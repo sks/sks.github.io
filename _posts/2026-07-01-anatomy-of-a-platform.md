@@ -214,8 +214,6 @@ return g.Wait()
 
 No ad-hoc goroutine management. No `sync.WaitGroup`. One pattern, everywhere.
 
-**A note on loop variables:** If you're on Go 1.22+, you no longer need the `item := item` capture hack — loop variables are now scoped per iteration. Our codebase still has some legacy captures from the pre-1.22 era, but new code omits them.
-
 ---
 
 ## What We'd Do Differently

@@ -64,18 +64,25 @@ resource "stackgen_agent" "sre_copilot" {
     "kubectl_get", "datadog_query", "pagerduty_list"
   ]
 
+  hitl {
+    always_allowed = ["websearch", "webfetch", "memory_*", "read_*"]
+    denied_tools   = ["bash", "shell_*"]
+  }
+
   policy_ids = [
     stackgen_policy.deny_destructive_shell.id,
     stackgen_policy.require_prod_approval.id,
   ]
 
-  platforms = jsonencode({
-    slack = { channel = var.slack_channel_sre }
-  })
+  integration "slack" {
+    channel = var.slack_channel_sre
+  }
 }
 ```
 
-### Defining Policies
+### Governance Configuration
+
+Governance is two-layered: HITL middleware handles fast tool-level allow/deny (embedded in the `hitl` block above), while OPA/Rego policies handle contextual, attribute-based decisions:
 
 ```hcl
 resource "stackgen_policy" "deny_destructive_shell" {
@@ -88,10 +95,12 @@ resource "stackgen_policy" "deny_destructive_shell" {
 resource "stackgen_policy" "require_prod_approval" {
   name        = "require-production-approval"
   description = "Require HITL approval for any production changes"
-  type        = "logic"
+  type        = "intervention"
   rego_source = file("${path.module}/policies/prod-approval.rego")
 }
 ```
+
+Policies are classified into four types: **Logic** (boolean allow/deny), **Temporal** (time-based access), **Intervention** (trigger HITL approval), and **Routing** (A/B persona selection). OPA evaluates them in-process using the Go SDK — no sidecar.
 
 ### Configuring Model Providers
 
@@ -123,7 +132,7 @@ Agent configuration lives in a Git repo alongside the Rego policies:
 
 ```
 agent-config/
-├── main.tf              # Agent definitions
+├── main.tf              # Agent definitions + governance
 ├── policies/
 │   ├── deny-destructive.rego
 │   └── prod-approval.rego
@@ -168,6 +177,8 @@ Plan: 0 to add, 1 to change, 0 to destroy.
 ```
 
 One tool added. Nothing else changed. The reviewer can approve with confidence.
+
+**An important nuance on live workflows:** If an engineer merges a config change while an agent is mid-task inside a Temporal workflow, the active workflow continues with its creation-time config snapshot. Config is loaded once at workflow start — not hot-reloaded mid-execution. The updated config takes effect on the next workflow invocation. This prevents mid-task tool list changes from breaking a live investigation.
 
 ---
 
@@ -249,9 +260,9 @@ Secrets never appear in `.tf` files, state files (with proper backend config), o
 
 1. **Agent config is infrastructure.** If your agents can run shell commands on production servers, their configuration deserves the same rigor as your Kubernetes manifests.
 
-2. **`plan` before `apply` is non-negotiable.** For AI agents, a misconfigured tool list or missing policy is a security incident. Preview every change.
+2. **`plan` before `apply` is non-negotiable.** For AI agents, a misconfigured tool list or missing governance rule is a security incident. Preview every change.
 
-3. **Separate runtime config from platform config.** TOML for what the agent loads at startup. HCL for what the platform manages across all agents. Different scopes, different tools.
+3. **Separate runtime config from platform config.** TOML files define what the agent runtime loads at startup — model providers, memory settings, middleware options. HCL defines what the platform manages across all agents — tenant routing, tool permissions, integration bindings, organizational policies. Different scopes, different tools.
 
 4. **Rego policies belong in version control.** OPA policies are code. They need review, testing, and versioning — not a database row edited via UI.
 

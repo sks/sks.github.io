@@ -39,8 +39,8 @@ We did something different. **Aiden imports the agent runtime as a Go module:**
 ```go
 import "github.com/stackgenhq/agentruntime/pkg/app"
 
-// Inside Aiden's Temporal workflow activity:
-func (a *AgentActivity) Execute(ctx context.Context, req AgentRequest) error {
+// Inside Aiden's Temporal workflow:
+func (w *AgentWorkflow) Execute(ctx workflow.Context, req AgentRequest) error {
     agent, err := app.NewApplication(ctx, app.Config{
         AgentName: req.AgentName,
         Persona:   req.Persona,
@@ -51,6 +51,10 @@ func (a *AgentActivity) Execute(ctx context.Context, req AgentRequest) error {
 ```
 
 Same process. Same memory space. No serialization. No network hops. The agent runtime is a library, not a service.
+
+**An important nuance on Temporal lifecycle:** The simplified example above wraps the entire agent run in a single unit of work. In production, the agent's execution loop is modelled as a Temporal Workflow — not a monolithic Activity. HITL approval gates use a non-blocking interrupt pattern: when the agent needs human approval, the middleware returns an `interrupt.Error` that yields execution back to the Temporal workflow, which then waits for a signal (approve/reject) and resumes from the exact point of interruption. This avoids re-burning tokens or duplicating tool calls if a worker crashes mid-execution.
+
+**The trade-off of in-process embedding:** Go goroutines share a single OS process, which means there's zero hardware-level isolation between tenants. If one agent triggers an OOM (e.g., parsing a corrupted 500MB PDF), the OS kills the entire worker process — taking other tenants' active executions with it. We mitigate this through Temporal's built-in crash recovery (workflows replay from the last checkpoint on a healthy worker) and per-agent memory budgets at the container level. Resource-heavy operations like document parsing are offloaded to dedicated worker pools.
 
 **Why this works in Go:** Go modules give you versioned, reproducible dependencies. The agent runtime and the platform share types directly. In Python, you'd fight import conflicts, version mismatches, and dependency hell across two large codebases.
 
@@ -107,32 +111,47 @@ Tenant: "platform-team"
 
 **Isolation guarantees:**
 - **Vector stores** are namespaced by tenant and agent
-- **Tool permissions** are scoped by tenant policies (OPA/Rego)
+- **Tool permissions** are scoped by two governance layers (HITL + OPA)
 - **Model routing** is per-tenant (different teams can use different providers)
 - **Budgets** are per-tenant with hard stops
 
-### OPA for Policy Enforcement
+### Two-Layer Governance
 
-Tool governance uses [Open Policy Agent](https://www.openpolicyagent.org/) with Rego rules:
+Tool governance operates at two levels:
+
+**Layer 1: HITL Middleware (agent runtime)** — Fast, static allow/deny lists loaded from TOML config:
+
+```toml
+[hitl]
+always_allowed = ["web_search", "memory_*", "read_*", "discover_skills"]
+denied_tools   = ["bash", "shell_*"]
+```
+
+Denied tools are hard-blocked. Allowed tools auto-approve. Everything else pauses for human review (see the [HITL Paradox post](/blog/hitl-paradox/) for the full story).
+
+**Layer 2: OPA/Rego Policies (platform layer)** — Contextual, attribute-based policies for decisions that HITL can't express:
 
 ```rego
-# Deny destructive shell commands
-deny[msg] {
-    input.tool == "run_shell"
-    contains(input.args.command, "rm -rf")
-    msg := "Destructive shell command blocked by policy"
+package policy
+
+# Deny deployments outside maintenance windows
+allow = false {
+    input.tool.name == "kubectl_apply"
+    not in_maintenance_window(input.timestamp)
 }
 
-# Require PR review for production changes
-deny[msg] {
-    input.tool == "kubectl_apply"
-    input.context.environment == "production"
-    not input.context.has_pr_approval
-    msg := "Production changes require PR approval"
+# Require manager approval for high-risk operations
+approval_required = true {
+    input.tool.name == "run_shell"
+    input.current_project.role_name != "admin"
 }
 ```
 
-Policies are defined per-tenant via Terraform (see the [TOML vs YAML post](/blog/2026/07/01/toml-over-yaml/) for the full GitOps story) and evaluated at tool execution time through the middleware stack.
+OPA policies are compiled in-process using the [OPA Go SDK](https://www.openpolicyagent.org/docs/latest/integration/#integrating-with-the-go-sdk) — no sidecar, no HTTP hop. Compiled Rego modules are cached in an LRU cache keyed by `(policyID, version)`, so repeated evaluations are sub-millisecond. The evaluator receives a rich ABAC input document containing the agent identity, tool call, calling user, their project memberships, and skill provenance — giving Rego policies full context for fine-grained decisions.
+
+Policies are classified into four types: **Logic** (boolean allow/deny), **Temporal** (time-based access), **Intervention** (trigger HITL approval), and **Routing** (A/B persona selection). When multiple policies are attached to an agent, outcomes are resolved using XACML-inspired combining algorithms (deny-overrides, permit-overrides, first-applicable).
+
+Policies are defined per-tenant via Terraform (see the [Terraform config post](/blog/terraform-config/) for the full GitOps story) and evaluated at tool execution time.
 
 ---
 
@@ -187,7 +206,7 @@ Workflows support versioning, traffic splitting (for A/B testing agent configura
 
 2. **Temporal is worth the complexity.** The durability and visibility guarantees pay for the learning curve. Agent tasks can run for minutes — you need crash recovery.
 
-3. **OPA for tool governance scales.** Rego policies are declarative, testable, and composable. They scale better than hardcoded permission checks.
+3. **Governance as middleware scales.** Two layers: HITL middleware for fast tool-level allow/deny at the runtime, OPA/Rego for contextual ABAC policies at the platform. Compiled in-process with LRU caching — no sidecar, sub-millisecond evaluations.
 
 4. **Tenant isolation is non-negotiable.** Vector store contamination between tenants is a data breach. Namespace everything from day one.
 
