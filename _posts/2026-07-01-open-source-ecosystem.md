@@ -82,6 +82,20 @@ upstream/main ──────────────────────
 
 4. **Be responsive.** When maintainers request changes, respond within 24 hours. Stale PRs die.
 
+5. **Design for maintainer latency.** The bottleneck is often the upstream review queue, not your response time. When your roadmap requires a framework change, propose a generic interface or registration hook upstream — then deploy your specific implementation in your private codebase immediately. You ship on time; the upstream PR merges when it merges.
+
+### The `go.mod` `replace` Trap
+
+In Go, depending on an active fork means `replace` directives in your `go.mod`:
+
+```go
+replace trpc.group/trpc-go/trpc-agent-go => github.com/stackgenhq/trpc-agent-go v0.0.0-20260513-5592d6460a1a
+```
+
+This works for your product but breaks downstream compatibility — Go ignores `replace` blocks in imported modules. If you distribute libraries or plugins, consumers can't resolve your fork.
+
+**Our mitigation:** Tag structured pseudo-versions on forks (`v0.0.0-YYYYMMDD-commitsha`) so the dependency graph is reproducible. When the upstream PR merges, we immediately rebase and drop the `replace`. The rule: every `replace` directive is a countdown timer, not a permanent fixture.
+
 ---
 
 ## What We Keep Proprietary
@@ -102,6 +116,8 @@ Not everything should be open-sourced. Here's our framework:
 - Operational knowledge (deployment patterns, scaling recipes)
 
 **The litmus test:** "Would a competitor gain more from seeing this code than the community gains from using it?" If yes, keep it private. If no, contribute it.
+
+**In practice, the boundary is rarely a clean file split.** Our governance middleware is proprietary, but the tool metadata interfaces it depends on are upstream. Our multi-model orchestration is private, but the model provider abstraction is open. The pattern: **open-source the interface abstractions, keep the implementations proprietary.** This turns the dependency into a plugin architecture where your core IP stays behind public hooks.
 
 ---
 
