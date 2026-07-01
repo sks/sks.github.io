@@ -6,7 +6,7 @@ permalink: /about/
 
 # About Me
 
-I'm **Sabith K Soopy**, a Principal Engineer at [StackGen](https://stackgen.com) where I lead the development of enterprise AI agent platforms.
+I'm **Sabith**, a Principal Engineer at [StackGen](https://stackgen.com) where I lead the development of enterprise AI agent platforms.
 
 ## What I Build
 

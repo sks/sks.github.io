@@ -6,7 +6,11 @@ baseurl: ""
 
 author:
   name: "Sabith K Soopy"
-  url: "https://github.com/sks"
+
+minima:
+  social_links:
+    - { platform: github, user_url: "https://github.com/sks" }
+    - { platform: linkedin, user_url: "https://linkedin.com/in/sabithks" }
 
 plugins:
   - jekyll-seo-tag
