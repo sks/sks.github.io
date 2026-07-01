@@ -144,7 +144,7 @@ For our single-binary deployment story, adding a PKL runtime (written in Java/Ko
 
 ### Problem 2: The ecosystem is thin
 
-In mid-2026, PKL's Go integration is still maturing. Community tooling, Stack Overflow answers, and editor support lag behind TOML and YAML. Our engineers would be learning a new language for config.
+In mid-2026, PKL's Go integration is still maturing. Community tooling and editor support lag behind TOML and YAML. Our engineers would be learning a new language for config.
 
 ### Problem 3: Code-as-config adds complexity
 
