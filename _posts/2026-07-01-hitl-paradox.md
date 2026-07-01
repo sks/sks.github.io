@@ -32,17 +32,19 @@ We classified tools into three tiers:
 
 ```toml
 [hitl]
-# Never needs approval — safe, read-only
-always_allowed = ["web_search", "memory_*", "read_*", "discover_skills"]
+# Never needs approval — safe, read-only, or internal
+always_allowed = ["web_search", "memory_*", "read_*", "discover_skills", "note"]
 
-# Needs approval — can modify state
-# (This is the default for unlisted tools)
+# Needs approval — can modify external state
+# (This is the default for any tool not in always_allowed)
 
-# Never allowed — blocked entirely
-denied_tools = ["rm", "kubectl delete", "DROP"]
+# Never allowed — blocked entirely, regardless of approval
+denied_tools = ["bash", "shell_*"]
 ```
 
-Only state-modifying tools require approval. Read-only operations auto-approve. Destructive operations hard-block regardless of approval.
+An important subtlety: **these lists match tool names, not shell command strings.** `denied_tools = ["bash"]` blocks the tool named `bash` from being invoked at all — it doesn't do regex matching against command arguments passed to `run_shell`. String-level blocklisting on shell primitives (e.g., blocking "rm" as a substring) is fundamentally unsafe — any sufficiently creative LLM can bypass it via base64 encoding, variable interpolation, or aliasing. Instead, the HITL gate operates at the **tool invocation boundary**: `run_shell` as a whole requires human approval, and the human sees the full command in the approval request. If you need granular command-level control, the right approach is typed Go API clients (e.g., a Kubernetes Go client with RBAC) instead of raw shell access.
+
+Only state-modifying tools require approval. Read-only operations auto-approve. Destructive tool names hard-block regardless of approval.
 
 **Result:** Approval requests dropped by 70%. Operators now see 3-5 requests per task instead of 20+. Each request is meaningful — they actually read them.
 
@@ -64,12 +66,12 @@ HITL approval. This includes run_shell, kubectl, and other
 state-modifying tools. Are you sure?
 ```
 
-We also introduced **per-tool overrides** — even if `always_allowed = ["*"]`, specific tools can be forced to require approval:
+The real safeguard is the `denied_tools` list — even when `always_allowed = ["*"]`, any tool in `denied_tools` is hard-blocked. So teams that want minimal friction can set `always_allowed = ["*"]` while keeping the most dangerous tool names denied:
 
 ```toml
 [hitl]
 always_allowed = ["*"]
-force_approval = ["run_shell", "kubectl_apply", "scm_commit_and_pr"]
+denied_tools = ["bash", "shell_*"]
 ```
 
 This gives teams the fast workflow they want while maintaining hard gates on the most dangerous operations.
@@ -87,14 +89,16 @@ For a single approval, this is annoying. For a task requiring 5 approvals across
 HITL approval is now asynchronous:
 
 1. Agent encounters a tool that requires approval
-2. Stores the pending request in the database
-3. Sends a notification (Slack, web UI, API)
+2. Stores the pending request in the database with a TTL (default: 30 minutes)
+3. Sends a notification via the event bus (Slack, web UI, AG-UI protocol)
 4. **Continues working on other parts of the task**
 5. When approved, the tool executes and results flow back
 
 The agent doesn't block. If it has parallel sub-tasks, it works on those while waiting. If there's nothing else to do, it waits — but the user sees a clear "waiting for approval" status, not a mysteriously silent agent.
 
-**Batch operations:** Operators can approve or reject multiple pending requests at once, grouped by tool name:
+**A note on state drift:** Asynchronous approval introduces a classic distributed systems risk — the environment state may change between when the agent formulated the tool call and when a human approves it 20 minutes later. We mitigate this with short approval TTLs (stale approvals auto-expire via a background reaper) and session-scoped approval caching that expires entries after 10 minutes, ensuring that long-deferred approvals don't execute against a drifted environment without the agent re-evaluating.
+
+**Batch operations:** Operators can view multiple pending requests at once via the `ListPending` API, grouped by tool name:
 
 ```
 Pending approvals (3):
@@ -105,7 +109,9 @@ Pending approvals (3):
   🔧 run_shell: kubectl logs api-server-7d8f --tail=50
 ```
 
-Three related shell commands for the same investigation — one click to approve all three.
+One important guardrail: the "Approve All" pattern works well for **read-only investigation commands** like the above. For state-modifying operations, each approval should be reviewed individually — otherwise you recreate the rubber-stamp problem at a higher abstraction level.
+
+**What happens on rejection?** When a human rejects a tool call (with or without feedback), the middleware returns an `ErrToolCallRejected` error to the agent's context. This isn't a hard cancellation — the LLM receives the rejection as a tool error and can replan. If the human provided feedback (e.g., "use the staging cluster instead"), the agent sees it and can adjust its approach. This gives operators a conversational override, not just a binary approve/deny gate.
 
 ---
 
