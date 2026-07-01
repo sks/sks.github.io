@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "52 Packages in 4 Months — Architecture at Speed Without Drowning"
-date: 2026-07-01 03:00:00 -0700
+date: 2026-06-22 10:00:00 -0700
 series: "Building an AI Agent Platform in Go"
 series_order: 3
 description: "From Hello World to 76K lines of Go — the architecture patterns that made rapid development sustainable."

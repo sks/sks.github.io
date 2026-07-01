@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "The HITL Paradox — When Human Approval Makes Agents Worse"
-date: 2026-07-01 07:00:00 -0700
+date: 2026-06-26 10:00:00 -0700
 series: "Building an AI Agent Platform in Go"
 series_order: 7
 description: "Human-in-the-loop is supposed to make agents safer. It can also make them useless. Here's how to find the balance."

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Your Agent Has Root — Defense-in-Depth for AI Agents That Wield Real Tools"
-date: 2026-07-01 08:00:00 -0700
+date: 2026-06-27 10:00:00 -0700
 series: "Building an AI Agent Platform in Go"
 series_order: 8
 description: "Your agent can run rm -rf /. Your prompt saying 'don't do that' is not security. Here's a 5-layer defense model."

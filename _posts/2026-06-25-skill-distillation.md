@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Teaching Agents to Learn Without Fine-Tuning"
-date: 2026-07-01 06:00:00 -0700
+date: 2026-06-25 10:00:00 -0700
 series: "Building an AI Agent Platform in Go"
 series_order: 6
 description: "Post-session skill distillation from agent traces — how we teach agents to write their own runbooks."

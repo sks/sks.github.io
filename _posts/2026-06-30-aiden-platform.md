@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "From CLI Agent to Multi-Tenant Platform — Building Aiden"
-date: 2026-07-01 11:00:00 -0700
+date: 2026-06-30 10:00:00 -0700
 series: "Building an AI Agent Platform in Go"
 series_order: 11
 description: "A CLI tool for one developer is fun. Making it work for 50 teams with different policies is engineering."

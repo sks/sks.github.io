@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Terraform for Agent Configuration — Infrastructure as Code Meets AI Governance"
-date: 2026-07-01 10:00:00 -0700
+date: 2026-06-29 10:00:00 -0700
 series: "Building an AI Agent Platform in Go"
 series_order: 10
 description: "We use Terraform to configure our AI agents. Not YAML. Not a dashboard. Terraform. Here's why."
