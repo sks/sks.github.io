@@ -37,7 +37,7 @@ We adopted strict coding standards in week one, before the codebase was large en
 Every interface method follows this signature:
 
 ```go
-type IToolProvider interface {
+type ToolProvider interface {
     GetTools(ctx context.Context, req GetToolsRequest) ([]Tool, error)
     ExecuteTool(ctx context.Context, req ExecuteToolRequest) (*ToolResult, error)
 }
@@ -54,8 +54,8 @@ Always `ctx context.Context` first. Always a request struct second. No exception
 Every interface gets a counterfeiter annotation:
 
 ```go
-//counterfeiter:generate . IToolProvider
-type IToolProvider interface { ... }
+//counterfeiter:generate . ToolProvider
+type ToolProvider interface { ... }
 ```
 
 Run `go generate ./...` and you get type-safe fake implementations in `fakes/` directories. No hand-rolled mocks. No `mockgen` boilerplate. Just auto-generated fakes that break at compile time when interfaces change.
@@ -75,6 +75,8 @@ func (s *SyncOptions) FindSLOFiles() ([]string, error) { ... }
 ```
 
 **Why:** Methods on structs enable dependency injection. You can replace `s.fileSystem` with a fake in tests. Package-level functions that call `os.ReadDir` directly are untestable without monkey-patching.
+
+**Exception:** Pure, stateless utility functions (formatting strings, parsing timestamps, mathematical computations) are exempt. If a function has no dependencies and no state, wrapping it in a struct adds ceremony without benefit.
 
 ### Rule 4: No Else Blocks
 
@@ -196,7 +198,6 @@ g, gctx := errgroup.WithContext(ctx)
 var mu sync.Mutex
 
 for _, item := range items {
-    item := item // capture
     g.Go(func() error {
         result, err := process(gctx, item)
         if err != nil {
@@ -212,6 +213,8 @@ return g.Wait()
 ```
 
 No ad-hoc goroutine management. No `sync.WaitGroup`. One pattern, everywhere.
+
+**A note on loop variables:** If you're on Go 1.22+, you no longer need the `item := item` capture hack — loop variables are now scoped per iteration. Our codebase still has some legacy captures from the pre-1.22 era, but new code omits them.
 
 ---
 
