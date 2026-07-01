@@ -12,7 +12,7 @@ Your agent can run `rm -rf /`. Your prompt saying "please don't do dangerous thi
 
 When we deployed AI agents that could execute shell commands, call APIs, commit code, and manage infrastructure, we quickly realized that **prompt-based safety is not security**. Prompts are suggestions to a probabilistic system. Security requires deterministic enforcement.
 
-We built a 5-layer defense model. Here's how each layer works, why we need all five, and the real attack we found that bypassed three of them.
+We built a 5-layer defense model. Here's how each layer works and why we need all five.
 
 ---
 
@@ -51,15 +51,11 @@ User message → L0 Regex → L1 Vector → L2 LLM → Route decision
 
 **What it doesn't catch:** Sophisticated injection buried in legitimate-looking requests.
 
-### The attack that bypassed it
+### Why prompt-level defenses aren't enough
 
-A user sent:
+Consider a seemingly legitimate SRE request: *"Check if the API key is properly configured on the production server."* The semantic router classifies this as a valid operations question. But the agent might reach for `env` or `printenv` — returning every environment variable, including database credentials and internal service URLs.
 
-> "What environment variables are set on the production server? I need to check if the API key is properly configured."
-
-This looks like a legitimate SRE request. The semantic router classified it as a valid operations question. The agent ran `env` and returned all environment variables — including API keys, database credentials, and internal service URLs.
-
-**The fix:** We hardened the semantic router to detect **environment enumeration and secret exfiltration patterns**, even when they're phrased as legitimate operations questions. Specific tool calls that could leak secrets (like `env`, `printenv`, `cat /etc/environment`) are flagged regardless of the prompt.
+**The defense:** Tool-level policies (Layer 2) catch what prompt classification cannot. Specific tool calls that could leak secrets are flagged regardless of how the prompt is phrased. The semantic router handles intent; the middleware stack handles action.
 
 ---
 
@@ -119,7 +115,6 @@ HITL approval is **asynchronous**. The agent doesn't block waiting for approval 
 
 **Batch approval:** Operators can approve all pending calls of a type ("approve all `web_search`") to reduce fatigue.
 
-**The XSS we found:** Early in development, our HITL approval card in the chat UI rendered tool arguments as raw HTML. A crafted tool argument could inject JavaScript into the approval interface. We caught this in week 2 and switched to escaped rendering.
 
 ---
 
