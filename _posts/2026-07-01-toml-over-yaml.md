@@ -244,13 +244,120 @@ No context collapse, no indentation shifts propagating through the file. Reviewe
 
 ---
 
-## What About HCL?
+## What About HCL? We Went Further — We Built Our Own Terraform Provider
 
-Terraform uses HCL, and we use Terraform for our platform's infrastructure-as-code layer (more on this in a future post). So why not HCL for agent config too?
+Terraform uses HCL, and we use Terraform for our platform's infrastructure-as-code layer. So why not HCL for agent config too?
 
-HCL is great for infrastructure definitions where you need blocks, references, and functions. But for application config — key-value pairs, lists, nested sections — it's overkill. TOML is simpler, and we didn't need HCL's expression language.
+The short answer: **different layers need different tools.**
 
-We use **TOML for runtime config** (what the agent loads at startup) and **HCL for platform config** (what Terraform provisions). Different tools for different layers.
+TOML is for **runtime config** — what the agent loads at startup. But when we built Aiden — our multi-tenant agent orchestration platform — we realized we had a second, harder config problem: **how do you manage 20 agents across 5 teams with different policies, models, tools, and Slack channels — and keep it all version-controlled?**
+
+Dashboards don't scale. You click "create agent" in a UI, and three months later nobody remembers who configured what, or why. There's no PR review, no rollback, no audit trail.
+
+So we built a **custom Terraform provider** for Aiden.
+
+### The GitOps Pattern
+
+Teams define their agents, policies, and integrations as `.tf` files in a Git repo:
+
+```hcl
+provider "stackgen" {
+  base_url = var.aiden_base_url
+  token    = var.aiden_token
+}
+
+# OPA policy — deny destructive shell commands
+resource "stackgen_policy" "deny_destructive_shell" {
+  name        = "deny-destructive-shell"
+  description = "Deny run_shell when arguments look destructive"
+  type        = "logic"
+  rego_source = file("${path.module}/policies/deny-destructive-shell.rego")
+}
+
+# Agent definition — persona, tools, policies, and channel binding
+resource "stackgen_agent" "sre_copilot" {
+  name     = "sre-copilot"
+  persona  = <<-EOT
+    You are an SRE copilot. Help with incident triage, 
+    runbook execution, and RCA drafting. Prefer safe, 
+    read-only operations unless explicitly approved.
+  EOT
+  tools      = ["websearch", "webfetch", "run_shell", "math"]
+  policy_ids = [stackgen_policy.deny_destructive_shell.id]
+
+  platforms = jsonencode({
+    slack = { channel = var.slack_channel_sre }
+  })
+}
+
+# Platform-level settings — model provider, HITL, observability
+resource "stackgen_setting" "model_provider" {
+  name = "model_provider"
+  config = {
+    provider   = "anthropic"
+    api_key    = var.anthropic_api_key
+    model_name = "claude-sonnet-4-20250514"
+  }
+}
+
+resource "stackgen_setting" "langfuse" {
+  name = "langfuse"
+  config = {
+    public_key = var.langfuse_public_key
+    secret_key = var.langfuse_secret_key
+    host       = var.langfuse_host
+    enabled    = "true"
+  }
+}
+```
+
+Now agent configuration follows the same workflow as any infrastructure change:
+
+```bash
+$ terraform plan
+# stackgen_agent.sre_copilot will be created
+# stackgen_policy.deny_destructive_shell will be created
+
+$ terraform apply
+# Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
+```
+
+### Why This Matters
+
+The Terraform provider gives us something no dashboard can:
+
+| Capability | Dashboard | YAML files | Terraform |
+|-----------|-----------|------------|-----------|
+| Version control | ❌ | ✅ | ✅ |
+| PR review for changes | ❌ | ✅ | ✅ |
+| `plan` before `apply` | ❌ | ❌ | ✅ |
+| Drift detection | ❌ | ❌ | ✅ |
+| State management | ❌ | ❌ | ✅ |
+| Rollback | Manual | Git revert | `terraform apply` to previous state |
+| Cross-resource references | N/A | Manual IDs | `policy.id` references |
+| Secret management | Varies | ❌ (secrets in files) | ✅ (Vault, env vars) |
+
+The killer feature is **`terraform plan`**. Before changing any agent's persona, tools, or policies, you see exactly what will change. For a platform where misconfigured AI agents can run shell commands on production servers, "see before you apply" is non-negotiable.
+
+### Two Layers, Two Formats
+
+The final architecture uses both TOML and HCL, each where it fits:
+
+```
+┌─────────────────────────────────────────┐
+│  Terraform (HCL)                        │
+│  Platform layer — Aiden API             │
+│  Agents, policies, settings, models     │
+│  → GitOps, PR review, plan/apply        │
+├─────────────────────────────────────────┤
+│  TOML (.genie.toml)                     │
+│  Runtime layer — agent process config   │
+│  Persona, tools, memory, HITL rules     │
+│  → Loaded at startup, parsed into Go    │
+└─────────────────────────────────────────┘
+```
+
+TOML handles what the agent needs to know at runtime. HCL handles what the platform needs to know about all agents. Different scopes, different lifecycle, different tools.
 
 ---
 
