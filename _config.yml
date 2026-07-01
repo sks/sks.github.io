@@ -1,0 +1,32 @@
+theme: minima
+title: "Sabith K S"
+description: "Engineering blog — AI agents, Go, and production systems"
+url: "https://sks.github.io"
+baseurl: ""
+
+author:
+  name: Sabith
+
+minima:
+  social_links:
+    - { platform: github, user_url: "https://github.com/sks" }
+    - { platform: linkedin, user_url: "https://linkedin.com/in/sabithks" }
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+defaults:
+  - scope:
+      path: "_posts"
+      type: "posts"
+    values:
+      layout: "post"
+      author: "Sabith K S"
+
+header_pages:
+  - about.md
+
+markdown: kramdown
+highlighter: rouge
+permalink: /blog/:title/

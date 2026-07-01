@@ -1,0 +1,143 @@
+# AGENTS.md
+
+Guidelines for AI coding agents working on this repository.
+
+## Project Overview
+
+This is a Jekyll-based personal blog hosted on GitHub Pages at `sks.github.io`. It contains blog series: **"Building an Enterprise AI Agent Platform in Go"** by Sabith.
+
+## Setup Commands
+
+- **Local preview:** `bundle exec jekyll serve --drafts --future`
+- **Build:** `bundle exec jekyll build`
+- **Install deps:** `bundle install` (requires Ruby + Bundler)
+
+No custom build pipeline — GitHub Pages builds automatically on push to `main`.
+
+## Architecture
+
+```
+sks.github.io/
+├── _config.yml          # Jekyll site configuration (minima theme)
+├── _includes/
+│   └── footer.html      # Custom footer override (minima)
+├── _posts/              # Blog posts (Markdown, Jekyll front matter)
+│   └── YYYY-MM-DD-slug.md
+├── index.md             # Home page with series index
+└── about.md             # Author bio and project links
+```
+
+- **Theme:** minima (GitHub Pages default)
+- **Permalink pattern:** `/blog/:year/:month/:day/:title/`
+- **No JavaScript, no CSS customizations** — content-only site
+
+## Content Rules
+
+### Naming Restrictions (CRITICAL)
+
+These are **hard rules** — violating them causes real-world harm:
+
+1. **Never use "Genie"** — the product is no longer open source. Use generic terms: "the agent runtime", "our runtime", "the framework".
+2. **"Guild" is the repo name only** — externally, the product is called **"Aiden"**. Always use "Aiden" in blog content.
+
+### Blog Post Format
+
+Every post must include:
+
+```yaml
+---
+layout: post
+title: "Title Here"
+date: YYYY-MM-DD
+description: "One-line description for SEO and social cards"
+tags: [tag1, tag2, tag3]
+---
+```
+
+### Call to Action
+
+Every post must end with:
+
+```markdown
+---
+
+> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+```
+
+### Style Guidelines
+
+- **Audience:** Junior developers through senior engineers and practitioners
+- **Tone:** Technical but conversational, like a senior engineer explaining to a colleague
+- **Code blocks:** Always specify language (`go`, `toml`, `hcl`, `bash`, `yaml`)
+- **Tables:** Use for comparisons (features, trade-offs, metrics)
+- **Structure:** Problem → Solution → Lessons Learned
+- **No `post_url` tags** — Jekyll fails hard when referenced posts don't exist. Use relative paths (`/blog/YYYY/MM/DD/slug/`) or "in a future post" text instead
+
+### Writing for LinkedIn
+
+Posts should be:
+- Self-contained (no required prior reading)
+- Skimmable (bold key takeaways, use headers)
+- Opinionated (take a stance, don't hedge everything)
+- Practical (include real code, real numbers, real lessons)
+
+## Testing
+
+### Before Pushing
+
+1. Verify no naming violations:
+   ```bash
+   grep -r "Genie\|Guild" _posts/ --include="*.md"
+   # Must return empty
+   ```
+
+2. Verify no broken `post_url` tags:
+   ```bash
+   grep -r "post_url" _posts/ --include="*.md"
+   # Must return empty
+   ```
+
+3. Verify CTA present on all posts:
+   ```bash
+   for f in _posts/*.md; do grep -q "ai.stackgen.com" "$f" || echo "MISSING CTA: $f"; done
+   # Must return empty
+   ```
+
+### After Pushing
+
+Monitor the GitHub Actions build:
+```bash
+gh run list --repo sks/sks.github.io --limit 1 --json status,conclusion
+# Must show "conclusion": "success"
+```
+
+## Git Workflow
+
+- **`main`** — production, auto-deploys to GitHub Pages
+- **Feature branches** — for draft posts or bulk additions
+- **NEVER run `git reset`** without explicit human consent
+- Use descriptive commit messages with `feat:`, `fix:`, or `docs:` prefixes
+
+## Dependencies
+
+- **Jekyll** (managed by GitHub Pages — no Gemfile in repo)
+- **Theme:** minima (remote theme via GitHub Pages)
+- **Plugins:** `jekyll-seo-tag`, `jekyll-sitemap`
+
+## Common Tasks
+
+### Add a New Blog Post
+
+1. Create `_posts/YYYY-MM-DD-slug.md` with proper front matter
+2. Write content following the style guidelines above
+3. Add the ai.stackgen.com CTA at the end
+4. Run the naming violation checks
+5. Commit, push, verify build passes
+
+### Update the Footer
+
+Edit `_includes/footer.html`. This overrides minima's default footer. Keep the `ai.stackgen.com` link.
+
+### Update Site Metadata
+
+Edit `_config.yml`. Changes to `_config.yml` require a full rebuild (GitHub Pages handles this automatically).

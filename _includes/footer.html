@@ -1,0 +1,31 @@
+<footer class="site-footer h-card">
+  <data class="u-url" href="{{ "/" | relative_url }}"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">{{ site.title | escape }}</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">{{ site.author.name | escape }}</li>
+          <li>Staff Engineer at <a href="https://stackgen.com">StackGen</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          <li><a href="https://github.com/sks"><svg class="svg-icon"><use xlink:href="{{ '/assets/minima-social-icons.svg#github' | relative_url }}"></use></svg> <span class="username">sks</span></a></li>
+          <li><a href="https://linkedin.com/in/sabithks"><svg class="svg-icon"><use xlink:href="{{ '/assets/minima-social-icons.svg#linkedin' | relative_url }}"></use></svg> <span class="username">sabithks</span></a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>{{ site.description | escape }}</p>
+        <p>🚀 Try our AI-powered SRE → <a href="https://ai.stackgen.com"><strong>ai.stackgen.com</strong></a></p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
