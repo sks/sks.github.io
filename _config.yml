@@ -13,8 +13,13 @@ minima:
     - { platform: linkedin, user_url: "https://linkedin.com/in/sabithks" }
 
 plugins:
+  - jekyll-feed
   - jekyll-seo-tag
   - jekyll-sitemap
+
+feed:
+  posts_limit: 20
+  excerpt_only: true
 
 defaults:
   - scope:

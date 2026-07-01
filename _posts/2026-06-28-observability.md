@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "You Can't Debug What You Can't See — Observability for AI Agents"
-date: 2026-07-01 09:00:00 -0700
+date: 2026-06-28 10:00:00 -0700
 series: "Building an AI Agent Platform in Go"
 series_order: 9
 description: "Traditional APM can't tell you why your agent spent $4.72 asking the same question three times. Here's what agent observability actually requires."

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Implementing ReAcTree — 6 Production Bugs the Paper Didn't Warn You About"
-date: 2026-07-01 04:00:00 -0700
+date: 2026-06-23 10:00:00 -0700
 series: "Building an AI Agent Platform in Go"
 series_order: 4
 description: "What happens when you take an arXiv algorithm to production. We found 6 bugs that no paper mentions."
