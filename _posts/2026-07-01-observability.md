@@ -58,6 +58,8 @@ Total: 5 LLM calls, 3 tool calls, 1 sub-agent, $0.044, 47 seconds
 
 We use [Langfuse](https://langfuse.com) as our trace backend. Every LLM call, tool execution, and sub-agent delegation is a span. Traces nest — sub-agent traces are children of the parent trace.
 
+Trace delivery is non-blocking — we use OpenTelemetry's batch exporter pipeline so tool execution is never waiting on a synchronous HTTP POST to the tracing backend. The OTel SDK buffers spans in memory and flushes them periodically. On pod shutdown, a graceful drain hook flushes remaining spans before the process exits. If the trace backend is temporarily unreachable, spans are dropped after the buffer fills — you lose telemetry, not availability.
+
 ### 2. Costs — The $4.72 Question
 
 Token costs are the unit economics of agents. We track:
@@ -79,7 +81,9 @@ Per-agent (daily):
 
 **Why this matters:** An agent that loops — calling the same tool repeatedly because it can't make progress — burns tokens geometrically. A 10-iteration loop on Claude Sonnet costs 10× a single call. Without cost monitoring, you discover this when the invoice arrives.
 
-**Alerting:** We alert when a single session exceeds 3× the rolling average cost for that agent. This catches loops, hallucination spirals, and model routing errors early.
+**Proactive guardrails:** Reactive alerting alone isn't fast enough — a tight exception loop in a parallel agent can burn through dollars in seconds before a Slack webhook fires. So cost management is layered: hard iteration caps (`MaxIterations`), per-tool call budgets (`ToolBudgets`), and loop detection middleware that blocks identical consecutive calls all act as **pre-flight circuit breakers** in the execution pipeline. Alerts are the second line of defense, not the first.
+
+**Alerting:** We alert when a single session exceeds 3× the rolling average cost for that agent. This catches the slower-burning anomalies — hallucination spirals, model routing errors, and gradually accumulating context — that slip past the hard limits.
 
 ### 3. Audit — The Immutable Record
 
@@ -172,6 +176,8 @@ semantic_router_classification_total{route="jailbreak",tier="L0"} 2
 ```
 
 These feed into standard Grafana dashboards for the operations team. They don't replace Langfuse traces — they complement them with real-time alerting.
+
+**A warning on cardinality:** Keep Prometheus labels low-cardinality. Labels like `tool="run_shell"` or `agent="sre-copilot"` are safe — they have bounded values. Never put unique identifiers like `session_id` or `run_id` into Prometheus labels. A production system running thousands of agent sessions daily will cause a high-cardinality explosion that bloats memory and crashes the Prometheus server. Leave per-session details to your tracing backend (Langfuse) or structured logs.
 
 ---
 
