@@ -28,7 +28,7 @@ sks.github.io/
 ```
 
 - **Theme:** minima (GitHub Pages default)
-- **Permalink pattern:** `/blog/:year/:month/:day/:title/`
+- **Permalink pattern:** `/blog/:title/` (slug from filename, e.g. `reactree-bugs` — no dates in URLs)
 - **No JavaScript, no CSS customizations** — content-only site
 
 ## Content Rules
@@ -39,6 +39,28 @@ These are **hard rules** — violating them causes real-world harm:
 
 1. **Never use "Genie"** — the product is no longer open source. Use generic terms: "the agent runtime", "our runtime", "the framework".
 2. **"Guild" is the repo name only** — externally, the product is called **"Aiden"**. Always use "Aiden" in blog content.
+
+### Blog Content Guardrails (CRITICAL)
+
+**No post may give away the architecture or design for free.** Posts describe the problem and the lesson, never the blueprint. Before publishing, apply the litmus test: *could a competitor rebuild this feature from this post alone? If yes, cut more.*
+
+**Cut from every post:**
+
+- Real code snippets showing actual internal types, functions, or config schemas (Go structs, TOML/HCL examples, JSON schemas) — illustrative pseudo-code is fine if it isn't a literal copy of the real implementation
+- Diagrams that map real internal components, data flow, or wiring between systems
+- Exact thresholds, weights, formulas, or scoring constants (e.g. "0.4 × cosine + 0.3 × recency", "novelty ≥ 7", "similarity ≥ 0.8")
+- Internal service/type/function names (e.g. `ToolWrapSvc`, `BuildParallel`, package paths like `pkg/repository/repositorymodel`) — refer to the pattern generically instead ("a middleware chain", "a scoring model")
+- Package/file layout, line counts, dependency graphs, or exact package/interface counts
+- Step-by-step "build this exact thing" instructions
+- Precise metrics that reveal scale or unit economics (exact percentages, latencies, costs) — prefer qualitative language ("meaningfully fewer approvals" instead of "70% fewer")
+
+**Keep in every post:**
+
+- The problem narrative and why it mattered
+- The failure story or production incident
+- The high-level lesson or principle, generalizable beyond this specific codebase
+- Qualitative outcomes and trade-offs
+- Generic industry comparisons and reasoning
 
 ### Blog Post Format
 
@@ -71,7 +93,7 @@ Every post must end with:
 - **Code blocks:** Always specify language (`go`, `toml`, `hcl`, `bash`, `yaml`)
 - **Tables:** Use for comparisons (features, trade-offs, metrics)
 - **Structure:** Problem → Solution → Lessons Learned
-- **No `post_url` tags** — Jekyll fails hard when referenced posts don't exist. Use relative paths (`/blog/YYYY/MM/DD/slug/`) or "in a future post" text instead
+- **No `post_url` tags** — Jekyll fails hard when referenced posts don't exist. Use relative paths (`/blog/slug/`) or "in a future post" text instead
 
 ### Writing for LinkedIn
 
@@ -79,7 +101,7 @@ Posts should be:
 - Self-contained (no required prior reading)
 - Skimmable (bold key takeaways, use headers)
 - Opinionated (take a stance, don't hedge everything)
-- Practical (include real code, real numbers, real lessons)
+- Practical (real lessons and generalizable trade-offs — see Blog Content Guardrails above for what to keep out)
 
 ## Testing
 

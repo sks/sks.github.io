@@ -8,13 +8,13 @@ Personal engineering blog — AI agents, Go, and production systems.
 
 ## 📚 Featured Series: Building an AI Agent Platform in Go
 
-A 12-part deep dive into building a production AI agent platform in Go — from choosing the language to scaling it to 50 teams. Based on real production experience building [Aiden](https://ai.stackgen.com), an enterprise agent orchestration platform.
+A 13-part deep dive into building a production AI agent platform in Go — from choosing the language to scaling it across many teams. Based on real production experience building [Aiden](https://sks.github.io/blog/aiden-platform/), StackGen's enterprise agent orchestration platform.
 
 | # | Post | What It Covers |
 |---|------|---------------|
 | 1 | [Why We Chose Go](https://sks.github.io/blog/why-go/) | Go vs Python for AI agents — concurrency, deployment, type safety |
 | 2 | [TOML Over YAML](https://sks.github.io/blog/toml-over-yaml/) | Config format wars — why TOML won over YAML and PKL |
-| 3 | [Anatomy of a Platform](https://sks.github.io/blog/anatomy-of-a-platform/) | 52 packages in 4 months — architecture at speed |
+| 3 | [Architecture at Speed](https://sks.github.io/blog/anatomy-of-a-platform/) | Growing a Go codebase fast without drowning in complexity |
 | 4 | [ReAcTree Bugs](https://sks.github.io/blog/reactree-bugs/) | 6 production bugs the paper didn't warn you about |
 | 5 | [Pensieve Memory](https://sks.github.io/blog/pensieve-memory/) | Memory management for agents that actually forget |
 | 6 | [Skill Distillation](https://sks.github.io/blog/skill-distillation/) | Teaching agents to learn without fine-tuning |
@@ -22,8 +22,9 @@ A 12-part deep dive into building a production AI agent platform in Go — from 
 | 8 | [Defense in Depth](https://sks.github.io/blog/defense-in-depth/) | 5-layer security model for tool-wielding agents |
 | 9 | [Observability](https://sks.github.io/blog/observability/) | Why traditional APM can't debug agent workloads |
 | 10 | [Terraform Config](https://sks.github.io/blog/terraform-config/) | Infrastructure as Code for AI agent governance |
-| 11 | [Building Aiden](https://sks.github.io/blog/aiden-platform/) | From CLI agent to multi-tenant platform |
+| 11 | [Why We Split Runtime From Platform](https://sks.github.io/blog/aiden-platform/) | The trade-off behind turning a single-user CLI agent into a multi-tenant platform |
 | 12 | [Open Source Ecosystem](https://sks.github.io/blog/open-source-ecosystem/) | Contributing back while building commercially |
+| 13 | [JSON Repair Layers](https://sks.github.io/blog/json-repair-layers/) | Five layers of JSON repair for production tool calls |
 
 ---
 

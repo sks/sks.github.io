@@ -7,7 +7,11 @@ title: Home
 
 Staff Engineer at [StackGen](https://stackgen.com), building enterprise AI agent platforms in Go.
 
-I write about the engineering decisions, production bugs, and hard-won lessons from building an **AI agent runtime** and **Aiden** — a multi-tenant agent orchestration platform — at StackGen.
+I write about the engineering decisions, production bugs, and hard-won lessons from building an **AI agent runtime** and **[Aiden](/blog/aiden-platform/)** — StackGen's multi-tenant agent orchestration platform for enterprise SRE and platform teams.
+
+## Aiden — Enterprise Agent Platform
+
+**[Why We Split Our Agent Runtime From Our Platform](/blog/aiden-platform/)** — the engineering trade-off behind turning a single-user CLI agent into a multi-tenant enterprise platform. Start here if you want the story behind how Aiden came to be.
 
 ## 📚 Blog Series: Building an Enterprise AI Agent Platform in Go
 
