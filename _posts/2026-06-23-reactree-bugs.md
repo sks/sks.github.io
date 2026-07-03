@@ -8,7 +8,7 @@ description: "What happens when you take an arXiv algorithm to production. We fo
 tags: [ai-agents, reactree, production, bugs, go]
 ---
 
-Research papers show you algorithms. They don't show you the 6 production bugs you'll hit implementing them.
+Research papers show you algorithms. They don't show you the production bugs you'll hit implementing them.
 
 We implemented [ReAcTree](https://arxiv.org/abs/2511.02424) — a hierarchical agent decomposition algorithm — in our production agent runtime. ReAcTree lets a parent agent break complex tasks into sub-goals, assign them to child agents, and coordinate results using sequence, parallel, and fallback control flows.
 
@@ -22,194 +22,107 @@ If you haven't read the paper, here's the idea:
 
 Instead of one agent trying to do everything, you build a **tree of agents**. A parent agent receives a task like "investigate this production outage," decomposes it into sub-goals ("check logs," "query metrics," "review recent deployments"), and delegates each to a specialized child agent.
 
-```
-         Parent Agent
-        /     |      \
-   Check    Query    Review
-   Logs    Metrics   Deploys
-```
-
-Each child works independently, calls its own tools, and reports back. The parent synthesizes the results.
-
-The paper defines:
-- **Expand** — decompose a goal into sub-goals
-- **Execute** — run a sub-agent on a sub-goal
-- **Control flow** — sequence (one after another), parallel (all at once), fallback (try A, if it fails try B)
-- **Working memory** — shared blackboard for inter-agent communication
-- **Episodic memory** — remember past experiences for future tasks
+Each child works independently, calls its own tools, and reports back. The parent synthesizes the results. The paper defines how goals get decomposed, how sub-agents execute, how control flow composes them (in sequence, in parallel, or with fallback), how agents share a working memory, and how they carry lessons forward via episodic memory.
 
 Simple on paper. Here's what happened in production.
 
 ---
 
-## The Paper-to-Code Mapping
+## Bug 1: Governance Bypass on Delegated Work (Critical)
 
-Before the bugs, let me show how we mapped paper concepts to code:
+**What happened:** Our agent runtime has a human-in-the-loop system — certain tools require human approval before executing. This worked perfectly for a single agent acting alone.
 
-| Paper Concept | Code Realization |
-|--------------|-----------------|
-| Expand(f, [g₁...gₖ]) | `CreateAgentRequest` → `Plan` → `ExecutePlan()` |
-| ExecCtrlFlowNode (Alg. 2) | `BuildSequence` / `BuildParallel` / `BuildFallback` |
-| Working memory | Shared key-value blackboard across plan steps |
-| Episodic memory | Retrieve-before-execute; store-on-success only |
-| Action space Aₜ | Filter dangerous tools from sub-agents |
+When we added multi-step delegation via ReAcTree, the tools handed to delegated sub-agents were bound directly, without passing through the same approval layer the primary agent used. A sub-agent could execute a tool that should have required a human sign-off, without ever asking.
 
-This mapping looked clean. Then we started running real tasks.
+**Why it's scary:** this is a security bug, not a cosmetic one. The entire point of human-in-the-loop is preventing unapproved actions. The new delegation path bypassed it silently, and nothing in normal testing would have caught it — the single-agent path still worked exactly as designed.
+
+**The fix:** every tool binding, regardless of which path it's reached through, now goes through the exact same governance wrapper. We turned this into a standing rule: never bind a tool without full governance wrapping, regardless of the delegation path that leads to it.
+
+**The lesson for you:** if your agent framework has any governance layer — approval, audit, rate limits — verify it applies to *every* tool execution path, including dynamically compiled plans, sub-agents, and fallback branches. The path you didn't think to check is the one that gets exploited.
 
 ---
 
-## Bug 1: HITL Bypass on Plan Steps (Critical 🔴)
+## Bug 2: Parallel Execution Wiring Panic (High)
 
-**What happened:** Our agent runtime has a Human-in-the-Loop (HITL) system — certain tools (like `run_shell`) require human approval before executing. This works perfectly for single-agent mode.
+**What happened:** When building a plan that ran several sub-agents simultaneously, the execution graph compiler panicked outright.
 
-When we added multi-step plans via ReAcTree, plan-step tools were bound directly from the registry **without passing through the HITL middleware**. A sub-agent could execute `run_shell` without approval.
+**Why papers don't mention this:** papers describe parallel execution as "run nodes concurrently." The implementation requires a graph with a single entry point that fans out to several parallel branches and fans back in cleanly. Getting that wiring right is a graph-compilation problem, not an AI problem, and it's exactly the kind of detail that doesn't survive the trip from paper to production code.
 
-**Why it's scary:** This is a security bug. The whole point of HITL is preventing unapproved actions. ReAcTree's delegation path bypassed it silently.
+**The fix:** each control-flow type — sequential, parallel, fallback — needed its own dedicated wiring logic rather than sharing one generic path.
 
-**The fix:** Every plan-step tool binding now uses the same `ToolWrapSvc` middleware chain as single delegation. We wrote it as a rule: **never bind tools without full middleware wrapping, regardless of the delegation path.**
-
-```go
-// Before (broken): tools bound without middleware
-tools := registry.GetTools(toolNames)
-
-// After (fixed): tools always go through the wrap chain
-tools := toolWrapSvc.WrapTools(registry.GetTools(toolNames))
-```
-
-**The lesson for you:** If your agent framework has any governance layer (approval, audit, rate limits), verify it applies to **every** tool execution path — including dynamically compiled plans, sub-agents, and fallback branches.
+**The lesson:** unit tests on individual components missed this entirely, because the bug only existed at the level of the *compiled, composed* graph. If you only unit test agent components in isolation, you will miss graph-level bugs. We added integration tests that compile and execute full plans end-to-end against a mock model.
 
 ---
 
-## Bug 2: Parallel Graph Compilation Panic (High 🟠)
+## Bug 3: A Hung Multi-Step Plan (Medium)
 
-**What happened:** When building a parallel execution plan (3 sub-agents running simultaneously), the graph compiler panicked. The `SetEntryPoint` call conflicted with the parallel fan-out wiring.
+**What happened:** A multi-step sequential plan hung indefinitely. One step was waiting on a model response that never arrived — a network timeout, an overloaded provider — and the parent agent waited forever.
 
-**Why papers don't mention this:** Papers describe parallel execution as "run nodes concurrently." The implementation requires a directed acyclic graph with a single entry point that fans out to N parallel nodes and fans back in to a join node. Getting the entry/exit wiring right is a graph compilation problem, not an AI problem.
+**Why it's subtle:** a single agent has a request timeout by default. A multi-step plan inherits the parent's overall context, but each step effectively starts its own model session. Without a timeout scoped to each individual step, one slow step blocks the entire plan indefinitely.
 
-**The fix:** Flow-specific entry wiring — each control flow type (`BuildSequence`, `BuildParallel`, `BuildFallback`) handles its own graph topology.
+**The fix:** every step now gets its own fixed time budget, independent of the others, in addition to an overall hard ceiling on the whole plan. A fixed per-step budget turned out to be simpler and more predictable than trying to divide up the parent's total time — dividing it up creates a pathological case where early steps eat their full allowance and leave the last step with almost nothing.
 
-**The lesson:** Unit tests missed this because they tested individual nodes, not the compiled graph. We added integration tests that compile and execute full plans with `FakeExpert` (a mock LLM). **If you only unit test agent components, you will miss graph-level bugs.**
-
----
-
-## Bug 3: Hung Multi-Step Plans (Medium 🟡)
-
-**What happened:** A 5-step sequential plan hung indefinitely. Step 3 was waiting for an LLM response that never came (network timeout, model overloaded). The parent agent waited forever.
-
-**Why it's subtle:** Single-agent mode has a request timeout. Multi-step plans inherit the parent's context but each step starts its own LLM session. Without per-step timeouts, one slow step blocks the entire plan.
-
-**The fix:** Per-step timeout enforcement — each step gets its own `context.WithTimeout` with a fixed budget. The parent context still enforces an overall hard limit, but individual steps can't hang indefinitely waiting for a slow model or a network timeout:
-
-```go
-const stepTimeout = 2 * time.Minute
-runCtx, cancel := context.WithTimeout(ctx, stepTimeout)
-defer cancel()
-```
-
-We also added retries with exponential backoff around each step's LLM call, so transient failures (TCP resets, model overload) don't immediately kill a step that had 90 seconds of budget remaining.
-
-**The lesson:** Timeout management in hierarchical systems is non-obvious. A fixed per-step budget is simpler and more predictable than dividing the parent's total — you avoid the pathological case where early steps consuming their full allotment leave later steps with seconds.
+**The lesson:** timeout management in hierarchical systems is non-obvious. Give every level of the hierarchy its own bounded budget rather than assuming the parent's timeout is enough.
 
 ---
 
-## Bug 4: Shared LLM Concurrency (Medium 🟡)
+## Bug 4: Shared State Across Concurrent Sub-Agents (Medium)
 
-**What happened:** Three parallel sub-agents shared the same LLM client. Under load, requests interleaved and responses got mixed up. Agent A received Agent B's completion.
+**What happened:** Several parallel sub-agents ended up sharing state that should have been private to each of them. Under load, one agent's in-flight conversation got mixed up with another's.
 
-**Why it matters:** Most LLM client libraries are stateless per-request, but our client tracked conversation history for multi-turn interactions. Sharing a client across concurrent sub-agents meant shared conversation state.
+**Why it matters:** most client libraries look stateless per request, but ours tracked conversation history for multi-turn interactions. Sharing that client across concurrent sub-agents meant sharing conversation state too — a subtle bug that only shows up under real concurrency, not in a single-threaded test.
 
-**The fix:** Per-request isolation — each sub-agent gets its own runner, its own in-memory session service, and its own LLM session. The runner is created fresh for every `create_agent` call and closed when the sub-agent completes. This isn't just "thread-safe" — it's full session isolation. Running our test suite with `go test -race` confirmed zero data races after this change.
+**The fix:** full per-request isolation. Every sub-agent gets its own fresh session, created when it starts and torn down when it finishes. This isn't just "thread-safe" in the narrow sense — it's complete logical isolation, not just safe concurrent access to shared state.
 
-**The lesson:** If your agent framework supports concurrent agents, verify that LLM clients, conversation state, and tool registries are isolated per-agent. "Thread-safe" doesn't mean "logically isolated." We enforce this architecturally — fresh runner per sub-agent — rather than relying on locking.
-
----
-
-## Bug 5: Recursive `create_agent` (High 🟠)
-
-**What happened:** A sub-agent decided to delegate its work by calling `create_agent` itself — spawning a grandchild agent. That grandchild also called `create_agent`. We had unbounded recursive delegation eating tokens and compute.
-
-**Why it happens:** The LLM sees `create_agent` in its tool list and decides delegation is the best approach. It's not wrong — it's doing exactly what we told it was possible.
-
-**The fix:** Architectural registry separation. We don't filter tools at runtime — we maintain a **separate tool registry** for sub-agents that has orchestration tools (`create_agent`, `send_message`) excluded at construction time. Sub-agents literally cannot see these tools; they don't exist in their registry:
-
-```go
-// Sub-agents get a pre-built registry with orchestration tools excluded.
-// This is architectural, not a runtime filter — the tools don't exist
-// in this registry at all.
-scopedTools := subAgentRegistry.Include(req.ToolNames...)
-```
-
-This is a deliberate 1-level depth limit. Sub-agents cannot spawn further sub-agents. We enforce this structurally rather than via depth counters because structural guarantees are harder to bypass than runtime checks.
-
-**The lesson:** Your agent's tool list is its action space. If a tool shouldn't be used in a particular context, **don't make it available** — don't rely on prompt instructions to prevent it. Better yet, make the restriction architectural rather than a runtime filter. LLMs are creative problem-solvers; they will find ways to use every tool you give them.
+**The lesson:** if your agent framework supports concurrent agents, verify that model clients, conversation state, and tool registries are isolated *per agent*, not just safe to touch concurrently. "Thread-safe" and "logically isolated" are different properties, and only one of them prevents this bug. We enforce it architecturally — a fresh session per sub-agent — rather than relying on careful locking.
 
 ---
 
-## Bug 6: Polluted Episodic Memory (Low but Insidious 🟢)
+## Bug 5: Unbounded Recursive Delegation (High)
 
-**What happened:** A sub-agent failed its task. The error message — "connection refused: unable to reach API" — was stored as an episodic memory. The next time a similar task came up, the agent retrieved this "experience" and concluded the API was unreachable before even trying.
+**What happened:** A sub-agent decided to delegate its own work further, spawning a grandchild agent — which itself tried to delegate again. Left unchecked, this is unbounded recursive delegation, burning tokens and compute with no natural floor.
 
-**Why it's insidious:** The agent appeared to be "learning from experience." It was actually learning from failures and applying them as permanent truths. This is worse than having no memory at all.
+**Why it happens:** the model isn't malfunctioning here. If delegation is a tool available to it, and delegation looks like a reasonable strategy for the task at hand, using it is a perfectly rational choice from the model's perspective.
 
-**The fix:** Status-aware episodic storage with multiple quality gates:
+**The fix:** we don't rely on filtering this out at runtime — we made it structurally impossible. Sub-agents are constructed with a tool set that simply doesn't include delegation tools in the first place. They're not told not to delegate; the capability doesn't exist for them. This gives a deliberate, hard depth limit on how far delegation can nest, enforced structurally rather than through a counter that could itself have a bug.
 
-1. **Status tagging** — every episode is stored with an explicit status (`pending`, `success`, `failure`). Successful outputs start as `pending` and are promoted to `success` only after user validation (e.g., a thumbs-up emoji reaction).
+**The lesson:** your agent's available tools *are* its action space. If a capability shouldn't be usable in a given context, don't make it available there — don't rely on a prompt instruction to suppress it. A structural restriction is much harder to route around than an instruction, because a sufficiently capable model will find creative ways to use every tool you hand it.
 
-2. **Failure reflections** — failed episodes aren't discarded. Instead, they're stored with a verbal reflection explaining what went wrong and what to try differently. This follows the Reflexion pattern — the agent learns *from* failures rather than blindly repeating them.
+---
 
-3. **Importance scoring** — each episode gets a 1-10 importance score that influences weighted retrieval. Low-importance transient failures naturally fade.
+## Bug 6: Memory Poisoned by Its Own Failures (Low but Insidious)
 
-4. **Weighted retrieval** — when recalling past experiences, the system combines recency (exponential decay) and importance using a weighted sum, so recent and important lessons surface first and old ones naturally fade away.
+**What happened:** A sub-agent failed a task, and the raw failure message got stored as if it were a normal memory. The next time a similar task came up, the agent retrieved that "experience" and concluded the underlying system was broken — without even attempting the task again.
 
-5. **Consolidation** — a background job purges stale failures and pending episodes after a configurable TTL.
+**Why it's insidious:** the agent looked like it was learning from experience. It was actually learning a false permanent conclusion from a single failure and treating it as ground truth going forward. That's worse than having no memory at all.
 
-```go
-if !output.looksLikeError() {
-    episode := Episode{
-        Goal:       goal,
-        Trajectory: trajectory,
-        Status:     EpisodePending,
-        Importance: scoreImportance(ctx, goal, trajectory),
-    }
-    episodic.Store(ctx, episode)
-}
-```
+**The fix:** we moved to status-aware memory with several quality gates working together — every stored experience carries an explicit status rather than being treated as unconditionally true, failures get distilled into a short lesson rather than stored as a raw error dump, each memory gets weighted by how important it's likely to be for future recall, and retrieval blends relevance, recency, and importance rather than surfacing everything indiscriminately. Stale, low-value entries naturally fade out of that blend over time.
 
-The key insight is that "don't store failures" was too naive. The agent needs to learn from failures — it just needs to know *they were failures*, not treat them as ground truth.
-
-**The lesson:** Memory systems for agents need the same data quality discipline as databases. But the answer isn't "only store successes" — it's "store everything with provenance, and let retrieval weigh quality."
+**The lesson:** memory systems for agents need the same data-quality discipline as a database. But the fix isn't "only store successes" — it's "store everything with context about what actually happened, and let retrieval do the judgment call."
 
 ---
 
 ## What We Learned
 
-Six bugs. Three patterns:
+Six bugs. Three patterns that generalize well beyond this specific project:
 
 ### Pattern 1: Governance must be path-independent
 
-Every tool execution — whether from a single agent, a plan step, a sub-agent, or a fallback branch — must pass through the same governance stack. No shortcuts.
+Every tool execution — whether from a single agent, a plan step, a sub-agent, or a fallback branch — must pass through the same governance stack. No shortcuts, no "we'll wire this one up later."
 
 ### Pattern 2: Test the graph, not just the nodes
 
-Unit testing individual components is necessary but not sufficient. Compile full plans, execute them end-to-end with mock LLMs, and verify the results. Our structural test suite (15 taxonomy-linked tests) catches regressions on all 6 bugs.
+Unit testing individual components is necessary but not sufficient. Compile full execution plans, run them end-to-end against a mock model, and verify the results. Several of these bugs only existed at the level of the composed system.
 
 ### Pattern 3: Agent memory needs provenance, not just quality gates
 
-Don't store everything blindly. But don't discard failures either — tag them with status, attach reflections, and let weighted retrieval surface what matters. The agent should learn from mistakes, not repeat them as truth.
+Don't store everything blindly. But don't discard failures either — tag them, distill them, and let weighted retrieval surface what actually matters. The agent should learn from mistakes, not repeat them as unquestioned truth.
 
 ---
 
 ## Current State
 
-After fixing all 6 bugs, our structural test suite passes at 100% on the taxonomy-linked tests. A 15-run end-to-end pilot (5 tasks × 3 delegation modes) achieved 100% task success:
-
-| Metric | Flat (no delegation) | Sequence | Parallel |
-|--------|---------------------|----------|----------|
-| Task success | 100% | 100% | 100% |
-| Mean tool calls | 10.2 | 19.2 | 16.4 |
-| Mean wall clock (s) | 61.6 | 129.2 | 144.1 |
-
-Parallel suits independent evidence gathering. Sequence suits dependent steps with clear handoffs. Flat is fastest for simple tasks.
+After fixing all six, our test suite — unit tests on individual pieces plus integration tests on fully compiled, composed plans — passes reliably across every delegation mode we support: no delegation, sequential, and parallel. Parallel delegation suits independent evidence-gathering; sequential suits dependent steps with clear handoffs; no delegation is fastest for genuinely simple tasks.
 
 ---
 

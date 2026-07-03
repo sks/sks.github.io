@@ -11,7 +11,7 @@ I'm **Sabith**, a Principal Engineer at [StackGen](https://stackgen.com) where I
 ## What I Build
 
 - **AI Agent Runtime** — A production agent runtime written in Go. Hierarchical task decomposition, tool middleware, memory management, and human-in-the-loop governance.
-- **Aiden** — A multi-tenant agent orchestration platform. OPA policy enforcement, Temporal workflows, Terraform-based agent configuration.
+- **Aiden** — StackGen's multi-tenant agent orchestration platform. Policy enforcement, durable workflows, and infrastructure-as-code agent configuration for enterprise SRE and platform teams. [Why we built it this way →](/blog/aiden-platform/)
 
 ## Technical Interests
 

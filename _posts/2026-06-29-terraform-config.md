@@ -10,7 +10,7 @@ tags: [terraform, iac, gitops, ai-agents, governance]
 
 We use Terraform to configure our AI agents. Not YAML. Not a dashboard. Terraform.
 
-This sounds like overkill until you consider what "configuring an AI agent" actually involves in production: defining personas, attaching tools, binding OPA policies, routing to specific models, setting cost budgets, configuring Slack channels, and managing secrets. Across 20 agents. Across 5 teams. With audit trails and rollback.
+This sounds like overkill until you consider what "configuring an AI agent" actually involves in production: defining personas, attaching tools, binding governance policies, routing to specific models, setting cost budgets, configuring notification channels, and managing secrets. Across dozens of agents. Across multiple teams. With audit trails and rollback.
 
 That's not application config. That's infrastructure.
 
@@ -18,255 +18,81 @@ That's not application config. That's infrastructure.
 
 ## The Problem with Dashboards
 
-Most agent platforms offer a dashboard: click "Create Agent," fill in a form, hit save. This works for one agent. For an enterprise with 20+ agents, dashboards create problems:
+Most agent platforms offer a dashboard: click "Create Agent," fill in a form, hit save. This works for one agent. For an enterprise with many agents across many teams, dashboards create problems:
 
-1. **No audit trail** — Who changed the SRE agent's tools last Tuesday? The dashboard doesn't know.
+1. **No audit trail** — Who changed an agent's tool list last Tuesday? The dashboard doesn't know.
 2. **No review process** — Config changes go live immediately. No PR, no review, no "are you sure?"
 3. **No rollback** — Something broke? Good luck remembering what the previous config looked like.
-4. **Drift** — The "source of truth" is a database somewhere. Nobody knows if it matches what was intended.
-5. **No environments** — Can't test agent config changes in staging before production.
+4. **Drift** — The "source of truth" is a database somewhere. Nobody's sure if it matches what was intended.
+5. **No environments** — You can't test an agent config change in staging before it hits production.
+
+These aren't hypothetical. We hit every one of them before we changed approach.
 
 ---
 
-## The Custom Terraform Provider
+## Why We Built a Terraform Provider Instead
 
-We built a Terraform provider for Aiden. Here's what it looks like:
+Terraform uses a declarative model: you describe the desired state, and the tool figures out how to get there. That model maps naturally onto agent configuration — an agent's persona, tool list, and governance bindings are exactly the kind of "desired state" Terraform is built for.
 
-```hcl
-terraform {
-  required_providers {
-    stackgen = {
-      source  = "registry.terraform.io/stackgenhq/stackgen"
-    }
-  }
-}
+So we built a custom Terraform provider for our platform, and agent configuration became just another resource type alongside the rest of a team's infrastructure-as-code.
 
-provider "stackgen" {
-  base_url = "https://aiden.internal.company.com"
-  token    = var.aiden_api_token
-}
-```
+### The GitOps Workflow
 
-### Defining Agents
+Agent configuration now lives in a Git repository, alongside the governance policies that apply to it. The workflow looks like any other infrastructure change:
 
-```hcl
-resource "stackgen_agent" "sre_copilot" {
-  name = "sre-copilot"
+1. An engineer opens a PR proposing a config change (e.g., "add a new tool to this agent")
+2. CI runs a plan step that shows exactly what will change — nothing more, nothing less
+3. The team reviews that plan in the PR, the same way they'd review a Kubernetes manifest change
+4. On merge, the change applies automatically
+5. The audit trail lives in Git history plus the tool's own state tracking
 
-  persona = <<-EOT
-    You are an SRE copilot. Help with incident triage, 
-    runbook execution, and RCA drafting. Prefer safe, 
-    read-only operations unless explicitly approved.
-  EOT
+### "Plan Before Apply" Is the Killer Feature
 
-  tools = [
-    "websearch", "webfetch", "run_shell",
-    "kubectl_get", "datadog_query", "pagerduty_list"
-  ]
+Before any change goes live, you see precisely what will happen — one tool added, one policy attached, nothing else touched. A reviewer can approve with confidence because they're looking at a diff, not trusting that a form was filled out correctly.
 
-  hitl {
-    always_allowed = ["websearch", "webfetch", "memory_*", "read_*"]
-    denied_tools   = ["bash", "shell_*"]
-  }
+For a platform where a misconfigured agent can run shell commands against production systems, "see before you apply" isn't a nice-to-have. It's the whole point.
 
-  policy_ids = [
-    stackgen_policy.deny_destructive_shell.id,
-    stackgen_policy.require_prod_approval.id,
-  ]
-
-  integration "slack" {
-    channel = var.slack_channel_sre
-  }
-}
-```
-
-### Governance Configuration
-
-Governance is two-layered: HITL middleware handles fast tool-level allow/deny (embedded in the `hitl` block above), while OPA/Rego policies handle contextual, attribute-based decisions:
-
-```hcl
-resource "stackgen_policy" "deny_destructive_shell" {
-  name        = "deny-destructive-shell"
-  description = "Block rm -rf, format, and other destructive commands"
-  type        = "logic"
-  rego_source = file("${path.module}/policies/deny-destructive.rego")
-}
-
-resource "stackgen_policy" "require_prod_approval" {
-  name        = "require-production-approval"
-  description = "Require HITL approval for any production changes"
-  type        = "intervention"
-  rego_source = file("${path.module}/policies/prod-approval.rego")
-}
-```
-
-Policies are classified into four types: **Logic** (boolean allow/deny), **Temporal** (time-based access), **Intervention** (trigger HITL approval), and **Routing** (A/B persona selection). OPA evaluates them in-process using the Go SDK — no sidecar.
-
-### Configuring Model Providers
-
-```hcl
-resource "stackgen_setting" "model_provider" {
-  name = "model_provider"
-  config = {
-    provider   = "anthropic"
-    api_key    = var.anthropic_api_key
-    model_name = "claude-sonnet-4-20250514"
-  }
-}
-
-resource "stackgen_setting" "fallback_model" {
-  name = "fallback_model"
-  config = {
-    provider   = "google"
-    api_key    = var.gemini_api_key
-    model_name = "gemini-2.5-flash"
-  }
-}
-```
+**One nuance worth knowing if you build something similar:** if a config change merges while an agent is mid-task in a durable workflow engine, the in-flight execution should keep running against the configuration it started with, not hot-swap mid-task. The updated config takes effect on the *next* invocation. Otherwise you risk a tool list changing out from under an agent halfway through an active investigation — which is a much stranger bug to debug than it sounds.
 
 ---
 
-## The GitOps Workflow
+## Cross-Resource References Matter More Than You'd Think
 
-Agent configuration lives in a Git repo alongside the Rego policies:
-
-```
-agent-config/
-├── main.tf              # Agent definitions + governance
-├── policies/
-│   ├── deny-destructive.rego
-│   └── prod-approval.rego
-├── variables.tf         # Input variables
-├── outputs.tf           # Agent IDs, endpoints
-├── terraform.tfvars     # Non-secret values
-└── .github/workflows/
-    └── terraform.yml    # CI/CD pipeline
-```
-
-The workflow:
-
-```
-1. Engineer opens PR: "Add datadog_query tool to sre-copilot"
-2. CI runs `terraform plan` — shows exactly what will change
-3. Team reviews the plan in the PR
-4. PR merges → `terraform apply` runs automatically
-5. Agent config updated, audit trail in Git + Terraform state
-```
-
-### `terraform plan` is the Killer Feature
-
-Before any change goes live, you see exactly what will happen:
-
-```
-$ terraform plan
-
-  # stackgen_agent.sre_copilot will be updated in-place
-  ~ resource "stackgen_agent" "sre_copilot" {
-        name = "sre-copilot"
-      ~ tools = [
-          + "datadog_query",
-            "kubectl_get",
-            "pagerduty_list",
-            "run_shell",
-            "webfetch",
-            "websearch",
-        ]
-    }
-
-Plan: 0 to add, 1 to change, 0 to destroy.
-```
-
-One tool added. Nothing else changed. The reviewer can approve with confidence.
-
-**An important nuance on live workflows:** If an engineer merges a config change while an agent is mid-task inside a Temporal workflow, the active workflow continues with its creation-time config snapshot. Config is loaded once at workflow start — not hot-reloaded mid-execution. The updated config takes effect on the next workflow invocation. This prevents mid-task tool list changes from breaking a live investigation.
-
----
-
-## Cross-Resource References
-
-Terraform's dependency graph is perfect for agent configuration. Policies are created first, then referenced by agents:
-
-```hcl
-resource "stackgen_policy" "deny_destructive_shell" {
-  name = "deny-destructive-shell"
-  # ...
-}
-
-resource "stackgen_agent" "sre_copilot" {
-  policy_ids = [
-    stackgen_policy.deny_destructive_shell.id,  # ← reference
-  ]
-}
-```
-
-If you delete a policy that's referenced by an agent, `terraform plan` tells you:
-
-```
-Error: Reference to undeclared resource
-
-  on main.tf line 42:
-  stackgen_policy.deny_destructive_shell.id references a 
-  resource that no longer exists.
-```
-
-No orphaned references. No silent misconfigurations.
+Terraform's dependency graph turned out to be one of the more valuable parts of this, almost by accident. Governance policies are created first, agents reference them by ID. If someone tries to delete a policy that's still referenced by a live agent, the plan step catches it before anything breaks — no orphaned references, no silently misconfigured agents.
 
 ---
 
 ## Secret Management
 
-Terraform integrates with secret management tools:
-
-```hcl
-# From environment variables
-variable "anthropic_api_key" {
-  type      = string
-  sensitive = true
-}
-
-# From HashiCorp Vault
-data "vault_generic_secret" "anthropic" {
-  path = "secret/ai/anthropic"
-}
-
-resource "stackgen_setting" "model_provider" {
-  config = {
-    api_key = data.vault_generic_secret.anthropic.data["api_key"]
-  }
-}
-```
-
-Secrets never appear in `.tf` files, state files (with proper backend config), or Git history.
+Secrets — model provider API keys, integration tokens — flow through standard secret-management integrations rather than living in config files. They never appear in version control, and depending on backend configuration, never touch persisted state either.
 
 ---
 
-## Comparison
+## Why This Beats the Alternatives
 
-| Capability | Dashboard | YAML + kubectl | Terraform |
-|-----------|-----------|---------------|-----------|
-| Audit trail | ❌ | ⚠️ Git only | ✅ Git + state |
-| PR review | ❌ | ✅ | ✅ |
-| Preview changes | ❌ | ❌ | ✅ `terraform plan` |
-| Drift detection | ❌ | ❌ | ✅ `terraform plan` |
-| Rollback | Manual | `git revert` | ✅ Apply previous state |
-| Cross-resource refs | ❌ | Manual IDs | ✅ Automatic |
-| Secret management | Varies | ❌ | ✅ Vault, env vars |
-| Environments | Manual copy | Manual copy | ✅ Workspaces |
-| Reusable modules | ❌ | ❌ | ✅ Terraform modules |
+| Capability | Dashboard | Plain config files | Terraform |
+|-----------|-----------|---------------------|-----------|
+| Audit trail | Weak | Git history only | Git + state |
+| PR review | No | Yes | Yes |
+| Preview changes before applying | No | No | Yes |
+| Drift detection | No | No | Yes |
+| Rollback | Manual | Git revert | Apply previous state |
+| Cross-resource references | Manual IDs | Manual IDs | Automatic, validated |
+| Secret management | Varies | Weak | Strong |
 
 ---
 
 ## Lessons Learned
 
-1. **Agent config is infrastructure.** If your agents can run shell commands on production servers, their configuration deserves the same rigor as your Kubernetes manifests.
+1. **Agent config is infrastructure.** If your agents can run shell commands on production servers, their configuration deserves the same rigor as your Kubernetes manifests — not a form in a dashboard.
 
-2. **`plan` before `apply` is non-negotiable.** For AI agents, a misconfigured tool list or missing governance rule is a security incident. Preview every change.
+2. **"Plan before apply" is non-negotiable for AI agents.** A misconfigured tool list or a missing governance rule is a security incident, not a bug ticket. Preview every change.
 
-3. **Separate runtime config from platform config.** TOML files define what the agent runtime loads at startup — model providers, memory settings, middleware options. HCL defines what the platform manages across all agents — tenant routing, tool permissions, integration bindings, organizational policies. Different scopes, different tools.
+3. **Separate concerns by scope, not by convenience.** A single developer working locally has very different config needs than an enterprise managing dozens of agents across teams. Don't force one format to serve both.
 
-4. **Rego policies belong in version control.** OPA policies are code. They need review, testing, and versioning — not a database row edited via UI.
+4. **Governance policy belongs in version control.** Policies are code. They need review, testing, and versioning — not a database row edited through a UI.
 
-5. **Build the provider early.** We started with direct API calls and migrated to Terraform at month 3. We wish we'd started at month 1 — the GitOps workflow would have prevented several misconfigurations.
+5. **Build the IaC layer earlier than feels necessary.** We didn't start here — we migrated once the pain of dashboard-driven config became obvious. In hindsight, the GitOps workflow would have prevented several early misconfigurations if we'd had it from month one.
 
 ---
 

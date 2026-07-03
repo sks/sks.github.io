@@ -12,7 +12,7 @@ Your agent remembers everything. That's a bug, not a feature.
 
 We've all seen it: you give an agent a task, it retrieves 40 "relevant" context chunks from a vector store, stuffs them into a 128K context window, and produces a response that's technically accurate but practically useless — because 35 of those chunks were irrelevant, stale, or contradictory.
 
-We built a memory system called Pensieve that handles this differently. Instead of "remember everything and search later," Pensieve manages **four distinct memory types**, with automatic decay, importance scoring, and self-pruning. This post walks through the architecture, the algorithms, and the production lessons.
+We built a memory system called Pensieve that handles this differently. Instead of "remember everything and search later," Pensieve manages **four distinct memory types**, with automatic decay, importance scoring, and self-pruning. This post walks through the problem, the design principles, and the production lessons — not the internals.
 
 ---
 
@@ -36,28 +36,14 @@ Standard RAG treats all chunks equally — same embedding, same retrieval, same 
 
 ## The Four Memory Types
 
-Pensieve manages four distinct memory stores, each with different lifecycle and retrieval semantics:
+Pensieve manages four distinct memory stores, each with a different lifecycle and a different reason to exist:
 
-```
-┌──────────────────────────────────────────────────────────┐
-│                     Agent Memory                         │
-├──────────────┬──────────────┬──────────┬─────────────────┤
-│   Working    │   Episodic   │  Notes   │    Skills       │
-│   Memory     │   Memory     │          │                 │
-├──────────────┼──────────────┼──────────┼─────────────────┤
-│ Session      │ Goal-keyed   │ Cross-   │ Reusable        │
-│ blackboard   │ experiences  │ session  │ procedures      │
-│              │              │ facts    │                 │
-├──────────────┼──────────────┼──────────┼─────────────────┤
-│ Lifetime:    │ Lifetime:    │ Lifetime:│ Lifetime:       │
-│ Single task  │ Decays over  │ Until    │ Until           │
-│              │ ~2 weeks     │ deleted  │ deprecated      │
-├──────────────┼──────────────┼──────────┼─────────────────┤
-│ No embedding │ Vector +     │ Key-     │ Semantic        │
-│ (key-value)  │ weighted     │ value    │ search          │
-│              │ retrieval    │ lookup   │                 │
-└──────────────┴──────────────┴──────────┴─────────────────┘
-```
+- **Working memory** — a session-scoped blackboard for the current task. Lives only as long as the task does.
+- **Episodic memory** — goal-keyed experiences from past tasks, weighted toward relevance and recency, that naturally fade out over time.
+- **Notes** — cross-session facts that don't decay, until someone (or the agent) deletes them.
+- **Skills** — reusable procedures that persist until they're deprecated.
+
+The split matters more than any single implementation detail: mixing a "what am I doing right now" blackboard with a "what happened last week" experience log with a "how do I do this" procedure store is how naive memory systems end up injecting stale, irrelevant, or contradictory context into every prompt.
 
 ### 1. Working Memory — The Session Blackboard
 
@@ -76,51 +62,23 @@ Working memory dies when the task completes. It's not persisted. Think of it as 
 
 Episodic memory stores **what happened during past tasks** — the goal, the approach, the outcome, and what was learned. It's the agent's autobiography.
 
-The critical design choice: **not all episodes are worth remembering.**
+The critical design choice: **not all episodes are worth remembering, and not every remembered episode should be trusted equally.**
 
-```go
-// Store episodes with explicit status tagging
-if !output.looksLikeError() {
-    episodic.Store(ctx, Episode{
-        Goal:       goal,
-        Trajectory: trajectory,
-        Status:     EpisodePending,  // promoted to Success on user validation
-        Importance: scoreImportance(ctx, goal, trajectory),
-    })
-}
-```
+We tag every stored episode with an explicit status — pending, success, or failure — and only promote an episode to "trusted success" after some form of validation (a user thumbs-up, a follow-up confirmation, whatever signal fits the product). Failures aren't discarded, but they aren't stored as raw error dumps either. A 50-line stack trace from a timeout doesn't belong in an agent's memory — it just pollutes future context. Instead, failures are distilled into a short, synthesized lesson before they're stored (more on this below).
 
-This is **status-aware storage**. Episodes start as `pending` and are promoted to `success` only after user validation (e.g., a 👍 emoji reaction). Failed tasks are stored separately with verbal reflections (more on this below). Raw error traces never pollute the memory — only synthesized lessons.
-
-*(In the [ReAcTree bugs post](/blog/2026/07/01/reactree-bugs/), I mentioned that naively storing failures poisoned the agent. That's true for raw execution traces — saving a 50-line stack trace of a timeout pollutes context. We evolved this: we still drop the raw failure log, but we pass the event to a `FailureReflector` to synthesize a concise, one-sentence lesson, which we safely store with a `failure` status and a verbal reflection.)*
+*(In the [ReAcTree bugs post](/blog/reactree-bugs/), I mentioned that naively storing failures poisoned the agent. Status-aware storage is how we fixed it.)*
 
 #### Retrieval Scoring
 
-Episodic memories are ranked using a **three-signal weighted score** that combines semantic similarity, temporal recency, and importance:
+Episodic memories are ranked using a combination of three signals: how semantically relevant a memory is to the current task, how recent it is, and how important it was judged to be at the time.
 
-```
-final_score = 0.4 × cosine_similarity + 0.3 × recency + 0.3 × importance
+**Why three signals instead of two?** With only recency and importance, you hit a structural problem: if recency dominates, *any* memory older than a few days gets outranked by a completely routine memory from the last hour — even a critical production incident. Weighting semantic relevance most heavily means the system surfaces memories that actually match the current situation first, and uses recency and importance as tiebreakers rather than the deciding factor. A week-old incident should still surface strongly when today's problem looks similar.
 
-recency    = e^(-0.01 × hours_since_created)   // exponential decay, [0,1]
-importance = importance_score / 10              // normalized from 1-10 to [0,1]
-```
-
-A memory from 1 hour ago has a recency score of ~0.99. A memory from 1 week (168 hours) ago has a recency score of ~0.19. After ~2 weeks, the recency component effectively drops to zero.
-
-**Why three signals instead of two?** With only recency and importance (the naive approach), you get a mathematical problem: if recency dominates (say, 60% weight), then *any* memory older than 4-5 days will always be outranked by a completely routine memory from the last hour — even a critical production incident. By adding cosine similarity as the largest component (40%), the system surfaces memories that are *semantically relevant to the current task* first, then uses recency and importance as tiebreakers. A week-old production incident retrieves strongly when the current task involves a similar failure mode.
-
-**Why this matters:** An agent that investigated a DNS issue last week shouldn't treat that experience the same as investigating the same issue 5 minutes ago. But it also shouldn't forget a critical production incident just because a routine health check happened more recently. The three-way weighting handles both cases.
+**Why this matters:** An agent that investigated an issue last week shouldn't treat that experience identically to investigating the same issue five minutes ago. But it also shouldn't forget a critical incident just because a routine check happened more recently. Blending relevance, recency, and importance — rather than picking one — is what makes both cases work.
 
 #### Importance Scoring
 
-When an episode is stored, a lightweight LLM call scores it 1-10:
-
-```
-"Deployed a hotfix to production under time pressure" → 9/10
-"Ran a routine health check, everything was green"   → 2/10
-```
-
-Unscored episodes (importance = 0) receive a neutral 0.5 weight so they don't dominate or disappear from retrieval.
+When an episode is stored, a lightweight LLM call estimates how important it is likely to be for future recall — a hotfix deployed under time pressure scores very differently from a routine health check that came back clean. That score feeds into retrieval weighting above.
 
 ### 3. Notes — Cross-Session Persistence
 
@@ -162,16 +120,7 @@ Skills are stored on the filesystem and indexed in a vector store for semantic d
 
 Here's where it gets interesting. In most agent frameworks, you (the developer) manage memory — you decide what to store, what to retrieve, how much context to inject.
 
-In Pensieve, the **agent manages its own memory budget.** It has memory management tools:
-
-| Tool | Purpose |
-|------|---------|
-| `memory_search` | Semantic search across episodic memories |
-| `memory_manage` | Save, update, or delete memories |
-| `note` | Read or write persistent notes |
-| `read_notes` | List all notes |
-| `discover_skills` | Search for relevant skills |
-| `load_skill` | Load a skill into working context |
+In Pensieve, the **agent manages its own memory budget.** It has tools to search past experiences, save or delete memories, read and write persistent notes, and discover and load relevant skills — the same operations a human operator would perform on a knowledge base, exposed to the agent itself.
 
 The agent's system prompt includes instructions to manage its context proactively:
 
@@ -185,27 +134,9 @@ The agent's system prompt includes instructions to manage its context proactivel
 
 ## The Learning Loop
 
-After every completed task, a background process evaluates whether the experience is worth remembering as a reusable **skill**:
+After every completed task, a background process evaluates whether the experience is novel and useful enough to distill into a reusable **skill** — and if something similar already exists, it either merges into that skill or skips entirely rather than creating a near-duplicate. This is **post-session skill distillation**. The agent doesn't learn during the task — it learns after, asynchronously, without blocking the user.
 
-```
-Task completes
-  → Novelty scoring (LLM rates 1-10)
-  → If novelty ≥ 7:
-      → Distill into structured skill document
-      → Semantic dedup check (similarity ≥ 0.8 → merge or skip)
-      → Store to filesystem + vector index
-```
-
-This is **post-session skill distillation**. The agent doesn't learn during the task — it learns after, asynchronously, without blocking the user.
-
-Example: An agent successfully triages a Redis connection storm for the first time. The learning loop:
-
-1. Scores it 8/10 novelty (agent hasn't handled Redis issues before)
-2. Distills the approach into a skill document
-3. Checks if a similar skill exists (none found)
-4. Stores it as `dynamic_skills/redis_connection_storm_triage.md`
-
-Next time a Redis issue comes up, the agent finds this skill via `discover_skills` and follows the documented procedure.
+Example: an agent successfully triages a Redis connection storm for the first time. Because it hasn't handled anything like this before, and no similar skill already exists, the approach gets distilled into a documented procedure. Next time a Redis issue comes up, the agent finds this skill and follows it instead of improvising from scratch.
 
 ---
 
@@ -213,29 +144,9 @@ Next time a Redis issue comes up, the agent finds this skill via `discover_skill
 
 Successes teach you what to do. Failures teach you what to avoid. We capture both.
 
-When an agent fails a task (timeout, too many errors, explicit failure status), a `FailureReflector` generates a verbal reflection:
+When an agent fails a task (timeout, too many errors, explicit failure status), a dedicated reflection step turns the raw failure into a short, plain-English lesson — what was attempted, what went wrong, and what to try differently next time — rather than storing the raw error trace verbatim.
 
-```
-Goal: "Scale the production database replica set"
-Status: Failed
-Reflection: "Attempted to modify replica count without checking 
-if the cluster was in maintenance mode. The API returned 403 
-Forbidden. Next time, verify cluster status before making 
-scaling changes."
-```
-
-These failure reflections are stored as episodic memories with a ⚠️ prefix. When the agent encounters a similar task, it retrieves both successful experiences and past failures:
-
-```
-## Relevant Experience
-✅ Successfully scaled Redis cluster by updating replica count 
-   after confirming maintenance window (2 days ago)
-
-⚠️ Failed to scale database replica set — didn't check 
-   maintenance mode first, got 403 (5 days ago)
-```
-
-The agent sees what worked **and** what didn't. This is inspired by [Reflexion](https://arxiv.org/abs/2303.11366) — verbal reinforcement without weight updates.
+These reflections are stored as episodic memories, clearly marked as failures. When the agent encounters a similar task, it retrieves both successful experiences and past failures side by side, so it sees what worked *and* what didn't — inspired by [Reflexion](https://arxiv.org/abs/2303.11366): verbal reinforcement without weight updates.
 
 ---
 
@@ -243,22 +154,7 @@ The agent sees what worked **and** what didn't. This is inspired by [Reflexion](
 
 Individual episodic memories accumulate. Over time, retrieving them all is expensive and noisy.
 
-Once per day, an `EpisodeConsolidator` reads recent episodes and summarizes them into **wisdom notes** — concise bullet-point lessons:
-
-```markdown
-## Consolidated Lessons (July 1, 2026)
-
-- When scaling database replicas, always check cluster 
-  maintenance mode status first (learned from failed attempt)
-- Redis connection storms usually indicate connection pool 
-  exhaustion in the application, not Redis server issues
-- PagerDuty incident creation requires the service_id field; 
-  use the pd_service_list tool to find it first
-```
-
-Wisdom notes are injected into the agent's system prompt as a `## Consolidated Lessons` section, capped at the 2-3 most recent notes. They provide distilled experience without the noise of individual episodes.
-
-To prevent the wisdom section from growing unboundedly, the consolidator naturally limits itself: it retrieves a small, fixed window of recent wisdom notes per prompt injection. Older notes still exist in storage but aren't injected — they've served their purpose by informing the agent during their active window, and the lessons they encode are either still relevant (and get re-learned) or have become stale. The consolidation job also deletes the raw episodes it summarized from the vector store, so the episodic memory stays clean.
+Once a day, a background job reads recent episodes and summarizes them into a short list of standing lessons — the kind of thing a human on-call engineer would jot in a shared runbook after a rough week. Those lessons get injected into the agent's prompt going forward, capped to a small, recent window so the summary doesn't grow without bound. The individual episodes it summarized are then cleared out, so the raw memory store stays lean and the distilled wisdom does the work instead.
 
 ---
 
@@ -266,48 +162,9 @@ To prevent the wisdom section from growing unboundedly, the consolidator natural
 
 Agent memories contain user conversations, tool outputs, API responses — all potentially containing PII (names, emails, IP addresses, tokens).
 
-We run PII redaction **before** persisting any memory:
+We run PII redaction **before** persisting any memory — every write path strips emails, bearer tokens, API keys, and similar sensitive patterns before the content ever reaches storage.
 
-```go
-// All memory storage goes through PII redaction
-func (s *Store) Save(ctx context.Context, req SaveRequest) error {
-    req.Content = pii.Redact(req.Content)
-    req.Goal = pii.Redact(req.Goal)
-    return s.backend.Save(ctx, req)
-}
-```
-
-The `pii.Redact()` function strips emails, bearer tokens, API keys, and other sensitive patterns before persistence.
-
-There's a domain-specific tension here: our product is an SRE copilot, and in SRE contexts, IP addresses and hostnames are critical telemetry. If the agent remembers "the outage was caused by a rogue pod on node [REDACTED]," the memory is functionally useless for future debugging. We handle this by allowlisting internal RFC-1918 subnets and using deterministic tokenization for external addresses — `203.0.113.42` consistently becomes `[EXT_IP_A]` across memories, so the agent can still learn network topology patterns without storing regulated PII in the vector store.
-
----
-
-## Architecture Summary
-
-```
-┌─────────────────────────────────────────────────────┐
-│ Agent Prompt                                         │
-│   ├── Consolidated wisdom (injected automatically)   │
-│   ├── Episodic memories (retrieved per-goal)         │
-│   ├── Skills (loaded on demand)                      │
-│   └── Notes (read via tool call)                     │
-├─────────────────────────────────────────────────────┤
-│ Memory Management Tools                              │
-│   memory_search, memory_manage, note,                │
-│   discover_skills, load_skill                        │
-├─────────────────────────────────────────────────────┤
-│ Storage Layer                                        │
-│   ├── Vector store (Qdrant) — embeddings             │
-│   ├── Filesystem — skills, notes                     │
-│   └── PII redaction — applied before persist         │
-├─────────────────────────────────────────────────────┤
-│ Background Processes                                 │
-│   ├── Learning loop — skill distillation             │
-│   ├── Wisdom consolidation — daily digest            │
-│   └── Memory decay — exponential time-based          │
-└─────────────────────────────────────────────────────┘
-```
+There's a domain-specific tension here: our product is an SRE copilot, and in SRE contexts, IP addresses and hostnames are critical telemetry. If the agent remembers "the outage was caused by a rogue pod on node [REDACTED]," the memory is functionally useless for future debugging. We handle this by treating internal, non-routable addresses differently from external ones, and by consistently tokenizing anything sensitive so the same value always maps to the same placeholder — the agent can still learn network topology patterns without ever storing the regulated PII itself.
 
 ---
 
@@ -327,17 +184,9 @@ There's a domain-specific tension here: our product is an SRE copilot, and in SR
 
 ---
 
-## The Comparison
+## Where This Differs From Off-the-Shelf Memory
 
-| Feature | Standard RAG | LangGraph Memory | Mem0 | Pensieve |
-|---------|-------------|-----------------|------|----------|
-| Memory types | 1 (chunks) | 2 (checkpointer + Store) | Centralized (user/session) | **4 (working, episodic, notes, skills)** |
-| Temporal decay | None | Manual / custom | Implicit (managed platform) | **Exponential (configurable λ)** |
-| Quality gates | None | Manual / custom | Manual / custom | **Status-aware + importance scoring** |
-| Failure learning | None | Manual / custom | None | **Reflexion-style verbal reflections** |
-| Self-pruning | None | Manual / custom | None | **Agent-managed via tools** |
-| Skill distillation | None | None | None | **Post-session, novelty-gated** |
-| PII redaction | Manual | Manual | Manual | **Automatic before persist** |
+Most memory approaches you'll find in open-source agent frameworks pick one axis and optimize it — a single chunk store, a generic checkpointer, or a centralized session store. Few combine temporal decay, quality gating, failure-aware learning, and agent-managed self-pruning into one system. That combination — not any single technique — is what makes Pensieve behave differently from "vector search with extra steps."
 
 ---
 
