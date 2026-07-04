@@ -20,10 +20,6 @@ I'm **Sabith**, a Principal Engineer at [StackGen](https://stackgen.com) where I
 - DevOps/SRE tooling and observability
 - Security for autonomous tool-using systems
 
-## Open Source
-
-I try and actively contribute to the agent ecosystem.
-
 ## StackGen teammates
 
 Aiden and the agent runtime are team efforts at StackGen. Teammates who shaped major areas reflected in this blog series include:
