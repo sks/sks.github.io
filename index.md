@@ -11,7 +11,7 @@ I write about the engineering decisions, production bugs, and hard-won lessons f
 
 ## Aiden — Enterprise Agent Platform
 
-**[Why We Split Our Agent Runtime From Our Platform](/blog/aiden-platform/)** — the engineering trade-off behind turning a single-user CLI agent into a multi-tenant enterprise platform. Start here if you want the story behind how Aiden came to be.
+**[Why We Split Our Agent Runtime From Our Platform](/blog/aiden-platform/)** — the engineering trade-off behind turning a single-user CLI agent into a multi-tenant enterprise platform.
 
 ## 📚 Blog Series: Building an Enterprise AI Agent Platform in Go
 

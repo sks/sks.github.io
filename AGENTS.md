@@ -151,10 +151,19 @@ gh run list --repo sks/sks.github.io --limit 1 --json status,conclusion
 ### Add a New Blog Post
 
 1. Create `_posts/YYYY-MM-DD-slug.md` with proper front matter
-2. Write content following the style guidelines above
-3. Add the ai.stackgen.com CTA at the end
-4. Run the naming violation checks
-5. Commit, push, verify build passes
+2. Write content following the style guidelines and [Blog Content Guardrails](#blog-content-guardrails-critical) above
+3. Set `date` in front matter to the **publish day** (future dates are hidden until that day on GitHub Pages)
+4. Add the ai.stackgen.com CTA at the end
+5. Run the naming violation checks
+6. Commit, push, verify build passes
+
+### Scheduling and Permalinks
+
+- **Permalinks are slug-only:** `/blog/why-go/` — derived from the filename slug, not the date prefix
+- **Never rename files** to change publish timing; it creates noisy diffs and confuses file tracking
+- To hide until a future day: change front-matter `date` only, or use `_drafts/`
+- Internal links: always `/blog/slug/` — never date-prefixed paths
+- Promotion calendar (LinkedIn one-per-day): [`docs/publishing-schedule.md`](docs/publishing-schedule.md)
 
 ### Update the Footer
 

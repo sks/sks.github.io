@@ -10,6 +10,8 @@ Personal engineering blog — AI agents, Go, and production systems.
 
 A 13-part deep dive into building a production AI agent platform in Go — from choosing the language to scaling it across many teams. Based on real production experience building [Aiden](https://sks.github.io/blog/aiden-platform/), StackGen's enterprise agent orchestration platform.
 
+See [`docs/publishing-schedule.md`](docs/publishing-schedule.md) for permalink reference and a suggested LinkedIn promotion order.
+
 | # | Post | What It Covers |
 |---|------|---------------|
 | 1 | [Why We Chose Go](https://sks.github.io/blog/why-go/) | Go vs Python for AI agents — concurrency, deployment, type safety |
@@ -19,12 +21,12 @@ A 13-part deep dive into building a production AI agent platform in Go — from 
 | 5 | [Pensieve Memory](https://sks.github.io/blog/pensieve-memory/) | Memory management for agents that actually forget |
 | 6 | [Skill Distillation](https://sks.github.io/blog/skill-distillation/) | Teaching agents to learn without fine-tuning |
 | 7 | [The HITL Paradox](https://sks.github.io/blog/hitl-paradox/) | When human approval makes agents worse |
-| 8 | [Defense in Depth](https://sks.github.io/blog/defense-in-depth/) | 5-layer security model for tool-wielding agents |
+| 8 | [Defense in Depth](https://sks.github.io/blog/defense-in-depth/) | Layered security for tool-wielding agents |
 | 9 | [Observability](https://sks.github.io/blog/observability/) | Why traditional APM can't debug agent workloads |
 | 10 | [Terraform Config](https://sks.github.io/blog/terraform-config/) | Infrastructure as Code for AI agent governance |
 | 11 | [Why We Split Runtime From Platform](https://sks.github.io/blog/aiden-platform/) | The trade-off behind turning a single-user CLI agent into a multi-tenant platform |
 | 12 | [Open Source Ecosystem](https://sks.github.io/blog/open-source-ecosystem/) | Contributing back while building commercially |
-| 13 | [JSON Repair Layers](https://sks.github.io/blog/json-repair-layers/) | Five layers of JSON repair for production tool calls |
+| 13 | [JSON Repair Layers](https://sks.github.io/blog/json-repair-layers/) | Why one JSON repair pass isn't enough in production |
 
 ---
 
