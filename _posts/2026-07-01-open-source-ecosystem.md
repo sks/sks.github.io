@@ -14,9 +14,9 @@ We built a proprietary product. We also merged 17 PRs into the agent framework w
 
 ## The Dependency Graph
 
-Our agent runtime is built on [trpc-agent-go](https://github.com/trpc-group/trpc-agent-go) (1,450⭐) — an open-source Go framework for building AI agents. It provides the core abstractions: tool interfaces, LLM wrappers, streaming, and memory primitives.
+Our agent runtime is built on [trpc-agent-go](https://github.com/trpc-group/trpc-agent-go) — an open-source Go framework for building AI agents. It provides the core abstractions: tool interfaces, LLM wrappers, streaming, and memory primitives.
 
-We extend it heavily — custom middleware, governance layers, memory management, multi-model orchestration — but the foundation is open source. Without it, we'd have spent 3 months building plumbing instead of features.
+We extend it heavily — custom middleware, governance layers, memory management, multi-model orchestration — but the foundation is open source. Without it, we'd have spent months building plumbing instead of features.
 
 That creates an obligation: **if you build on open source, you contribute back.** Not because you have to. Because it makes your product better.
 
@@ -37,7 +37,7 @@ Our contributions fall into three categories:
 **Features we needed that benefit everyone:**
 - HTTP client override for SSE connections (needed for corporate proxies)
 - Enhanced tool metadata for governance (needed for our middleware stack)
-- Memory search filtering by type (needed for our 4-type memory model)
+- Memory search filtering by type (needed for our multi-type memory model)
 
 **Security patches:**
 - Input validation for tool arguments
@@ -49,9 +49,9 @@ Our contributions fall into three categories:
 
 | Project | What We Contributed |
 |---------|-------------------|
-| [Docker MCP Registry](https://github.com/docker/mcp-registry) (511⭐) | Added StackGen to the official MCP server catalog |
-| [A2A JS SDK](https://github.com/a2aproject/a2a-js) (564⭐) | Registry fix for agent-to-agent protocol |
-| [Kiro Powers](https://github.com/kirodotdev/powers) (323⭐) | Added StackGen IaC power for agent management |
+| [Docker MCP Registry](https://github.com/docker/mcp-registry) | Added StackGen to the official MCP server catalog |
+| [A2A JS SDK](https://github.com/a2aproject/a2a-js) | Registry fix for agent-to-agent protocol |
+| [Kiro Powers](https://github.com/kirodotdev/powers) | Added StackGen IaC power for agent management |
 | [mcp-go](https://github.com/mark3labs/mcp-go) | HTTP client override for SSE transport |
 | [dex (OIDC)](https://github.com/dexidp/dex) | MCP authentication flow changes |
 | [HashiCorp Terraform MCP Server](https://github.com/hashicorp/terraform-mcp-server) | Reviewed and tested early builds |
@@ -60,17 +60,7 @@ Our contributions fall into three categories:
 
 ## The Fork Management Problem
 
-When you depend on an open-source project and contribute to it, you often need changes before your PR is merged. This creates a fork management challenge:
-
-```
-upstream/main ──────────────────────────── (their changes)
-       \
-        fork/main ── PR#1 ── PR#2 ──────── (our pending PRs)
-               \
-                our-product ──── (builds on fork)
-```
-
-**The problem:** Your product depends on your fork. Your fork has pending PRs. The upstream project merges other changes that conflict with yours. Now you're maintaining merge conflicts in a fork while trying to ship features.
+When you depend on an open-source project and contribute to it, you often need changes before your PR is merged. This creates a fork management challenge: your product depends on your fork, your fork has pending PRs, upstream merges other changes that conflict with yours, and now you're maintaining merge conflicts while trying to ship features.
 
 **Our approach:**
 
@@ -80,21 +70,15 @@ upstream/main ──────────────────────
 
 3. **Match upstream style.** Read their contributing guide. Match their test patterns. Use their naming conventions. PRs that look like they belong get merged faster.
 
-4. **Be responsive.** When maintainers request changes, respond within 24 hours. Stale PRs die.
+4. **Be responsive.** When maintainers request changes, respond quickly. Stale PRs die.
 
 5. **Design for maintainer latency.** The bottleneck is often the upstream review queue, not your response time. When your roadmap requires a framework change, propose a generic interface or registration hook upstream — then deploy your specific implementation in your private codebase immediately. You ship on time; the upstream PR merges when it merges.
 
-### The `go.mod` `replace` Trap
+### The Fork Dependency Trap
 
-In Go, depending on an active fork means `replace` directives in your `go.mod`:
+In Go, depending on an active fork means temporary `replace` directives in your module file — pointing your build at your fork until the upstream change lands. This works for your product but breaks downstream compatibility: Go ignores `replace` blocks in imported modules, so consumers of any library you distribute can't resolve your fork.
 
-```go
-replace trpc.group/trpc-go/trpc-agent-go => github.com/stackgenhq/trpc-agent-go v0.0.0-20260513-5592d6460a1a
-```
-
-This works for your product but breaks downstream compatibility — Go ignores `replace` blocks in imported modules. If you distribute libraries or plugins, consumers can't resolve your fork.
-
-**Our mitigation:** Tag structured pseudo-versions on forks (`v0.0.0-YYYYMMDD-commitsha`) so the dependency graph is reproducible. When the upstream PR merges, we immediately rebase and drop the `replace`. The rule: every `replace` directive is a countdown timer, not a permanent fixture.
+**Our mitigation:** Tag structured pseudo-versions on forks so the dependency graph is reproducible. When the upstream PR merges, immediately rebase and drop the replace. The rule: every fork dependency is a countdown timer, not a permanent fixture.
 
 ---
 
@@ -125,21 +109,15 @@ Not everything should be open-sourced. Here's our framework:
 
 ### 1. You fix bugs faster
 
-When you find a bug in the upstream framework, you can either:
-- **A)** Work around it in your code (fragile, compounds over time)
-- **B)** Fix it upstream, get it reviewed by maintainers who know the codebase better, and have it maintained by the community going forward
-
-Option B is more work upfront. It's less work over the lifetime of your product.
+When you find a bug in the upstream framework, you can either work around it in your code (fragile, compounds over time) or fix it upstream, get it reviewed by maintainers who know the codebase better, and have it maintained by the community going forward. Option B is more work upfront. It's less work over the lifetime of your product.
 
 ### 2. Your changes stay compatible
 
-If you fix a bug in your fork but never upstream it, every upstream update requires you to re-apply your patch. After 6 months, you're maintaining a shadow fork with 30 patches. Eventually, you stop updating and miss security fixes.
-
-By upstreaming, your changes become part of the official release. Updates work seamlessly.
+If you fix a bug in your fork but never upstream it, every upstream update requires you to re-apply your patch. After several months, you're maintaining a shadow fork with dozens of patches. Eventually, you stop updating and miss security fixes. By upstreaming, your changes become part of the official release.
 
 ### 3. Hiring signal
 
-Engineers evaluate companies by their open-source presence. "We have 17 merged PRs in trpc-agent-go" tells a candidate more about engineering quality than any job listing.
+Engineers evaluate companies by their open-source presence. A track record of quality upstream contributions tells a candidate more about engineering culture than any job listing.
 
 ### 4. Community relationships
 
