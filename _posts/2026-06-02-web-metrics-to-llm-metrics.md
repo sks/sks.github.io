@@ -4,6 +4,7 @@ title: "From Lighthouse to LLMs — A Performance Vocabulary for the Token Era"
 date: 2026-07-17 10:00:00 -0700
 description: "FCP, LCP, TBT, and CLS don't measure what users wait for in AI apps. Here's the LLM equivalent of each — and how to debug them."
 tags: [llm, performance, observability, web-vitals, ai-agents, system-design]
+series: "Building an Enterprise AI Agent Platform in Go"
 ---
 
 If you're transitioning from traditional web engineering into AI/LLM product work, your performance instincts are still valuable — but the vocabulary needs an update.
@@ -336,7 +337,11 @@ For agents, add per-step spans: each LLM call and each tool execution as a child
 
 ---
 
+**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
+
 *Which of these four are you wrestling with most — TTFT, total generation time, pre-fill bloat, or output drift? I'd love to hear what's biting you in production. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+
+
 
 ---
 

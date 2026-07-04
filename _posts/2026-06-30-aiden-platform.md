@@ -2,7 +2,7 @@
 layout: post
 title: "Why We Split Our Agent Runtime From Our Platform"
 date: 2026-06-30 10:00:00 -0700
-series: "Building an AI Agent Platform in Go"
+series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 11
 description: "A CLI agent for one developer and an enterprise agent platform for many teams have almost nothing in common operationally. Here's the trade-off behind keeping them as one runtime, two layers."
 tags: [aiden, platform, multi-tenant, architecture, ai-agents, stackgen]
@@ -100,7 +100,11 @@ This post covers *why* the runtime and platform are split the way they are. The 
 
 ---
 
+**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
+
 *Building a multi-tenant agent platform, or wrestling with a similar embed-vs-orchestrate decision? I'd love to hear what you're building — find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+
+
 
 ---
 

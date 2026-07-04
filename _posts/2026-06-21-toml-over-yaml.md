@@ -2,7 +2,7 @@
 layout: post
 title: "TOML Over YAML and PKL — How We Stopped Fighting Config and Started Shipping"
 date: 2026-06-21 10:00:00 -0700
-series: "Building an AI Agent Platform in Go"
+series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 2
 description: "We tried YAML, considered PKL, and landed on TOML for agent configuration. The reason surprised us."
 tags: [config, toml, yaml, devops, ai-agents]
@@ -145,7 +145,11 @@ In the next post, I'll cover how we went from a single "Hello World" commit to a
 
 ---
 
+**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
+
 *What config format does your agent platform use? I'm genuinely curious about the trade-offs others are making. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+
+
 
 ---
 

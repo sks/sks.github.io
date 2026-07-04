@@ -2,7 +2,7 @@
 layout: post
 title: "You Can't Debug What You Can't See — Observability for AI Agents"
 date: 2026-06-28 10:00:00 -0700
-series: "Building an AI Agent Platform in Go"
+series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 9
 description: "Traditional APM can't tell you why your agent spent far more than usual on a routine task. Here's what agent observability actually requires."
 tags: [observability, ai-agents, langfuse, monitoring, production]
@@ -117,7 +117,11 @@ These complement traces — they don't replace them.
 
 ---
 
+**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
+
 *What observability tools do you use for your agent platform? I'm especially interested in cost monitoring and loop detection approaches. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+
+
 
 ---
 

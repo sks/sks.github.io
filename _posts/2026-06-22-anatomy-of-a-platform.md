@@ -2,7 +2,7 @@
 layout: post
 title: "Architecture at Speed Without Drowning"
 date: 2026-06-22 10:00:00 -0700
-series: "Building an AI Agent Platform in Go"
+series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 3
 description: "From a single Hello World commit to a production Go codebase in a few months — the architecture patterns that made rapid development sustainable."
 tags: [go, architecture, ddd, engineering, ai-agents]
@@ -22,39 +22,19 @@ Development moved in clear, recognizable phases: a single agent running a single
 
 We adopted strict coding standards in week one, before the codebase was large enough to need them. This felt premature. It wasn't.
 
-### Rule 1: A Consistent Interface Shape
+The specifics don't matter for this post — what mattered was **consistency at scale**:
 
-Every interface method follows the same signature shape: a context parameter first, a request struct second. Always in that order. No exceptions.
+- **One way to call things** — same parameter patterns everywhere so engineers never guess interface shape.
+- **Test doubles you can trust** — generated fakes that break at compile time when contracts change, not hand-rolled mocks that drift.
+- **Methods over free functions** — dependency injection by default so production and tests share the same seams.
+- **Flat control flow** — guard clauses instead of nested branches; readability compounds as files grow.
+- **Small public APIs** — export only what other packages need; everything else stays private.
 
-**Why this matters at scale:** once you have dozens of packages and well over a hundred interfaces, consistency eliminates cognitive load. You never wonder "does this method take context?" or "which order are the parameters?" Every interface reads the same way.
-
-**The hidden benefit:** adding a field to a request struct is backward-compatible. Adding a new parameter to a function signature is not. Over months of development, we added fields to request structs dozens of times with zero breaking changes downstream.
-
-### Rule 2: Auto-Generated Test Doubles
-
-Every interface gets a code-generation annotation that produces a type-safe fake implementation automatically. No hand-rolled mocks, no manually maintained mock boilerplate — just fakes that break at compile time the moment an interface changes, so a mismatch is caught immediately rather than silently at runtime.
-
-By later months, we had a large and steadily growing set of these generated fakes. Maintaining that many by hand would have been a full-time job on its own.
-
-### Rule 3: No Package-Level Functions
-
-Functions with dependencies or state are methods on structs, not free-floating package functions. Methods enable dependency injection — you can swap a real dependency for a fake in tests. A package-level function that reaches directly into the filesystem or network is much harder to test without resorting to monkey-patching.
-
-**Exception:** genuinely pure, stateless utility functions — string formatting, timestamp parsing, simple math — are exempt. Wrapping something with zero dependencies and zero state in a struct adds ceremony without benefit.
-
-### Rule 4: No Else Blocks
-
-Early returns and guard clauses instead of `if / else`. This sounds pedantic on a small codebase. At scale, it's the difference between code that reads top-to-bottom and nested spaghetti — every `else` avoided is one less indentation level, one less branch to hold in your head while reading.
-
-### Rule 5: Export Only When Necessary
-
-If something is only used within its own package, it stays unexported. We periodically sweep for exported symbols with zero external references and demote them back to private.
-
-**Result:** each package's public surface stays small enough that you can read it in a couple of minutes and understand what the package is actually for.
+**Why this matters for agents:** agent platforms accrue integrations faster than typical CRUD apps. Without mechanical consistency, every new tool provider becomes a one-off. With it, a senior engineer can review a pull request in minutes because the shape is familiar even when the domain is new.
 
 ---
 
-## Domain-Driven Boundaries
+## Domain Boundaries, Not Layer Soup
 
 The codebase is organized around clear domain boundaries rather than technical layers — data access, application services, tool providers, identity, observability, and so on each live in their own space, with dependencies flowing in one direction only. Lower-level packages never import from higher-level orchestration code; the compiler's import-cycle detection enforces this automatically, which turns a design intention into something that's actually impossible to violate by accident.
 
@@ -94,7 +74,11 @@ The codebase is still fast to work in months later. Adding a new tool provider t
 
 ---
 
+**Acknowledgments.** [Deepjyot Kapoor](https://www.linkedin.com/in/deepjyot-kapoor/) contributed to early platform plumbing and API docs at Aiden.
+
 *What architecture patterns does your team enforce from day one? I'm curious about the "premature" rules that turned out to be essential. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+
+
 
 ---
 

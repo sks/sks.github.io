@@ -2,7 +2,7 @@
 layout: post
 title: "Your Agent Has Root — Defense-in-Depth for AI Agents That Wield Real Tools"
 date: 2026-06-27 10:00:00 -0700
-series: "Building an AI Agent Platform in Go"
+series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 8
 description: "Your agent can run rm -rf /. Your prompt saying 'don't do that' is not security. Here's why one layer is never enough."
 tags: [security, ai-agents, hitl, governance, production]
@@ -92,7 +92,11 @@ The failure mode we've seen repeatedly isn't any one layer being weak — it's a
 
 ---
 
+**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
+
 *What security model does your agent platform use? I'm especially interested in how others handle the "sub-agent bypasses governance" problem. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+
+
 
 ---
 

@@ -24,6 +24,23 @@ I'm **Sabith**, a Principal Engineer at [StackGen](https://stackgen.com) where I
 
 I try and actively contribute to the agent ecosystem.
 
+## StackGen teammates
+
+Aiden and the agent runtime are team efforts at StackGen. Teammates who shaped major areas reflected in this blog series include:
+
+- **[Siddham Jain](https://www.linkedin.com/in/siddham-jain-apple/)** — cascade routing, session behavior, feature flags
+- **[Dhairya Dudhatra](https://www.linkedin.com/in/dhairya-dudhatra/)** — skillsync, integrations, policy and governance paths
+- **[Gururaj Math](https://www.linkedin.com/in/gururaj-math2304/)** — generative UI (A2UI) validation and platform UI
+- **[Suvarna Rokade](https://www.linkedin.com/in/suvarna-rokade-b469aa125/)** — routing spawner, sessions, integrations
+- **[Nikhil Pavan Kanaka](https://www.linkedin.com/in/nkanaka/)** ([GitHub](https://github.com/npkanaka)) — episodic memory and tooling in the agent runtime
+- **[Ankit Agarwal](https://www.linkedin.com/in/ankit-agarwal-65553b24/)** — A2UI frontend and parsing
+- **[Gabriel Araújo](https://www.linkedin.com/in/gabriel-ara%C3%BAjo-b20477258/)** — context graph tools and agent runtime integrations
+- **[Shubham Game](https://www.linkedin.com/in/shubhamgame/)** — organization settings, RBAC, and members UI
+- **[Bhavya Jain](https://www.linkedin.com/in/jaingounchained/)** — platform UI
+- **[Deepjyot Kapoor](https://www.linkedin.com/in/deepjyot-kapoor/)** — platform bootstrap, API surface, and internal plumbing
+
+Per-post acknowledgments appear where git history shows clear ownership. See [`docs/contributor-attributions.md`](docs/contributor-attributions.md) for the maintainer map.
+
 ## Connect
 
 - **GitHub**: [@sks](https://github.com/sks)

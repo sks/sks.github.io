@@ -2,7 +2,7 @@
 layout: post
 title: "Implementing ReAcTree — 6 Production Bugs the Paper Didn't Warn You About"
 date: 2026-06-23 10:00:00 -0700
-series: "Building an AI Agent Platform in Go"
+series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 4
 description: "What happens when you take an arXiv algorithm to production. We found 6 bugs that no paper mentions."
 tags: [ai-agents, reactree, production, bugs, go]
@@ -132,7 +132,11 @@ In a future post, I'll cover Pensieve — our memory management system — and w
 
 ---
 
+**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
+
 *Have you implemented a research paper in production and found bugs the authors didn't mention? I'd love to hear your war stories. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+
+
 
 ---
 

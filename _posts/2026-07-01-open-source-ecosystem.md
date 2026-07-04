@@ -2,7 +2,7 @@
 layout: post
 title: "Contributing Back While Building a Commercial Product"
 date: 2026-07-01 10:00:00 -0700
-series: "Building an AI Agent Platform in Go"
+series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 12
 description: "We built a proprietary product. We also merged 17 PRs into the agent framework we depend on. Here's how to navigate that tension."
 tags: [open-source, community, ai-agents, go, engineering]
@@ -167,7 +167,11 @@ We adopted MCP for tool connections, A2A for inter-agent communication, and AG-U
 
 ---
 
+**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
+
 *Do you contribute to the open-source projects your product depends on? I'd love to hear about your approach to the build-vs-contribute tension. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+
+
 
 ---
 

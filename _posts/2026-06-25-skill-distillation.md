@@ -2,7 +2,7 @@
 layout: post
 title: "Teaching Agents to Learn Without Fine-Tuning"
 date: 2026-06-25 10:00:00 -0700
-series: "Building an AI Agent Platform in Go"
+series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 6
 description: "Post-session skill distillation from agent traces — how we teach agents to write their own runbooks."
 tags: [ai-agents, learning, skills, llm, architecture]
@@ -90,7 +90,11 @@ Two agents with very different roles shared a skill index, and one agent's skill
 
 ---
 
+**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
+
 *How do you handle agent learning in your system? I'm especially curious about approaches to skill quality and lifecycle management. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+
+
 
 ---
 

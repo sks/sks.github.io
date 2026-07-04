@@ -2,7 +2,7 @@
 layout: post
 title: "The HITL Paradox — When Human Approval Makes Agents Worse"
 date: 2026-06-26 10:00:00 -0700
-series: "Building an AI Agent Platform in Go"
+series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 7
 description: "Human-in-the-loop is supposed to make agents safer. It can also make them useless. Here's how to find the balance."
 tags: [hitl, ai-agents, ux, governance, production]
@@ -139,7 +139,11 @@ Healthy HITL has meaningful friction on the requests that matter and near-zero f
 
 ---
 
+**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
+
 *How does your team handle the approval fatigue problem? I'd love to hear about alternative approaches. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+
+
 
 ---
 
