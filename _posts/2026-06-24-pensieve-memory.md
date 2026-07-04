@@ -2,7 +2,7 @@
 layout: post
 title: "Pensieve — Memory Management for AI Agents That Actually Forget"
 date: 2026-06-24 10:00:00 -0700
-series: "Building an AI Agent Platform in Go"
+series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 5
 description: "Your agent remembers everything. That's a bug, not a feature. Here's how we built a memory system that learns, forgets, and self-prunes."
 tags: [ai-agents, memory, rag, architecture, go]
@@ -181,6 +181,8 @@ There's a domain-specific tension here: our product is an SRE copilot, and in SR
 5. **Failure memories are as valuable as success memories** — but they must be clearly labeled. An agent should learn "don't do X" without concluding "X is impossible."
 
 6. **PII redaction is non-negotiable.** Agents process sensitive data. Memory stores are search targets. Unredacted PII in a vector store is a compliance incident waiting to happen.
+
+**Acknowledgments.** [Nikhil Pavan Kanaka](https://www.linkedin.com/in/nkanaka/) contributed substantially to episodic memory in the agent runtime.
 
 ---
 

@@ -6,11 +6,9 @@ Personal engineering blog — AI agents, Go, and production systems.
 
 ---
 
-## 📚 Featured Series: Building an AI Agent Platform in Go
+## 📚 Featured Series: Building an Enterprise AI Agent Platform in Go
 
 A 13-part deep dive into building a production AI agent platform in Go — from choosing the language to scaling it across many teams. Based on real production experience building [Aiden](https://sks.github.io/blog/aiden-platform/), StackGen's enterprise agent orchestration platform.
-
-See [`docs/publishing-schedule.md`](docs/publishing-schedule.md) for permalink reference and a suggested LinkedIn promotion order.
 
 | # | Post | What It Covers |
 |---|------|---------------|
@@ -51,8 +49,7 @@ bundle exec jekyll serve
 ├── _posts/              # Blog posts (Markdown)
 ├── _includes/           # Custom Jekyll includes
 ├── about.md             # About page
-├── index.md             # Home page
-└── AGENTS.md            # AI agent coding standards
+└── index.md             # Home page
 ```
 
 ## ✍️ Writing a New Post
@@ -70,7 +67,7 @@ Front matter template:
 layout: post
 title: "Your Post Title"
 date: YYYY-MM-DD HH:MM:SS -0700
-series: "Building an AI Agent Platform in Go"  # optional
+series: "Building an Enterprise AI Agent Platform in Go"  # optional
 series_order: N                                 # optional
 description: "A compelling one-liner."
 tags: [tag1, tag2, tag3]

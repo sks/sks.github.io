@@ -2,7 +2,7 @@
 layout: post
 title: "Terraform for Agent Configuration — Infrastructure as Code Meets AI Governance"
 date: 2026-06-29 10:00:00 -0700
-series: "Building an AI Agent Platform in Go"
+series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 10
 description: "We use Terraform to configure our AI agents. Not YAML. Not a dashboard. Terraform. Here's why."
 tags: [terraform, iac, gitops, ai-agents, governance]
@@ -96,7 +96,11 @@ Secrets — model provider API keys, integration tokens — flow through standar
 
 ---
 
+**Acknowledgments.** [Deepjyot Kapoor](https://www.linkedin.com/in/deepjyot-kapoor/) contributed to platform bootstrap and API surface work at Aiden.
+
 *Does your agent platform use IaC for configuration? I'd love to hear about alternative approaches. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+
+
 
 ---
 

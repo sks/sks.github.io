@@ -2,7 +2,7 @@
 layout: post
 title: "Why One JSON Repair Pass Isn't Enough for Production Agent Tool Calls"
 date: 2026-07-03 10:00:00 -0700
-series: "Building an AI Agent Platform in Go"
+series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 13
 description: "LLMs emit broken tool JSON constantly. Here's why a single repair step fails in production — and what we learned fixing it."
 tags: [ai-agents, production, go, reliability, tool-calls]
@@ -116,7 +116,11 @@ No single layer catches everything. That's the point.
 
 ---
 
+**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
+
 *How many JSON repair layers does your agent stack have? Genuinely curious whether teams hit the validation-before-repair trap too. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+
+
 
 ---
 
