@@ -44,7 +44,7 @@ We chose a boring, reliable graph for several investigation families (streaming 
 
 **One investigator persona** across nodes beat a mesh of hyper-specialized micro-agents ("metrics agent" talking to "logs agent"). Specialist swarms recreate the coordination tax: cascading context loss, duplicated tool discovery, and token burn on handoff theater.
 
-Mid-graph outputs must say **"node complete — handoff,"** not **"final answer."** Early nodes that emit a finished narrative poison the watch UI and train humans to distrust the system — the same failure mode as [fabricated sub-agent reports](/blog/halguard-fabricated-reports/).
+Mid-graph outputs must say **"node complete — handoff,"** not **"final answer."** Early nodes that emit a finished narrative poison the watch UI and train humans to distrust the system — the same failure mode as fabricated sub-agent reports (a topic for a future post).
 
 The LLM still reasons inside a node. The **graph** decides when the node is allowed to finish.
 
@@ -74,7 +74,7 @@ That is a **context-window / state-merging bug**, not an intelligence bug.
 
 **Fix the graph:** presentation fans in **gather output + gate**. The gate decides *whether* to proceed; gather carries *what* to say. Control-flow JSON is not an investigation transcript.
 
-This is [workflow composition](/blog/workflow-composition/) applied to agent memory: contracts over vibes.
+This is workflow composition applied to agent memory: contracts over vibes.
 
 ---
 
@@ -111,7 +111,7 @@ Operators at 3 AM have zero patience for system-prompt archaeology. Agents need 
 
 We split the playbook:
 
-- **Human body** — numbered steps, tool plane, expected output, calm senior-engineer markdown ([executable runbooks](/blog/markdown-runbooks-playbooks/))
+- **Human body** — numbered steps, tool plane, expected output, calm senior-engineer markdown (executable runbooks humans still want to edit)
 - **Machine appendix** — tokens, note keys, spawn hygiene, gate phrases
 
 One source of truth; two audiences. The UX pattern is underrated: it keeps humans editing the doc while the runtime still gets a parseable contract.
