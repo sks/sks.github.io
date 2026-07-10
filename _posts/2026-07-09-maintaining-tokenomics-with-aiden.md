@@ -34,10 +34,10 @@ Most production blow-ups come from stuffing **tier 2** (verbatim history) while 
 Data should flow **into** the model from the right tier — not all tiers at full fidelity every turn:
 
 ```
-  Tier 4  Archive          ---- selective fetch on demand ----+
-  Tier 3  Rolling summaries --------------------------------+-->  LLM call
-  Tier 2  Recent turns     ---------------------------------+
-  Tier 1  Active task      ---------------------------------+
+  [Tier 4: Archive]           --> selective fetch on demand --+
+  [Tier 3: Rolling summaries] --> continuous compaction ------+--> [ LLM turn ]
+  [Tier 2: Recent turns]      --> verbatim sliding window -----+
+  [Tier 1: Active task]       --> hard-pinned instructions ----+
 ```
 
 Industry teams are converging on the same shape. [Prosus ARC](https://medium.com/prosus-ai-tech-blog/context-compression-for-production-ai-agents-d6cc34bd3358) replaces a single condensation pass with a structured rolling summary plus optional retrieval when the summary is not enough. [Maxim's context-engineering guide](https://www.getmaxim.ai/articles/context-engineering-for-ai-agents-production-optimization-strategies/) argues for proactive compaction before you hit the wall, not after the API returns a context-length error. Recent [long-horizon agent research](https://arxiv.org/html/2606.10209v1) shows recency pruning of whole tool call/response pairs — plus summarizing what you evicted — can improve task success while cutting tokens materially.
@@ -93,7 +93,9 @@ func responseShapingMiddleware(summarize summarizeFunc) func(next Handler) Handl
 				return shaped, nil
 			}
 
-			summary, err := summarize(ctx, shaped) // identical payloads can be cached
+			// Summarize last. Exact content-hash hits are rare on live logs (timestamps drift);
+			// upstream semantic memoization and stripping volatile fields improve hit rate.
+			summary, err := summarize(ctx, shaped)
 			if err != nil {
 				return shaped, nil // prefer partial signal over failing the tool
 			}
@@ -109,7 +111,7 @@ The tiered pattern in plain language:
 
 1. **Structural stripping** — drop known noise fields, binary blobs, repeated array elements
 2. **Relevance-based chunking** — score chunks against terms in the tool call arguments; return the best slices **without** another LLM call when possible
-3. **Summarization** — when the payload is still too large and thematic understanding matters, compress with a dedicated summarizer profile; cache by content hash so identical outputs do not pay twice
+3. **Summarization** — when the payload is still too large and thematic understanding matters, compress with a dedicated summarizer profile; cache when payloads repeat, but do not expect byte-identical log dumps to hit often
 4. **Hard ceiling** — nothing above a maximum string size enters context, period
 
 The design tension is **lossy compression with intent preservation**. Blind truncation is worse than bloat — you cut the one line that explains the outage. We preserve identifiers **mechanically** (trace IDs, commit SHAs, error codes) and let summarization handle the surrounding narrative. That mirrors what [Thomson Reuters Labs observed in proactive compression work](https://medium.com/tr-labs-ml-engineering-blog/keeping-the-lights-on-proactive-context-compression-for-pydanticai-agents-6ee3e4e84f6d): arbitrary string chopping breaks agent reasoning, but structural, hierarchical summarization keeps the lights on when you still need an LLM in the loop.
@@ -130,12 +132,12 @@ The cheapest token is the one you never send. Semantic memoization on tool calls
 
 On the Aiden side, we handle governance **before** a runaway tool loop starts:
 
-- **Spawn contracts** — hard caps on LLM rounds and tool iterations propagated to sub-agents per workflow stage; planning stays tight, investigation gets more room, but still bounded
-- **Evidence-gated orchestration** ([fixed workflow graphs with structural gates](/blog/evidence-gated-multiplane-rca/), not unbounded ReAct loops) — fluency was masking skipped work *and* inflating token burn
-- **Attachment gates** — large files get an inline preview; full documents route to retrieval instead of being re-inlined every turn
-- **Gather-once triage** ([parallel context collection, then narrate](/blog/ai-incident-triage-sre/)) — same discipline for chat: stop stuffing the same attachment after a few turns
-- **Stratified audit sampling** — on offline paths (diary, execution grading), errors and warnings are prioritized; the prompt includes an explicit "sampled N of M" so the model knows visibility is bounded
-- **Heuristic shortcuts** — digest-based grading and LLM-free draft planners where a full model pass is overkill
+- **Spawn contracts:** Hard caps on LLM rounds and tool iterations propagated to sub-agents per workflow stage. Planning stays tight; investigation gets more room, but still bounded.
+- **Evidence-gated orchestration:** [Fixed workflow graphs with structural gates](/blog/evidence-gated-multiplane-rca/) instead of unbounded ReAct loops — fluency was masking skipped work *and* inflating token burn.
+- **Attachment gates:** Large files get an inline preview; full documents route to retrieval instead of being re-inlined every turn.
+- **Gather-once triage:** [Parallel context collection, then narrate](/blog/ai-incident-triage-sre/) — same discipline for chat: stop stuffing the same attachment after a few turns.
+- **Stratified audit sampling:** On offline paths (diary, execution grading), errors and warnings are prioritized; the prompt includes an explicit "sampled N of M" so the model knows visibility is bounded.
+- **Heuristic shortcuts:** Digest-based grading and LLM-free draft planners where a full model pass is overkill.
 
 ### Model routing by task type
 
@@ -143,9 +145,11 @@ Not every call needs your best model. Classification, salutations, and simple lo
 
 ### The FinOps loop
 
-Session-level invoices lie. One triage session might include cheap classification, one massive log summarization, three verification retries, and a reasoning model only for the final paragraph. Charge it all to "triage" and nobody fixes the summarization middleware.
+Session-level invoices lie. One triage session might include cheap classification, one massive log summarization, three verification retries, and a reasoning model only for the final paragraph. Charge it all to "triage" and nobody fixes the summarization middleware — and Finance cannot forecast whether next month's margin holds.
 
-We attribute tokens and cost at **tool boundaries** — parent tool identity in telemetry, like distributed tracing for LLM spend. That pairs with middleware: did cache hit avoid a model call? did shaping reduce the next turn? did the circuit breaker stop a retry storm? The vocabulary for what to measure is in [web metrics → LLM metrics](/blog/web-metrics-to-llm-metrics/). Per-trace summaries and agent USD budgets give operators a stop signal; historical cost bands on workflows set expectations before a run starts.
+We attribute tokens and cost at **tool boundaries** — parent tool identity in telemetry, like distributed tracing for LLM spend. That turns optimization into a conversation both engineering and finance can act on: which integration blew the budget, which middleware avoided a repeat model call, which workflow stage needs a tighter spawn contract. Predictable **unit economics per successful run** matter as much as a monthly cap.
+
+That pairs with middleware instrumentation: did cache hit avoid a model call? did shaping reduce the next turn? did the circuit breaker stop a retry storm? The vocabulary for what to measure is in [web metrics → LLM metrics](/blog/web-metrics-to-llm-metrics/). Per-trace summaries and agent USD budgets give operators a stop signal; historical cost bands on workflows set expectations before a run starts.
 
 ---
 
@@ -184,7 +188,7 @@ A short checklist that does not require reading our config:
 
 **Truncating without an archive.** If operators cannot replay what the model saw, postmortems become arguments.
 
-**Summarizing away identifiers.** Models love to round commit SHAs and trace IDs. Mechanical preservation is non-negotiable for SRE work.
+**Summarizing away identifiers.** A generic summarizer treats a commit SHA like prose — it may truncate, round, or hallucinate trailing characters. Mechanical extraction and pinning (regex or structured parse for trace IDs, SHAs, error codes) is non-negotiable for SRE work; let the model summarize everything *around* the identifiers, not instead of them.
 
 **Session totals as the only metric.** The expensive tool hides inside an otherwise cheap session.
 
