@@ -4,6 +4,10 @@
 {%- assign author_github = site.author.github | default: "https://github.com/sks" -%}
 {%- assign author_linkedin = site.author.linkedin | default: "https://linkedin.com/in/sabithks" -%}
 
+<link rel="icon" href="{{ '/assets/favicon.ico' | relative_url }}" sizes="32x32">
+<link rel="icon" href="{{ '/assets/images/favicon-192.png' | relative_url }}" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="{{ '/assets/images/apple-touch-icon.png' | relative_url }}">
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -21,6 +25,23 @@
   ]
 }
 </script>
+
+{%- if page.layout == "home" -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": {{ site.title | jsonify }},
+  "url": {{ site.url | jsonify }},
+  "description": {{ page.description | default: site.description | jsonify }},
+  "publisher": {
+    "@type": "Person",
+    "name": {{ author_name | jsonify }},
+    "url": {{ site.url | append: "/about/" | jsonify }}
+  }
+}
+</script>
+{%- endif -%}
 
 {%- if page.layout == "post" -%}
 <script type="application/ld+json">
