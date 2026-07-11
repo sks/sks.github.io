@@ -1,5 +1,9 @@
 ---
 ---
 
+// Minima default link blue (#2a7ae2) is 4.14:1 on #fdfdfd — below WCAG AA (4.5:1).
+$brand-color: #1758a8;
+$background-color: #fdfdfd;
+
 @import "minima";
 @import "custom";

@@ -16,3 +16,21 @@
   color: #6e7781;
   margin-bottom: 0;
 }
+
+// Body copy links: underline so color-blind users can spot them (Lighthouse link-in-text-block).
+.post-content a,
+.home a,
+.page-content a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.site-header a,
+.site-footer .social-media-list a {
+  text-decoration: none;
+}
+
+.contact-list a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
