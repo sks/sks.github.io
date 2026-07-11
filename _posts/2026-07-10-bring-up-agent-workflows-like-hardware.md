@@ -1,16 +1,17 @@
 ---
 layout: post
-title: "Bring Up Agent Workflows Like Hardware — One Stage at a Time"
+title: "How to Debug Multi-Stage AI Agent Workflows — Bring Up Like Hardware"
 date: 2026-07-10 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 18
-description: "Debugging a multi-stage AI investigation pipeline end-to-end is a whodunit where every suspect is lying. Board bring-up — greening one stage at a time against a golden gate — is the discipline that saved me, plus the twist where the real culprit turned out to be my own scorer."
+description: "Debug multi-stage AI agent workflows by bringing up one stage at a time against golden gates — plus why scoring tool calls beats grading transcripts."
+image: /assets/images/og-bring-up-workflows.png
 tags: [ai-agents, workflows, evaluation, golang, sre, testing]
 ---
 
 There's a scene in *Apollo 13* where the crew has to power the command module back up from stone-cold dead, on a battery budget so tight that flipping the wrong switch too early means everybody dies in the dark. They don't just hit the main breaker and vibe. Ken Mattingly sits in a simulator and brings it up **one system at a time, in a precise sequence, under a hard power budget.**
 
-I thought about that scene a lot last week, because I was doing the software version of it: bringing up a multi-stage AI investigation workflow — the kind that takes a screaming alert and walks it through several dependent stages of evidence gathering before it dares to name a root cause. And every time I was tempted to just run the whole thing and hope, Ken Mattingly's disapproving simulator face floated into view.
+I thought about that scene a lot last week, because I was doing the software version of it: bringing up a [multi-stage agent pipeline](/topics/ai-agent-workflows/) — the kind that takes a screaming alert and walks it through several dependent stages of evidence gathering before it dares to name a root cause.
 
 The instinct that saved me is the oldest one in hardware: **stop running the whole board. Green one rail. Then add the next.**
 
@@ -156,6 +157,14 @@ This is just the agentic version of a sin we already know: asserting on log outp
 - **Score effects, not transcripts.** The single highest-leverage fix of the week. Your evals will lie to you with a straight face if they grade the words in the context window instead of the actions the agent actually committed. Make your gates take typed tool calls, not strings.
 
 The best part of bring-up isn't that it finds bugs faster. It's that it turns "it works" from a prayer into a *deposition*. When every rail is green and stable on its own, the full board booting isn't a miracle — it's a formality. That discipline — green rails, effect-based gates, and zero lucky-take demos — is exactly what we're building into our SRE agents, so the person holding the pager gets a deposition instead of a séance. Failure is not an option, and with bring-up, it's not a mystery either.
+
+---
+
+## Related reading
+
+- [Prove, Then Narrate — Evidence-Gated Multi-Plane RCA](/blog/evidence-gated-multiplane-rca/) — the compound-AI architecture this bring-up ladder debugs
+- [Evidence-Based Verification](/blog/evidence-based-verification/) — don't trust self-report; check systems of record
+- More on [AI agent workflows](/topics/ai-agent-workflows/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---
 

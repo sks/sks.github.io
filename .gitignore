@@ -12,3 +12,18 @@ scripts/
 _staging/
 AGENTS.md
 docs/
+
+# ── Terraform (secrets & state never commit) ──
+terraform/.terraform/
+terraform/terraform.tfstate
+terraform/terraform.tfstate.*
+terraform/terraform.tfvars
+terraform/*.auto.tfvars
+terraform/tfplan
+terraform/plan.txt
+terraform/crash.log
+terraform/override.tf
+terraform/override.tf.json
+terraform/*_override.tf
+terraform/*_override.tf.json
+# Commit terraform/.terraform.lock.hcl after tofu init

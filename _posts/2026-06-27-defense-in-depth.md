@@ -10,7 +10,7 @@ tags: [security, ai-agents, hitl, governance, production]
 
 Your agent can run `rm -rf /`. Your prompt saying "please don't do dangerous things" is not security.
 
-When we deployed AI agents that could execute shell commands, call APIs, commit code, and manage infrastructure, we quickly realized that **prompt-based safety is not security**. Prompts are suggestions to a probabilistic system. Security requires deterministic enforcement. We ended up needing several independent layers of defense — not because one wasn't good enough, but because each layer catches a different category of failure that the others structurally cannot.
+When we deployed AI agents that could execute shell commands, call APIs, commit code, and manage infrastructure, we quickly realized that **prompt-based safety is not security**. Prompts are suggestions to a probabilistic system. Security requires deterministic enforcement — a core requirement for [production AI agents](/topics/ai-agents-sre/) that wield real tools.
 
 ---
 
@@ -92,11 +92,17 @@ The failure mode we've seen repeatedly isn't any one layer being weak — it's a
 
 ---
 
+## Related reading
+
+- [The HITL Paradox](/blog/hitl-paradox/) — when human approval helps vs hurts
+- [Why We Split Runtime From Platform](/blog/aiden-platform/) — where policy enforcement lives
+- More on [AI agents for SRE](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
+
+---
+
 **Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *What security model does your agent platform use? I'm especially interested in how others handle the "sub-agent bypasses governance" problem. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
-
-
 
 ---
 

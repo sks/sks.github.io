@@ -4,7 +4,8 @@ title: "Evidence-Based Verification — Don't Trust Self-Report, Check the Syste
 date: 2026-07-08 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 16
-description: "An agent that says 'deploy succeeded' without checking ArgoCD or Datadog is lying politely. Verification must pull evidence from systems of record — with Go owning pass/fail."
+description: "Evidence-based verification for AI agents — pull proof from ArgoCD, Datadog, and systems of record; let Go own pass/fail."
+image: /assets/images/og-evidence-rca.png
 tags: [ai-agents, sre, verification, observability, production, golang]
 ---
 
@@ -12,7 +13,7 @@ The most dangerous sentence an agent can produce is: **"I've confirmed the issue
 
 Confirmed how? By re-reading its own summary? By noticing the user stopped complaining? By vibes?
 
-We built agents for SRE workflows where **self-report is worthless**. The only verification that matters pulls evidence from systems of record — monitoring, deployment pipelines, ticket state — before anyone closes an incident.
+We built agents for SRE workflows where **self-report is worthless**. The only verification that matters pulls evidence from systems of record — monitoring, deployment pipelines, ticket state — before anyone closes an incident. This is the downstream gate for [evidence-gated agent workflows](/topics/ai-agent-workflows/).
 
 This sits next to [AI-augmented incident triage](/blog/ai-incident-triage-sre/): triage gathers hypotheses; verification refuses to promote a "resolved" claim until tools vote.
 
@@ -145,6 +146,14 @@ If you are early in your agent journey, implement the safety and isolation piece
 Share what broke in your stack. The agent ecosystem is young enough that honest failure stories save the next team weeks — the same way early cloud outage postmortems taught us multi-AZ before marketing did.
 
 In [Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/), we take the same philosophy upstream: structural evals and fixed DAGs so investigation stages cannot mark "done" on vibes either.
+
+---
+
+## Related reading
+
+- [Bring Up Agent Workflows Like Hardware](/blog/bring-up-agent-workflows-like-hardware/) — score tool calls, not transcripts
+- [AI Incident Triage for SREs](/blog/ai-incident-triage-sre/) — gather before you verify
+- More on [AI agent workflows](/topics/ai-agent-workflows/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---
 

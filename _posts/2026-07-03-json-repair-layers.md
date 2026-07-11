@@ -4,13 +4,13 @@ title: "Why One JSON Repair Pass Isn't Enough for Production Agent Tool Calls"
 date: 2026-07-03 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 13
-description: "LLMs emit broken tool JSON constantly. Here's why a single repair step fails in production — and what we learned fixing it."
+description: "Production AI agent tool calls need layered JSON repair — why one pass fails and what we learned in Go middleware."
 tags: [ai-agents, production, go, reliability, tool-calls]
 ---
 
 Your agent didn't crash. It just stopped mid-run with `invalid character after top-level value` — after spending real money on tokens and looking completely healthy until the tool handler tried to parse its arguments.
 
-If you build agent platforms in Go — middleware pipelines, tool handlers, streaming model adapters — you've probably seen this. This post is for that crowd: AI backend and platform engineers shipping tool-calling agents to production, not prompt-engineering tutorials.
+If you build [production AI agents in Go](/topics/go-ai-agents/) — middleware pipelines, tool handlers, streaming model adapters — you've probably seen this. This post is for that crowd: AI backend and platform engineers shipping tool-calling agents to production, not prompt-engineering tutorials.
 
 The LLM *almost* produced valid JSON. Almost isn't good enough when strict parsing is your gatekeeper.
 
@@ -113,6 +113,14 @@ No single layer catches everything. That's the point.
 4. **Keep framework fixes in the framework.** Upstream generic repair so the community benefits and your fork shrinks. Product-specific semantic repair stays in the product.
 
 5. **Contribute the generic fix, keep the domain fix.** Same pattern as our [open-source contribution model](/blog/open-source-ecosystem/) — isolate what's universal, merge it upstream, build what's specific on top.
+
+---
+
+## Related reading
+
+- [Maintaining Tokenomics with Aiden](/blog/maintaining-tokenomics-with-aiden/) — tool response compression at the boundary
+- [Go vs Python for AI Agents](/blog/why-go/) — why middleware chains live in Go
+- More on [AI agents for SRE](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---
 
