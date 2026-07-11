@@ -1,6 +1,7 @@
 ---
 layout: home
-title: Home
+title: Enterprise AI Agents in Go — Production Notes
+description: Production engineering notes on building enterprise AI agent runtimes, durable workflows, and SRE automation in Go — by Sabith K S, Staff Engineer at StackGen.
 ---
 
 # Production Notes on Enterprise AI Agents
