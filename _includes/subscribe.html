@@ -1,12 +1,9 @@
 <div class="subscribe-block">
   <p><strong>Stay in the loop</strong> — production notes on AI agents, workflows, and SRE.</p>
   <p>
-    <a href="{{ '/feed.xml' | relative_url }}">Subscribe via RSS</a>
-    {%- if site.newsletter_url != "" -%}
-      &nbsp;·&nbsp;<a href="{{ site.newsletter_url }}">Email newsletter</a>
-    {%- endif -%}
+    <a href="{{ site.newsletter_url }}">Email newsletter</a>
+    &nbsp;·&nbsp;
+    <a href="{{ '/feed.xml' | relative_url }}">RSS</a>
   </p>
-  {%- if site.newsletter_url != "" -%}
-  <p class="subscribe-fine-print">No spam. Unsubscribe anytime.</p>
-  {%- endif -%}
+  <p class="subscribe-fine-print">Low volume — new posts and curated reading lists. Unsubscribe anytime.</p>
 </div>
