@@ -4,13 +4,13 @@ title: "You Can't Debug What You Can't See — Observability for AI Agents"
 date: 2026-06-28 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 9
-description: "Traditional APM can't tell you why your agent spent far more than usual on a routine task. Here's what agent observability actually requires."
+description: "Observability for production AI agents — session traces, tool attribution, and token budgets beyond traditional APM."
 tags: [observability, ai-agents, langfuse, monitoring, production]
 ---
 
 Traditional APM can't tell you why your agent spent far more than usual asking the same question three times.
 
-We've been running AI agents in production for months. The hardest part isn't building them — it's understanding what they're doing when they go wrong. Agents don't crash with stack traces. They loop, hallucinate, burn tokens, and produce plausible-looking output that's subtly wrong.
+We've been running [AI agents for SRE teams](/topics/ai-agents-sre/) in production for months. The hardest part isn't building them — it's understanding what they're doing when they go wrong. Agents don't crash with stack traces. They loop, hallucinate, burn tokens, and produce plausible-looking output that's subtly wrong.
 
 Here's what we learned about seeing inside.
 
@@ -114,6 +114,14 @@ These complement traces — they don't replace them.
 4. **Build a diagnostic command.** One command, all dependencies, clear pass/fail — saves more time than any dashboard.
 
 5. **Automate trace analysis.** You can't review hundreds of sessions a day manually. Let the analyzer flag anomalies; humans review the flags.
+
+---
+
+## Related reading
+
+- [Maintaining Tokenomics with Aiden](/blog/maintaining-tokenomics-with-aiden/) — context budgets and cost attribution
+- [AI Incident Triage for SREs](/blog/ai-incident-triage-sre/) — what to gather once you can see sessions
+- More on [AI agents for SRE](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---
 

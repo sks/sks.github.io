@@ -1,11 +1,17 @@
 theme: minima
 title: "Production Notes"
-description: "AI agents, Go, and production systems — by Sabith"
-url: "https://sks.github.io"
+description: "Production engineering notes on enterprise AI agents, workflows, and SRE — by Sabith K S, Staff Engineer at StackGen."
+url: "https://productionnotes.dev"
 baseurl: ""
 
 author:
-  name: Sabith
+  name: Sabith K S
+  title: Staff Engineer
+  company: StackGen
+  github: "https://github.com/sks"
+  linkedin: "https://linkedin.com/in/sabithks"
+
+newsletter_url: ""
 
 minima:
   social_links:
@@ -23,6 +29,10 @@ feed:
 
 defaults:
   - scope:
+      path: ""
+    values:
+      image: /assets/images/og-default.png
+  - scope:
       path: "_posts"
       type: "posts"
     values:
@@ -31,6 +41,7 @@ defaults:
 
 header_pages:
   - about.md
+  - series/enterprise-ai-agents-go.md
 
 markdown: kramdown
 highlighter: rouge

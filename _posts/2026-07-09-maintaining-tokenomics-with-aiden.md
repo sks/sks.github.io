@@ -4,13 +4,14 @@ title: "Maintaining Tokenomics with Aiden — Context Budgets as an Operating Mo
 date: 2026-07-09 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 17
-description: "Cheaper models are not a FinOps strategy. How we keep agent sessions finishing without blowing context windows — layered defenses across the agent runtime and Aiden, and what the industry is doing that we should steal next."
+description: "LLM tokenomics for production AI agents — context budgets, tool compression, and FinOps loops that keep sessions finishing."
+image: /assets/images/og-tokenomics.png
 tags: [llm, finops, ai-agents, context-window, production, aiden]
 ---
 
 Finance asked us to cut LLM spend. Engineering's first instinct was routing everything to a smaller model. That helped on salutations. It did **nothing** for the incident where a log query returned a wall of JSON and the session died mid-triage — not because reasoning was expensive, but because we **ran out of context**.
 
-That failure reframed the problem. **Tokenomics** is not a model-picker exercise. It is an operating model: keep three things in balance at once.
+That failure reframed the problem. **Tokenomics** is not a model-picker exercise. It is an operating model for [production AI agents on-call](/topics/ai-agents-sre/): keep three things in balance at once.
 
 - **Finish rate** — sessions complete the task instead of hitting context limits
 - **Signal fidelity** — compression does not hide the smoking gun
@@ -205,6 +206,14 @@ A short checklist that does not require reading our config:
 3. **Shape the model's view; keep the full dump for humans** — compression is working memory, not evidence destruction.
 4. **Workflow bounds beat hope** — spawn budgets and fixed graphs prevent both skipped work and token swarms.
 5. **Measure at tool boundaries** — attribution turns optimization from "use Haiku" into "fix this integration pipeline."
+
+---
+
+## Related reading
+
+- [You Can't Debug What You Can't See — Observability for AI Agents](/blog/observability/) — see token burn before the session dies
+- [Why One JSON Repair Pass Isn't Enough](/blog/json-repair-layers/) — tool-call reliability at the boundary
+- More on [AI agents for SRE](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---
 

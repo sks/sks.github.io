@@ -1,16 +1,17 @@
 ---
 layout: post
-title: "AI-Augmented Incident Triage for SREs"
+title: "AI Incident Triage for SREs — What Actually Helps On-Call"
 date: 2026-07-07 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 15
-description: "What actually helps on-call versus what sounds good in a demo — a practitioner's honest take on AI incident triage, grounded in how we fan out context gathering in Go."
+description: "AI incident triage for SREs — what actually helps on-call versus demo theater, grounded in parallel context gathering in Go."
+image: /assets/images/og-incident-triage.png
 tags: [sre, incident-response, on-call, ai-agents, production, golang]
 ---
 
 The demo version of AI incident triage is seductive: alert fires, agent reads it, agent fixes it, you go back to sleep. The on-call version is messier — ambiguous alerts, partial telemetry, three services pointing fingers, and a human who still owns the pager.
 
-We built AI triage into Aiden after watching SRE teams drown in the first thirty minutes of incidents. Not to replace on-call engineers. To **shrink the time between "something's wrong" and "we know where to look."**
+We built AI triage into Aiden after watching [on-call SRE teams](/topics/ai-agents-sre/) drown in the first thirty minutes of incidents. Not to replace on-call engineers. To **shrink the time between "something's wrong" and "we know where to look."**
 
 Here's what actually helped versus what sounded good in slide decks — and how the Go runtime underneath makes the parallel work cheap enough to ship.
 
@@ -143,6 +144,14 @@ Coordination is human. Agents don't resolve disagreements between service owners
 5. **The pager still belongs to a person.** AI that tries to close the loop without human ownership erodes trust fast. Treat the agent as an indefatigable junior who pulls the data — not the commander running the bridge.
 
 Building that assistant well means separating **gather** (Go concurrency, structured payloads) from **narrate** (the model). In the [next post](/blog/evidence-based-verification/), we go further: verification that refuses to trust self-report until tools return proof.
+
+---
+
+## Related reading
+
+- [You Can't Debug What You Can't See — Observability for AI Agents](/blog/observability/) — session-level traces and tool attribution
+- [Prove, Then Narrate — Evidence-Gated Multi-Plane RCA](/blog/evidence-gated-multiplane-rca/) — orchestration after triage narrows the blast radius
+- More on [AI agents for SRE](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---
 

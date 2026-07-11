@@ -4,13 +4,14 @@ title: "Prove, Then Narrate — Deterministic Orchestration Over Autonomous Agen
 date: 2026-07-08 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 14
-description: "How we stopped prompting reliability into frontier models and wrapped them in a fixed DAG with structural evals, state merging, and token-aware tool loops — using SRE RCA as the proving ground."
+description: "Evidence-gated multi-plane RCA — fixed DAG, structural evals, and token-aware tool loops for production agent workflows."
+image: /assets/images/og-evidence-rca.png
 tags: [ai-agents, compound-ai, orchestration, evaluation, sre, workflows]
 ---
 
 The demo version of agentic AI is an unconstrained ReAct loop: think, call a tool, think again, declare victory. The production version is uglier. Models are polite, sycophantic, and excellent at the **"looks-right" heuristic** — marking a stage complete because the *syntactic shape* of their own thought history satisfies a stop condition, not because the investigation earned it.
 
-We hardened multi-plane RCA workflows in Aiden after watching fluent agents skip the boring work. The domain was SRE — metrics, logs, warehouses — but the engineering problem was general: **deterministic orchestration over non-deterministic models.**
+We hardened [multi-stage agent workflows](/topics/ai-agent-workflows/) in Aiden after watching fluent agents skip the boring work. The domain was SRE — metrics, logs, warehouses — but the engineering problem was general: **deterministic orchestration over non-deterministic models.**
 
 We stopped trying to prompt-engineer reliability into a frontier model. We built a **compound AI system**: a fixed DAG where the LLM is a stateless execution engine for individual nodes, and Go-owned control flow owns state, validation, and promotion.
 
@@ -158,6 +159,14 @@ This is classifier hygiene for compound systems: the router is cheap and determi
 7. **Prove, then narrate.** Narration is the last node — never the first.
 
 None of this requires a smarter model. It requires treating agent workflows like production software: fixed control flow, regression traces, and gates that fail closed when the model tries to skip the boring work.
+
+---
+
+## Related reading
+
+- [Bring Up Agent Workflows Like Hardware](/blog/bring-up-agent-workflows-like-hardware/) — green one stage at a time before trusting the full DAG
+- [Evidence-Based Verification](/blog/evidence-based-verification/) — verification from systems of record after investigation
+- More on [AI agent workflows](/topics/ai-agent-workflows/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---
 

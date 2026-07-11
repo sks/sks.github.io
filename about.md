@@ -6,7 +6,17 @@ permalink: /about/
 
 # About Me
 
-I'm **Sabith**, a Principal Engineer at [StackGen](https://stackgen.com) where I lead the development of enterprise AI agent platforms.
+I'm **Sabith K S**, Staff Engineer at [StackGen](https://stackgen.com) where I build enterprise AI agent platforms.
+
+I write [Production Notes](https://productionnotes.dev) on shipping **AI agents**, **workflows**, and **SRE automation** in Go — lessons from production, not slide-deck demos.
+
+## Why trust this blog
+
+- **Production experience** — multi-tenant agent orchestration (Aiden), tool middleware, durable workflows, and on-call-adjacent RCA pipelines
+- **Verifiable claims** — posts describe problems and lessons, not copy-pasteable competitor blueprints
+- **Team context** — acknowledgments and the teammate list below credit StackGen engineers who own subsystems
+
+**Elsewhere:** [GitHub @sks](https://github.com/sks) · [LinkedIn](https://linkedin.com/in/sabithks) · [StackGen](https://stackgen.com)
 
 ## What I Build
 
@@ -35,7 +45,9 @@ Aiden and the agent runtime are team efforts at StackGen. Teammates who shaped m
 - **[Bhavya Jain](https://www.linkedin.com/in/jaingounchained/)** — platform UI
 - **[Deepjyot Kapoor](https://www.linkedin.com/in/deepjyot-kapoor/)** — platform bootstrap, API surface, and internal plumbing
 
-Per-post acknowledgments appear where git history shows clear ownership. See [`docs/contributor-attributions.md`](docs/contributor-attributions.md) for the maintainer map.
+Per-post acknowledgments appear where git history shows clear ownership.
+
+{% include subscribe.html %}
 
 ## Connect
 

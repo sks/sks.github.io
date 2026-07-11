@@ -4,13 +4,13 @@ title: "Why We Split Our Agent Runtime From Our Platform"
 date: 2026-06-30 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 11
-description: "A CLI agent for one developer and an enterprise agent platform for many teams have almost nothing in common operationally. Here's the trade-off behind keeping them as one runtime, two layers."
+description: "Why we split the agent runtime from Aiden — multi-tenant enterprise AI agent platform architecture in Go."
 tags: [aiden, platform, multi-tenant, architecture, ai-agents, stackgen]
 ---
 
 A CLI tool for one developer is fun. Making it work for dozens of teams with different policies, models, budgets, and notification channels is engineering.
 
-We built our AI agent runtime as a single-binary CLI tool. It worked beautifully — for one person. Then we needed to run it for an enterprise with many teams, many agents, and strict governance requirements. That's when we built **Aiden**.
+We built our AI agent runtime as a single-binary CLI tool. It worked beautifully — for one person. Then we needed to run it for an enterprise with many teams, many agents, and strict governance requirements. That's when we built **Aiden** — the [enterprise agent platform in Go](/topics/go-ai-agents/) layer on top of the runtime.
 
 ---
 
@@ -96,7 +96,15 @@ The one rule that made this useful rather than theater: **the model doing the gr
 
 ## Further Reading in This Series
 
-This post covers *why* the runtime and platform are split the way they are. The rest of the series digs into specific pieces of the runtime itself — language choice, configuration, memory, delegation, security, and observability — each as its own story with its own production lessons. See the [series index](/) for the full list.
+This post covers *why* the runtime and platform are split the way they are. The rest of the series digs into specific pieces of the runtime itself — language choice, configuration, memory, delegation, security, and observability — each as its own story with its own production lessons.
+
+---
+
+## Related reading
+
+- [Go vs Python for AI Agents](/blog/why-go/) — the language bet under both layers
+- [Terraform for Agent Configuration](/blog/terraform-config/) — IaC for agent governance on the platform
+- More on [Go AI agents](/topics/go-ai-agents/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---
 
