@@ -1,12 +1,12 @@
 theme: minima
 title: "Production Notes"
-description: "Production engineering notes on enterprise AI agents, workflows, and SRE — by Sabith K S, Staff Engineer at StackGen."
+description: "Production engineering notes on enterprise AI agents, workflows, and SRE — by Sabith K S, Principal Engineer at StackGen."
 url: "https://productionnotes.dev"
 baseurl: ""
 
 author:
   name: Sabith K S
-  title: Staff Engineer
+  title: Principal Engineer
   company: StackGen
   github: "https://github.com/sks"
   linkedin: "https://linkedin.com/in/sabithks"

@@ -1,6 +1,6 @@
 # Production Notes
 
-> Enterprise AI agent engineering in Go — production runtimes, workflows, and SRE automation. By Sabith K S, Staff Engineer at StackGen.
+> Enterprise AI agent engineering in Go — production runtimes, workflows, and SRE automation. By Sabith K S, Principal Engineer at StackGen.
 
 ## Canonical site
 
