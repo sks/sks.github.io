@@ -34,7 +34,7 @@ New to the series? Read these three, in order:
 
 ## Connect
 
-- **Newsletter**: [Email (Substack)](https://sabithks.substack.com/subscribe) · [RSS](/feed.xml)
+- **Newsletter**: [Subscribe on Substack](https://sabithks.substack.com/subscribe) · [Issue #1 — Start here](https://sabithks.substack.com/p/start-here) · [RSS](/feed.xml)
 - **GitHub**: [@sks](https://github.com/sks)
 - **LinkedIn**: [Sabith](https://linkedin.com/in/sabithks)
 - **Company**: [StackGen](https://stackgen.com)
