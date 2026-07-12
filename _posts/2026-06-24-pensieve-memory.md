@@ -5,6 +5,7 @@ date: 2026-06-24 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 5
 description: "Your agent remembers everything. That's a bug, not a feature. Here's how we built a memory system that learns, forgets, and self-prunes."
+image: /assets/images/og-memory.png
 tags: [ai-agents, memory, rag, architecture, go]
 ---
 

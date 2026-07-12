@@ -5,6 +5,7 @@ date: 2026-06-22 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 3
 description: "From a single Hello World commit to a production Go codebase in a few months — the architecture patterns that made rapid development sustainable."
+image: /assets/images/og-platform.png
 tags: [go, architecture, ddd, engineering, ai-agents]
 ---
 

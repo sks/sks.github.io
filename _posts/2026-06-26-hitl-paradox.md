@@ -5,6 +5,7 @@ date: 2026-06-26 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 7
 description: "Human-in-the-loop is supposed to make agents safer. It can also make them useless. Here's how to find the balance."
+image: /assets/images/og-hitl.png
 tags: [hitl, ai-agents, ux, governance, production]
 ---
 

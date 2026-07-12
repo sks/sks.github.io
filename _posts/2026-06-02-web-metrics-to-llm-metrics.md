@@ -3,6 +3,7 @@ layout: post
 title: "From Lighthouse to LLMs — A Performance Vocabulary for the Token Era"
 date: 2026-07-17 10:00:00 -0700
 description: "FCP, LCP, TBT, and CLS don't measure what users wait for in AI apps. Here's the LLM equivalent of each — and how to debug them."
+image: /assets/images/og-observability.png
 tags: [llm, performance, observability, web-vitals, ai-agents, system-design]
 series: "Building an Enterprise AI Agent Platform in Go"
 ---

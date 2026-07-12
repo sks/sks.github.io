@@ -5,6 +5,7 @@ date: 2026-06-27 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 8
 description: "Your agent can run rm -rf /. Your prompt saying 'don't do that' is not security. Here's why one layer is never enough."
+image: /assets/images/og-governance.png
 tags: [security, ai-agents, hitl, governance, production]
 ---
 

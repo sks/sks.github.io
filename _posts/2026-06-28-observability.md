@@ -5,6 +5,7 @@ date: 2026-06-28 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 9
 description: "Observability for production AI agents — session traces, tool attribution, and token budgets beyond traditional APM."
+image: /assets/images/og-observability.png
 tags: [observability, ai-agents, langfuse, monitoring, production]
 ---
 

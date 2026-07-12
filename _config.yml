@@ -12,6 +12,11 @@ author:
   linkedin: "https://linkedin.com/in/sabithks"
 
 newsletter_url: "https://sabithks.substack.com/subscribe"
+substack_latest_issue_url: "https://sabithks.substack.com/p/start-here"
+substack_latest_issue_label: "Issue #1 — Start here"
+
+indexnow_key: "a9faf91a081fa0b3582b992495fc78fa"
+indexnow_host: "productionnotes.dev"
 
 minima:
   social_links:

@@ -5,6 +5,7 @@ date: 2026-07-03 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 13
 description: "Production AI agent tool calls need layered JSON repair — why one pass fails and what we learned in Go middleware."
+image: /assets/images/og-why-go.png
 tags: [ai-agents, production, go, reliability, tool-calls]
 ---
 

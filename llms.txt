@@ -1,0 +1,32 @@
+# Production Notes
+
+> Enterprise AI agent engineering in Go — production runtimes, workflows, and SRE automation. By Sabith K S, Staff Engineer at StackGen.
+
+## Canonical site
+
+https://productionnotes.dev
+
+## Start here
+
+- https://productionnotes.dev/series/enterprise-ai-agents-go/
+- https://productionnotes.dev/blog/why-go/
+- https://productionnotes.dev/blog/bring-up-agent-workflows-like-hardware/
+- https://productionnotes.dev/blog/ai-incident-triage-sre/
+
+## Topic hubs
+
+- https://productionnotes.dev/topics/ai-agent-workflows/
+- https://productionnotes.dev/topics/ai-agents-sre/
+- https://productionnotes.dev/topics/go-ai-agents/
+
+## About the author
+
+- https://productionnotes.dev/about/
+
+## Newsletter (low volume)
+
+https://sabithks.substack.com/subscribe
+
+## RSS
+
+https://productionnotes.dev/feed.xml

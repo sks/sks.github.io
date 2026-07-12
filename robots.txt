@@ -2,3 +2,5 @@ User-agent: *
 Allow: /
 
 Sitemap: https://productionnotes.dev/sitemap.xml
+
+# LLM crawlers: https://productionnotes.dev/llms.txt
