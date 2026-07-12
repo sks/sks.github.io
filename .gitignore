@@ -27,3 +27,6 @@ terraform/override.tf.json
 terraform/*_override.tf
 terraform/*_override.tf.json
 # Commit terraform/.terraform.lock.hcl after tofu init
+
+# Local tool secrets
+tools/social-radar/.env
