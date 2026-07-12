@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Prove, Then Narrate — Deterministic Orchestration Over Autonomous Agents"
+title: "Evidence-Gated RCA — Prove, Then Narrate"
 date: 2026-07-08 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 14

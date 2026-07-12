@@ -21,7 +21,7 @@ This post is about why that discipline matters *specifically* for agentic system
 
 ## The Problem: End-to-End Failures Are a Whodunit Where Everyone Lies
 
-The workflow was a sequential investigation. Each stage depended on the one before it: establish *when* the problem started, then *who* was involved, then corroborate across a second and third data plane, then synthesize an answer. Standard compound-AI shape — a fixed pipeline with a non-deterministic model doing the work inside each node. (I wrote about that architecture in [Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/).)
+The workflow was a sequential investigation. Each stage depended on the one before it: establish *when* the problem started, then *who* was involved, then corroborate across a second and third data plane, then synthesize an answer. Standard compound-AI shape — a fixed pipeline with a non-deterministic model doing the work inside each node. (I wrote about that architecture in [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/).)
 
 Here's the trap: when you run all of it and the final answer is wrong, **you have almost no idea who to blame.**
 
@@ -162,7 +162,7 @@ The best part of bring-up isn't that it finds bugs faster. It's that it turns "i
 
 ## Related reading
 
-- [Prove, Then Narrate — Evidence-Gated Multi-Plane RCA](/blog/evidence-gated-multiplane-rca/) — the compound-AI architecture this bring-up ladder debugs
+- [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/) — the compound-AI architecture this bring-up ladder debugs
 - [Evidence-Based Verification](/blog/evidence-based-verification/) — don't trust self-report; check systems of record
 - More on [AI agent workflows](/topics/ai-agent-workflows/) · full [series](/series/enterprise-ai-agents-go/)
 

@@ -16,7 +16,7 @@ New to the series? Read these three, in order:
 
 1. **[Go vs Python for AI Agents](/blog/why-go/)** — why we chose Go for a production agent runtime
 2. **[Bring Up Agent Workflows Like Hardware](/blog/bring-up-agent-workflows-like-hardware/)** — debug multi-stage pipelines one stage at a time
-3. **[AI-Augmented Incident Triage for SREs](/blog/ai-incident-triage-sre/)** — what actually helps on-call
+3. **[AI Incident Triage for SREs — What Actually Helps On-Call](/blog/ai-incident-triage-sre/)** — what actually helps on-call
 
 **Full series:** [Building an Enterprise AI Agent Platform in Go](/series/enterprise-ai-agents-go/)
 
@@ -28,7 +28,7 @@ New to the series? Read these three, in order:
 
 ## Aiden — Enterprise Agent Platform
 
-**[Why We Split Our Agent Runtime From Our Platform](/blog/aiden-platform/)** — the engineering trade-off behind turning a single-user CLI agent into a multi-tenant enterprise platform.
+**[AI Agent Runtime vs Platform — Why We Split Them](/blog/aiden-platform/)** — the engineering trade-off behind turning a single-user CLI agent into a multi-tenant enterprise platform.
 
 {% include subscribe.html %}
 

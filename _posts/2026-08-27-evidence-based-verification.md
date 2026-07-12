@@ -145,7 +145,7 @@ If you are early in your agent journey, implement the safety and isolation piece
 
 Share what broke in your stack. The agent ecosystem is young enough that honest failure stories save the next team weeks — the same way early cloud outage postmortems taught us multi-AZ before marketing did.
 
-In [Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/), we take the same philosophy upstream: structural evals and fixed DAGs so investigation stages cannot mark "done" on vibes either.
+In [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/), we take the same philosophy upstream: structural evals and fixed DAGs so investigation stages cannot mark "done" on vibes either.
 
 ---
 

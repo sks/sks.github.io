@@ -2,7 +2,7 @@
 layout: post
 title: "You Vibe-Coded the AWS Calls — Do You Know What IAM Permissions You Actually Need?"
 date: 2026-07-05 11:00:00 -0700
-description: "The complete CCE guide — what Code Context Engine solves, how to install and run it (CLI, Docker, GitHub Actions), recipes, lenses, and reading scan output."
+description: "IAM permissions for vibe-coded AWS calls — cloud entitlements, CCE, and least privilege for agent tools."
 image: /assets/images/og-governance.png
 tags: [cce, aws, iam, security, devops, ai-coding, go, github-actions]
 ---

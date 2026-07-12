@@ -18,10 +18,10 @@ An 18+ post practitioner series on building a production AI agent platform in Go
 |---|------|----------------|
 | 1 | [Why We Chose Go](https://productionnotes.dev/blog/why-go/) | Go vs Python for AI agents |
 | 2 | [TOML Over YAML](https://productionnotes.dev/blog/toml-over-yaml/) | Config format trade-offs |
-| 3 | [Architecture at Speed](https://productionnotes.dev/blog/anatomy-of-a-platform/) | Growing a Go codebase fast |
+| 3 | [Go Platform Architecture at Speed](https://productionnotes.dev/blog/anatomy-of-a-platform/) | Growing a Go codebase fast |
 | 4 | [ReAcTree Bugs](https://productionnotes.dev/blog/reactree-bugs/) | Production bugs in agent trees |
 | 5 | [Pensieve Memory](https://productionnotes.dev/blog/pensieve-memory/) | Memory for agents that forget |
-| 6 | [Skill Distillation](https://productionnotes.dev/blog/skill-distillation/) | Learning without fine-tuning |
+| 6 | [Agent Skill Distillation](https://productionnotes.dev/blog/skill-distillation/) | Learning without fine-tuning |
 | 7 | [The HITL Paradox](https://productionnotes.dev/blog/hitl-paradox/) | When human approval hurts |
 | 8 | [Defense in Depth](https://productionnotes.dev/blog/defense-in-depth/) | Security for tool-wielding agents |
 | 9 | [Observability](https://productionnotes.dev/blog/observability/) | APM vs agent workloads |
@@ -29,11 +29,11 @@ An 18+ post practitioner series on building a production AI agent platform in Go
 | 11 | [Runtime vs Platform](https://productionnotes.dev/blog/aiden-platform/) | CLI agent → multi-tenant platform |
 | 12 | [Open Source Ecosystem](https://productionnotes.dev/blog/open-source-ecosystem/) | Contributing while shipping commercially |
 | 13 | [JSON Repair Layers](https://productionnotes.dev/blog/json-repair-layers/) | Why one repair pass isn't enough |
-| 14 | [Web → LLM Metrics](https://productionnotes.dev/blog/web-metrics-to-llm-metrics/) | Metrics for agent systems |
+| 14 | [LLM Performance Metrics](https://productionnotes.dev/blog/web-metrics-to-llm-metrics/) | Metrics for agent systems |
 | 15 | [CCE Cloud Entitlements](https://productionnotes.dev/blog/cce-cloud-entitlements/) | Cloud entitlement patterns |
 | 16 | [AI Incident Triage](https://productionnotes.dev/blog/ai-incident-triage-sre/) | What helps on-call SREs |
 | 17 | [Evidence-Gated RCA](https://productionnotes.dev/blog/evidence-gated-multiplane-rca/) | Multi-plane investigation |
-| 18 | [Maintaining Tokenomics](https://productionnotes.dev/blog/maintaining-tokenomics-with-aiden/) | Context budgets & FinOps |
+| 18 | [LLM Tokenomics](https://productionnotes.dev/blog/maintaining-tokenomics-with-aiden/) | Context budgets & FinOps |
 
 **Topic hubs:** [workflows](https://productionnotes.dev/topics/ai-agent-workflows/) · [SRE](https://productionnotes.dev/topics/ai-agents-sre/) · [Go agents](https://productionnotes.dev/topics/go-ai-agents/)
 

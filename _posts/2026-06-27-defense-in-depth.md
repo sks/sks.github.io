@@ -96,7 +96,7 @@ The failure mode we've seen repeatedly isn't any one layer being weak — it's a
 ## Related reading
 
 - [The HITL Paradox](/blog/hitl-paradox/) — when human approval helps vs hurts
-- [Why We Split Runtime From Platform](/blog/aiden-platform/) — where policy enforcement lives
+- [AI Agent Runtime vs Platform — Why We Split Them](/blog/aiden-platform/) — where policy enforcement lives
 - More on [AI agents for SRE](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---

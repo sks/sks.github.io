@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Maintaining Tokenomics with Aiden — Context Budgets as an Operating Model"
+title: "LLM Tokenomics for Production Agents — Context Budgets as an Operating Model"
 date: 2026-07-09 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 17
@@ -150,7 +150,7 @@ Session-level invoices lie. One triage session might include cheap classificatio
 
 We attribute tokens and cost at **tool boundaries** — parent tool identity in telemetry, like distributed tracing for LLM spend. That turns optimization into a conversation both engineering and finance can act on: which integration blew the budget, which middleware avoided a repeat model call, which workflow stage needs a tighter spawn contract. Predictable **unit economics per successful run** matter as much as a monthly cap.
 
-That pairs with middleware instrumentation: did cache hit avoid a model call? did shaping reduce the next turn? did the circuit breaker stop a retry storm? The vocabulary for what to measure is in [web metrics → LLM metrics](/blog/web-metrics-to-llm-metrics/). Per-trace summaries and agent USD budgets give operators a stop signal; historical cost bands on workflows set expectations before a run starts.
+That pairs with middleware instrumentation: did cache hit avoid a model call? did shaping reduce the next turn? did the circuit breaker stop a retry storm? The vocabulary for what to measure is in [LLM performance metrics](/blog/web-metrics-to-llm-metrics/). Per-trace summaries and agent USD budgets give operators a stop signal; historical cost bands on workflows set expectations before a run starts.
 
 ---
 

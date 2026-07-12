@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Why We Split Our Agent Runtime From Our Platform"
+title: "AI Agent Runtime vs Platform — Why We Split Them"
 date: 2026-06-30 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 11
-description: "Why we split the agent runtime from Aiden — multi-tenant enterprise AI agent platform architecture in Go."
+description: "AI agent runtime vs multi-tenant platform architecture in Go — why we split the CLI loop from Aiden."
 image: /assets/images/og-platform.png
 tags: [aiden, platform, multi-tenant, architecture, ai-agents, stackgen]
 ---
