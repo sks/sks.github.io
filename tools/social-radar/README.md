@@ -95,7 +95,7 @@ HN works without secrets. If Reddit secrets are missing, the workflow still runs
 
 ## Similar projects (inspiration)
 
-Repos that automate HN/Reddit digests via GitHub Actions or CLI:
+Repos that automate HN/Reddit digests via GitHub Actions or CLI — see also **[SPEAKING-AND-CFPS.md](./SPEAKING-AND-CFPS.md)** for conferences, CFPs, and newsletters.
 
 | Repo | What it does |
 |------|----------------|
