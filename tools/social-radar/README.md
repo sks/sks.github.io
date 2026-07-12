@@ -52,6 +52,10 @@ go run . -days 3 -min-score 3 -min-comments 2
 | `-min-comments` | `2` | Minimum comments |
 | `-queries` | see `config.go` | Comma-separated search phrases |
 | `-subreddits` | golang, devops, sre, … | Subreddits to search on Reddit |
+| `-format` | `table` | `table`, `markdown`, or `both` |
+| `-tsv-out` | _(empty)_ | Write TSV table to file |
+| `-md-out` | _(empty)_ | Write markdown digest to file |
+| `-quiet` | `false` | Suppress stdout table (use with file outputs) |
 
 ### Example
 
@@ -59,10 +63,51 @@ go run . -days 3 -min-score 3 -min-comments 2
 go run . \
   -days 3 \
   -queries "golang AI,LLM production,SRE triage" \
-  -subreddits "golang,devops,sre,LocalLLaMA"
+  -subreddits "golang,devops,sre,LocalLLaMA" \
+  -format both \
+  -tsv-out digest.tsv \
+  -md-out digest.md
 ```
 
-Output is a TSV table: platform, age, score, comments, source, title, URL — sorted by engagement.
+Output is a TSV table and/or markdown digest — sorted by engagement.
+
+## GitHub Actions (automated digest)
+
+Workflow: [`.github/workflows/social-radar.yml`](../../.github/workflows/social-radar.yml)
+
+- **Schedule:** daily at 14:00 UTC
+- **Manual:** Actions → **Social radar digest** → **Run workflow**
+- **Outputs:**
+  - **Job summary** on the run page (markdown table)
+  - **Artifact** `social-radar-<run_id>` with `digest.md` + `digest.tsv` (30-day retention)
+
+### Repository secrets (optional, for Reddit)
+
+Settings → Secrets and variables → Actions:
+
+| Secret | Value |
+|--------|--------|
+| `REDDIT_CLIENT_ID` | From reddit.com/prefs/apps |
+| `REDDIT_CLIENT_SECRET` | App secret |
+| `REDDIT_USER_AGENT` | `social-radar:1.0 (by /u/your_username)` |
+
+HN works without secrets. If Reddit secrets are missing, the workflow still runs and reports HN-only results.
+
+## Similar projects (inspiration)
+
+Repos that automate HN/Reddit digests via GitHub Actions or CLI:
+
+| Repo | What it does |
+|------|----------------|
+| [mickdur/tech-watch](https://github.com/mickdur/tech-watch) | Twice-daily GenAI digest → Telegram via Actions |
+| [marcT1/ai-news-dashboard](https://github.com/marcT1/ai-news-dashboard) | Daily pipeline → JSON + GitHub Pages dashboard + email |
+| [Rohit8y/AI-Brief](https://github.com/Rohit8y/AI-Brief) | Reddit + HN + blogs → scored Telegram briefing |
+| [solcreek/sunbreak](https://github.com/solcreek/sunbreak) | Go keyword monitor (HN + RSS + Reddit adapter), local-first |
+| [mbtz/morningweave](https://github.com/mbtz/morningweave) | Go CLI digest scheduler for HN + Reddit |
+| [adrienckr/notslop](https://github.com/adrienckr/notslop) | Multi-source digest CLI (HN, Reddit, X) for content drafting |
+| [jedi4ever/social-skills](https://github.com/jedi4ever/social-skills) | Unified fetch CLI for HN, Reddit, GitHub, X, etc. |
+
+**This tool is narrower:** no LLM summarization, no Telegram — just **recent threads with engagement** for manual commenting.
 
 ## Build
 

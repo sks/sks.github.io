@@ -27,7 +27,7 @@ func main() {
 
 	g.Go(func() error {
 		client := NewHackerNewsClient(httpClient)
-		hits, err := client.FindCandidates(gctx, cfg)
+		hits, err := client.FindCandidates(gctx, cfg.Scan)
 		if err != nil {
 			return err
 		}
@@ -42,7 +42,7 @@ func main() {
 			return nil
 		}
 
-		hits, err := client.FindCandidates(gctx, cfg)
+		hits, err := client.FindCandidates(gctx, cfg.Scan)
 		if err != nil {
 			return err
 		}
@@ -55,6 +55,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	printCandidates(all, cfg.Since)
-	printLinkedInGuidance()
+	if err := WriteOutputs(all, cfg.Scan.Since, cfg.Output); err != nil {
+		fmt.Fprintf(os.Stderr, "output error: %v\n", err)
+		os.Exit(1)
+	}
 }

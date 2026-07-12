@@ -1,0 +1,67 @@
+name: Social radar digest
+
+on:
+  schedule:
+    # Daily 14:00 UTC (~7 AM US Pacific during DST)
+    - cron: "0 14 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: tools/social-radar/go.mod
+          cache-dependency-path: tools/social-radar/go.sum
+
+      - name: Run social-radar
+        working-directory: tools/social-radar
+        env:
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
+        run: |
+          set -euo pipefail
+          go run . \
+            -days 3 \
+            -min-score 3 \
+            -min-comments 2 \
+            -format both \
+            -quiet \
+            -tsv-out digest.tsv \
+            -md-out digest.md
+
+      - name: Publish job summary
+        if: always()
+        run: |
+          if [ -f tools/social-radar/digest.md ]; then
+            {
+              echo "## Social radar digest"
+              echo ""
+              echo "Run: [\`${{ github.run_id }}\`](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+              echo ""
+              cat tools/social-radar/digest.md
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## Social radar digest" >> "$GITHUB_STEP_SUMMARY"
+            echo "No digest.md produced — check workflow logs." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload digest artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: social-radar-${{ github.run_id }}
+          path: |
+            tools/social-radar/digest.md
+            tools/social-radar/digest.tsv
+          if-no-files-found: warn
+          retention-days: 30
