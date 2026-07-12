@@ -1,13 +1,13 @@
 ---
 layout: page
 title: About Sabith K S — Enterprise AI Agent Engineer
-description: Sabith K S is Staff Engineer at StackGen, building Aiden and multi-tenant AI agent platforms in Go. Background, expertise, and team credits behind Production Notes.
+description: Sabith K S is Principal Engineer at StackGen, building Aiden and multi-tenant AI agent platforms in Go. Background, expertise, and team credits behind Production Notes.
 permalink: /about/
 ---
 
 # About Me
 
-I'm **Sabith K S**, Staff Engineer at [StackGen](https://stackgen.com) where I build enterprise AI agent platforms.
+I'm **Sabith K S**, Principal Engineer at [StackGen](https://stackgen.com) where I build enterprise AI agent platforms.
 
 I write [Production Notes](https://productionnotes.dev) on shipping **AI agents**, **workflows**, and **SRE automation** in Go — lessons from production, not slide-deck demos.
 
