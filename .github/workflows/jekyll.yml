@@ -44,14 +44,8 @@ jobs:
 
   notify-indexnow:
     runs-on: ubuntu-latest
-    needs: [build, deploy]
+    needs: deploy
     steps:
-      - name: Download site artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: github-pages
-          path: _site
-
       - name: Submit sitemap URLs to IndexNow
         env:
           INDEXNOW_KEY: a9faf91a081fa0b3582b992495fc78fa
@@ -59,6 +53,7 @@ jobs:
           SITE_URL: https://productionnotes.dev
         run: |
           set -euo pipefail
+          curl -sSf "${SITE_URL}/sitemap.xml" -o sitemap.xml
           python3 - <<'PY'
           import json
           import os
@@ -68,11 +63,7 @@ jobs:
           import urllib.request
           from pathlib import Path
 
-          sitemap_path = Path("_site/sitemap.xml")
-          if not sitemap_path.is_file():
-              print(f"missing {sitemap_path}", file=sys.stderr)
-              sys.exit(1)
-
+          sitemap_path = Path("sitemap.xml")
           urls = re.findall(r"<loc>([^<]+)</loc>", sitemap_path.read_text(encoding="utf-8"))
           urls = sorted({url.strip() for url in urls if url.strip()})
           if not urls:
