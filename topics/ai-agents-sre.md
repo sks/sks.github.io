@@ -21,9 +21,9 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 
 | Post | What you'll learn |
 |------|-------------------|
-| [AI-Augmented Incident Triage for SREs](/blog/ai-incident-triage-sre/) | Practitioner take on what helps on-call vs demo theater |
+| [AI Incident Triage for SREs — What Actually Helps On-Call](/blog/ai-incident-triage-sre/) | Practitioner take on what helps on-call vs demo theater |
 | [You Can't Debug What You Can't See — Observability for AI Agents](/blog/observability/) | Why traditional APM fails for agent workloads |
-| [Maintaining Tokenomics with Aiden](/blog/maintaining-tokenomics-with-aiden/) | Context budgets, compression, FinOps operating model |
+| [LLM Tokenomics for Production Agents — Context Budgets as an Operating Model](/blog/maintaining-tokenomics-with-aiden/) | Context budgets, compression, FinOps operating model |
 
 ## FAQ
 

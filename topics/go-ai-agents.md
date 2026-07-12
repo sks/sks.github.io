@@ -22,8 +22,8 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | Post | What you'll learn |
 |------|-------------------|
 | [Go vs Python for AI Agents — Why We Chose Go](/blog/why-go/) | Language decision for a production agent runtime |
-| [Architecture at Speed Without Drowning](/blog/anatomy-of-a-platform/) | Growing a Go codebase fast without drowning in complexity |
-| [Why We Split Runtime From Platform](/blog/aiden-platform/) | CLI agent vs enterprise multi-tenant platform |
+| [Go Platform Architecture at Speed — Without Drowning](/blog/anatomy-of-a-platform/) | Growing a Go codebase fast without drowning in complexity |
+| [AI Agent Runtime vs Platform — Why We Split Them](/blog/aiden-platform/) | CLI agent vs enterprise multi-tenant platform |
 
 ## FAQ
 

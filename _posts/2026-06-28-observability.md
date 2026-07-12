@@ -120,7 +120,7 @@ These complement traces — they don't replace them.
 
 ## Related reading
 
-- [Maintaining Tokenomics with Aiden](/blog/maintaining-tokenomics-with-aiden/) — context budgets and cost attribution
+- [LLM Tokenomics for Production Agents](/blog/maintaining-tokenomics-with-aiden/) — context budgets and cost attribution
 - [AI Incident Triage for SREs](/blog/ai-incident-triage-sre/) — what to gather once you can see sessions
 - More on [AI agents for SRE](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
 

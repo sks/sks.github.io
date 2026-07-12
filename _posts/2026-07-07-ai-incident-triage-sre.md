@@ -150,7 +150,7 @@ Building that assistant well means separating **gather** (Go concurrency, struct
 ## Related reading
 
 - [You Can't Debug What You Can't See — Observability for AI Agents](/blog/observability/) — session-level traces and tool attribution
-- [Prove, Then Narrate — Evidence-Gated Multi-Plane RCA](/blog/evidence-gated-multiplane-rca/) — orchestration after triage narrows the blast radius
+- [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/) — orchestration after triage narrows the blast radius
 - More on [AI agents for SRE](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---

@@ -119,7 +119,7 @@ No single layer catches everything. That's the point.
 
 ## Related reading
 
-- [Maintaining Tokenomics with Aiden](/blog/maintaining-tokenomics-with-aiden/) — tool response compression at the boundary
+- [LLM Tokenomics for Production Agents](/blog/maintaining-tokenomics-with-aiden/) — tool response compression at the boundary
 - [Go vs Python for AI Agents](/blog/why-go/) — why middleware chains live in Go
 - More on [AI agents for SRE](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
 

@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Teaching Agents to Learn Without Fine-Tuning"
+title: "Agent Skill Distillation Without Fine-Tuning"
 date: 2026-06-25 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 6
-description: "Post-session skill distillation from agent traces — how we teach agents to write their own runbooks."
+description: "Agent skill distillation from production traces — teach agents new runbooks without fine-tuning."
 image: /assets/images/og-memory.png
 tags: [ai-agents, learning, skills, llm, architecture]
 ---
