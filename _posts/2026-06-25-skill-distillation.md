@@ -5,6 +5,7 @@ date: 2026-06-25 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 6
 description: "Post-session skill distillation from agent traces — how we teach agents to write their own runbooks."
+image: /assets/images/og-memory.png
 tags: [ai-agents, learning, skills, llm, architecture]
 ---
 

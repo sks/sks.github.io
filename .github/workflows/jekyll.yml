@@ -41,3 +41,20 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+  notify-indexnow:
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Ping IndexNow (Bing, Yandex, and partners)
+        env:
+          INDEXNOW_KEY: a9faf91a081fa0b3582b992495fc78fa
+          SITE_URL: https://productionnotes.dev
+        run: |
+          set -euo pipefail
+          curl -sS -G "https://www.bing.com/indexnow" \
+            --data-urlencode "url=${SITE_URL}/" \
+            --data-urlencode "key=${INDEXNOW_KEY}"
+          curl -sS -X POST "https://api.indexnow.org/indexnow" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -d "{\"host\":\"productionnotes.dev\",\"key\":\"${INDEXNOW_KEY}\",\"keyLocation\":\"${SITE_URL}/${INDEXNOW_KEY}.txt\",\"urlList\":[\"${SITE_URL}/\",\"${SITE_URL}/series/enterprise-ai-agents-go/\"]}"

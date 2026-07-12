@@ -5,6 +5,7 @@ date: 2026-07-01 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 12
 description: "We built a proprietary product. We also merged 17 PRs into the agent framework we depend on. Here's how to navigate that tension."
+image: /assets/images/og-platform.png
 tags: [open-source, community, ai-agents, go, engineering]
 ---
 

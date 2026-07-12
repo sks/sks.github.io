@@ -5,6 +5,7 @@ date: 2026-06-21 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 2
 description: "We tried YAML, considered PKL, and landed on TOML for agent configuration. The reason surprised us."
+image: /assets/images/og-iac.png
 tags: [config, toml, yaml, devops, ai-agents]
 ---
 

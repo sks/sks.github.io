@@ -47,6 +47,26 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": {{ site.url | append: "/" | jsonify }}
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": {{ page.title | jsonify }},
+      "item": {{ page.url | absolute_url | jsonify }}
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": {{ page.title | jsonify }},
   "description": {{ page.description | default: page.excerpt | strip_html | truncate: 160 | jsonify }},
