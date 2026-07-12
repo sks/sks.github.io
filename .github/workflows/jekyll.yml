@@ -44,17 +44,60 @@ jobs:
 
   notify-indexnow:
     runs-on: ubuntu-latest
-    needs: deploy
+    needs: [build, deploy]
     steps:
-      - name: Ping IndexNow (Bing, Yandex, and partners)
+      - name: Download site artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: _site
+
+      - name: Submit sitemap URLs to IndexNow
         env:
           INDEXNOW_KEY: a9faf91a081fa0b3582b992495fc78fa
+          SITE_HOST: productionnotes.dev
           SITE_URL: https://productionnotes.dev
         run: |
           set -euo pipefail
-          curl -sS -G "https://www.bing.com/indexnow" \
-            --data-urlencode "url=${SITE_URL}/" \
-            --data-urlencode "key=${INDEXNOW_KEY}"
-          curl -sS -X POST "https://api.indexnow.org/indexnow" \
-            -H "Content-Type: application/json; charset=utf-8" \
-            -d "{\"host\":\"productionnotes.dev\",\"key\":\"${INDEXNOW_KEY}\",\"keyLocation\":\"${SITE_URL}/${INDEXNOW_KEY}.txt\",\"urlList\":[\"${SITE_URL}/\",\"${SITE_URL}/series/enterprise-ai-agents-go/\"]}"
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import sys
+          import urllib.error
+          import urllib.request
+          from pathlib import Path
+
+          sitemap_path = Path("_site/sitemap.xml")
+          if not sitemap_path.is_file():
+              print(f"missing {sitemap_path}", file=sys.stderr)
+              sys.exit(1)
+
+          urls = re.findall(r"<loc>([^<]+)</loc>", sitemap_path.read_text(encoding="utf-8"))
+          urls = sorted({url.strip() for url in urls if url.strip()})
+          if not urls:
+              print("no URLs found in sitemap.xml", file=sys.stderr)
+              sys.exit(1)
+
+          key = os.environ["INDEXNOW_KEY"]
+          payload = {
+              "host": os.environ["SITE_HOST"],
+              "key": key,
+              "keyLocation": f"{os.environ['SITE_URL']}/{key}.txt",
+              "urlList": urls,
+          }
+
+          req = urllib.request.Request(
+              "https://api.indexnow.org/indexnow",
+              data=json.dumps(payload).encode("utf-8"),
+              headers={"Content-Type": "application/json; charset=utf-8"},
+              method="POST",
+          )
+
+          try:
+              with urllib.request.urlopen(req) as resp:
+                  print(f"IndexNow accepted {len(urls)} URL(s) (HTTP {resp.status})")
+          except urllib.error.HTTPError as err:
+              print(f"IndexNow HTTP {err.code}: {err.read().decode()}", file=sys.stderr)
+              sys.exit(1)
+          PY
