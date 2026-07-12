@@ -1,7 +1,8 @@
 ---
 layout: post
 title: "LLM Performance Metrics — From Lighthouse to the Token Era"
-date: 2026-07-17 10:00:00 -0700
+permalink: /blog/web-metrics-to-llm-metrics/
+date: 2026-06-02 10:00:00 -0700
 description: "LLM performance metrics: the token-era equivalent of FCP, LCP, and TBT — and how to debug them."
 image: /assets/images/og-observability.png
 tags: [llm, performance, observability, web-vitals, ai-agents, system-design]
