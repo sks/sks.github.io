@@ -4,255 +4,127 @@
   <meta charset="utf-8">
   <title>Substack — Your RCA Agent Doesn't Need Another Runbook — It Needs a Map</title>
   <style>
-    body { font-family: Georgia, serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; color: #111; }
-    .howto { font-family: system-ui, sans-serif; font-size: 14px; background: #fff8e6; border: 1px solid #e6d9a8; padding: 1rem 1.25rem; margin-bottom: 2rem; border-radius: 6px; }
-    .howto strong { display: block; margin-bottom: 0.5rem; }
-    h2 { font-size: 1.25rem; margin-top: 2rem; }
-    h3 { font-size: 1.1rem; margin-top: 1.5rem; }
+    body { font-family: Georgia, serif; max-width: 100%; margin: 1rem auto; padding: 0 1rem; line-height: 1.55; color: #111; font-size: 17px; }
+    .howto { font-family: system-ui, sans-serif; font-size: 13px; background: #fff8e6; border: 1px solid #e6d9a8; padding: 0.85rem 1rem; margin-bottom: 1.5rem; border-radius: 6px; }
+    .howto strong { display: block; margin-bottom: 0.35rem; }
+    h2 { font-size: 1.2rem; margin: 1.75rem 0 0.75rem; }
+    h3 { font-size: 1.05rem; margin: 1.25rem 0 0.5rem; }
     a { color: #1758a8; }
-    hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
-    ol, ul { padding-left: 1.25rem; }
-    li { margin: 0.35rem 0; }
-    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85em; }
-    code { background: #f4f4f4; padding: 0.1em 0.35em; border-radius: 3px; }
-    pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; line-height: 1.35; white-space: pre; }
-    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.95em; }
-    th, td { border: 1px solid #ddd; padding: 0.5rem 0.65rem; text-align: left; vertical-align: top; }
-    th { background: #f9f9f9; }
-    blockquote { margin: 1.25rem 0; padding-left: 1rem; border-left: 3px solid #ccc; color: #333; }
-    .series { font-family: system-ui, sans-serif; font-size: 0.9rem; color: #555; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 1.5rem 0; }
+    ol, ul { padding-left: 1.15rem; margin: 0.5rem 0; }
+    li { margin: 0.4rem 0; }
+    code { font-family: ui-monospace, Menlo, monospace; font-size: 0.88em; background: #f4f4f4; padding: 0.1em 0.3em; border-radius: 3px; }
+    blockquote { margin: 1rem 0; padding: 0.5rem 0 0.5rem 1rem; border-left: 3px solid #ccc; color: #333; }
+    .series { font-family: system-ui, sans-serif; font-size: 0.85rem; color: #555; }
+    p { margin: 0.75rem 0; }
   </style>
 </head>
 <body>
 
   <div class="howto">
-    <strong>How to get this into Substack</strong>
-    1. Substack title: <em>Your RCA Agent Doesn't Need Another Runbook — It Needs a Map</em><br>
-    2. Subtitle (optional): <em>Customer runbooks are a crutch. Topology, golden gates, and verify-first beat another SOP notebook.</em><br>
-    3. Click inside the article below → <kbd>Cmd+A</kbd> → <kbd>Cmd+C</kbd> (select article only, not this yellow box).<br>
-    4. Substack → New post → paste into body.<br>
-    5. Hero image: <code>https://productionnotes.dev/assets/images/og-agents-need-a-map.jpg</code>
+    <strong>Substack paste (mobile-friendly edition)</strong>
+    Title: <em>Your RCA Agent Doesn't Need Another Runbook — It Needs a Map</em><br>
+    Subtitle: <em>Customer runbooks are a crutch. Topology, gates, and verify-first beat another notebook.</em><br>
+    Select article below (not this box) → copy → paste. Hero: <code>https://productionnotes.dev/assets/images/og-agents-need-a-map.jpg</code><br>
+    Full post with diagrams: <a href="https://productionnotes.dev/blog/agents-need-a-map-not-a-script/">productionnotes.dev</a>
   </div>
 
   <article id="substack-body">
 
-    <p class="series"><em>Building an Enterprise AI Agent Platform in Go</em> · Post #19 · <a href="https://productionnotes.dev/series/enterprise-ai-agents-go/">Series hub</a></p>
+    <p class="series"><em>Building an Enterprise AI Agent Platform in Go</em> · #19</p>
 
     <p>There's a moment in a great Rahman live set where the band stops replaying the film track and starts reading the room. Same score on paper. Completely different concert.</p>
 
-    <p>I've spent the last few months in the gap between demo and production — teaching an AI SRE copilot to investigate real incidents. The work spanned <strong>multiple observability planes</strong> (metrics, logs, traces, and an analytics warehouse), <strong>fixed-stage pipelines</strong> (a directed graph of plan → gather → present — not a free-form chat loop), and two intake shapes: firing alerts and human symptom tickets.</p>
-
-    <p>Each path taught the same product lesson, louder every week:</p>
+    <p>I've spent months teaching an AI SRE copilot to investigate real production incidents — across metrics, logs, warehouses, and messy human tickets. Same lesson every time:</p>
 
     <blockquote>
-      <p>If your agent only works when you ship it a forty-page customer runbook, <strong>the agent is not good yet.</strong> The runbook is a crutch, not a feature.</p>
+      <p>If your agent only works when you ship it a forty-page customer runbook, <strong>the agent is not good yet.</strong></p>
     </blockquote>
 
-    <p>The runbook is a programmed track: linear, brittle, written for one scene. <strong>The map</strong> is what a good investigator carries instead. This post names what that map is — then shows why scripts fail without it.</p>
+    <p>The runbook is a programmed track. <strong>The map</strong> is what a good investigator carries instead. Here's what that map actually is.</p>
 
     <hr>
 
-    <h2>What the map is</h2>
+    <h2>What the map is (four layers)</h2>
 
-    <p>A map is not another markdown SOP. It is four things the platform injects <strong>before</strong> the model improvises:</p>
+    <p><strong>1. Topology at launch.</strong> Inject what discovery already knows — integrations, services, env tags, deploy repos — before the first tool call. No inventing dependency graphs mid-incident.</p>
 
-    <h3>1. Topology at launch</h3>
+    <p><strong>2. Verify-first probes.</strong> Branches write structured evidence (<code>orphaned_partition=true</code>, <code>crosscheck=mismatch</code>). A deterministic verifier locks the root-cause class. The LLM drafts; code decides. No vibe-check judge.</p>
 
-    <p>Discovery already knows which integrations exist (metrics, logs, warehouse, Git), which services and env tags appear in your estate, and which repos deploy to which workloads. <strong>Inject that graph at investigate launch</strong> so the agent navigates a pruned subgraph instead of inventing dependencies mid-run.</p>
+    <p><strong>3. Cross-plane reconciliation.</strong> Each datastore gets a turn; crosscheck must resolve to match, mismatch, or single_plane — never <code>pending</code> at gather complete. Inactive error rate + pod restart = <strong>no active incident on scoped path</strong>, not pod theater.</p>
 
-    <p>Without it, every incident is a blind crawl. With it, "check deploy correlation" is a first-class probe, not folklore buried in a customer PDF.</p>
+    <p><strong>4. Verify-learn memory.</strong> Store operator verdicts and ruled-out paths. Recall them on the next similar alert.</p>
 
-    <h3>2. Verify-first probes</h3>
-
-    <p>Each investigation branch must write <strong>structured evidence</strong> — machine-checkable keys like <code>orphaned_partition=true</code>, <code>readiness_pct=96.6</code>, or <code>datadog_ch_crosscheck=mismatch</code>. Fluent RCA prose comes <em>after</em> those fields exist.</p>
-
-    <p>A <strong>hypothesis verifier</strong> (deterministic code, not a second LLM) maps evidence keys to a root-cause class. The model drafts; code locks the taxonomy. That is how you avoid "vibe check from a judge wearing a hat."</p>
-
-    <h3>3. Cross-plane reconciliation</h3>
-
-    <p>Real incidents rarely live in one datastore. The map requires each plane to get a turn, then a mandatory <strong>crosscheck</strong> field that resolves to <code>match</code>, <code>mismatch</code>, or <code>single_plane</code> — not <code>pending</code> when gather declares complete.</p>
-
-    <p>When metrics say "0.007% errors, issue inactive" but pods restarted once, the headline is <strong>no active incident on scoped path</strong>, not pod theater. Reconciliation is a presentation contract, not prompt flair.</p>
-
-    <h3>4. Verify-learn memory</h3>
-
-    <p>When an operator confirms or corrects a verdict, store the class, service fingerprint, and what was ruled out. On the next similar alert, surface that memory so the agent does not reopen solved dead ends.</p>
-
-    <p>The map grows from production — not from shipping another notebook when Kafka breaks.</p>
-
-    <pre>RUNBOOK (script)                 MAP (environment)
-─────────────────                ───────────────────
-Step 1: query metric A           Alert + topology (injected)
-        │                                │
-        ▼                                ▼
-Step 2: check logs               Verify probe ──(dead end?)──► widen / retry ──┐
-        │                                │ (confirmed)                        │
-        ▼                                ▼                                    │
-Step 3: write RCA                Rank hypothesis ◄────────────────────────────┘
-        │                                │
-        ▼                                ▼
-(linear — fixed steps)           Verdict + memory (stored for recall)
-                                 (branching — retries on failure)</pre>
-
-    <table>
-      <thead>
-        <tr><th>Script model</th><th>Map model</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Ship another notebook per failure mode</td><td>Agent knows probe → discover → requery</td></tr>
-        <tr><td>New gate regex per customer phrasing</td><td>Verifier reads structured evidence keys</td></tr>
-        <tr><td>Dependency map checkbox in gather</td><td>Topology injected at launch</td></tr>
-        <tr><td>Operator corrects RCA in Slack</td><td>Verdict → memory → next run recalls prior</td></tr>
-        <tr><td>Score workflow note tokens</td><td>Score <strong>expected vs detected</strong> root-cause class</td></tr>
-      </tbody>
-    </table>
-
-    <p><strong>Customer-authored investigation stacks</strong> — per-tenant notebooks, stage-gate regex, spawn allowlists — are <strong>symptoms</strong> of a copilot that did not yet have the four layers above. If the product agent were good, those stacks shrink to optional demos.</p>
-
-    <hr>
-
-    <h2>When the map is missing: production failure modes</h2>
-
-    <p>In the happy path, metrics confirm the window, logs corroborate, and the final paragraph names a mechanism an on-call engineer would actually act on. Without the map, the same model ships gorgeous closing prose on top of a hollow middle stage.</p>
-
-    <p>Common patterns:</p>
-
+    <p><strong>Script vs map, in one line each:</strong></p>
     <ul>
-      <li><strong>Wrong time window</strong> — stop at 30 minutes when the signal only appears at 7-day cadence; declare victory in the wrong clock.</li>
-      <li><strong>Loudest spike wins</strong> — rank correlation over causation.</li>
-      <li><strong>Hollow gather</strong> — fluent narrative while a middle stage never committed tool receipts.</li>
-      <li><strong>Premature "observability gap"</strong> — give up before widening the window, fixing env tags, or running tag discovery.</li>
-      <li><strong>Sub-agent loops</strong> — spawn helpers until a <strong>spawn budget</strong> (max LLM turns per worker) exhausts, leaving <code>pending_from_*</code> stubs the gate accepts anyway.</li>
+      <li>Script: ship another notebook when Kafka breaks.</li>
+      <li>Map: probe → discover → requery, with topology and memory built in.</li>
+      <li>Script: gate regex per customer phrasing.</li>
+      <li>Map: verifier reads evidence keys.</li>
+      <li>Script: operator fixes RCA in Slack.</li>
+      <li>Map: verdict feeds the next run.</li>
     </ul>
 
-    <p>Operators need <strong>receipts</strong>: concrete IDs, numeric KPIs, ruled-out branches, and next probes that survive a deterministic check.</p>
-
-    <p>Prior posts in this series drill into specific antidotes: <a href="https://productionnotes.dev/blog/evidence-gated-multiplane-rca/">evidence-gated RCA</a>, <a href="https://productionnotes.dev/blog/bring-up-agent-workflows-like-hardware/">bring-up like hardware</a>, <a href="https://productionnotes.dev/blog/evidence-based-verification/">evidence-based verification</a>. This one is the product frame they fit inside.</p>
+    <p>Per-tenant investigation stacks are <strong>symptoms</strong> of a copilot missing these four layers.</p>
 
     <hr>
 
-    <h2>Two venues where scripts broke</h2>
-
-    <p>I'll describe incidents in parallel universes — no customer names.</p>
-
-    <h3>Metric-backed alerts (event-bus lag and API 5xx)</h3>
-
-    <p><strong>Shape A:</strong> consumer lag on one partition of a high-volume topic — sparse per-tenant metrics, drama in one GUID's slice of the bus.</p>
-
-    <p><strong>Shape B:</strong> HTTP error-rate SLO on <code>checkout-api</code> in <code>prod-eu</code>, scoped to <code>/api/v2/widgets</code> — while the warehouse whispers a different path is actually on fire.</p>
-
-    <p>Different alerts. Same script failures:</p>
-
-    <table>
-      <thead>
-        <tr><th>What a good run proves</th><th>What the script did instead</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Lag or error rate with <strong>numbers</strong>, not "elevated"</td><td>Stopped at a window too narrow for sparse metrics</td></tr>
-        <tr><td>Primary tenant or path identified with evidence</td><td>Pasted <strong>redacted placeholder tokens</strong> into SQL → syntax errors → retry loop</td></tr>
-        <tr><td>Cross-plane <strong>crosscheck</strong> resolved</td><td>Left <code>pending</code> forever while gather declared complete</td></tr>
-        <tr><td>Partition owner or pod health with concrete fields</td><td>Wrote <code>blocked: no data</code> or <code>pending_from_*</code> while gate cheered on non-empty text</td></tr>
-        <tr><td>Presentation uses gather transcript</td><td>Read only navigation JSON ("FINISH, iter=1") and ignored evidence</td></tr>
-      </tbody>
-    </table>
-
-    <p>Fixes were never "more poetry in the runbook." They were <strong>topology + verifier + gates</strong>: UUID-aware regex, forbidden hollow stubs (<code>branch dispatched…</code> is not evidence), spawn contracts that allow tag-discovery tools, and headlines that say <strong>no active incident on scoped path</strong> when rates are inactive.</p>
-
-    <h3>Symptom tickets (human words, messy scope)</h3>
-
-    <p><strong>Intake:</strong> "Billing module stuck after publish in prod-eu since Tuesday."</p>
-
-    <p>No metric attached — so structure first: parse Environment / Module / Symptom / Time, ladder env tags (<code>staging</code> → <code>staging-prod</code>), check the obvious deployment <strong>and</strong> adjacent services (API backend, worker, admin — not only the name in the ticket), query log monitors with <strong>log search</strong> rather than metric APIs on log-based alerts.</p>
-
-    <p><strong>What went wrong:</strong> keyword routing (<em>Billing</em> matched an unrelated event-bus workflow), clarifying-question loops while the user said "just investigate," and monitors attached because a title contained a keyword. Wrong genre, wrong hall.</p>
-
-    <p><strong>Trap:</strong> treat human intake like a firing metric alert. The map starts with scope parsing, not tool roulette.</p>
-
-    <hr>
-
-    <h2>Golden gates (and a testing failure we owned)</h2>
-
-    <p>Even with a map, you need to <strong>prove each pipeline stage</strong> before you trust the whole run.</p>
-
-    <p><strong>Bring-up</strong> works like hardware bring-up: imagine a fixed pipeline — plan scope → gather evidence → present RCA. Deploy only stages <strong>1 through N</strong>, run one canary investigation, and pass an automated <strong>gate</strong> (a function over <strong>tool outputs</strong>, not LLM adjectives) before you wire up stage N+1. Green one stage until it is boring; then add the next. When stage 2 fails, stage 2 did it — not "the model felt creative today." (<a href="https://productionnotes.dev/blog/bring-up-agent-workflows-like-hardware/">Full hardware analogy here</a>.)</p>
-
-    <p>Gates are only as honest as their tests. We learned that the hard way:</p>
+    <h2>Without the map</h2>
 
     <ul>
-      <li><strong>The expectation:</strong> Gate regex demanded the literal English phrase <code>tenant GUID</code>.</li>
-      <li><strong>The reality:</strong> The agent correctly emitted a raw <code>UUID</code>.</li>
-      <li><strong>The result:</strong> False failure — and shape-only gates that accepted <strong>empty shells</strong> while rejecting valid data.</li>
+      <li>Wrong time window — 30 minutes when the signal needs 7 days.</li>
+      <li>Loudest spike wins over causal spike.</li>
+      <li>Beautiful RCA on a hollow gather stage.</li>
+      <li>"Observability gap" before exhausting tag discovery.</li>
+      <li>Sub-agents spin until spawn budget leaves <code>pending_from_*</code> stubs the gate accepts.</li>
     </ul>
 
-    <p>Worse: we once shipped a gate regex with <strong>negative lookahead</strong>. Go's RE2 engine does not support that syntax — the gate <strong>crashed mid-run</strong> after gather had already produced good evidence. That is not a plot twist. That is a <strong>missing unit test</strong>. We had golden pass fixtures; we did not have a golden <strong>fail</strong> fixture that would have caught unsupported regex in CI. Gates are code. Code ships with tests, or it ships lies.</p>
-
-    <p><strong>Lesson:</strong> treat gates like unit tests — pass <em>and</em> fail fixtures, run in CI, score tool effects not mood words.</p>
+    <p>Operators need <strong>receipts</strong> — IDs, KPIs, ruled-out branches — not more narration.</p>
 
     <hr>
 
-    <h2>Shipping the map in slices</h2>
+    <h2>Where scripts broke (two shapes)</h2>
 
-    <p>The map only ships if the <strong>platform codebase</strong> practices what the agent preaches: modular stages, verifiable contracts, strictly typed evidence — not one monolithic branch nobody can review.</p>
+    <p><strong>Metric alerts</strong> — event-bus lag or API 5xx: different alerts, same failures. Narrow windows on sparse metrics. Redacted tokens pasted into SQL. Crosscheck stuck on <code>pending</code>. Gates cheering on empty text while ignoring real UUIDs. Presentation reading navigation JSON instead of gather evidence.</p>
 
-    <p>We split the work:</p>
+    <p><strong>Symptom tickets</strong> — "Billing module stuck since Tuesday": keyword routing to the wrong workflow, question loops instead of probes, monitors picked by title match. Structure first; then tools.</p>
 
-    <ol>
-      <li><strong>Manifest DNA</strong> — skills, agents, workflows (what the investigator is allowed to believe).</li>
-      <li><strong>Hedge gate</strong> — reject soft "likely broader instability" RCA unless dig-ladder exhaustion is documented.</li>
-      <li><strong>Change plane</strong> — discovery-derived deploy candidates at launch when Git is connected.</li>
-      <li><strong>Eval harness</strong> — shipped separately from the production investigator.</li>
-    </ol>
-
-    <p>Incremental rehearsal, not a double soundtrack.</p>
+    <p>Fixes were never more runbook poetry. They were topology, verifier, and gates.</p>
 
     <hr>
 
-    <h2>What still goes wrong</h2>
+    <h2>Golden gates</h2>
 
-    <p>No hero narrative. Current board:</p>
+    <p><strong>Bring-up:</strong> deploy pipeline stages 1..N only; green each stage with a gate on <strong>tool outputs</strong> before adding N+1. (<a href="https://productionnotes.dev/blog/bring-up-agent-workflows-like-hardware/">Hardware analogy</a>.)</p>
 
-    <ul>
-      <li><strong>Inactive incidents</strong> scored as <code>undetermined</code> — presentation lacks an "issue not active" mode.</li>
-      <li><strong>Path anchoring</strong> — alert path vs warehouse-dominant path confuses headlines.</li>
-      <li><strong>Spawn budgets</strong> — workers hit max LLM calls; gates still accept <code>pending_from_*</code>.</li>
-      <li><strong>Chat path</strong> loads orchestration skills but never runs tools — routing is not investigating.</li>
-      <li><strong>Mitigation homework</strong> — "confirm latency in dashboard" instead of running the verification query.</li>
-    </ul>
-
-    <p>Each is a <strong>gate or contract</strong> bug, not an intelligence shortage. Fixable without waiting for the next foundation model.</p>
+    <p>We owned two gate failures: regex wanted <code>tenant GUID</code>, agent correctly emitted a <code>UUID</code>; and a regex with negative lookahead that <strong>crashed</strong> Go's RE2 mid-run — caught by nothing in CI. Gates are code. Golden pass <em>and</em> fail fixtures, or you ship lies.</p>
 
     <hr>
 
     <h2>What to steal</h2>
 
-    <p>If you are building agentic RCA (or any multi-stage compound system):</p>
-
     <ol>
-      <li><strong>Inject topology at launch</strong> — do not make the model draw the map mid-run.</li>
-      <li><strong>Structured evidence → verifier → class</strong> — LLM drafts; code locks.</li>
-      <li><strong>Cross-plane crosscheck</strong> — mandatory resolution before present-RCA.</li>
-      <li><strong>Verify-learn memory</strong> — store verdicts; recall on similar fingerprints.</li>
-      <li><strong>Bring-up rails</strong> — green one stage at a time; gates on tool effects.</li>
-      <li><strong>Golden pass and fail fixtures</strong> — including regex and gate-engine compatibility.</li>
+      <li>Topology at launch.</li>
+      <li>Evidence → verifier → class.</li>
+      <li>Crosscheck before present-RCA.</li>
+      <li>Memory on verified verdicts.</li>
+      <li>Bring-up one stage at a time.</li>
+      <li>Test your gates like unit tests.</li>
     </ol>
 
-    <p>The goal is not an agent that recites your runbook. It is an agent that walks in with a <strong>map</strong> — and enough humility to run the boring ladders before calling the incident closed.</p>
+    <p>Still rough: inactive incidents scored <code>undetermined</code>, path anchoring, chat paths that route but never investigate. All gate or contract bugs — fixable without a new foundation model.</p>
 
-    <p>Research directions worth betting on: hypothesize-then-verify, offline causal graphs pruned per alert, and process-centric evals that grade what happened — not how pretty the closing paragraph was.</p>
+    <p>Goal: an agent that walks in with a <strong>map</strong>, runs the boring ladders, then closes the incident.</p>
 
     <hr>
 
-    <p><strong>Further reading (same series):</strong></p>
-
+    <p><strong>More depth (diagrams + tables on the blog):</strong></p>
     <ul>
-      <li><a href="https://productionnotes.dev/blog/evidence-gated-multiplane-rca/">Evidence-Gated RCA — Prove, Then Narrate</a></li>
-      <li><a href="https://productionnotes.dev/blog/bring-up-agent-workflows-like-hardware/">Bring Up Agent Workflows Like Hardware</a></li>
-      <li><a href="https://productionnotes.dev/blog/evidence-based-verification/">Evidence-Based Verification</a></li>
-      <li><a href="https://productionnotes.dev/blog/ai-incident-triage-sre/">AI-Augmented Incident Triage</a></li>
-      <li><a href="https://productionnotes.dev/blog/agents-need-a-map-not-a-script/"><strong>Read on productionnotes.dev →</strong></a></li>
+      <li><a href="https://productionnotes.dev/blog/agents-need-a-map-not-a-script/">This essay — full version</a></li>
+      <li><a href="https://productionnotes.dev/blog/evidence-gated-multiplane-rca/">Evidence-Gated RCA</a></li>
+      <li><a href="https://productionnotes.dev/blog/bring-up-agent-workflows-like-hardware/">Bring Up Like Hardware</a></li>
+      <li><a href="https://productionnotes.dev/series/enterprise-ai-agents-go/">Full series</a></li>
     </ul>
-
-    <p><a href="https://productionnotes.dev/series/enterprise-ai-agents-go/">Full series: Building an Enterprise AI Agent Platform in Go</a></p>
 
   </article>
 
