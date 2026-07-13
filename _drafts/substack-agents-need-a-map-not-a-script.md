@@ -7,7 +7,7 @@
 **Send to:** All subscribers  
 **Also publish to web:** Yes  
 
-**Copy into Substack:** Open `_drafts/substack-agents-need-a-map-not-a-script.html` in your browser → select the article (not the yellow box) → paste into Substack body.
+**Copy into Substack:** Regenerate from the latest `_posts/2026-07-12-agents-need-a-map-not-a-script.md` after review edits (structure changed — map architecture moved up). Or open `_drafts/substack-agents-need-a-map-not-a-script.html` if updated.
 
 **Subtitle (optional):** Customer runbooks are a crutch. Topology, golden gates, and verify-first beat another SOP notebook.
 
