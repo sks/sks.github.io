@@ -1,0 +1,58 @@
+name: CFP radar
+
+on:
+  schedule:
+    # Daily 14:00 UTC (~7 AM US Pacific during DST)
+    - cron: "0 14 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run cfp-radar
+        run: |
+          set -euo pipefail
+          python3 scripts/cfp-radar.py \
+            --format both \
+            --md-out cfp-open.md \
+            --tsv-out cfp-open.tsv \
+            --quiet
+
+      - name: Publish job summary
+        if: always()
+        run: |
+          if [ -f cfp-open.md ]; then
+            {
+              echo "## CFP radar"
+              echo ""
+              echo "Run: [\`${{ github.run_id }}\`](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+              echo ""
+              cat cfp-open.md
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## CFP radar" >> "$GITHUB_STEP_SUMMARY"
+            echo "No cfp-open.md produced — check workflow logs." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload CFP artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cfp-radar-${{ github.run_id }}
+          path: |
+            cfp-open.md
+            cfp-open.tsv
+          if-no-files-found: warn
+          retention-days: 30

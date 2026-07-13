@@ -7,7 +7,8 @@ vendor/
 .bundle/
 
 # ── Maintainer-only (keep local + backup/blog — never commit to origin/main) ──
-scripts/
+scripts/*
+!scripts/cfp-radar.py
 .local/
 _staging/
 AGENTS.md
