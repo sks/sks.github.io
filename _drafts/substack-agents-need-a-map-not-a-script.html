@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Substack — Your RCA Agent Doesn't Need Another Runbook — It Needs a Map</title>
+  <style>
+    body { font-family: Georgia, serif; max-width: 100%; margin: 1rem auto; padding: 0 1rem; line-height: 1.55; color: #111; font-size: 17px; }
+    .howto { font-family: system-ui, sans-serif; font-size: 13px; background: #fff8e6; border: 1px solid #e6d9a8; padding: 0.85rem 1rem; margin-bottom: 1.5rem; border-radius: 6px; }
+    .howto strong { display: block; margin-bottom: 0.35rem; }
+    h2 { font-size: 1.2rem; margin: 1.75rem 0 0.75rem; }
+    h3 { font-size: 1.05rem; margin: 1.25rem 0 0.5rem; }
+    a { color: #1758a8; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 1.5rem 0; }
+    ol, ul { padding-left: 1.15rem; margin: 0.5rem 0; }
+    li { margin: 0.4rem 0; }
+    code { font-family: ui-monospace, Menlo, monospace; font-size: 0.88em; background: #f4f4f4; padding: 0.1em 0.3em; border-radius: 3px; }
+    blockquote { margin: 1rem 0; padding: 0.5rem 0 0.5rem 1rem; border-left: 3px solid #ccc; color: #333; }
+    .series { font-family: system-ui, sans-serif; font-size: 0.85rem; color: #555; }
+    p { margin: 0.75rem 0; }
+  </style>
+</head>
+<body>
+
+  <div class="howto">
+    <strong>Substack paste (mobile-friendly edition)</strong>
+    Title: <em>Your RCA Agent Doesn't Need Another Runbook — It Needs a Map</em><br>
+    Subtitle: <em>Runbooks are fine for humans — bad as the agent's only navigation. Topology, gates, verify-first.</em><br>
+    Select article below (not this box) → copy → paste. Hero: <code>https://productionnotes.dev/assets/images/og-agents-need-a-map.jpg</code><br>
+    Full post with diagrams: <a href="https://productionnotes.dev/blog/agents-need-a-map-not-a-script/">productionnotes.dev</a>
+  </div>
+
+  <article id="substack-body">
+
+    <p class="series"><em>Building an Enterprise AI Agent Platform in Go</em> · #19</p>
+
+    <p>There's a moment in a great Rahman live set where the band stops replaying the film track and starts reading the room. Same score on paper. Completely different concert.</p>
+
+    <p>I've spent months teaching an AI SRE copilot to investigate real production incidents — across metrics, logs, warehouses, and messy human tickets. Same lesson every time:</p>
+
+    <blockquote>
+      <p>If your agent only works when you ship it a forty-page bespoke runbook, <strong>the agent is not good yet.</strong> Not because runbooks are useless — because the product had no map underneath.</p>
+    </blockquote>
+
+    <p>The runbook is a programmed track. <strong>The map</strong> is what a good investigator carries when the room changes. Here's what that map is — and when a runbook still earns its keep.</p>
+
+    <hr>
+
+    <h2>What the map is (four layers)</h2>
+
+    <p><strong>1. Topology at launch.</strong> Inject what discovery already knows — integrations, services, env tags, deploy repos — before the first tool call. No inventing dependency graphs mid-incident.</p>
+
+    <p><strong>2. Verify-first probes.</strong> Branches write structured evidence (<code>queue_depth_spike=true</code>, <code>crosscheck=mismatch</code>). A deterministic verifier locks the root-cause class. The LLM drafts; code decides. No vibe-check judge.</p>
+
+    <p><strong>3. Cross-plane reconciliation.</strong> Each datastore gets a turn; crosscheck must resolve to match, mismatch, or single_plane — never <code>pending</code> at gather complete. Inactive scoped signal + pod restart = <strong>no active incident on scoped path</strong>, not pod theater.</p>
+
+    <p><strong>4. Verify-learn memory.</strong> Store operator verdicts and ruled-out paths. Recall them on the next similar alert.</p>
+
+    <p><strong>Script vs map, in one line each:</strong></p>
+    <ul>
+      <li>Script: ship another notebook when Kafka breaks.</li>
+      <li>Map: probe → discover → requery, with topology and memory built in.</li>
+      <li>Script: gate regex per tenant phrasing.</li>
+      <li>Map: verifier reads evidence keys.</li>
+      <li>Script: operator fixes RCA in Slack.</li>
+      <li>Map: verdict feeds the next run.</li>
+    </ul>
+
+    <p>Per-tenant investigation stacks are <strong>symptoms</strong> of a copilot missing these four layers. When the map ships, those stacks should shrink — not vanish.</p>
+
+    <hr>
+
+    <h2>When runbooks still earn their keep</h2>
+
+    <p>A live set still starts from the score. Runbooks stay valid for:</p>
+    <ul>
+      <li><strong>Human SOPs</strong> — on-call, auditors, training (PDF for people, not agent navigation).</li>
+      <li><strong>Stable archetypes</strong> — known probe ladders encoded as map recipes, not rediscovered every run.</li>
+      <li><strong>Reference demos</strong> — worked examples while discovery is still thin.</li>
+      <li><strong>HITL remediation</strong> — who approves scale-down, which job to run (governance after evidence).</li>
+      <li><strong>Local overlays</strong> — dashboard IDs, tag quirks, on top of topology — not instead of it.</li>
+    </ul>
+
+    <p>The failure mode: <strong>runbook as sole dependency</strong> — forty pages per estate because the agent could not navigate alone.</p>
+
+    <hr>
+
+    <h2>Without the map</h2>
+
+    <ul>
+      <li>Wrong time window — 30 minutes when the signal needs 7 days.</li>
+      <li>Loudest spike wins over causal spike.</li>
+      <li>Beautiful RCA on a hollow gather stage.</li>
+      <li>"Observability gap" before exhausting tag discovery.</li>
+      <li>Sub-agents spin until spawn budget leaves <code>pending_from_*</code> stubs the gate accepts.</li>
+    </ul>
+
+    <p>Operators need <strong>receipts</strong> — IDs, KPIs, ruled-out branches — not more narration.</p>
+
+    <hr>
+
+    <h2>Where scripts broke (two shapes)</h2>
+
+    <p><strong>Metric alerts</strong> — shard backlog vs dependency-chain saturation: two parallel use cases, same failures. Narrow windows on sparse metrics. Redacted tokens pasted into SQL. Crosscheck stuck on <code>pending</code>. Gates cheering on empty text while ignoring real UUIDs. Presentation reading navigation JSON instead of gather evidence.</p>
+
+    <p><strong>Symptom tickets</strong> — "Payments module stuck since Tuesday": keyword routing to the wrong workflow, question loops instead of probes, monitors picked by title match. Structure first; then tools.</p>
+
+    <p>Fixes were rarely more runbook poetry. They were topology, verifier, and gates — often encoding probe ideas the runbook already had.</p>
+
+    <hr>
+
+    <h2>Golden gates</h2>
+
+    <p><strong>Bring-up:</strong> deploy pipeline stages 1..N only; green each stage with a gate on <strong>tool outputs</strong> before adding N+1. (<a href="https://productionnotes.dev/blog/bring-up-agent-workflows-like-hardware/">Hardware analogy</a>.)</p>
+
+    <p>We owned two gate failures: regex wanted <code>tenant GUID</code>, agent correctly emitted a <code>UUID</code>; and a regex with negative lookahead that <strong>crashed</strong> Go's RE2 mid-run — caught by nothing in CI. Gates are code. Golden pass <em>and</em> fail fixtures, or you ship lies.</p>
+
+    <hr>
+
+    <h2>What to steal</h2>
+
+    <ol>
+      <li>Topology at launch.</li>
+      <li>Evidence → verifier → class.</li>
+      <li>Crosscheck before present-RCA.</li>
+      <li>Memory on verified verdicts.</li>
+      <li>Bring-up one stage at a time.</li>
+      <li>Test your gates like unit tests.</li>
+      <li>Runbooks as overlay, not foundation.</li>
+    </ol>
+
+    <p>Still rough: inactive incidents scored <code>undetermined</code>, path anchoring, chat paths that route but never investigate. All gate or contract bugs — fixable without a new foundation model.</p>
+
+    <p>Goal: an agent with a <strong>map</strong>, optionally guided by proven runbook recipes — not one that needs a fresh notebook per tenant.</p>
+
+    <hr>
+
+    <p><strong>More depth (diagrams + tables on the blog):</strong></p>
+    <ul>
+      <li><a href="https://productionnotes.dev/blog/agents-need-a-map-not-a-script/">This essay — full version</a></li>
+      <li><a href="https://productionnotes.dev/blog/evidence-gated-multiplane-rca/">Evidence-Gated RCA</a></li>
+      <li><a href="https://productionnotes.dev/blog/bring-up-agent-workflows-like-hardware/">Bring Up Like Hardware</a></li>
+      <li><a href="https://productionnotes.dev/series/enterprise-ai-agents-go/">Full series</a></li>
+    </ul>
+
+  </article>
+
+</body>
+</html>

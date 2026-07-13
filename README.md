@@ -10,7 +10,7 @@ Personal engineering blog — enterprise AI agents, workflows, Go, and productio
 
 ## Featured series: Building an Enterprise AI Agent Platform in Go
 
-An 18+ post practitioner series on building a production AI agent platform in Go — from language choice through workflows, SRE triage, and enterprise platform lessons. Based on real production work on [Aiden](https://productionnotes.dev/blog/aiden-platform/), StackGen's enterprise agent orchestration platform.
+An 19+ post practitioner series on building a production AI agent platform in Go — from language choice through workflows, SRE triage, and enterprise platform lessons. Based on real production work on [Aiden](https://productionnotes.dev/blog/aiden-platform/), StackGen's enterprise agent orchestration platform.
 
 **Series hub:** [enterprise-ai-agents-go](https://productionnotes.dev/series/enterprise-ai-agents-go/)
 
@@ -34,6 +34,7 @@ An 18+ post practitioner series on building a production AI agent platform in Go
 | 16 | [AI Incident Triage](https://productionnotes.dev/blog/ai-incident-triage-sre/) | What helps on-call SREs |
 | 17 | [Evidence-Gated RCA](https://productionnotes.dev/blog/evidence-gated-multiplane-rca/) | Multi-plane investigation |
 | 18 | [LLM Tokenomics](https://productionnotes.dev/blog/maintaining-tokenomics-with-aiden/) | Context budgets & FinOps |
+| 19 | [Your RCA Agent Needs a Map](https://productionnotes.dev/blog/agents-need-a-map-not-a-script/) | Runbooks vs topology, gates, verify-first |
 
 **Topic hubs:** [workflows](https://productionnotes.dev/topics/ai-agent-workflows/) · [SRE](https://productionnotes.dev/topics/ai-agents-sre/) · [Go agents](https://productionnotes.dev/topics/go-ai-agents/)
 
