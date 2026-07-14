@@ -26,6 +26,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [Bring Up Agent Workflows Like Hardware](/blog/bring-up-agent-workflows-like-hardware/) | Green one stage at a time; golden gates; score effects not transcripts |
 | [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/) | Fixed DAG, structural evals, compound-AI orchestration for SRE RCA |
 | [Evidence-Based Verification](/blog/evidence-based-verification/) | Don't trust self-report — check ArgoCD, Datadog, systems of record |
+| [Beyond Confluence Runbooks](/blog/beyond-confluence-runbooks/) | Executable GitOps triage vs Confluence narrative — split the corpus |
 
 ## FAQ
 
