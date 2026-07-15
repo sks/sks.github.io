@@ -25,6 +25,8 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [You Can't Debug What You Can't See — Observability for AI Agents](/blog/observability/) | Why traditional APM fails for agent workloads |
 | [LLM Tokenomics for Production Agents — Context Budgets as an Operating Model](/blog/maintaining-tokenomics-with-aiden/) | Context budgets, compression, FinOps operating model |
 | [Beyond Confluence Runbooks](/blog/beyond-confluence-runbooks/) | When GitOps triage beats wiki playbooks for agents — and when it doesn't |
+| [From Demo to Deploy — Failure Modes with Receipts](/blog/demo-to-deploy-receipts/) | Polite demo→prod failures and the receipts checklist for production-ready claims |
+| [The Diary Learning Loop](/blog/diary-learning-loop/) | Daily digests → human-approved workflow and policy proposals |
 
 ## FAQ
 
