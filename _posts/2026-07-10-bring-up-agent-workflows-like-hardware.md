@@ -4,7 +4,7 @@ title: "How to Debug Multi-Stage AI Agent Workflows — Bring Up Like Hardware"
 date: 2026-07-10 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 18
-description: "Debug multi-stage AI agent workflows by bringing up one stage at a time against golden gates — plus why scoring tool calls beats grading transcripts."
+description: "AI workflow debugging — bring up multi-stage agent pipelines one stage at a time with golden gates, like hardware board bring-up."
 image: /assets/images/og-bring-up-workflows.png
 tags: [ai-agents, workflows, evaluation, golang, sre, testing]
 ---

@@ -4,15 +4,17 @@ title: "The Diary Learning Loop — From Daily Agent Digests to Human-Approved P
 date: 2026-07-14 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 21
-description: "Agents that never improve from ops history are scripts. How daily digests become proposed workflows and policies — with humans still on the approval gate."
-tags: [ai-agents, learning, governance, workflows, policy, hitl, aiden, production]
+description: "AI agent learning loop for production — daily digests become human-approved workflow and policy changes, not bigger vector stores. HITL governance for enterprise agents."
+image: /assets/images/og-governance.png
+tags: [ai-agents, learning, governance, workflows, policy, hitl, aiden, production, enterprise-agents]
+permalink: /blog/diary-learning-loop/
 ---
 
-Most “learning” claims around AI agents are really **retrieving** more text into the next prompt. That is recall. It is not improvement.
+Most **AI agent learning** claims in production are really **retrieving** more text into the next prompt. That is recall. It is not improvement.
 
 Improvement looks different in production: the system notices that the same denial fires every Thursday, that your SRE team always runs the same three workflows in order, or that a cost spike always trails the same integration path — and then it **proposes a change** a human can approve, dismiss, or edit. Without that loop, your digital employees are scripts with better vocabularies.
 
-We built that loop into Aiden as a **diary → insight → human gate → materialize** path. This post is the problem narrative and the operating principles — not a blueprint. If you only remember one line: **learning without an approval gate is just unsupervised self-modification with better branding.**
+We built that loop into Aiden as a **diary → insight → human gate → materialize** path for [AI agent workflows](/topics/ai-agent-workflows/). This post is the problem narrative and the operating principles — not a blueprint. If you only remember one line: **learning without an approval gate is just unsupervised self-modification with better branding.**
 
 ---
 
