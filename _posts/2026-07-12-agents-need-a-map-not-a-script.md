@@ -131,7 +131,7 @@ Different alerts, same script failures — two parallel use cases, one failure t
 | Primary signal with **numbers**, not "elevated" | Stopped at a window too narrow for sparse metrics |
 | Primary scope key identified with evidence | Pasted **redacted placeholder tokens** into SQL → syntax errors → retry loop |
 | Cross-plane **crosscheck** resolved | Left `pending` forever while gather declared complete |
-| Partition owner or pod health with concrete fields | Wrote `blocked: no data` or `pending_from_*` while gate cheered on non-empty text |
+| Queue consumer or pod health with concrete fields | Wrote `blocked: no data` or `pending_from_*` while gate cheered on non-empty text |
 | Presentation uses gather transcript | Read only navigation JSON ("FINISH, iter=1") and ignored evidence |
 
 Fixes were rarely "more poetry in the runbook." They were **topology + verifier + gates**: UUID-aware regex, forbidden hollow stubs (`branch dispatched…` is not evidence), spawn contracts that allow tag-discovery tools, and headlines that say **no active incident on scoped path** when the signal is inactive. The runbook's *probe ideas* were often right; the platform had not encoded them as structured evidence and gates.
@@ -142,7 +142,7 @@ Fixes were rarely "more poetry in the runbook." They were **topology + verifier 
 
 No metric attached — so structure first: parse Environment / Module / Symptom / Time, ladder env tags (non-prod before prod), check the obvious deployment **and** adjacent services (edge tier, worker, admin — not only the name in the ticket), query log monitors with **log search** rather than metric queries on log-based alerts.
 
-**What went wrong:** keyword routing (the module name in the ticket matched an unrelated streaming workflow), clarifying-question loops while the user said "just investigate," and monitors attached because a title contained a keyword. Wrong genre, wrong hall.
+**What went wrong:** keyword routing (the module name in the ticket matched an unrelated queue-depth workflow), clarifying-question loops while the user said "just investigate," and monitors attached because a title contained a keyword. Wrong genre, wrong hall.
 
 **Trap:** treat human intake like a firing metric alert. The map starts with scope parsing, not tool roulette.
 
