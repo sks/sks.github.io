@@ -4,7 +4,7 @@ title: "LLM Tokenomics for Production Agents — Context Budgets as an Operating
 date: 2026-07-09 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 17
-description: "LLM tokenomics for production AI agents — context budgets, tool compression, and FinOps loops that keep sessions finishing."
+description: "LLM token budget strategies for production agents — context budgets, tool compression, and FinOps loops that keep sessions finishing."
 image: /assets/images/og-tokenomics.png
 tags: [llm, finops, ai-agents, context-window, production, aiden]
 ---

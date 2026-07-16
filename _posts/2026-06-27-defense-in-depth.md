@@ -4,7 +4,7 @@ title: "Your Agent Has Root — Defense-in-Depth for AI Agents That Wield Real T
 date: 2026-06-27 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 8
-description: "Your agent can run rm -rf /. Your prompt saying 'don't do that' is not security. Here's why one layer is never enough."
+description: "Secure agent workflows — defense-in-depth for AI agents with real tools: policy, HITL, and layered governance in production."
 image: /assets/images/og-governance.png
 tags: [security, ai-agents, hitl, governance, production]
 ---

@@ -3,7 +3,7 @@ layout: post
 title: "LLM Performance Metrics — From Lighthouse to the Token Era"
 permalink: /blog/web-metrics-to-llm-metrics/
 date: 2026-06-02 10:00:00 -0700
-description: "LLM performance metrics: the token-era equivalent of FCP, LCP, and TBT — and how to debug them."
+description: "LLM performance metrics — TTFT, time per output token (TPOT), and token-era equivalents of web vitals for agent workloads."
 image: /assets/images/og-observability.png
 tags: [llm, performance, observability, web-vitals, ai-agents, system-design]
 series: "Building an Enterprise AI Agent Platform in Go"
