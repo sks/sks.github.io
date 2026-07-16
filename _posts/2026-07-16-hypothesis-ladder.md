@@ -4,13 +4,15 @@ title: "The Hypothesis Ladder — Ruling Things Out Before You Narrate"
 date: 2026-07-16 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 23
-description: "Why production AI incident investigators need a hypothesis ladder — narrow with evidence, rule branches out, and stop narrating before the ladder says you can."
-tags: [sre, incident-response, ai-agents, root-cause-analysis, on-call, production]
+description: "Hypothesis-driven debugging for AI SRE root cause analysis — climb identity and onset before deploy theories, keep parallel branches, prove first and narrate last."
+image: /assets/images/og-evidence-rca.png
+tags: [sre, incident-response, root-cause-analysis, ai-agents, on-call, hypothesis-driven-debugging, production, aiden]
+permalink: /blog/hypothesis-ladder/
 ---
 
-The demo version of AI root-cause analysis reads like a senior engineer wrote it on a good day. The on-call version often reads the same — polished, confident, and wrong — because fluency is not evidence.
+**Hypothesis-driven debugging** for AI **root cause analysis (RCA)** fails when the investigator narrates before eliminating. The demo version reads like a senior engineer on a good day. The on-call version often reads the same — polished, confident, and wrong — because fluency is not evidence.
 
-We kept hitting the same failure in production: the model latched onto the first plausible story (usually a recent deploy) and wrote an RCA-shaped paragraph before the boring elimination work finished. The fix was not a longer prompt. It was treating investigation as a **hypothesis ladder** — climb in order, prune with cheap disproof, and forbid the narrative from getting ahead of what telemetry actually supports.
+We kept hitting the same failure in production while shipping [AI agents for SRE](/topics/ai-agents-sre/): the model latched onto the first plausible story (usually a recent deploy) and wrote an RCA-shaped paragraph before the boring elimination work finished. The fix was not a longer prompt. It was treating investigation as a **hypothesis ladder** — climb in order, prune with cheap disproof, and forbid the narrative from getting ahead of what telemetry actually supports.
 
 This post is a sequel to [AI incident triage](/blog/ai-incident-triage-sre/) and [evidence-gated RCA](/blog/evidence-gated-multiplane-rca/). Same lesson from a different angle: **investigation is elimination**, not storytelling.
 
@@ -143,18 +145,21 @@ Empty branches marked **looked, nothing found** are success. They beat invented 
 
 ---
 
-## Where This Sits in the Series
+## Related reading
 
-- [AI incident triage](/blog/ai-incident-triage-sre/) — parallel context before the model narrates.
-- [Evidence-gated RCA](/blog/evidence-gated-multiplane-rca/) — fixed stages and structural evals.
-- [Agents need a map, not a script](/blog/agents-need-a-map-not-a-script/) — procedure as reference, not a single megaprompt.
-- [From demo to deploy](/blog/demo-to-deploy-receipts/) — why fluent output without receipts fails in production.
+- [AI incident triage](/blog/ai-incident-triage-sre/) — parallel context before the model narrates
+- [Evidence-gated RCA](/blog/evidence-gated-multiplane-rca/) — fixed stages and structural evals
+- [Your RCA agent needs a map](/blog/agents-need-a-map-not-a-script/) — procedure as reference, not a single megaprompt
+- [From demo to deploy](/blog/demo-to-deploy-receipts/) — why fluent output without receipts fails in production
+- Topic hubs: [AI agents for SRE](/topics/ai-agents-sre/) · [AI agent workflows](/topics/ai-agent-workflows/)
 
 The hypothesis ladder is the **on-call behavior layer**: climb, prune, grade, stop — so humans get clarity instead of bedtime stories.
 
 ---
 
 **Acknowledgments.** Investigation discipline in this area reflects work across the [StackGen Aiden team](/about/) on production SRE agents and operator-facing workflows.
+
+*Does your AI investigator stop at “probably the deploy” — or show what it ruled out first? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 
 ---
 

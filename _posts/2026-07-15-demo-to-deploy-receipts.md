@@ -4,15 +4,17 @@ title: "From Demo to Deploy — Failure Modes with Receipts"
 date: 2026-07-15 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 22
-description: "Why agent demos pass and production fails politely — and the receipts (gates, evidence, bring-up, HITL) that close the gap."
-tags: [ai-agents, production, sre, evaluation, hitl, workflows, aiden]
+description: "Production-ready AI agents need receipts, not fluent demos — evidence gates, bring-up discipline, HITL tiers, and eval checklists for enterprise agent pilots."
+image: /assets/images/og-hitl.png
+tags: [ai-agents, production, sre, evaluation, hitl, workflows, aiden, compound-ai, enterprise-agents]
+permalink: /blog/demo-to-deploy-receipts/
 ---
 
-Conference stages and investor decks are full of agent demos that *work*. A clean alert. A fluent root-cause analysis (RCA). A green check. Applause.
+**Production-ready AI agents** fail differently than conference demos. Stages and investor decks are full of agent demos that *work*. A clean alert. A fluent root-cause analysis (RCA). A green check. Applause.
 
 Then the same pattern meets a partial dashboard, three services blaming each other, a runbook from 2023, and a human who still owns the pager. The demo did not lie about the model. It lied about **the environment**.
 
-This post is an umbrella for the failure modes we keep relearning while shipping Aiden-adjacent AI SRE and agent workflows — and the **receipts** that make production different from theater. It is intentionally a map of linked lessons, not a new architecture essay. Steal the checklist; keep your stack.
+This post is an umbrella for the failure modes we keep relearning while shipping [AI agents for SRE](/topics/ai-agents-sre/) and agent workflows — and the **receipts** that make production different from theater. It is intentionally a map of linked lessons, not a new architecture essay. Steal the checklist; keep your stack.
 
 ---
 
@@ -97,6 +99,7 @@ Print this for demos that claim to be “production-ready.”
 | “Humans are in the loop” | What is auto-approved, what needs a person, what is hard-denied? |
 | “Cost is under control” | Finish rate and cost per *success*, not spend per chat. |
 | “It learns” | Show an approved change that altered policy or workflow — not a bigger vector store. |
+| “It investigates like an SRE” | Does it establish identity and onset before deploy theories? Show ruled-out branches, not one hero narrative. |
 
 If the seller cannot produce receipts, you are buying theater seats.
 
@@ -124,6 +127,7 @@ That is the sister narrative to reliability-over-intelligence slides — the bui
 - [The HITL Paradox](/blog/hitl-paradox/) — risk-tiered approvals so review stays real
 - [LLM Tokenomics for Production Agents](/blog/maintaining-tokenomics-with-aiden/) — finish rate and compression as an operating model
 - [The Diary Learning Loop](/blog/diary-learning-loop/) — digests become human-approved workflow/policy changes
+- [The Hypothesis Ladder](/blog/hypothesis-ladder/) — hypothesis-driven debugging: prove first, narrate last
 - Topic hubs: [AI agent workflows](/topics/ai-agent-workflows/) · [AI agents for SRE](/topics/ai-agents-sre/)
 
 ---
