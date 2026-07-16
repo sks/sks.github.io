@@ -57,7 +57,7 @@
 
     <p><strong>Script vs map, in one line each:</strong></p>
     <ul>
-      <li>Script: ship another notebook when Kafka breaks.</li>
+      <li>Script: ship another notebook when the broker queue backs up.</li>
       <li>Map: probe → discover → requery, with topology and memory built in.</li>
       <li>Script: gate regex per tenant phrasing.</li>
       <li>Map: verifier reads evidence keys.</li>
@@ -100,7 +100,7 @@
 
     <h2>Where scripts broke (two shapes)</h2>
 
-    <p><strong>Metric alerts</strong> — shard backlog vs dependency-chain saturation: two parallel use cases, same failures. Narrow windows on sparse metrics. Redacted tokens pasted into SQL. Crosscheck stuck on <code>pending</code>. Gates cheering on empty text while ignoring real UUIDs. Presentation reading navigation JSON instead of gather evidence.</p>
+    <p><strong>Metric alerts</strong> — queue depth vs dependency-chain saturation: two parallel use cases, same failures. Narrow windows on sparse metrics. Redacted tokens pasted into SQL. Crosscheck stuck on <code>pending</code>. Gates cheering on empty text while ignoring real UUIDs. Presentation reading navigation JSON instead of gather evidence.</p>
 
     <p><strong>Symptom tickets</strong> — "Payments module stuck since Tuesday": keyword routing to the wrong workflow, question loops instead of probes, monitors picked by title match. Structure first; then tools.</p>
 

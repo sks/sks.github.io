@@ -4,7 +4,7 @@ title: "Agent Skill Distillation Without Fine-Tuning"
 date: 2026-06-25 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 6
-description: "Agent skill distillation from production traces — teach agents new runbooks without fine-tuning."
+description: "Agent skill distillation without fine-tuning — teach agents from production traces, not distilled models. Reusable skills without GPU fine-tuning."
 image: /assets/images/og-memory.png
 tags: [ai-agents, learning, skills, llm, architecture]
 ---

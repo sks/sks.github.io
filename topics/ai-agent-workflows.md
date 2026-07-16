@@ -30,6 +30,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [Your RCA Agent Needs a Map](/blog/agents-need-a-map-not-a-script/) | Topology, verify-first probes, and learn-from-verdict over runbook-only agents |
 | [From Demo to Deploy — Failure Modes with Receipts](/blog/demo-to-deploy-receipts/) | Umbrella of production-hardening failure modes with receipts |
 | [The Diary Learning Loop](/blog/diary-learning-loop/) | Organizational learning: propose → human approve → materialize |
+| [The Hypothesis Ladder](/blog/hypothesis-ladder/) | On-call RCA discipline: elimination before narrative |
 
 ## FAQ
 
