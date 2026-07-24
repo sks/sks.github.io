@@ -26,6 +26,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [AI Incident Triage for SREs — What Actually Helps On-Call](/blog/ai-incident-triage-sre/) | Practitioner take on what helps on-call vs demo theater |
 | [You Can't Debug What You Can't See — Observability for AI Agents](/blog/observability/) | Why traditional APM fails for agent workloads |
 | [LLM Tokenomics for Production Agents — Context Budgets as an Operating Model](/blog/maintaining-tokenomics-with-aiden/) | Context budgets, compression, FinOps operating model |
+| [Is the Task Actually Done?](/blog/is-the-task-actually-done/) | When "done" needs an independent check — goal-scoped loops without melting the bill |
 | [Beyond Confluence Runbooks](/blog/beyond-confluence-runbooks/) | When GitOps triage beats wiki playbooks for agents — and when it doesn't |
 | [From Demo to Deploy — Failure Modes with Receipts](/blog/demo-to-deploy-receipts/) | Polite demo→prod failures and the receipts checklist for production-ready claims |
 | [The Diary Learning Loop](/blog/diary-learning-loop/) | Daily digests → human-approved workflow and policy proposals |

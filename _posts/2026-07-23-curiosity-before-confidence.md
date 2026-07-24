@@ -3,7 +3,7 @@ layout: post
 title: "AI Agent Root Cause Analysis — Curiosity Before Confidence"
 date: 2026-07-23 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
-series_order: 25
+series_order: 26
 description: "AI agent root cause analysis for SRE: soft prompts don't stop bad RCAs — curiosity checklists, hard gates, and batched validation before confident narratives."
 image: /assets/images/og-evidence-rca.png
 tags: [ai-agents, root-cause-analysis, sre, incident-response, on-call, evaluation, prompt-engineering, production, aiden, compound-ai]
