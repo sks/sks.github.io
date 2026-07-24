@@ -12,7 +12,7 @@ faqs:
   - question: "How do you control LLM costs for agent sessions?"
     answer: "Treat context as an operating budget: tiered memory, tool response compression, doom-loop detection, and per-session FinOps loops — cheaper models alone are not a strategy."
   - question: "How should AI agents do root cause analysis without guessing?"
-    answer: "Use a hypothesis ladder: establish identity and onset before change theories, keep competing branches parallel until evidence rules them out, and prove before narrating — not one fluent hero narrative."
+    answer: "Use a hypothesis ladder: establish identity and onset before change theories, keep competing branches parallel until evidence rules them out, and prove before narrating — not one fluent hero narrative. Soft prompts alone won't stop early closure; fail-closed checks should refuse confidence while required digs remain unattempted."
 ---
 
 **AI agents for SRE** sit at the intersection of on-call pain and demo hype. These posts separate what moved our incident response from what merely looked impressive in a slide deck.
@@ -30,6 +30,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [From Demo to Deploy — Failure Modes with Receipts](/blog/demo-to-deploy-receipts/) | Polite demo→prod failures and the receipts checklist for production-ready claims |
 | [The Diary Learning Loop](/blog/diary-learning-loop/) | Daily digests → human-approved workflow and policy proposals |
 | [The Hypothesis Ladder](/blog/hypothesis-ladder/) | Hypothesis-driven RCA — identity before depth, parallel branches, prove then narrate |
+| [AI Agent Root Cause Analysis — Curiosity Before Confidence](/blog/curiosity-before-confidence/) | Soft prompts don't stop bad AI RCA — hard gates, batched validation, curiosity before confidence |
 
 ## FAQ
 
