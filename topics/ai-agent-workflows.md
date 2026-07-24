@@ -26,6 +26,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [Bring Up Agent Workflows Like Hardware](/blog/bring-up-agent-workflows-like-hardware/) | Green one stage at a time; golden gates; score effects not transcripts |
 | [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/) | Fixed DAG, structural evals, compound-AI orchestration for SRE RCA |
 | [Evidence-Based Verification](/blog/evidence-based-verification/) | Don't trust self-report — check ArgoCD, Datadog, systems of record |
+| [Is the Task Actually Done?](/blog/is-the-task-actually-done/) | Goal-scoped completion loops — independent checks, budgets, mutation-safe retries |
 | [Beyond Confluence Runbooks](/blog/beyond-confluence-runbooks/) | Executable GitOps triage vs Confluence narrative — split the corpus |
 | [Your RCA Agent Needs a Map](/blog/agents-need-a-map-not-a-script/) | Topology, verify-first probes, and learn-from-verdict over runbook-only agents |
 | [From Demo to Deploy — Failure Modes with Receipts](/blog/demo-to-deploy-receipts/) | Umbrella of production-hardening failure modes with receipts |
