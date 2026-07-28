@@ -32,6 +32,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [The Diary Learning Loop](/blog/diary-learning-loop/) | Daily digests → human-approved workflow and policy proposals |
 | [The Hypothesis Ladder](/blog/hypothesis-ladder/) | Hypothesis-driven RCA — identity before depth, parallel branches, prove then narrate |
 | [AI Agent Root Cause Analysis — Curiosity Before Confidence](/blog/curiosity-before-confidence/) | Soft prompts don't stop bad AI RCA — hard gates, batched validation, curiosity before confidence |
+| [Be Creative. Don't Invent.](/blog/be-creative-do-not-invent/) | When stuck, search harder — don't fabricate IDs, metrics, or a tidy root cause |
 
 ## FAQ
 
