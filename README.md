@@ -36,6 +36,8 @@ An 19+ post practitioner series on building a production AI agent platform in Go
 | 18 | [LLM Tokenomics](https://productionnotes.dev/blog/maintaining-tokenomics-with-aiden/) | Context budgets & FinOps |
 | 19 | [Your RCA Agent Needs a Map](https://productionnotes.dev/blog/agents-need-a-map-not-a-script/) | Runbooks vs topology, gates, verify-first |
 
+Later posts in the same series (curiosity gates, completion loops, invent-vs-create, abandon-after-lead) continue on the [series hub](https://productionnotes.dev/series/enterprise-ai-agents-go/).
+
 **Topic hubs:** [workflows](https://productionnotes.dev/topics/ai-agent-workflows/) · [SRE](https://productionnotes.dev/topics/ai-agents-sre/) · [Go agents](https://productionnotes.dev/topics/go-ai-agents/)
 
 ---

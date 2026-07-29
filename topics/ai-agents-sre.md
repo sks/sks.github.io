@@ -13,6 +13,8 @@ faqs:
     answer: "Treat context as an operating budget: tiered memory, tool response compression, doom-loop detection, and per-session FinOps loops — cheaper models alone are not a strategy."
   - question: "How should AI agents do root cause analysis without guessing?"
     answer: "Use a hypothesis ladder: establish identity and onset before change theories, keep competing branches parallel until evidence rules them out, and prove before narrating — not one fluent hero narrative. Soft prompts alone won't stop early closure; fail-closed checks should refuse confidence while required digs remain unattempted."
+  - question: "What if the agent found evidence but still gave up?"
+    answer: "That is abandon-after-lead — different from inventing under emptiness. When the rule payload matches the pasted alert, ignore mismatched firing peers, pin query windows to fire time, and require Theory to cite the strongest metric or log lead instead of restating the checklist."
 ---
 
 **AI agents for SRE** sit at the intersection of on-call pain and demo hype. These posts separate what moved our incident response from what merely looked impressive in a slide deck.
@@ -33,6 +35,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [The Hypothesis Ladder](/blog/hypothesis-ladder/) | Hypothesis-driven RCA — identity before depth, parallel branches, prove then narrate |
 | [AI Agent Root Cause Analysis — Curiosity Before Confidence](/blog/curiosity-before-confidence/) | Soft prompts don't stop bad AI RCA — hard gates, batched validation, curiosity before confidence |
 | [Be Creative. Don't Invent.](/blog/be-creative-do-not-invent/) | When stuck, search harder — don't fabricate IDs, metrics, or a tidy root cause |
+| [AI Agent Root Cause Analysis — Evidence Discarded After the Lead](/blog/evidence-discarded/) | AI agent RCA fails when digs find a lead and discard it — peer noise, fire-time windows, transcript gates |
 
 ## FAQ
 
