@@ -56,6 +56,7 @@ Human responders will readily forgive an AI agent that sets an explicit checkpoi
 - [Curiosity before confidence](/blog/curiosity-before-confidence/)
 - [Hypothesis ladder](/blog/hypothesis-ladder/)
 - [Evidence-gated RCA](/blog/evidence-gated-multiplane-rca/)
+- [Evidence discarded after the lead](/blog/evidence-discarded/)
 
 ---
 

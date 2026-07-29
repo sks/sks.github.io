@@ -33,6 +33,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [The Diary Learning Loop](/blog/diary-learning-loop/) | Organizational learning: propose → human approve → materialize |
 | [The Hypothesis Ladder](/blog/hypothesis-ladder/) | On-call RCA discipline: elimination before narrative |
 | [AI Agent Root Cause Analysis — Curiosity Before Confidence](/blog/curiosity-before-confidence/) | Soft prompts vs hard gates for AI RCA; batch validation to stop agent thrash |
+| [AI Agent Root Cause Analysis — Evidence Discarded After the Lead](/blog/evidence-discarded/) | Dig found the lead, then abandoned it for peer noise — transcript gates that catch discard |
 
 ## FAQ
 
