@@ -11,7 +11,7 @@ https://productionnotes.dev
 - https://productionnotes.dev/series/enterprise-ai-agents-go/
 - https://productionnotes.dev/blog/why-go/
 - https://productionnotes.dev/blog/bring-up-agent-workflows-like-hardware/
-- https://productionnotes.dev/blog/ai-incident-triage-sre/
+- https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call
 
 ## Topic hubs
 
