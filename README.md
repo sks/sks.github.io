@@ -31,7 +31,7 @@ An 19+ post practitioner series on building a production AI agent platform in Go
 | 13 | [JSON Repair Layers](https://productionnotes.dev/blog/json-repair-layers/) | Why one repair pass isn't enough |
 | 14 | [LLM Performance Metrics](https://productionnotes.dev/blog/web-metrics-to-llm-metrics/) | Metrics for agent systems |
 | 15 | [CCE Cloud Entitlements](https://productionnotes.dev/blog/cce-cloud-entitlements/) | Cloud entitlement patterns |
-| 16 | [AI Incident Triage](https://productionnotes.dev/blog/ai-incident-triage-sre/) | What helps on-call SREs |
+| 16 | [AI Incident Triage](https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call) | What helps on-call SREs (canonical on StackGen; `/blog/ai-incident-triage-sre/` redirects) |
 | 17 | [Evidence-Gated RCA](https://productionnotes.dev/blog/evidence-gated-multiplane-rca/) | Multi-plane investigation |
 | 18 | [LLM Tokenomics](https://productionnotes.dev/blog/maintaining-tokenomics-with-aiden/) | Context budgets & FinOps |
 | 19 | [Your RCA Agent Needs a Map](https://productionnotes.dev/blog/agents-need-a-map-not-a-script/) | Runbooks vs topology, gates, verify-first |
