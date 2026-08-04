@@ -25,7 +25,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 
 | Post | What you'll learn |
 |------|-------------------|
-| [AI Incident Triage for SREs — What Actually Helps On-Call](/blog/ai-incident-triage-sre/) | Practitioner take on what helps on-call vs demo theater |
+| [AI Incident Triage for SREs — What Actually Helps On-Call](https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call) | Practitioner take on what helps on-call vs demo theater (on StackGen) |
 | [You Can't Debug What You Can't See — Observability for AI Agents](/blog/observability/) | Why traditional APM fails for agent workloads |
 | [LLM Tokenomics for Production Agents — Context Budgets as an Operating Model](/blog/maintaining-tokenomics-with-aiden/) | Context budgets, compression, FinOps operating model |
 | [Is the Task Actually Done?](/blog/is-the-task-actually-done/) | When "done" needs an independent check — goal-scoped loops without melting the bill |

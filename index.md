@@ -16,7 +16,7 @@ New to the series? Read these three, in order:
 
 1. **[Go vs Python for AI Agents](/blog/why-go/)** — why we chose Go for a production agent runtime
 2. **[Bring Up Agent Workflows Like Hardware](/blog/bring-up-agent-workflows-like-hardware/)** — debug multi-stage pipelines one stage at a time
-3. **[AI Incident Triage for SREs — What Actually Helps On-Call](/blog/ai-incident-triage-sre/)** — what actually helps on-call
+3. **[AI Incident Triage for SREs — What Actually Helps On-Call](https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call)** — what actually helps on-call (on StackGen)
 
 **Full series:** [Building an Enterprise AI Agent Platform in Go](/series/enterprise-ai-agents-go/)
 
