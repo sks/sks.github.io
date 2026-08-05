@@ -211,6 +211,7 @@ A short checklist that does not require reading our config:
 
 ## Related reading
 
+- [Prompt caching for AI agents is an architecture problem](/blog/prompt-caching-ai-agents/) — make stable context reusable across turns
 - [You Can't Debug What You Can't See — Observability for AI Agents](/blog/observability/) — see token burn before the session dies
 - [Why One JSON Repair Pass Isn't Enough](/blog/json-repair-layers/) — tool-call reliability at the boundary
 - More on [AI agents for SRE](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)

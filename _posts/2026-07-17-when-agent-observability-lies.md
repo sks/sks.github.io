@@ -256,6 +256,7 @@ The scorecard that started this post was not lying maliciously. It was doing mat
 
 ## Related reading
 
+- [PII redaction for AI agents](/blog/pii-redaction-ai-agents/) — preserve authorized debugging without exposing model history
 - [You Can't Debug What You Can't See](/blog/observability/) — the foundations of production agent tracing, costs, and audit
 - [LLM Performance Metrics](/blog/web-metrics-to-llm-metrics/) — translating web-performance instincts into token-era metrics
 - [Evidence-Gated Multi-Plane RCA](/blog/evidence-gated-multiplane-rca/) — why claims must not outrun their evidence

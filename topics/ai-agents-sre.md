@@ -36,6 +36,8 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [AI Agent Root Cause Analysis — Curiosity Before Confidence](/blog/curiosity-before-confidence/) | Soft prompts don't stop bad AI RCA — hard gates, batched validation, curiosity before confidence |
 | [Be Creative. Don't Invent.](/blog/be-creative-do-not-invent/) | When stuck, search harder — don't fabricate IDs, metrics, or a tidy root cause |
 | [AI Agent Root Cause Analysis — Evidence Discarded After the Lead](/blog/evidence-discarded/) | AI agent RCA fails when digs find a lead and discard it — peer noise, fire-time windows, transcript gates |
+| [AI Agent Loop Detection — Don't Throw Away the Answer](/blog/ai-agent-loop-detection-salvage/) | Keep useful incident findings when the agent's finishing loop stalls |
+| [PII Redaction for AI Agents](/blog/pii-redaction-ai-agents/) | Protect model history while preserving authorized operator debugging |
 
 ## FAQ
 
