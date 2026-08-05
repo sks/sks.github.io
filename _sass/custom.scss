@@ -9,27 +9,36 @@
   --pn-text-subtle: #6e7781;
   --pn-border: #e8e8e8;
   --pn-link: #1758a8;
+  --pn-link-visited: #0f4a8c;
+  --pn-link-hover: #0a3d75;
   --pn-accent: #00add8;
   --pn-code-bg: #f3f6fa;
   --pn-header-bg: rgba(253, 253, 253, 0.92);
   --pn-toggle-hover: #eef2f6;
   --pn-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  --pn-table-stripe: #f7f7f7;
+  --pn-table-header: #f0f0f0;
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
   --pn-bg: #0d1117;
   --pn-bg-elevated: #161b22;
-  --pn-text: #e6edf3;
-  --pn-text-muted: #9da7b3;
-  --pn-text-subtle: #8b949e;
+  --pn-text: #f0f3f6;
+  --pn-text-muted: #b1bac4;
+  --pn-text-subtle: #9da7b3;
   --pn-border: #30363d;
-  --pn-link: #6cb6ff;
+  // Light sky blue — Minima’s visited/hover navy/black are unreadable on dark.
+  --pn-link: #8cbcff;
+  --pn-link-visited: #b3d1ff;
+  --pn-link-hover: #d0e4ff;
   --pn-accent: #39c5e0;
   --pn-code-bg: #161b22;
   --pn-header-bg: rgba(13, 17, 23, 0.92);
   --pn-toggle-hover: #21262d;
   --pn-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --pn-table-stripe: #161b22;
+  --pn-table-header: #21262d;
 }
 
 html {
@@ -55,8 +64,31 @@ body {
   color: var(--pn-text);
 }
 
+// Beat Minima’s hardcoded a / a:visited (#0e3565) / a:hover (#111).
 a {
   color: var(--pn-link);
+}
+
+a:visited {
+  color: var(--pn-link-visited);
+}
+
+a:hover {
+  color: var(--pn-link-hover);
+}
+
+.page-content,
+.home,
+.page-content h1,
+.page-content h2,
+.page-content h3,
+.page-content h4,
+.page-content h5,
+.page-content h6,
+.home h1,
+.home h2,
+.home h3 {
+  color: var(--pn-text);
 }
 
 .site-header {
@@ -74,11 +106,14 @@ a {
 }
 
 .site-title,
-.site-title:visited {
+.site-title:visited,
+.site-title:hover {
   color: var(--pn-text);
 }
 
-.site-nav .page-link {
+.site-nav .page-link,
+.site-nav .page-link:visited,
+.site-nav .page-link:hover {
   color: var(--pn-text);
 }
 
@@ -107,6 +142,7 @@ a {
 .theme-toggle:hover,
 .theme-toggle:focus-visible {
   background: var(--pn-toggle-hover);
+  color: var(--pn-text);
 }
 
 .theme-toggle:focus-visible {
@@ -124,8 +160,17 @@ a {
   color: var(--pn-text-muted);
 }
 
-.site-footer a {
+.site-footer a,
+.site-footer a:visited {
   color: var(--pn-link);
+}
+
+.site-footer a:hover {
+  color: var(--pn-link-hover);
+}
+
+.footer-col-wrapper {
+  color: var(--pn-text-muted);
 }
 
 .post-title,
@@ -144,14 +189,19 @@ a {
   color: var(--pn-text-muted);
 }
 
+blockquote,
 .post-content blockquote {
   color: var(--pn-text-muted);
   border-left-color: var(--pn-border);
 }
 
+pre,
+code,
 .post-content code,
 .page-content code {
   background-color: var(--pn-code-bg);
+  border-color: var(--pn-border);
+  color: var(--pn-text);
 }
 
 .post-content pre,
@@ -162,9 +212,15 @@ a {
   color: var(--pn-text);
 }
 
+.highlight,
 .highlighter-rouge .highlight,
 pre.highlight {
   background: var(--pn-code-bg);
+  color: var(--pn-text);
+}
+
+.svg-icon {
+  fill: var(--pn-text-muted);
 }
 
 // Rouge classic tokens are tuned for light backgrounds; lift contrast in dark mode.
@@ -172,7 +228,11 @@ pre.highlight {
   .highlight .c,
   .highlight .cm,
   .highlight .c1,
-  .highlight .cs {
+  .highlight .cs,
+  .highlight .cp,
+  .highlight .gh,
+  .highlight .gu,
+  .highlight .bp {
     color: #8b949e;
   }
 
@@ -181,7 +241,8 @@ pre.highlight {
   .highlight .kn,
   .highlight .kp,
   .highlight .kr,
-  .highlight .kt {
+  .highlight .kt,
+  .highlight .kc {
     color: #ff7b72;
   }
 
@@ -194,7 +255,9 @@ pre.highlight {
   .highlight .se,
   .highlight .sh,
   .highlight .si,
-  .highlight .sx {
+  .highlight .sx,
+  .highlight .sr,
+  .highlight .ss {
     color: #a5d6ff;
   }
 
@@ -202,36 +265,81 @@ pre.highlight {
   .highlight .mf,
   .highlight .mh,
   .highlight .mi,
-  .highlight .mo {
+  .highlight .mo,
+  .highlight .il {
     color: #79c0ff;
   }
 
   .highlight .nf,
   .highlight .nc,
-  .highlight .nn {
+  .highlight .nn,
+  .highlight .ne {
     color: #d2a8ff;
   }
 
   .highlight .na,
   .highlight .nb,
-  .highlight .bp {
+  .highlight .no,
+  .highlight .nv,
+  .highlight .vc,
+  .highlight .vg,
+  .highlight .vi {
     color: #7ee787;
   }
 
   .highlight .o,
   .highlight .ow,
-  .highlight .p {
+  .highlight .p,
+  .highlight .w,
+  .highlight .nx,
+  .highlight .nt {
     color: #e6edf3;
+  }
+
+  .highlight .err,
+  .highlight .gr,
+  .highlight .gt {
+    color: #ffa198;
+    background-color: transparent;
+  }
+
+  .highlight .gd,
+  .highlight .gd .x {
+    color: #ffa198;
+    background-color: rgba(248, 81, 73, 0.15);
+  }
+
+  .highlight .gi,
+  .highlight .gi .x {
+    color: #7ee787;
+    background-color: rgba(46, 160, 67, 0.15);
+  }
+
+  .highlight .go,
+  .highlight .gp {
+    color: #8b949e;
   }
 }
 
 table {
+  color: var(--pn-text);
   border-color: var(--pn-border);
+}
+
+table tr:nth-child(even) {
+  background-color: var(--pn-table-stripe);
+}
+
+table th {
+  background-color: var(--pn-table-header);
+  border-color: var(--pn-border);
+  color: var(--pn-text);
 }
 
 th,
 td {
   border-color: var(--pn-border);
+  color: var(--pn-text);
 }
 
 hr {
@@ -436,7 +544,7 @@ hr {
   display: none;
 }
 
-// Mobile: keep theme toggle clear of the hamburger.
+// Mobile: keep theme toggle clear of the hamburger; restyle Minima’s light panel.
 @media screen and (max-width: 600px) {
   .site-header .wrapper {
     position: relative;
@@ -452,5 +560,11 @@ hr {
 
   .site-nav {
     z-index: 3;
+    background-color: var(--pn-bg);
+    border-color: var(--pn-border);
+  }
+
+  .site-nav .menu-icon > svg {
+    fill: var(--pn-text);
   }
 }
