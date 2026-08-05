@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Building an Enterprise AI Agent Platform in Go
+nav_title: Series
 permalink: /series/enterprise-ai-agents-go/
 description: "A practitioner series on building production AI agents in Go — runtime design, workflows, SRE triage, observability, and enterprise platform lessons from StackGen."
 faqs:

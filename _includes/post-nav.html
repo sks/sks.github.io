@@ -1,0 +1,30 @@
+{%- if page.series and page.series_order -%}
+  {%- assign series_posts = site.posts | where: "series", page.series | sort: "series_order" -%}
+  {%- assign prev_post = false -%}
+  {%- assign next_post = false -%}
+  {%- for p in series_posts -%}
+    {%- if p.series_order < page.series_order -%}
+      {%- assign prev_post = p -%}
+    {%- endif -%}
+    {%- if next_post == false and p.series_order > page.series_order -%}
+      {%- assign next_post = p -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- if prev_post or next_post -%}
+  <nav class="post-nav" aria-label="Series navigation">
+    {%- if prev_post -%}
+    <a class="post-nav__link post-nav__prev" href="{{ prev_post.url | relative_url }}">
+      <span class="post-nav__label">← Previous</span>
+      <span class="post-nav__title">{{ prev_post.title | escape }}</span>
+    </a>
+    {%- endif -%}
+    {%- if next_post -%}
+    <a class="post-nav__link post-nav__next" href="{{ next_post.url | relative_url }}">
+      <span class="post-nav__label">Next →</span>
+      <span class="post-nav__title">{{ next_post.title | escape }}</span>
+    </a>
+    {%- endif -%}
+  </nav>
+  {%- endif -%}
+{%- endif -%}
