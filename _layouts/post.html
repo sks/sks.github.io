@@ -10,6 +10,13 @@ layout: default
         {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
         {{ page.date | date: date_format }}
       </time>
+      {%- assign words = content | number_of_words -%}
+      {%- if words < 360 -%}
+        {%- assign reading_minutes = 1 -%}
+      {%- else -%}
+        {%- assign reading_minutes = words | divided_by: 180 -%}
+      {%- endif -%}
+      <span class="post-reading-meta" aria-label="Estimated reading time"> · {{ reading_minutes }} min read</span>
     </p>
     {% include author-bio.html %}
   </header>
@@ -18,6 +25,7 @@ layout: default
     {{ content }}
   </div>
 
+  {% include post-nav.html %}
   {% include subscribe.html %}
 
   <a class="u-url" href="{{ page.url | relative_url }}" hidden></a>

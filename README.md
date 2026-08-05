@@ -57,8 +57,10 @@ bundle exec jekyll serve
 ```
 ├── _config.yml          # Site URL, author, SEO defaults, plugins
 ├── _posts/              # Blog posts
-├── _includes/           # head-custom (JSON-LD), author-bio, subscribe
-├── _layouts/post.html   # Post layout with byline + subscribe
+├── _includes/           # head, header, footer, head-custom, author-bio, subscribe, post-nav
+├── _layouts/            # default (skip link + theme JS), post, home
+├── _sass/custom.scss    # Dark/light theme tokens + reading UX styles
+├── assets/js/site.js    # Theme toggle, copy-code, back-to-top
 ├── series/              # Series pillar page
 ├── topics/              # Topic hub pages (FAQ + schema)
 ├── tags/                # Tag archive pages
