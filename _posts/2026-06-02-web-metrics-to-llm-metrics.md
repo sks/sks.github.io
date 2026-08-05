@@ -321,7 +321,7 @@ You don't need a bespoke observability platform to start. Log these fields on ev
 | `retry_count` | Hidden latency multiplier |
 | `model` / `region` | Segmentation |
 
-For agents, add per-step spans: each LLM call and each tool execution as a child of the session trace. Without that breakdown, you'll optimize the wrong hop.
+For agents, add per-step spans: each LLM call and each tool execution as a child of the session trace. Without that breakdown, you'll optimize the wrong hop. The broader [observability model for AI agents](/blog/observability/) combines those traces with cost signals and an audit trail.
 
 ---
 
