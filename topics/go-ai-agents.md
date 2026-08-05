@@ -26,6 +26,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [Go vs Python for AI Agents — Why We Chose Go](/blog/why-go/) | Language decision for a production agent runtime |
 | [Go Platform Architecture at Speed — Without Drowning](/blog/anatomy-of-a-platform/) | Growing a Go codebase fast without drowning in complexity |
 | [AI Agent Runtime vs Platform — Why We Split Them](/blog/aiden-platform/) | CLI agent vs enterprise multi-tenant platform |
+| [Prompt Caching for AI Agents Is an Architecture Problem](/blog/prompt-caching-ai-agents/) | Stable context, early compaction, isolated helpers, and delegated budgets |
 
 ## FAQ
 

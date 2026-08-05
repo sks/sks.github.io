@@ -13,6 +13,13 @@ https://productionnotes.dev
 - https://productionnotes.dev/blog/bring-up-agent-workflows-like-hardware/
 - https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call
 
+## Recent posts
+
+- https://productionnotes.dev/blog/ai-agent-loop-detection-salvage/
+- https://productionnotes.dev/blog/prompt-caching-ai-agents/
+- https://productionnotes.dev/blog/steer-ai-agents-mid-run/
+- https://productionnotes.dev/blog/pii-redaction-ai-agents/
+
 ## Topic hubs
 
 - https://productionnotes.dev/topics/ai-agent-workflows/

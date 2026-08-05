@@ -79,7 +79,7 @@ The agent doesn't block. If it has parallel sub-tasks, it works on those while w
 
 **Batch operations:** Operators can view multiple pending requests at once, grouped by tool type, and approve or reject in bulk. One important guardrail: bulk approval works well for **read-only investigation commands**. For state-modifying operations, each approval should be reviewed individually — otherwise you recreate the rubber-stamp problem at a higher abstraction level.
 
-**What happens on rejection?** When a human rejects a tool call (with or without feedback), the agent receives the rejection as a tool error and can replan. If the human provided feedback (e.g., "use the staging cluster instead"), the agent sees it and can adjust. This gives operators a conversational override, not just a binary approve/deny gate.
+**What happens on rejection?** When a human rejects a tool call (with or without feedback), the agent receives the rejection as a tool error and can replan. If the human provided feedback (e.g., "use the staging cluster instead"), the agent sees it and can adjust. This gives operators a conversational override, not just a binary approve/deny gate. The same idea extends to [steering an AI agent mid-run](/blog/steer-ai-agents-mid-run/) without discarding valid work.
 
 ---
 
