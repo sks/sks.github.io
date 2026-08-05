@@ -10,6 +10,8 @@ Principal Engineer at [StackGen](https://stackgen.com), building enterprise AI a
 
 I write about the engineering decisions, production bugs, and hard-won lessons from building an **AI agent runtime** and **[Aiden](/blog/aiden-platform/)** — StackGen's multi-tenant agent orchestration platform for enterprise SRE and platform teams.
 
+**Featured by CNCF:** [You Can't Debug What You Can't See — Observability for AI Agents](https://www.cncf.io/blog/2026/08/04/you-cant-debug-what-you-cant-see-observability-for-ai-agents/)
+
 ## Start here
 
 New to the series? Read these three, in order:

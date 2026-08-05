@@ -4,10 +4,12 @@ title: "You Can't Debug What You Can't See — Observability for AI Agents"
 date: 2026-06-28 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 9
-description: "Observability for production AI agents — session traces, tool attribution, and token budgets beyond traditional APM."
+description: "Observability for AI agents in production: session traces, tool attribution, token budgets, audit trails, and signals traditional APM misses."
 image: /assets/images/og-observability.png
 tags: [observability, ai-agents, langfuse, monitoring, production]
 ---
+
+> **Featured by CNCF.** An edited version of this article was published on the [Cloud Native Computing Foundation blog](https://www.cncf.io/blog/2026/08/04/you-cant-debug-what-you-cant-see-observability-for-ai-agents/).
 
 Traditional APM can't tell you why your agent spent far more than usual asking the same question three times.
 
