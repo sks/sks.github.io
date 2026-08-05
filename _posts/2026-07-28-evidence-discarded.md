@@ -140,6 +140,7 @@ This is not a substitute for live eval. It is how you stop shipping the same aba
 
 ## Related reading
 
+- [AI agent loop detection — don't throw away the answer](/blog/ai-agent-loop-detection-salvage/)
 - [AI agent root cause analysis — curiosity before confidence](/blog/curiosity-before-confidence/)
 - [Be creative. Don’t invent.](/blog/be-creative-do-not-invent/)
 - [Evidence-gated RCA — prove, then narrate](/blog/evidence-gated-multiplane-rca/)
