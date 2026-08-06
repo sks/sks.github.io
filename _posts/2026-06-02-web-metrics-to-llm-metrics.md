@@ -339,7 +339,6 @@ For agents, add per-step spans: each LLM call and each tool execution as a child
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *Which of these four are you wrestling with most — TTFT, total generation time, pre-fill bloat, or output drift? I'd love to hear what's biting you in production. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

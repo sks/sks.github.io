@@ -163,7 +163,6 @@ Loop detection should stop wasted work. It should not erase completed work on th
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *Has your agent ever produced the right answer and then lost it while trying to finish? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

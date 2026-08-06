@@ -183,7 +183,6 @@ There's a domain-specific tension here: our product is an SRE copilot, and in SR
 
 6. **PII redaction is non-negotiable.** Agents process sensitive data. Memory stores are search targets. Unredacted PII in a vector store is a compliance incident waiting to happen.
 
-**Acknowledgments.** [Nikhil Pavan Kanaka](https://www.linkedin.com/in/nkanaka/) contributed substantially to episodic memory in the agent runtime.
 
 ---
 

@@ -194,7 +194,6 @@ The cheapest prompt is not merely the shortest one. It is the one whose unchange
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *Are your prompt-cache misses a provider problem, or a context-shape problem? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

@@ -53,8 +53,4 @@ By applying rigorous SRE principles—like SLOs, error budgets, and automated re
 
 ---
 
-**Acknowledgments.** [Gururaj Math](https://www.linkedin.com/in/gururaj-math2304/) contributed substantially to the platform evaluation and scorecard UX that this post draws on.
-
----
-
 > 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
