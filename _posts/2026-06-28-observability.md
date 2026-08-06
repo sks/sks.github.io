@@ -128,7 +128,6 @@ These complement traces — they don't replace them.
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *What observability tools do you use for your agent platform? I'm especially interested in cost monitoring and loop detection approaches. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

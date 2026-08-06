@@ -197,7 +197,6 @@ Good agent privacy does not make the system impossible to debug. Good agent obse
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *How do you preserve operator debuggability without feeding sensitive data back into the model? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

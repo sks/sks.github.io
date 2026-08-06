@@ -97,7 +97,6 @@ Secrets — model provider API keys, integration tokens — flow through standar
 
 ---
 
-**Acknowledgments.** [Deepjyot Kapoor](https://www.linkedin.com/in/deepjyot-kapoor/) contributed to platform bootstrap and API surface work at Aiden.
 
 *Does your agent platform use IaC for configuration? I'd love to hear about alternative approaches. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

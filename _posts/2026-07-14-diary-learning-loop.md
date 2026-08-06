@@ -174,7 +174,6 @@ Related: [Pensieve memory](/blog/pensieve-memory/) is about forgetting and curat
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *Are your agents proposing improvements your team actually reviews — or just writing diaries into the void? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

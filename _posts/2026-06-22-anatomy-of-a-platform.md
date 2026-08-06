@@ -75,7 +75,6 @@ The codebase is still fast to work in months later. Adding a new tool provider t
 
 ---
 
-**Acknowledgments.** [Deepjyot Kapoor](https://www.linkedin.com/in/deepjyot-kapoor/) contributed to early platform plumbing and API docs at Aiden.
 
 *What architecture patterns does your team enforce from day one? I'm curious about the "premature" rules that turned out to be essential. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

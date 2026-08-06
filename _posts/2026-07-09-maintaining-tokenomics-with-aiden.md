@@ -218,7 +218,6 @@ A short checklist that does not require reading our config:
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *How does your team balance finish rate, fidelity, and unit economics? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

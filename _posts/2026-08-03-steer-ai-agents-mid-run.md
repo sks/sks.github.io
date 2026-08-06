@@ -194,7 +194,6 @@ Human-in-the-loop should mean more than approving a button at the end. Sometimes
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *Where should operators be able to redirect your agents without restarting the task? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

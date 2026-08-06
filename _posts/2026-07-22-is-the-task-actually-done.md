@@ -177,7 +177,6 @@ Related: [evidence-gated RCA](/blog/evidence-gated-multiplane-rca/), [hypothesis
 
 ---
 
-**Acknowledgments.** [Dhairya Dudhatra](https://www.linkedin.com/in/dhairya-dudhatra/) built much of the early completion-loop foundation in the agent runtime that this hardening builds on.
 
 *Does your agent stop because the goal is met — or because it typed "done"? Picture abhi baaki hai until the checklist is. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

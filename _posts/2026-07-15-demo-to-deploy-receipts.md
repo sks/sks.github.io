@@ -186,7 +186,6 @@ Elevator version: *“We don’t need smarter models first. We need receipts —
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *What receipt do you wish you had asked for before the last agent pilot? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

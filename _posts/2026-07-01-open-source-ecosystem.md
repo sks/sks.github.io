@@ -168,7 +168,6 @@ We adopted MCP for tool connections, A2A for inter-agent communication, and AG-U
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *Do you contribute to the open-source projects your product depends on? I'd love to hear about your approach to the build-vs-contribute tension. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

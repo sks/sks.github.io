@@ -157,7 +157,6 @@ In [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *How do your agents prove they did what they claim? I'd love to hear patterns from other domains. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

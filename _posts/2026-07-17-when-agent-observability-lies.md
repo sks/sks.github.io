@@ -264,7 +264,6 @@ The scorecard that started this post was not lying maliciously. It was doing mat
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *Has an AI scorecard ever given you a precise answer to the wrong question? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

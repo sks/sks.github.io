@@ -125,7 +125,6 @@ No single layer catches everything. That's the point.
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *How many JSON repair layers does your agent stack have? Genuinely curious whether teams hit the validation-before-repair trap too. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 
