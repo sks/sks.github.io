@@ -146,7 +146,6 @@ In the next post, I'll cover how we went from a single "Hello World" commit to a
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *What config format does your agent platform use? I'm genuinely curious about the trade-offs others are making. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

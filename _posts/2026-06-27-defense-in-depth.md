@@ -101,7 +101,6 @@ The failure mode we've seen repeatedly isn't any one layer being weak — it's a
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *What security model does your agent platform use? I'm especially interested in how others handle the "sub-agent bypasses governance" problem. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

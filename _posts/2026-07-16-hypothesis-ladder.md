@@ -157,7 +157,6 @@ The hypothesis ladder is the **on-call behavior layer**: climb, prune, grade, st
 
 ---
 
-**Acknowledgments.** Investigation discipline in this area reflects work across the [StackGen Aiden team](/about/) on production SRE agents and operator-facing workflows.
 
 *Does your AI investigator stop at “probably the deploy” — or show what it ruled out first? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

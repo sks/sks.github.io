@@ -60,7 +60,6 @@ Human responders will readily forgive an AI agent that sets an explicit checkpoi
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/).
 
 *Does your AI agent dig harder when stuck in incident response — or invent the missing piece? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

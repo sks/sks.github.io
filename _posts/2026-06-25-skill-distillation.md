@@ -91,7 +91,6 @@ Two agents with very different roles shared a skill index, and one agent's skill
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *How do you handle agent learning in your system? I'm especially curious about approaches to skill quality and lifecycle management. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

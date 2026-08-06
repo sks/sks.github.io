@@ -109,7 +109,6 @@ This post covers *why* the runtime and platform are split the way they are. The 
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *Building a multi-tenant agent platform, or wrestling with a similar embed-vs-orchestrate decision? I'd love to hear what you're building — find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

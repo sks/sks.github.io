@@ -152,7 +152,6 @@ Finding the lead is Collect. Keeping the lead is RCA. Ship both — or operators
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *Does your AI SRE agent keep the lead — or throw the notebook away when a neighbor’s dog barks? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

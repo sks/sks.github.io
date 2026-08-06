@@ -140,7 +140,6 @@ Healthy HITL has meaningful friction on the requests that matter and near-zero f
 
 ---
 
-**Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
 *How does your team handle the approval fatigue problem? I'd love to hear about alternative approaches. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 
