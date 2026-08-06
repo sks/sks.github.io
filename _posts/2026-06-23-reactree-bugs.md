@@ -4,7 +4,7 @@ title: "Implementing ReAcTree — 6 Production Bugs the Paper Didn't Warn You Ab
 date: 2026-06-23 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 4
-description: "What happens when you take an arXiv algorithm to production. We found 6 bugs that no paper mentions."
+description: "What happens when you take an arXiv algorithm to production. The best way to debug a multi-step AI agent and avoid these 6 ReAcTree bugs."
 image: /assets/images/og-debug.png
 tags: [ai-agents, reactree, production, bugs, go]
 ---
