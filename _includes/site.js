@@ -43,7 +43,7 @@
 
   function initCopyCode() {
     var blocks = document.querySelectorAll(".post-content pre, .page-content pre");
-    blocks.forEach(function (pre) {
+    Array.prototype.forEach.call(blocks, function (pre) {
       if (pre.closest(".code-block")) {
         return;
       }
@@ -60,7 +60,8 @@
       wrap.appendChild(btn);
 
       btn.addEventListener("click", function () {
-        var text = pre.innerText || "";
+        // textContent avoids layout flush that innerText can trigger.
+        var text = pre.textContent || "";
         if (!navigator.clipboard || !navigator.clipboard.writeText) {
           btn.textContent = "Unavailable";
           return;
@@ -86,17 +87,28 @@
       return;
     }
     var showAfter = 480;
-    function onScroll() {
+    var ticking = false;
+    function updateVisibility() {
+      ticking = false;
       btn.hidden = window.scrollY < showAfter;
     }
+    function onScroll() {
+      if (ticking) {
+        return;
+      }
+      ticking = true;
+      window.requestAnimationFrame(updateVisibility);
+    }
     window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
+    // Read scroll position before later DOM work invalidates layout.
+    updateVisibility();
     btn.addEventListener("click", function () {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   }
 
   initThemeToggle();
-  initCopyCode();
+  // Back-to-top reads scrollY; run it before copy-code DOM wraps force a reflow.
   initBackToTop();
+  initCopyCode();
 })();

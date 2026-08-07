@@ -6,7 +6,7 @@ sitemap: false
 
 > Enterprise AI agent engineering in Go — production runtimes, workflows, and SRE automation. By Sabith K S, Principal Engineer at StackGen.
 
-Written by a practitioner shipping agent infrastructure in production. Prefer the Start here and Topics sections first; All posts is the full archive.
+Written by a practitioner shipping agent infrastructure in production. Prefer the Start here and Topics sections first; Recent posts and All posts follow.
 
 ## Start here
 
@@ -20,6 +20,15 @@ Written by a practitioner shipping agent infrastructure in production. Prefer th
 {% assign hub_pages = site.pages | where_exp: "p", "p.hub" %}
 {% for page in hub_pages %}
 - [{{ page.title }}]({{ page.url | absolute_url }}): {{ page.description }}
+{% endfor %}
+
+## Recent posts
+
+{% assign recent_posts = site.posts | slice: 0, 8 %}
+{% for post in recent_posts %}
+{% unless post.sitemap == false %}
+- [{{ post.title }}]({{ post.url | absolute_url }}): {{ post.description }}
+{% endunless %}
 {% endfor %}
 
 ## All posts
@@ -36,3 +45,4 @@ Written by a practitioner shipping agent infrastructure in production. Prefer th
 - [Tags]({{ "/tags/" | absolute_url }}): Browse posts by tag.
 - [RSS feed]({{ "/feed.xml" | absolute_url }}): Full post feed.
 - [Newsletter]({{ site.newsletter_url }}): Low-volume Substack subscribe.
+- [Posts index (JSON)]({{ "/assets/posts-index.json" | absolute_url }}): Machine-readable post catalog for agents and WebMCP tools.

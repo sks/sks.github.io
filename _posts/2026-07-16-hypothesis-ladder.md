@@ -8,6 +8,13 @@ description: "Hypothesis-driven debugging for AI SRE root cause analysis — cli
 image: /assets/images/og-evidence-rca.png
 tags: [sre, incident-response, root-cause-analysis, ai-agents, on-call, hypothesis-driven-debugging, production, aiden]
 permalink: /blog/hypothesis-ladder/
+faqs:
+  - question: "What is the hypothesis ladder in AI RCA?"
+    answer: "Climb investigation in order — identity and onset before deploy theories — prune with cheap disproof, and forbid the narrative from getting ahead of telemetry."
+  - question: "Why do agents latch onto the first plausible story?"
+    answer: "Fluency is not evidence. Models often write an RCA-shaped paragraph around a recent deploy before elimination work finishes."
+  - question: "Is a longer prompt the fix for early narrating?"
+    answer: "No. Treat investigation as ordered elimination with parallel branches and prove-first gates, not more soft instructions."
 ---
 
 **Hypothesis-driven debugging** for AI **root cause analysis (RCA)** fails when the investigator narrates before eliminating. The demo version reads like a senior engineer on a good day. The on-call version often reads the same — polished, confident, and wrong — because fluency is not evidence.

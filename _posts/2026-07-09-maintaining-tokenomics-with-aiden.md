@@ -7,6 +7,13 @@ series_order: 17
 description: "LLM token budget strategies for production agents — context budgets, tool compression, and FinOps loops that keep sessions finishing."
 image: /assets/images/og-tokenomics.png
 tags: [llm, finops, ai-agents, context-window, production, aiden]
+faqs:
+  - question: "What is LLM tokenomics for production agents?"
+    answer: "An operating model for context budgets, tool-response compression, and FinOps loops — not just picking a cheaper model."
+  - question: "Why doesn't switching to a smaller model fix agent cost?"
+    answer: "Sessions often die from context exhaustion after huge tool payloads, not from reasoning cost. Smaller models help greetings; they do not fix wall-of-JSON tool returns."
+  - question: "What should you balance in a token operating model?"
+    answer: "Keep context budget, tool compression, and session completion in balance so triage finishes instead of dying mid-investigation."
 ---
 
 Finance asked us to cut LLM spend. Engineering's first instinct was routing everything to a smaller model. That helped on salutations. It did **nothing** for the incident where a log query returned a wall of JSON and the session died mid-triage — not because reasoning was expensive, but because we **ran out of context**.

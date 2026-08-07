@@ -7,6 +7,13 @@ series_order: 18
 description: "The best way to debug a multi-step AI agent and execution logs. Bring up multi-stage agent pipelines one stage at a time."
 image: /assets/images/og-bring-up-workflows.png
 tags: [ai-agents, workflows, evaluation, golang, sre, testing]
+faqs:
+  - question: "How do you debug a multi-step AI agent workflow?"
+    answer: "Bring up one stage at a time against a golden gate — like hardware board bring-up. Green each stage repeatedly before adding the next. End-to-end runs hide which stage failed."
+  - question: "Why are full end-to-end agent runs a bad first debug loop?"
+    answer: "They are expensive in tokens, slow, and non-deterministic. A wrong answer can be smeared across every stage, so you cannot tell who to blame without isolating stages."
+  - question: "What should you score when bringing up agent pipelines?"
+    answer: "Score committed tool calls and stage gates, not raw transcripts. Models will narrate confident conclusions on top of broken middles."
 ---
 
 There's a scene in *Apollo 13* where the crew has to power the command module back up from stone-cold dead, on a battery budget so tight that flipping the wrong switch too early means everybody dies in the dark. They don't just hit the main breaker and vibe. Ken Mattingly sits in a simulator and brings it up **one system at a time, in a precise sequence, under a hard power budget.**

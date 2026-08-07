@@ -7,6 +7,13 @@ series_order: 14
 description: "Evidence-gated multi-plane RCA — fixed DAG, structural evals, and token-aware tool loops for production agent workflows."
 image: /assets/images/og-evidence-rca.png
 tags: [ai-agents, compound-ai, orchestration, evaluation, sre, workflows]
+faqs:
+  - question: "What is evidence-gated RCA for AI agents?"
+    answer: "A fixed investigation DAG with structural evals and token-aware tool loops. Go owns pass/fail gates; the model narrates only after evidence is committed."
+  - question: "Why avoid unconstrained ReAct for production RCA?"
+    answer: "Models are polite and excellent at the looks-right heuristic — marking stages complete from syntactic thought shape instead of earned evidence."
+  - question: "What does prove-then-narrate mean?"
+    answer: "Require committed evidence from observability planes before allowing a fluent root-cause narrative. Narration without proof is a demo pattern, not a production one."
 ---
 
 The demo version of agentic AI is an unconstrained ReAct loop: think, call a tool, think again, declare victory. The production version is uglier. Models are polite, sycophantic, and excellent at the **"looks-right" heuristic** — marking a stage complete because the *syntactic shape* of their own thought history satisfies a stop condition, not because the investigation earned it.

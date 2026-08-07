@@ -7,6 +7,13 @@ series_order: 25
 description: "Why production AI agents need an independent completion check — options we rejected, the goal-scoped loop we shipped, and the papers that shaped it."
 tags: [ai-agents, verification, llm-as-judge, production, golang, aiden, sre, budgets]
 permalink: /blog/is-the-task-actually-done/
+faqs:
+  - question: "Why do production agents need a completion check?"
+    answer: "The word done triggers human next steps. If the agent meant I tried and failed or I wrote a confident paragraph, you get a polished false alarm."
+  - question: "What is a goal-scoped completion loop?"
+    answer: "An independent check that the goal was actually met — separate from the agent's self-report — before declaring the task finished."
+  - question: "Why is done the most expensive word an agent can say?"
+    answer: "Not because of tokens, but because humans close tickets, merge changes, or sleep based on that claim."
 ---
 
 The most expensive word an agent can say is **"done."**

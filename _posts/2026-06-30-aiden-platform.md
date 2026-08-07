@@ -7,6 +7,13 @@ series_order: 11
 description: "AI agent runtime vs multi-tenant platform for GenAI — why we split the Go runtime from enterprise orchestration (Aiden)."
 image: /assets/images/og-platform.png
 tags: [aiden, platform, multi-tenant, architecture, ai-agents, stackgen]
+faqs:
+  - question: "What is an AI agent runtime vs a platform?"
+    answer: "The runtime is the loop that plans, calls tools, and manages context. The platform adds tenancy, policy, durable workflows, budgets, and IaC-configured agents for many teams."
+  - question: "Why split the Go runtime from Aiden?"
+    answer: "A single-user CLI agent and a multi-tenant enterprise orchestration layer have different failure modes, auth, and policy needs. Splitting keeps the core loop lean."
+  - question: "Who is Aiden for?"
+    answer: "Enterprise SRE and platform teams that need multi-tenant agent orchestration with policies, models, budgets, and notification channels — not a personal chatbot demo."
 ---
 
 A CLI tool for one developer is fun. Making it work for dozens of teams with different policies, models, budgets, and notification channels is engineering.

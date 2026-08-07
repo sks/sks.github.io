@@ -7,6 +7,13 @@ series_order: 35
 description: "SRE for agentic systems and AI agents. Introducing Judgment SLOs and how to measure agentic drift in production."
 image: /assets/images/og-default.png
 tags: [ai-agents, sre, observability, golang]
+faqs:
+  - question: "Why isn't API uptime enough for agentic systems?"
+    answer: "An agent can return HTTP 200 while confidently misclassifying alerts or escalating work humans used to handle. Infrastructure green does not mean judgment is healthy."
+  - question: "What is agentic drift?"
+    answer: "Decay of decision quality over time — often from upstream model tweaks, shifting prompts, or degraded tools — while latency and error rate still look fine."
+  - question: "What are Judgment SLOs?"
+    answer: "Service objectives that measure decision quality for agents, not only classic SRE signals like latency, errors, and saturation."
 ---
 
 There is a terrifying new metric in production engineering: **the 100% uptime silent failure.**

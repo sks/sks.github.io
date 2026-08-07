@@ -7,6 +7,13 @@ series_order: 9
 description: "Observability for AI agents in production: session traces, tool attribution, token budgets, audit trails, and signals traditional APM misses."
 image: /assets/images/og-observability.png
 tags: [observability, ai-agents, langfuse, monitoring, production]
+faqs:
+  - question: "Why does traditional APM miss AI agent failures?"
+    answer: "Request latency and error rate do not explain why an agent asked the same question three times or burned a token budget looping on tools."
+  - question: "What signals do you need for agent observability?"
+    answer: "Session-level traces, tool-call attribution, token budgets, and audit trails — not just HTTP metrics."
+  - question: "Was this observability post published elsewhere?"
+    answer: "Yes. An edited version was featured on the CNCF blog covering observability for AI agents."
 ---
 
 > **Featured by CNCF.** An edited version of this article was published on the [Cloud Native Computing Foundation blog](https://www.cncf.io/blog/2026/08/04/you-cant-debug-what-you-cant-see-observability-for-ai-agents/).

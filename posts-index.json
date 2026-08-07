@@ -1,0 +1,42 @@
+---
+layout: null
+permalink: /assets/posts-index.json
+sitemap: false
+---
+{
+  "newsletter_url": {{ site.newsletter_url | jsonify }},
+  "rss_url": {{ "/feed.xml" | absolute_url | jsonify }},
+  "series": {
+    "title": "Building an Enterprise AI Agent Platform in Go",
+    "url": {{ "/series/enterprise-ai-agents-go/" | absolute_url | jsonify }}
+  },
+  "topic_hubs": [
+{%- assign hub_pages = site.pages | where_exp: "p", "p.hub" -%}
+{%- assign hub_first = true -%}
+{%- for hub in hub_pages -%}
+{%- unless hub_first -%},{%- endunless -%}
+{%- assign hub_first = false %}
+    {
+      "title": {{ hub.title | jsonify }},
+      "url": {{ hub.url | absolute_url | jsonify }},
+      "description": {{ hub.description | jsonify }}
+    }
+{%- endfor %}
+  ],
+  "posts": [
+{%- assign post_first = true -%}
+{%- for post in site.posts -%}
+{%- unless post.sitemap == false -%}
+{%- unless post_first -%},{%- endunless -%}
+{%- assign post_first = false %}
+    {
+      "title": {{ post.title | jsonify }},
+      "url": {{ post.url | absolute_url | jsonify }},
+      "description": {{ post.description | default: "" | jsonify }},
+      "date": {{ post.date | date: "%Y-%m-%d" | jsonify }},
+      "tags": {{ post.tags | jsonify }}
+    }
+{%- endunless -%}
+{%- endfor %}
+  ]
+}
