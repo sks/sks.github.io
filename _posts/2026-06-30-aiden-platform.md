@@ -18,6 +18,8 @@ faqs:
 
 A CLI tool for one developer is fun. Making it work for dozens of teams with different policies, models, budgets, and notification channels is engineering.
 
+Short definition first: [What Is an AI Agent Runtime?](/blog/what-is-an-ai-agent-runtime/) — then the split below. Hub: [AI agent runtime](/topics/ai-agent-runtime/).
+
 We built our AI agent runtime as a single-binary CLI tool. It worked beautifully — for one person. Then we needed to run it for an enterprise with many teams, many agents, and strict governance requirements. That's when we built **Aiden** — the [enterprise agent platform in Go](/topics/go-ai-agents/) layer on top of the runtime.
 
 ---

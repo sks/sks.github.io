@@ -5,6 +5,10 @@ permalink: /topics/ai-agent-workflows/
 description: "Production multi-stage AI agent workflows — bring-up discipline, evidence-gated orchestration, and verification patterns for enterprise pipelines."
 hub: ai-agent-workflows
 faqs:
+  - question: "What are AI agent workflows?"
+    answer: "Multi-stage pipelines where each stage depends on the last — ingest, investigate, verify, notify — run by agents with tools and gates, not a single chat turn."
+  - question: "What is an AI agent workflow vs a single agent turn?"
+    answer: "A turn is one plan→tool→answer loop. A workflow chains stages with durable state, skip/loop conditions, and verification so a broken middle cannot hide behind a fluent ending."
   - question: "How do you debug a multi-stage AI agent workflow?"
     answer: "Bring up one stage at a time against a golden gate — like hardware board bring-up. Green each stage repeatedly before adding the next. Score committed tool calls, not raw transcripts."
   - question: "What is evidence-gated agent orchestration?"
@@ -13,7 +17,7 @@ faqs:
     answer: "Pull evidence from systems of record — ArgoCD, Datadog, Grafana — instead of trusting self-reported success. Verification gates should be deterministic where possible."
 ---
 
-Multi-stage **agent workflows** fail differently than single-shot chat. When every stage depends on the last, end-to-end debugging becomes a whodunit — and models will narrate confident conclusions on top of broken middles.
+**AI agent workflows** are multi-stage pipelines — not a single chat turn. They fail differently than single-shot chat: when every stage depends on the last, end-to-end debugging becomes a whodunit — and models will narrate confident conclusions on top of broken middles.
 
 These posts cover how we **bring up**, **orchestrate**, and **verify** production agent pipelines.
 
