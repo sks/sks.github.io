@@ -28,6 +28,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | Post | What you'll learn |
 |------|-------------------|
 | [From Vague GitHub Issue to PR with Aiden](/blog/from-vague-github-issue-to-pr-with-aiden/) | Board SDLC: Specify→Research→Plan comments, Status hops, optional review PR — and why card-drag ≠ issue webhook |
+| [Bring Up Agent Workflows Like Hardware](/blog/bring-up-agent-workflows-like-hardware/) | Green one stage at a time; golden gates; score effects not transcripts |
 | [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/) | Fixed DAG, structural evals, compound-AI orchestration for SRE RCA |
 | [Evidence-Based Verification](/blog/evidence-based-verification/) | Don't trust self-report — check ArgoCD, Datadog, systems of record |
 | [Is the Task Actually Done?](/blog/is-the-task-actually-done/) | Goal-scoped completion loops — independent checks, budgets, mutation-safe retries |
