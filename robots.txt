@@ -3,5 +3,4 @@ Allow: /
 
 Sitemap: https://productionnotes.dev/sitemap.xml
 
-# LLM crawlers: curated site map for agents
-https://productionnotes.dev/llms.txt
+# LLM / agent site map (not a robots directive): https://productionnotes.dev/llms.txt
