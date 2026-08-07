@@ -91,6 +91,14 @@ image: /assets/images/og-default.png  # or post-specific og-*.png
 
 URLs: `permalink: /blog/:title/` — no dates in paths.
 
+### Publish checklist
+
+- Confirm the filename uses the publish date and final slug: `_posts/YYYY-MM-DD-post-slug.md`.
+- Verify front matter before push: `title`, `date`, `description`, and `tags` are filled in, and add `series` / `series_order` when the post belongs to a series.
+- Check whether the default social image is sufficient or whether the post needs its own `image` value.
+- Proofread the post body for broken links, unfinished placeholders, and formatting issues in headings, lists, and code fences.
+- Make sure the post is ready to publish on its intended date/time, since the existing GitHub Pages workflow will build and deploy from `main` after push.
+
 ## License
 
 Content © Sabith K S. All rights reserved.
