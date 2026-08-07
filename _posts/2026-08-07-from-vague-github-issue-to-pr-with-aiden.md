@@ -4,7 +4,7 @@ title: "From Vague GitHub Issue to PR with Aiden"
 date: 2026-08-07 18:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 38
-description: "Follow-along OpenTofu: every Aiden piece as sg_* resources — models, GitHub integration, agent, workflow, webhook, schedule — for Specify → Research → Plan → review PR."
+description: "A follow-along guide to OpenTofu: configuring every Aiden piece as sg_* resources — models, GitHub integration, agent, workflow, webhook, schedule — for Specify → Research → Plan → review PR."
 image: /assets/images/og-default.png
 tags: [ai-agents, github, workflows, aiden, terraform, opentofu, sdlc, beginners]
 permalink: /blog/from-vague-github-issue-to-pr-with-aiden/
@@ -19,6 +19,8 @@ faqs:
     answer: "No. Opening a reviewable PR is enough for a first loop. Merge stays a human decision."
 ---
 
+GitHub Projects are great until the board fills with cards that say “make nav better” and nothing else.
+
 I wanted a boring demo that still felt magical: open a **vague** GitHub issue, watch it land on a Project board, and let [Aiden](/blog/aiden-platform/) walk it through **Specify → Research → Plan** — then, if we asked for it, open a **review PR**. No second orchestration product. No “trust me, the agent did homework” without a comment on the issue.
 
 We dogfooded it on this blog’s repo and a personal GitHub Project. Internally we package the same idea as reusable OpenTofu modules under `appcd-dev/solutions` — **that repo is invite-only today**. So this post does **not** ask you to `module "…"` anything. Below is a **flat root** of `sg_*` resources you can follow with the [StackGen Terraform/OpenTofu provider](/blog/terraform-config/) on a tenant you already have.
@@ -29,9 +31,7 @@ Snippets are teaching shapes (shortened personas/runbooks). Swap URLs, tokens, a
 
 ## The problem
 
-GitHub Projects are great until the board fills with cards that say “make nav better” and nothing else.
-
-Humans then do unpaid product work in the comments:
+When cards stay vague, humans do unpaid product work in the comments:
 
 1. Turn the wish into acceptance criteria (**Specify**)
 2. Look at the repo and write down what already exists (**Research**)
@@ -50,6 +50,8 @@ That is [bring-up discipline](/blog/bring-up-agent-workflows-like-hardware/) app
 ---
 
 ## 0. Provider + variables
+
+**Prerequisite:** you need an **active StackGen / Aiden tenant** (URL + token + org/project id). Without that, `tofu apply` has nowhere to create resources — this is not a local-only sandbox.
 
 Aiden is not “paste a system prompt into a dashboard.” StackGen ships `provider "sg"`. Point it at your tenant; every agent object becomes plan/apply/drift — same muscle memory as the rest of your infra.
 
@@ -299,7 +301,7 @@ output "webhook_ingress_payload_url" {
 }
 ```
 
-On our dogfood host, the trigger lived under a `/guild` API prefix — a bare `/api/v1/...` returned nginx `404` with a valid token. Register the repo webhook for **Issues** (opened), content type JSON, secret = `webhook_token` (or rely on `apiKey` in the URL).
+On our dogfood host, the trigger lived under a `/guild` API prefix — a bare `/api/v1/...` returned an nginx `404` with a valid token. Register the repo webhook for **Issues** (opened), content type JSON, secret = `webhook_token` (or rely on `apiKey` in the URL).
 
 ---
 
@@ -340,7 +342,7 @@ Repo Issues deliveries showed only `opened` and `ping`. Dragging a Projects v2 c
 @issue28_comment.md
 ```
 
-For `gh api`, capital **`-F`** expands `@file`; lowercase `-f` sends the path string. Same class of bug as `#42` eating a shell line.
+For `gh api`, capital **`-F`** expands `@file`; lowercase `-f` sends the path string. This is the same class of bug as putting `#42` on a shell command line — everything after `#` is treated as a comment, so the rest of the command disappears.
 
 ```bash
 gh api "repos/$OWNER/$REPO/issues/$N/comments" -F body=@assist_comment.md
@@ -385,7 +387,9 @@ Open a vague issue on the allowlisted repo — or drag a card and wait for the p
 
 ---
 
-## Lessons
+## Wrap-up
+
+**Takeaways**
 
 1. **`sg_*` resources are the product surface** — follow them before wrapping modules.
 2. **Order matters** — secrets → providers/models → integrations → agent → workflow → webhook/schedule.
@@ -394,15 +398,7 @@ Open a vague issue on the allowlisted repo — or drag a card and wait for the p
 5. **CLI flag semantics are product** — `-F` vs `-f` for `@file`.
 6. **Merge stays human.**
 
----
-
-## Where to look next
-
-- [Terraform for Agent Configuration](/blog/terraform-config/)
-- [How to Debug Multi-Step AI Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/)
-- [AI Agent Runtime vs Platform](/blog/aiden-platform/)
-- [Is the Task Actually Done?](/blog/is-the-task-actually-done/)
-- Packaged modules live in `appcd-dev/solutions` (**invite-only for now**) — same shapes as the flat `sg_*` root above when your org gets access
+**Read next:** [Terraform for Agent Configuration](/blog/terraform-config/) · [How to Debug Multi-Step AI Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/) · [AI Agent Runtime vs Platform](/blog/aiden-platform/) · [Is the Task Actually Done?](/blog/is-the-task-actually-done/). Packaged modules live in `appcd-dev/solutions` (**invite-only for now**) — same shapes as the flat `sg_*` root above when your org gets access.
 
 ---
 
