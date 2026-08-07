@@ -8,7 +8,7 @@ faqs:
   - question: "Why use Go instead of Python for AI agents?"
     answer: "Concurrency, single-binary deployment, and static typing for tool middleware and workflow gates. Python wins for research and notebook iteration; Go wins for long-running production agent runtimes."
   - question: "What is an AI agent runtime vs a platform?"
-    answer: "The runtime is the Go loop that plans, calls tools, and manages context. The platform adds tenancy, policy, durable workflows, and IaC-configured agents — see our posts on why-go and aiden-platform."
+    answer: "The runtime is the Go loop that plans, calls tools, and manages context. The platform adds tenancy, policy, durable workflows, and IaC-configured agents — see what-is-an-ai-agent-runtime, why-go, and aiden-platform."
   - question: "When should you not choose Go for agents?"
     answer: "When your team lacks Go depth, when you need tight HuggingFace or notebook integration, or when iteration speed on prompts matters more than runtime discipline."
   - question: "How do you structure an enterprise agent platform in Go?"
@@ -19,10 +19,13 @@ Every AI framework defaults to Python. We built ours in **Go** — and we'd do i
 
 Part of the series [Building an Enterprise AI Agent Platform in Go](/series/enterprise-ai-agents-go/).
 
+Related hub: [AI agent runtime](/topics/ai-agent-runtime/) — definition and production failure modes for the loop itself.
+
 ## Featured posts
 
 | Post | What you'll learn |
 |------|-------------------|
+| [What Is an AI Agent Runtime?](/blog/what-is-an-ai-agent-runtime/) | Plain definition of the production agent loop |
 | [Go vs Python for AI Agents — Why We Chose Go](/blog/why-go/) | Language decision for a production agent runtime |
 | [Go Platform Architecture at Speed — Without Drowning](/blog/anatomy-of-a-platform/) | Growing a Go codebase fast without drowning in complexity |
 | [AI Agent Runtime vs Platform — Why We Split Them](/blog/aiden-platform/) | CLI agent vs enterprise multi-tenant platform |
