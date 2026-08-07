@@ -15,7 +15,7 @@ faqs:
     answer: "The canonical long-form piece lives on StackGen: AI Incident Triage for SREs — What Actually Helps On-Call. This hub links that essay plus Production Notes follow-ups on hypotheses, evidence gates, and verification."
 ---
 
-**AI for incident triage** is the most searched on-call use case on this site — and the easiest place to ship a demo that fails at 3 AM. These links separate what moved our response from what looked good in a slide deck.
+**AI for incident triage** is the easiest place to ship a demo that fails at 3 AM. These links separate what moved our response from what looked good in a slide deck.
 
 Part of the series [Building an Enterprise AI Agent Platform in Go](/series/enterprise-ai-agents-go/).
 

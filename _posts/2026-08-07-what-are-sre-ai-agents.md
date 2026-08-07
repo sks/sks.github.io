@@ -17,8 +17,6 @@ faqs:
     answer: "Not as the first milestone. Start with parallel context gathering and human-reviewable outputs. Remediations need fail-closed gates, receipts, and Judgment-style health checks — not demo confidence."
 ---
 
-**SRE AI agents** (also searched as *SRE AI agent*, *AI SRE agent*, *AI agents for SRE*)
-
 An **SRE AI agent** is an AI agent whose job is reliability work: shrink an incident, gather context from observability and change systems, propose a hypothesis, and draft RCA-shaped output humans can trust or reject. It is not a general chatbot with PagerDuty pasted into the prompt. It is also not “autonomous remediation” as a first demo — that is how you buy a second outage.
 
 The curated map is [AI agents for SRE](/topics/ai-agents-sre/). The triage landing page is [AI incident triage](/topics/ai-incident-triage/). The long essay on what helps versus demo theater lives on StackGen: [AI Incident Triage for SREs](https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call).

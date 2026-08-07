@@ -17,8 +17,6 @@ faqs:
     answer: "Unbounded tool loops, invisible sessions, context that blows the bill, and no place to put mid-run human steer or fail-closed gates."
 ---
 
-Search for **AI agent runtime** and you mostly get glossary pages and product listicles. Here is the practitioner definition we use when shipping production agents in Go.
-
 An **AI agent runtime** is the process that owns the agent loop: plan the next step, call tools, fold results into context, decide whether to continue or stop. Everything else — chat UI, multi-tenant control plane, IaC for agents, Slack bots — sits around that loop. If you cannot point at the loop, you do not have a runtime. You have a wrapper.
 
 This post is the short answer. The longer engineering story is [why we split runtime from platform](/blog/aiden-platform/) and [why we chose Go](/blog/why-go/). The curated map lives at [AI agent runtime](/topics/ai-agent-runtime/).
