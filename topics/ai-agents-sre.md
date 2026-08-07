@@ -2,9 +2,11 @@
 layout: page
 title: AI Agents for SRE
 permalink: /topics/ai-agents-sre/
-description: "AI-augmented incident triage, agent observability, and tokenomics for on-call teams — what actually helps SREs versus what sounds good in a demo."
+description: "SRE AI agents for incident triage, diagnostics, and RCA — what actually helps on-call teams versus demo theater, plus observability and tokenomics."
 hub: ai-agents-sre
 faqs:
+  - question: "What are SRE AI agents?"
+    answer: "AI agents that help site reliability and on-call teams triage incidents, query observability and change planes, and draft evidence-backed next steps — with budgets and human review, not open-ended auto-remediation theater."
   - question: "What actually helps on-call SRE teams with AI agents?"
     answer: "Parallel context gathering with bounded tool loops, evidence from observability planes, and human-reviewable outputs — not open-ended autonomous remediation in the first iteration."
   - question: "How do you observe AI agent workloads in production?"
@@ -17,7 +19,9 @@ faqs:
     answer: "That is abandon-after-lead — different from inventing under emptiness. When the rule payload matches the pasted alert, ignore mismatched firing peers, pin query windows to fire time, and require Theory to cite the strongest metric or log lead instead of restating the checklist."
 ---
 
-**AI agents for SRE** sit at the intersection of on-call pain and demo hype. These posts separate what moved our incident response from what merely looked impressive in a slide deck.
+**SRE AI agents** sit at the intersection of on-call pain and demo hype. Start with [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/) for the plain definition, then dig into triage, RCA, and observability below.
+
+Also see [AI incident triage](/topics/ai-incident-triage/) for the on-call-specific landing page.
 
 Part of the series [Building an Enterprise AI Agent Platform in Go](/series/enterprise-ai-agents-go/).
 
@@ -25,6 +29,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 
 | Post | What you'll learn |
 |------|-------------------|
+| [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/) | Plain definition — triage vs RCA vs remediation |
 | [AI Incident Triage for SREs — What Actually Helps On-Call](https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call) | Practitioner take on what helps on-call vs demo theater (on StackGen) |
 | [You Can't Debug What You Can't See — Observability for AI Agents](/blog/observability/) | Why traditional APM fails for agent workloads |
 | [LLM Tokenomics for Production Agents — Context Budgets as an Operating Model](/blog/maintaining-tokenomics-with-aiden/) | Context budgets, compression, FinOps operating model |
