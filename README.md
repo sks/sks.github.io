@@ -60,7 +60,7 @@ bundle exec jekyll serve
 ├── _includes/           # head, header, footer, head-custom, author-bio, subscribe, post-nav
 ├── _layouts/            # default (skip link + theme JS), post, home
 ├── _sass/custom.scss    # Dark/light theme tokens + reading UX styles
-├── assets/js/site.js    # Theme toggle, copy-code, back-to-top
+├── _includes/site.js    # Theme toggle, copy-code, back-to-top (inlined)
 ├── series/              # Series pillar page
 ├── topics/              # Topic hub pages (FAQ + schema)
 ├── tags/                # Tag archive pages
