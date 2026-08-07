@@ -42,36 +42,13 @@ That is [bring-up discipline](/blog/bring-up-agent-workflows-like-hardware/) app
 
 ---
 
-## The easy path
+## The easy path (follow-up)
 
 If you already have an Aiden tenant, you do **not** need to assemble every secret, model, agent, workflow, webhook, and schedule by hand.
 
-Use the public OpenTofu module:
+**[Aiden the Easy Way](/blog/aiden-the-easy-way/)** is the adoption guide: all-in-one wrapper, composable module, webhook registration, and apply loop for [sks/aiden-github-project-assistant](https://github.com/sks/aiden-github-project-assistant) (`v0.1.0`).
 
-**[github.com/sks/aiden-github-project-assistant](https://github.com/sks/aiden-github-project-assistant)** (`ref=v0.1.0`)
-
-```hcl
-module "github_project_assistant" {
-  source = "github.com/sks/aiden-github-project-assistant?ref=v0.1.0"
-
-  model_names                      = module.foundation.model_names
-  existing_github_integration_name = module.github.integration_name
-
-  default_project_url           = "https://github.com/users/YOU/projects/1"
-  webhook_repository_full_names = ["YOU/your-repo"]
-
-  enable_github_webhook       = true
-  enable_implement            = true
-  enable_status_poll_schedule = true
-
-  webhook_trigger_base_url = "${var.stackgen_url}/guild"
-  webhook_trigger_org_id   = var.stackgen_project_id
-}
-```
-
-First-time demo without shared foundation? Use the all-in-one wrapper at `//wrappers/all-in-one?ref=v0.1.0` (see the module README). After `tofu apply`, paste `webhook_ingress_payload_url` into the repo’s Issues webhook, and the PR-merge URL into Pull request events when implement is on.
-
-**Easy Way** = consume the module. **Hard Way** = understand why those pieces exist.
+**Easy Way** = consume the module. **Hard Way** (this post) = understand why those pieces exist.
 
 ---
 
@@ -162,7 +139,7 @@ Our dogfood closed with [PR #31](https://github.com/sks/sks.github.io/pull/31).
 4. **Wire every gesture you care about** — issues, status poll, PR merge.
 5. **Merge stays human.**
 
-**Read next:** [Terraform for Agent Configuration](/blog/terraform-config/) · [How to Debug Multi-Step AI Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/) · [AI Agent Runtime vs Platform](/blog/aiden-platform/) · [Is the Task Actually Done?](/blog/is-the-task-actually-done/)
+**Read next:** [Aiden the Easy Way](/blog/aiden-the-easy-way/) · [Terraform for Agent Configuration](/blog/terraform-config/) · [How to Debug Multi-Step AI Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/) · [AI Agent Runtime vs Platform](/blog/aiden-platform/)
 
 Module: [sks/aiden-github-project-assistant](https://github.com/sks/aiden-github-project-assistant)
 
