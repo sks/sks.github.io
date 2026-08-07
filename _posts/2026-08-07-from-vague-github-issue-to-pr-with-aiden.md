@@ -1,59 +1,54 @@
 ---
 layout: post
-title: "From Vague GitHub Issue to PR with Aiden"
+title: "Automating GitHub Projects with AI: From Vague Issue to PR using OpenTofu and Aiden"
 date: 2026-08-07 18:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 38
-description: "A follow-along guide to OpenTofu: configuring every Aiden piece as sg_* resources — models, GitHub integration, agent, workflow, webhook, schedule — for Specify → Research → Plan → review PR."
+description: "A step-by-step guide to configuring AI agents with OpenTofu. Learn how to use StackGen's Aiden to automate GitHub Project boards from Specify to PR."
 image: /assets/images/og-default.png
 tags: [ai-agents, github, workflows, aiden, terraform, opentofu, sdlc, beginners]
 permalink: /blog/from-vague-github-issue-to-pr-with-aiden/
 faqs:
   - question: "Can an AI agent run a GitHub Project board SDLC?"
-    answer: "Yes, if you keep the board as source of truth, write evidence as issue comments, and treat Status hops as one step at a time — with humans merging any PR."
+    answer: "Yes, if you keep the board as the source of truth, write evidence as issue comments, and treat Status hops as one step at a time — with humans merging any PR."
   - question: "How do you configure Aiden agents with Terraform or OpenTofu?"
     answer: "Aiden ships a Terraform/OpenTofu provider. You declare agents, workflows, webhooks, schedules, and policies as sg_* resources, then tofu plan / tofu apply like any other infrastructure."
   - question: "Why did dragging a Project card not trigger my agent webhook?"
-    answer: "Repo Issues webhooks fire on issue events, not on Projects v2 Status changes. You need a different signal — for example a short poll of the board — if humans drag cards."
+    answer: "Repo Issues webhooks fire on issue events, not on Projects v2 Status changes. You need a different signal — for example, a short poll of the board — if humans drag cards."
   - question: "Should the agent merge the PR?"
     answer: "No. Opening a reviewable PR is enough for a first loop. Merge stays a human decision."
 ---
 
-GitHub Projects are great until the board fills with cards that say “make nav better” and nothing else.
+GitHub Projects are great until the board fills with cards that say “make nav better” and absolutely nothing else.
 
-I wanted a boring demo that still felt magical: open a **vague** GitHub issue, watch it land on a Project board, and let [Aiden](/blog/aiden-platform/) walk it through **Specify → Research → Plan** — then, if we asked for it, open a **review PR**. No second orchestration product. No “trust me, the agent did homework” without a comment on the issue.
+Humans then have to do unpaid product work in the comments: turning the wish into acceptance criteria (**Specify**), looking at the repo to see what already exists (**Research**), writing a plan someone could actually implement (**Plan**), and maybe opening a PR (**Implement**).
 
-We dogfooded it on this blog’s repo and a personal GitHub Project. Internally we package the same idea as reusable OpenTofu modules under `appcd-dev/solutions` — **that repo is invite-only today**. So this post does **not** ask you to `module "…"` anything. Below is a **flat root** of `sg_*` resources you can follow with the [StackGen Terraform/OpenTofu provider](/blog/terraform-config/) on a tenant you already have.
+I wanted a boring demo that still felt magical: open a **vague** GitHub issue, watch it land on a Project board, and let [Aiden](/blog/aiden-platform/) walk it through that entire lifecycle — ending with a **review PR**. No second orchestration product. No “trust me, the agent did homework” without a comment on the issue as evidence.
 
-Snippets are teaching shapes (shortened personas/runbooks). Swap URLs, tokens, and column names for your board.
+We dogfooded this on this blog’s repo and a personal GitHub Project. Internally we package the same idea as reusable OpenTofu modules — **that packaging is invite-only today**. So this post does **not** ask you to `module "…"` anything. Below is a complete, step-by-step guide using a flat root of `sg_*` resources with the [StackGen Terraform/OpenTofu provider](/blog/terraform-config/) on a tenant you already have.
+
+> **Note:** Snippets below are teaching shapes (shortened personas/runbooks). Swap URLs, tokens, and column names for your board.
 
 ---
 
-## The problem
+## Best practices for AI kanban automation
 
-When cards stay vague, humans do unpaid product work in the comments:
-
-1. Turn the wish into acceptance criteria (**Specify**)
-2. Look at the repo and write down what already exists (**Research**)
-3. Write a plan someone could implement (**Plan**)
-4. Maybe open a PR (**Implement**)
+Before writing code, apply [bring-up discipline](/blog/bring-up-agent-workflows-like-hardware/) to the board.
 
 | Do | Don’t |
 | -- | ----- |
-| One issue per run | Boil the ocean across the whole board |
-| Comment evidence on the issue | Keep findings only in chat |
-| Hop Status one column at a time | Jump Specify → Done in silence |
-| Open a PR for humans to merge | Auto-merge |
-
-That is [bring-up discipline](/blog/bring-up-agent-workflows-like-hardware/) applied to a kanban.
+| Process one issue per run | Boil the ocean across the whole board |
+| Comment evidence directly on the issue | Keep findings hidden only in chat |
+| Hop Status one column at a time | Jump from Specify to Done in silence |
+| Open a PR for humans to review and merge | Allow the AI to auto-merge |
 
 ---
 
-## 0. Provider + variables
+## Step 0: Set up the StackGen OpenTofu provider
 
 **Prerequisite:** you need an **active StackGen / Aiden tenant** (URL + token + org/project id). Without that, `tofu apply` has nowhere to create resources — this is not a local-only sandbox.
 
-Aiden is not “paste a system prompt into a dashboard.” StackGen ships `provider "sg"`. Point it at your tenant; every agent object becomes plan/apply/drift — same muscle memory as the rest of your infra.
+Aiden is not a platform where you just “paste a system prompt into a dashboard.” StackGen ships a native `provider "sg"`. Point it at your tenant, and every agent object becomes plan, apply, and drift — using the same muscle memory as the rest of your infrastructure.
 
 ```hcl
 terraform {
@@ -99,7 +94,9 @@ We use **OpenTofu** (`tofu`) interchangeably with Terraform for `fmt`, `init`, `
 
 ---
 
-## 1. Model stack — secret → provider → named model
+## Step 1: Configure the LLM provider and models
+
+You only need **one** working model for this demo. We use OpenAI here; attach Anthropic the same way if you prefer Claude.
 
 ```hcl
 resource "sg_secret" "openai" {
@@ -125,11 +122,11 @@ resource "sg_guild_model" "primary" {
 }
 ```
 
-You only need **one** working model for the demo. Attach Anthropic the same way if you prefer Claude.
-
 ---
 
-## 2. GitHub integration — vault + `sg_guild_integration`
+## Step 2: Integrate GitHub Issues and Projects
+
+Without Projects scopes, GraphQL Status reads fail in opaque ways. Budget time for token scopes before blaming the agent.
 
 ```hcl
 resource "sg_secret" "github" {
@@ -156,11 +153,11 @@ resource "sg_guild_integration" "github" {
 }
 ```
 
-Without Projects scopes, GraphQL Status reads fail in opaque ways. Budget time for token scopes before blaming the agent.
-
 ---
 
-## 3. Guardrails policy — merge stays human
+## Step 3: Define guardrails and human-in-the-loop (HITL) policies
+
+We want the agent to have autonomy to open a PR (`gh pr create`), but accountability to land it. Keep destructive actions and **merges** strictly behind HITL approval.
 
 ```hcl
 resource "sg_policy" "guardrails" {
@@ -183,13 +180,11 @@ resource "sg_policy" "guardrails" {
 }
 ```
 
-Allow `gh pr create` in the runbook path; keep **merge** behind HITL. Autonomy to open a PR; accountability to land it.
-
 ---
 
-## 4. Agent + budget + policy attachment
+## Step 4: Deploy the AI agent and budget policy
 
-Put the long persona in `persona.md` next to your root (mission, comment template, “do not merge”). Keep absolute filesystem paths **out** of spawn goals — they trip execution-surface guards when GitHub tools expect relative paths.
+Put your long persona in a `persona.md` file next to your root (mission, comment template, “do not merge”). Keep absolute filesystem paths **out** of spawn goals — they trip execution-surface guards when GitHub tools expect relative paths.
 
 ```hcl
 resource "sg_agent" "project_assistant" {
@@ -221,9 +216,9 @@ resource "sg_agent_policy_attachment" "guardrails" {
 
 ---
 
-## 5. Runbook + workflow
+## Step 5: Bind the agent runbook to a workflow
 
-The runbook markdown is the playbook: how to read Status, what Specify/Research/Plan must post, when to chain, when to open a PR. Bind it to a single workflow stage so chat and webhooks share one entrypoint.
+The runbook markdown is the playbook: how to read Status, what Specify/Research/Plan must post, and when to open a PR. Bind it to a single workflow stage so chat and webhooks share one entrypoint.
 
 ```hcl
 resource "sg_runbook_sop" "item_assist" {
@@ -263,7 +258,9 @@ Start the **workflow**, not a naked agent chat — inputs stay structured.
 
 ---
 
-## 6. Webhook — issue opened
+## Step 6: Trigger workflows with GitHub webhooks
+
+Register the repo webhook for **Issues** (opened), content type JSON, and secret = `webhook_token`.
 
 ```hcl
 resource "sg_webhook" "issues" {
@@ -301,11 +298,11 @@ output "webhook_ingress_payload_url" {
 }
 ```
 
-On our dogfood host, the trigger lived under a `/guild` API prefix — a bare `/api/v1/...` returned an nginx `404` with a valid token. Register the repo webhook for **Issues** (opened), content type JSON, secret = `webhook_token` (or rely on `apiKey` in the URL).
-
 ---
 
-## 7. Schedule — card drag is not an Issues event
+## Step 7: Schedule Status polls for Projects
+
+Dragging a Projects v2 card is **not** an `issues` event. If you want the agent to react when a human drags a card from Research to Plan, you need a schedule. Webhooks and schedules share the same `target_type` and `target_name` pairing.
 
 ```hcl
 resource "sg_agent_schedule" "status_poll" {
@@ -326,31 +323,37 @@ resource "sg_agent_schedule" "status_poll" {
 }
 ```
 
-Webhooks and schedules share the same `target_type` / `target_name` pairing — both aim at the workflow.
-
 ---
 
-## Failure story #1: “I dragged Research → Plan and nothing happened”
+## Troubleshooting common pitfalls
 
-Repo Issues deliveries showed only `opened` and `ping`. Dragging a Projects v2 card is **not** an `issues` event. The schedule is the fix for personal boards — eventual, not instant. **Match the trigger to the UI gesture.**
+If you hit a wall during your `tofu apply` loop, check these:
 
----
-
-## Failure story #2: the agent “posted” `@comment.md`
-
-```text
-@issue28_comment.md
-```
-
-For `gh api`, capital **`-F`** expands `@file`; lowercase `-f` sends the path string. This is the same class of bug as putting `#42` on a shell command line — everything after `#` is treated as a comment, so the rest of the command disappears.
+* **Dragging a card did nothing:** Repo Issues deliveries only show `opened` and `ping`. Dragging a Projects v2 card is not an `issues` event. The schedule block in Step 7 is the fix for personal boards — eventual, not instant. Match the trigger to the UI gesture.
+* **The agent posted `@comment.md` as text:** For `gh api`, a capital **`-F`** expands the `@file`, while a lowercase `-f` sends the literal path string. Make sure your runbook explicitly uses `-F`:
 
 ```bash
 gh api "repos/$OWNER/$REPO/issues/$N/comments" -F body=@assist_comment.md
 ```
 
+This is the same class of bug as putting `#42` on a shell command line — everything after `#` is treated as a comment, so the rest of the command disappears.
+
 ---
 
-## What a good stage comment looks like
+## Wrapping up: see it in action
+
+Apply the flat root, then open a vague issue (or drag a card and wait for the poll):
+
+```bash
+tofu init
+tofu plan
+tofu apply
+
+tofu output -raw webhook_ingress_payload_url
+tofu output -raw webhook_token
+```
+
+Once applied, your agent leaves structured receipts on GitHub issues. A successful stage comment should look like this:
 
 ```markdown
 ### Aiden project assist — Specify
@@ -367,38 +370,22 @@ Goal, in/out of scope, acceptance criteria, open questions…
 Review, answer questions, or let the chain continue.
 ```
 
-Dogfood closed with [navigation polish PR #31](https://github.com/sks/sks.github.io/pull/31) — agent opened, human merged.
+Our dogfooding closed with [navigation polish PR #31](https://github.com/sks/sks.github.io/pull/31) — the agent opened it, and a human merged it.
 
----
+### Key takeaways
 
-## Apply loop
+* **`sg_*` resources are the product surface** — understand them before wrapping modules.
+* **Order of operations matters** — secrets → providers/models → integrations → agent → workflow → webhook/schedule.
+* **Receipts on GitHub** — issue comments beat chat transcripts.
+* **Issue opened ≠ card dragged** — wire both triggers you care about.
+* **Merge stays human** — always require human-in-the-loop for destructive actions.
 
-```bash
-# in your flat root (provider + sg_* resources above)
-tofu init
-tofu plan
-tofu apply
+**Where to look next:**
 
-tofu output -raw webhook_ingress_payload_url
-tofu output -raw webhook_token
-```
-
-Open a vague issue on the allowlisted repo — or drag a card and wait for the poll. “What’s deployed?” is state + Git history.
-
----
-
-## Wrap-up
-
-**Takeaways**
-
-1. **`sg_*` resources are the product surface** — follow them before wrapping modules.
-2. **Order matters** — secrets → providers/models → integrations → agent → workflow → webhook/schedule.
-3. **Receipts on GitHub** — issue comments beat chat transcripts.
-4. **Issue opened ≠ card dragged** — wire both triggers you care about.
-5. **CLI flag semantics are product** — `-F` vs `-f` for `@file`.
-6. **Merge stays human.**
-
-**Read next:** [Terraform for Agent Configuration](/blog/terraform-config/) · [How to Debug Multi-Step AI Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/) · [AI Agent Runtime vs Platform](/blog/aiden-platform/) · [Is the Task Actually Done?](/blog/is-the-task-actually-done/). Packaged modules live in `appcd-dev/solutions` (**invite-only for now**) — same shapes as the flat `sg_*` root above when your org gets access.
+* [Terraform for Agent Configuration](/blog/terraform-config/)
+* [How to Debug Multi-Step AI Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/)
+* [AI Agent Runtime vs Platform](/blog/aiden-platform/)
+* [Is the Task Actually Done?](/blog/is-the-task-actually-done/)
 
 ---
 
