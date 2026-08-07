@@ -45,8 +45,8 @@ defaults:
       author: "Sabith K S"
 
 header_pages:
-  - about.md
   - series/enterprise-ai-agents-go.md
+  - about.md
 
 markdown: kramdown
 highlighter: rouge
