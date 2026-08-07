@@ -51,3 +51,7 @@ header_pages:
 markdown: kramdown
 highlighter: rouge
 permalink: /blog/:title/
+
+# Build future-dated posts. GitHub Pages only rebuilds on push, so a post dated
+# ahead of the last build would otherwise 404 until someone triggers a new build.
+future: true
