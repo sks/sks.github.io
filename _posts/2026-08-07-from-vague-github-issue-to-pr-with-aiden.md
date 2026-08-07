@@ -309,7 +309,7 @@ resource "sg_agent_schedule" "status_poll" {
   target_type = "workflow"
   target_name = sg_workflow.item_assist.name
   name        = "github-project-status-poll"
-  expression  = "*/5 * * * *" # five-field cron, UTC
+  expression  = "0 0 * * 0" # weekly, Sunday 00:00 UTC (five-field cron)
   enabled     = true
 
   action = <<-EOT
