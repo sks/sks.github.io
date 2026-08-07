@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Automating GitHub Projects with AI: Vague Issue to Review PR"
+title: "Aiden the Hard Way: Vague GitHub Issues to Review PRs"
 date: 2026-08-07 18:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 38
-description: "A step-by-step guide to configuring AI agents with OpenTofu. Learn how to use StackGen's Aiden to automate GitHub Project boards from Specify to PR."
+description: "Wire Aiden board SDLC the hard way: every sg_* resource from provider and models through GitHub integration, agent, workflow, webhook, and status poll."
 image: /assets/images/og-default.png
 tags: [ai-agents, github, workflows, aiden, terraform, opentofu, sdlc, beginners]
 permalink: /blog/from-vague-github-issue-to-pr-with-aiden/
@@ -12,7 +12,7 @@ faqs:
   - question: "Can an AI agent run a GitHub Project board SDLC?"
     answer: "Yes, if you keep the board as the source of truth, write evidence as issue comments, and treat Status hops as one step at a time — with humans merging any PR."
   - question: "How do you configure Aiden agents with Terraform or OpenTofu?"
-    answer: "Aiden ships a Terraform/OpenTofu provider. You declare agents, workflows, webhooks, schedules, and policies as sg_* resources, then tofu plan / tofu apply like any other infrastructure."
+    answer: "Aiden ships a Terraform/OpenTofu provider. This Hard Way post declares agents, workflows, webhooks, schedules, and policies as flat sg_* resources. For a packaged module, see Aiden the Easy Way."
   - question: "Why did dragging a Project card not trigger my agent webhook?"
     answer: "Repo Issues webhooks fire on issue events, not on Projects v2 Status changes. You need a different signal — for example, a short poll of the board — if humans drag cards."
   - question: "Should the agent merge the PR?"
@@ -25,7 +25,7 @@ Humans then have to do unpaid product work in the comments: turning the wish int
 
 I wanted a boring demo that still felt magical: open a **vague** GitHub issue, watch it land on a Project board, and let [Aiden](/blog/aiden-platform/) walk it through that entire lifecycle — ending with a **review PR**. No second orchestration product. No “trust me, the agent did homework” without a comment on the issue as evidence.
 
-We dogfooded this on this blog’s repo and a personal GitHub Project. Internally we package the same idea as reusable OpenTofu modules — **that packaging is invite-only today**. So this post does **not** ask you to `module "…"` anything. Below is a complete, step-by-step guide using a flat root of `sg_*` resources with the [StackGen Terraform/OpenTofu provider](/blog/terraform-config/) on a tenant you already have.
+We dogfooded this on this blog’s repo and a personal GitHub Project. This post is **Aiden the Hard Way**: a flat root of `sg_*` resources with the [StackGen Terraform/OpenTofu provider](/blog/terraform-config/) — every layer you would otherwise hide inside a module. Prefer `module "…"` instead? Read the follow-up, [Aiden the Easy Way](/blog/aiden-the-easy-way/).
 
 > **Note:** Snippets below are teaching shapes (shortened personas/runbooks). Swap URLs, tokens, and column names for your board.
 
@@ -377,15 +377,15 @@ Our dogfooding closed with [navigation polish PR #31](https://github.com/sks/sks
 * **`sg_*` resources are the product surface** — understand them before wrapping modules.
 * **Order of operations matters** — secrets → providers/models → integrations → agent → workflow → webhook/schedule.
 * **Receipts on GitHub** — issue comments beat chat transcripts.
-* **Issue opened ≠ card dragged** — wire both triggers you care about.
+* **Issue opened ≠ card dragged ≠ PR merged** — wire the triggers you care about.
 * **Merge stays human** — always require human-in-the-loop for destructive actions.
 
 **Where to look next:**
 
+* [Aiden the Easy Way](/blog/aiden-the-easy-way/) — same outcome via a public OpenTofu module
 * [Terraform for Agent Configuration](/blog/terraform-config/)
 * [How to Debug Multi-Step AI Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/)
 * [AI Agent Runtime vs Platform](/blog/aiden-platform/)
-* [Is the Task Actually Done?](/blog/is-the-task-actually-done/)
 
 ---
 
