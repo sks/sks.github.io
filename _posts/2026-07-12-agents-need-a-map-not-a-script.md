@@ -8,6 +8,13 @@ description: "Runbooks are fine for humans and stable ladders — bad as the age
 image: /assets/images/og-agents-need-a-map.jpg
 tags: [ai-agents, sre, evaluation, compound-ai, workflows, golang]
 permalink: /blog/agents-need-a-map-not-a-script/
+faqs:
+  - question: "Why aren't runbooks enough for an RCA agent?"
+    answer: "Runbooks help humans on stable ladders. As the agent's only navigation they become brittle scripts. Topology, gates, and verify-first beat another long notebook."
+  - question: "What should replace a script-shaped runbook for agents?"
+    answer: "A map: service topology, evidence gates, and verify-first checks across observability planes — not a single forty-page procedure the model must recite."
+  - question: "What intake shapes did the multi-plane RCA work cover?"
+    answer: "Firing alerts and human symptom tickets across metrics, logs, traces, and analytics — inside fixed-stage pipelines rather than free-form chat."
 ---
 
 There's a moment in a great Rahman live set where the band stops replaying the film track and starts reading the room. Same score on paper. Completely different concert.
