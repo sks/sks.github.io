@@ -19,7 +19,7 @@ faqs:
     answer: "That is abandon-after-lead — different from inventing under emptiness. When the rule payload matches the pasted alert, ignore mismatched firing peers, pin query windows to fire time, and require Theory to cite the strongest metric or log lead instead of restating the checklist."
 ---
 
-**SRE AI agents** (AI agents for SRE) sit at the intersection of on-call pain and demo hype. Start with [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/) for the plain definition, then dig into triage, RCA, and observability below.
+**SRE AI agents** sit at the intersection of on-call pain and demo hype. Start with [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/) for the plain definition, then dig into triage, RCA, and observability below.
 
 Also see [AI incident triage](/topics/ai-incident-triage/) for the on-call-specific landing page.
 
