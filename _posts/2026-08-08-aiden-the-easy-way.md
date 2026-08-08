@@ -19,25 +19,44 @@ faqs:
     answer: "Read Aiden the Hard Way for trigger semantics (issue opened vs card drag vs PR merge) and receipt/HITL lessons — then come back here for the module."
 ---
 
-[Aiden the Hard Way](/blog/from-vague-github-issue-to-pr-with-aiden/) is the honest story: why board SDLC needs receipts, three different triggers, and a human merge. This post is the adoption path.
+Your GitHub Project board fills up with cards like “make nav better” and nothing else. Someone still has to turn that wish into acceptance criteria, look at the repo, write a plan, and maybe open a PR. That unpaid product work is exactly what [Aiden the Hard Way](/blog/from-vague-github-issue-to-pr-with-aiden/) taught an agent to do — by wiring every `sg_*` resource by hand.
 
-**Easy Way** = one OpenTofu module. **Hard Way** = understand the pieces under it.
+This post is the **shortcut**. Same outcome, one OpenTofu module.
+
+- **Hard Way** = understand every piece: provider, models, integration, agent, workflow, webhooks, schedule.
+- **Easy Way** = consume a public module that already assembled those pieces for you.
+
+You do not have to read the Hard Way first. Come back to it only when something subtle breaks (there’s a map at the end of this post).
 
 ---
 
-## What you get
+## Who this is for
 
-For **one** GitHub Project item per run:
+You’ll get the most out of this if:
+
+- You have (or can get) an **Aiden / StackGen tenant** and a **GitHub Projects v2 board**.
+- You’re comfortable running `tofu apply` and pasting a webhook URL into GitHub settings.
+- You want an agent that leaves **evidence on the issue**, not a black box that says “trust me.”
+
+You do **not** need to write a system prompt, design a workflow, or understand webhook plumbing. The module ships all of that.
+
+---
+
+## What to expect
+
+By the end of this post you will have applied one module and wired three GitHub gestures. Then, for **one** Project item per run, Aiden does this on its own:
 
 1. Vague issue → **Specify** comment + Status hop  
 2. **Research** against the repo (via GitHub APIs)  
 3. **Plan** someone could implement  
-4. Optional **review PR** (agent opens; you merge)  
-5. **Done** after merge
+4. Optional **review PR** (the agent opens it; **you** merge)  
+5. **Done** — comment + Status hop after you merge
 
-Evidence lives on the **issue**, not only in chat.
+Every step lands as a comment on the **issue**, so the board tells the whole story. Merge stays a human decision, on purpose.
 
-Dogfood on this blog: [navigation polish PR #31](https://github.com/sks/sks.github.io/pull/31).
+Want to see it before you build it? We dogfooded this on this very blog: [navigation polish PR #31](https://github.com/sks/sks.github.io/pull/31).
+
+The rest of this post walks you through it in order: **prerequisites → first demo → production shape → wiring → first run**.
 
 ---
 
@@ -50,7 +69,20 @@ Dogfood on this blog: [navigation polish PR #31](https://github.com/sks/sks.gith
 
 ---
 
-## First-time demo (all-in-one)
+## Pick your starting point
+
+There are two ways to consume the module. Choose one:
+
+| You are… | Use | Why |
+|----------|-----|-----|
+| Trying it for the first time, nothing shared yet | **First-time demo** (below) | Creates the OpenAI + GitHub vaults for you |
+| Already running Aiden with shared models + a GitHub integration | **Production** | Reuses what you have — no duplicate vaults |
+
+Start with the demo. Move to the production shape once it works.
+
+---
+
+## Step 1 — First-time demo (all-in-one)
 
 No shared foundation yet? Use the wrapper that creates OpenAI + GitHub vaults, then the assistant:
 
@@ -85,7 +117,7 @@ tofu output -raw pr_webhook_ingress_payload_url
 
 ---
 
-## Production (composable)
+## Step 1 (alternate) — Production (composable)
 
 When you already have models and a GitHub integration:
 
@@ -113,9 +145,9 @@ Prefer this shape once foundation is shared — avoid a second OpenAI vault per 
 
 ---
 
-## Wire the three gestures
+## Step 2 — Wire the three gestures
 
-After apply:
+After apply, tell GitHub how to reach Aiden. Three gestures, three wirings:
 
 | Gesture | GitHub setting |
 |---------|----------------|
@@ -127,7 +159,7 @@ Content type: `application/json`. Secret: `webhook_token` (or rely on `apiKey` i
 
 ---
 
-## Run it
+## Step 3 — Run it
 
 1. Open a vague issue on an allowlisted repo (or drag a card and wait for the poll).  
 2. Watch Specify / Research / Plan comments appear; Status hops one column at a time.  
