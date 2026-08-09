@@ -43,7 +43,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [AI Agent Root Cause Analysis — Evidence Discarded After the Lead](/blog/evidence-discarded/) | AI agent RCA fails when digs find a lead and discard it — peer noise, fire-time windows, transcript gates |
 | [AI Agent Loop Detection — Don't Throw Away the Answer](/blog/ai-agent-loop-detection-salvage/) | Keep useful incident findings when the agent's finishing loop stalls |
 | [PII Redaction for AI Agents](/blog/pii-redaction-ai-agents/) | Protect model history while preserving authorized operator debugging |
-| [When the Planner Costs More Than the Work](/blog/parent-first-vs-planner-trees/) | Fair A/B: parent-first vs planner trees for single-plane triage |
+| [Single-Agent vs Multi-Agent Orchestration: How to Choose](/blog/single-agent-vs-multi-agent/) | When single-agent vs multi-agent fits SRE triage — fair A/B, both sides |
 
 ## FAQ
 

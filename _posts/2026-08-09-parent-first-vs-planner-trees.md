@@ -1,97 +1,155 @@
 ---
 layout: post
-title: "When the Planner Costs More Than the Work"
+title: "Single-Agent vs Multi-Agent Orchestration: How to Choose"
 date: 2026-08-09 15:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 40
-description: "A fair A/B of parent-first agent loops vs ReAcTree-style planners on the same incident triage job — same findings, very different orchestration tax."
+description: "Single-agent vs multi-agent orchestration for SRE triage — a fair A/B, what each shape is good at, and a decision framework without defaulting to either."
 image: /assets/images/og-default.png
-tags: [ai-agents, sre, reactree, incident-response, workflows, golang, aiden]
-permalink: /blog/parent-first-vs-planner-trees/
+tags: [ai-agents, multi-agent, orchestration, sre, reactree, incident-response, workflows, golang, aiden]
+permalink: /blog/single-agent-vs-multi-agent/
 faqs:
-  - question: "When should an SRE agent skip the planner and work parent-first?"
-    answer: "When the job is one tool plane and a short collect→verdict loop — for example read-only cluster inspection that ends in Theory / Impact / Do-this-now. Spawning children adds wall time without better findings."
-  - question: "When do planner trees still win for incident triage?"
-    answer: "When you need parallel falsifiers across skills or planes — metrics plus logs plus change history — or long-horizon digs that justify isolated workers. The tree earns its keep when branching is the work."
-  - question: "What failed in a fair parent-first vs planner A/B?"
-    answer: "Not finding quality — both paths named the same unhealthy loci. The planner spent extra turns on child spawn, clarifying stalls, and completion-gate retries at the root after a child already finished the dig."
+  - question: "What is the difference between a single-agent and a multi-agent system?"
+    answer: "A single-agent path is one cognitive loop with tools. A multi-agent path is two or more loops coordinated by a planner or orchestrator — specialists, handoffs, and often parallel digs."
+  - question: "When should you use a single agent instead of multi-agent orchestration?"
+    answer: "When the work fits one tool plane and a short collect→verdict loop, and latency or cost matter more than parallel specialization. A capable root with tools often matches multi-agent quality with less coordination tax."
+  - question: "When is multi-agent orchestration worth it for incident triage?"
+    answer: "When you need parallel falsifiers across planes or skills, isolated workers with their own budgets, failure isolation, or auditability of specialist steps — branching is the job, not overhead."
+  - question: "Is multi-agent always better for complex SRE work?"
+    answer: "No. Complexity of the incident does not automatically require multiple agents. Use multi-agent when the work itself branches; use single-agent when one loop can own the dig end to end."
 ---
 
-We already knew [ReAcTree has sharp edges in production](/blog/reactree-bugs/). What we had not measured cleanly was a quieter question:
+The 2026 buying question is rarely “should we use AI agents?” It is **single-agent vs multi-agent orchestration** — one capable loop with tools, or a planner that coordinates specialists.
 
-> For a **single-plane** incident triage job — inspect, gate, summarize — does the planner tree earn its keep, or does a **parent-first** root finish the same work with less tax?
+Vendors sell the diagram. Engineers want to build the diagram. On-call teams inherit the bill.
 
-So we ran a fair A/B. Same prompt. Same models. Same tools and budgets. Differ only by execution shape: one path keeps the root agent on the tools; the other keeps the ReAcTree planner and lets it spawn children.
+We ran a fair A/B on the same [incident triage](/topics/ai-incident-triage/) job to force an honest answer: **same prompt, models, tools, and budgets** — differ only by execution shape. One path was a **single parent-first agent**. The other kept a **ReAcTree-style planner** that could spawn children.
 
-**No architecture blueprint here** — just the comparison lesson, and when to pick which shape.
-
----
-
-## The job (deliberately boring)
-
-Not a multi-plane Grafana → logs → GitHub saga. A **read-only cluster health triage**: look at nodes and workloads, mark unavailable planes as not applicable, hit a completion gate, then write Theory / Impact / Do-this-now with concrete unhealthy names.
-
-That shape matters. It is the kind of work where orchestration overhead shows up as pure waste — or proves it was necessary.
+This is not a takedown of either. Both paths produced the **same class of findings**. The lesson is fit: when each shape earns its keep, and when it does not.
 
 ---
 
-## What stayed the same
+## TL;DR
 
-Both paths found the **same** class of problems:
+- **Single-agent** and **multi-agent** are both legitimate production shapes — not a fashion contest.
+- On a **single-plane** triage job, single-agent finished with less orchestration tax; multi-agent still reached the same Theory.
+- On **multi-plane / parallel** work, the planner’s strengths — isolation, parallel digs, specialist context — are exactly why trees exist ([ReAcTree in production](/blog/reactree-bugs/)).
+- Choose by **branching need**, not by which architecture looks smarter in a slide.
+
+### Explain like I'm five
+
+Sometimes one detective with a notebook is enough. Sometimes you need a team that splits up and reports back. Hiring the whole team for a lost library book is wasteful. Sending one detective into a city-wide investigation alone is also wasteful. Match the team to the mystery.
+
+---
+
+## What people mean by single-agent vs multi-agent
+
+| Shape | What it is | Good faith strength |
+|-------|------------|---------------------|
+| **Single-agent** | One plan → tool → context loop. The root calls tools itself. | Simple to reason about, usually lower latency and token tax, one place to put budgets and HITL |
+| **Multi-agent orchestration** | A planner (or foreman) coordinates child agents with handoffs | Parallelism, specialist personas, failure isolation, clearer audit of who did which dig |
+
+Counting tools does not make a system multi-agent. **Counting cognitive loops** does. One loop with twenty tools is still single-agent. Two loops with a handoff is multi-agent.
+
+---
+
+## The A/B job (kept deliberately narrow)
+
+We used a **read-only cluster health triage**: inspect nodes and workloads, mark unavailable planes as not applicable, satisfy a completion gate, then write Theory / Impact / Do-this-now with concrete unhealthy names.
+
+That is a **single-plane** job on purpose. It is where orchestration either proves useful — or shows up as pure coordination cost. It is *not* a claim that every SRE investigation looks like this. Multi-plane RCA (metrics + logs + change history) is a different beast ([evidence-gated RCA](/blog/evidence-gated-multiplane-rca/), [hypothesis ladder](/blog/hypothesis-ladder/)).
+
+---
+
+## What both sides got right
+
+Both paths named the **same** class of problems:
 
 - A worker node stuck NotReady / unreachable
 - A pod stuck creating because a required secret was missing
-- A workload evicted after disk pressure on a node
+- A workload evicted after disk pressure
 
-Finding quality was a **tie**. The interesting delta was everything around the findings.
-
----
-
-## Where the paths diverged
-
-| Dimension | Parent-first root | Planner / ReAcTree |
-|-----------|-------------------|--------------------|
-| Wall time | Faster finish | Noticeably slower on the same job |
-| Tool chatter | Short, direct loop | Several times more calls |
-| Child agents | None (capability denied) | Spawned children for work the root could do |
-| Completion gate | Clean close | Extra root retries after a child already dug |
-| Theory / Do-this-now | Concrete names | Same loci, more procedural noise |
-
-The planner did not invent better RCA. It paid for **delegation and adaptive loops** on a task that did not need branching.
-
-That matches a failure mode we keep rediscovering: [fluency and ceremony are not evidence](/blog/curiosity-before-confidence/). Here the ceremony was structural — spawn, note, search, retry the gate — not a wrong Theory.
+So the fair story is **not** “one architecture found the truth and the other failed.” Finding quality was a **tie**. The interesting differences were *how* each path spent its budget — and what that implies for other jobs.
 
 ---
 
-## What wins where
+## The case for single-agent (parent-first)
 
-**Prefer parent-first when**
+**Where it shone in this A/B**
 
-- One tool plane owns the dig (shell against the cluster, or one observability family)
-- The loop is short: collect → gate → summarize
-- You care about latency and bill for on-call assist, not for proving the tree can nest
+- Shorter wall time on the same card
+- Fewer tool turns — collect → gate → summarize without a detour through child spawn
+- Cleaner completion: the root owned the dig and the gate in one altitude
+- Easier operator story: one session to read, one place to steer ([mid-run steer](/blog/steer-ai-agents-mid-run/))
 
-**Prefer a planner tree when**
+**Why that is a real product win — not just “simpler is nicer”**
 
-- Competing falsifiers should run in parallel across skills or planes
-- Digs need isolated workers with their own budgets
-- The job is long-horizon enough that orchestration is the product, not overhead
+On-call assist is a latency product. Every extra model hop is a second the human stares at a spinner. For jobs that fit one plane and one checklist, a capable root with the right tools is often enough. Industry write-ups in 2026 keep rediscovering the same thing: many fleets could have been one good agent with structured tools.
 
-This is the same instinct as [bring-up one stage at a time](/blog/bring-up-agent-workflows-like-hardware/): do not pay for a composed system when a single green stage already answers the card.
+**What single-agent is *not* claiming**
+
+It is not “never delegate.” It is “do not pay for a second cognitive loop until the first one is actually stuck or the work truly branches.”
 
 ---
 
-## Fairness pitfalls (the quiet killers)
+## The case for multi-agent orchestration (planner trees)
 
-A few setup mistakes made early runs look like “simple is broken” or “the planner is blind.” None of them were about model IQ.
+**Where the planner is the honest choice**
 
-1. **Budgets that lie** — aggregate ceilings that do not actually raise the root’s iteration limits cut parent-first runs mid-dig while the planner still looked healthy.
-2. **Over-eager redaction** — when tool names and cluster identifiers become opaque placeholders in the model view, agents stall or invent fake tools. Trust the prompt IDs; let rehydration do its job ([PII for agents](/blog/pii-redaction-ai-agents/)).
-3. **Clarifying-question HITL on an unattended bench** — the planner path can pause forever waiting for a human to name tools that were already in the prompt.
-4. **Completion checks at the wrong altitude** — a child can satisfy the gate while the root adaptive loop still rejects “done” until the parent calls the same gate again. That is tree tax, not missing evidence.
-5. **Loop traps on legitimate repeats** — batch inspection and gate retries look like doom loops if exemption policy is too aggressive ([salvage the answer](/blog/ai-agent-loop-detection-salvage/)).
+Even when this narrow A/B made the tree look expensive, the architecture exists for good reasons:
 
-If your A/B is not fair on those five, you are measuring configuration debt — not planner value.
+1. **Parallel falsifiers** — metrics vs logs vs deploys should race, not queue. A single agent serializes; a tree can fan out ([bring-up discipline](/blog/bring-up-agent-workflows-like-hardware/)).
+2. **Specialist context** — a dig worker with a tight persona and tool set stays sharp; a mega-root that “does everything” often gets mediocre at all of it.
+3. **Failure isolation** — a bad dig can fail without poisoning the parent’s whole turn; partial progress is salvageable.
+4. **Governance and audit** — per-child budgets, HITL, and traces nest cleanly when specialists are first-class ([observability for agents](/blog/observability/)).
+5. **Depth with hard limits** — ReAcTree-style systems can allow structured delegation while still capping recursion ([production tree bugs we fixed](/blog/reactree-bugs/)).
+
+**Why the tree looked “heavier” on this particular job**
+
+On a single-plane card, the planner still did planner things: consider children, adaptive completion at the root, more note/search ceremony. That is not stupidity — it is an architecture optimized for branching, applied to a job that did not branch. **Wrong fit ≠ bad architecture.**
+
+---
+
+## Side-by-side (this A/B only)
+
+| Dimension | Single-agent | Multi-agent / ReAcTree |
+|-----------|--------------|-------------------------|
+| Finding quality | Same loci | Same loci |
+| Wall time on this card | Lower | Higher |
+| Tool chatter | Leaner | Heavier |
+| Child agents | None by design | Used |
+| Best fit signal | One plane, short loop | Parallel / multi-skill / isolation |
+
+Treat the table as **evidence for a decision framework**, not a global ranking.
+
+---
+
+## A practical decision framework
+
+Ask these before you pick a shape:
+
+1. **Does the work branch?** Competing hypotheses across planes → lean multi-agent. One plane, one checklist → lean single-agent.
+2. **Is parallelism the product?** Independent digs that should finish together → multi-agent. Strictly sequential collect → single-agent is fine.
+3. **Do specialists need isolation?** Different budgets, tools, or risk profiles per dig → multi-agent. Same tools for the whole turn → single-agent.
+4. **What is the latency budget?** Human waiting on chat → bias single-agent until branching forces otherwise.
+5. **What must you audit?** Step-level specialist trails → multi-agent. One session narrative → single-agent may be enough.
+6. **Are you fair-testing?** Mis-set budgets, over-redaction, HITL clarify stalls, or completion checks at the wrong altitude can fake a winner ([PII for agents](/blog/pii-redaction-ai-agents/), [completion loops](/blog/is-the-task-actually-done/), [loop salvage](/blog/ai-agent-loop-detection-salvage/)).
+
+**Rule of thumb:** start with the simpler shape that can still finish the card; graduate to orchestration when production usage shows real branching — not when the architecture diagram looks cooler.
+
+---
+
+## Fairness pitfalls (both sides get hurt)
+
+Early runs lied until we fixed setup. Worth naming so your own A/Bs stay honest:
+
+1. **Budgets that do not actually apply** to the path under test
+2. **Redaction that hides tool names and IDs** the model must use
+3. **HITL clarify** on unattended benches (multi-agent especially)
+4. **Completion at the wrong altitude** (child done, root still retries)
+5. **Loop detectors** that punish legitimate batch inspection
+
+If those are broken, you are not measuring single-agent vs multi-agent. You are measuring config debt.
 
 ---
 
@@ -99,9 +157,10 @@ If your A/B is not fair on those five, you are measuring configuration debt — 
 
 **Match execution shape to branching need.**
 
-A tree is a tool for parallel uncertainty. A parent-first root is a tool for decisive, single-plane work. Using a tree for the latter does not make the agent smarter; it makes the session longer.
+- A **single agent** is a tool for decisive, same-plane work.
+- A **multi-agent tree** is a tool for parallel uncertainty and specialist isolation.
 
-We will keep ReAcTree for the jobs that need it. We will also stop apologizing for the boring path when the boring path wins.
+We keep both. We use the A/B to stop treating “multi-agent” as a status symbol and “single-agent” as a compromise. Each is a product choice with a good-faith home.
 
 ---
 
@@ -110,13 +169,13 @@ We will keep ReAcTree for the jobs that need it. We will also stop apologizing f
 - [ReAcTree production bugs](/blog/reactree-bugs/) — why trees need hard depth and shared governance
 - [Is the task actually done?](/blog/is-the-task-actually-done/) — completion that is not prose
 - [What are SRE AI agents?](/blog/what-are-sre-ai-agents/) — triage vs RCA vs remediation
-- Hub: [AI incident triage](/topics/ai-incident-triage/) · [AI agent workflows](/topics/ai-agent-workflows/)
+- Hub: [AI incident triage](/topics/ai-incident-triage/) · [AI agent workflows](/topics/ai-agent-workflows/) · [AI agent runtime](/topics/ai-agent-runtime/)
 
 ---
 
-**Acknowledgments.** Parent-first execution in our agent runtime was driven as a product bet by the Aiden / runtime team so ordinary triage stops over-delegating; this A/B is the measurement that made the trade-off concrete.
+**Acknowledgments.** Both execution shapes in our stack are team work across the Aiden / agent-runtime effort — parent-first paths and planner trees each exist because production pulled for them, not because one fashion won.
 
-*Choosing execution shape for on-call agents — or stuck paying planner tax for single-plane digs? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+*Choosing single-agent vs multi-agent for on-call triage? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 
 ---
 

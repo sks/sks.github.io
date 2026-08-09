@@ -41,7 +41,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [AI Agent Root Cause Analysis — Evidence Discarded After the Lead](/blog/evidence-discarded/) | Dig found the lead, then abandoned it for peer noise — transcript gates that catch discard |
 | [AI Agent Loop Detection — Don't Throw Away the Answer](/blog/ai-agent-loop-detection-salvage/) | Preserve the best evidence-backed answer when repetition stops a run |
 | [How to Steer an AI Agent Mid-Run Without Starting Over](/blog/steer-ai-agents-mid-run/) | Apply additive human feedback at safe iteration boundaries |
-| [When the Planner Costs More Than the Work](/blog/parent-first-vs-planner-trees/) | Parent-first vs ReAcTree on the same triage job — match shape to branching need |
+| [Single-Agent vs Multi-Agent Orchestration: How to Choose](/blog/single-agent-vs-multi-agent/) | Decision framework from a fair triage A/B — both shapes have a home |
 
 ## FAQ
 
