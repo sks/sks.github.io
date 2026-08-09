@@ -21,8 +21,15 @@
   {%- capture pn_css -%}{%- include inline-css.scss -%}{%- endcapture -%}
   <style>{{ pn_css | scssify }}</style>
   {%- feed_meta -%}
+  {%- comment -%}
+    Minima-style production gate: local `jekyll serve` stays clean;
+    GitHub Pages builds with JEKYLL_ENV=production.
+  {%- endcomment -%}
   {%- if jekyll.environment == 'production' and site.google_analytics -%}
     {%- include google-analytics.html -%}
+  {%- endif -%}
+  {%- if jekyll.environment == 'production' and site.google_ads.id -%}
+    {%- include google-ads.html -%}
   {%- endif -%}
   {%- include head-custom.html -%}
 </head>

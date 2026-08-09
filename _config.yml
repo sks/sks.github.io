@@ -18,6 +18,13 @@ substack_latest_issue_label: "Issue #1 — Start here"
 indexnow_key: "a9faf91a081fa0b3582b992495fc78fa"
 indexnow_host: "productionnotes.dev"
 
+# Google Ads (gtag). Loaded only when JEKYLL_ENV=production (GitHub Pages).
+# Base tag is sitewide; page_view_conversion fires on each page except 404
+# (override per page with google_ads_conversion: false in front matter).
+google_ads:
+  id: "AW-1027246396"
+  page_view_conversion: "AW-1027246396/3kZTCJ6x7t4cELyS6ukD"
+
 minima:
   social_links:
     - { platform: github, user_url: "https://github.com/sks" }
