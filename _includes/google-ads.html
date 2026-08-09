@@ -1,16 +1,30 @@
 {%- comment -%}
-  Google Ads (gtag.js) base tag + page-view conversion event.
-  IDs come from site.google_ads in _config.yml.
+  Google Ads (gtag.js) — included only when jekyll.environment is production
+  (see _includes/head.html), matching Minima's google_analytics gate.
+
+  Base tag: every page (required for Ads measurement / remarketing).
+  Conversion event: only when site.google_ads.page_view_conversion is set,
+  skipped on 404 and when a page sets google_ads_conversion: false.
 {%- endcomment -%}
+{%- assign gads_id = site.google_ads.id -%}
+{%- assign gads_conversion = site.google_ads.page_view_conversion -%}
+{%- assign fire_conversion = false -%}
+{%- if gads_conversion and page.google_ads_conversion != false -%}
+  {%- unless page.url == '/404.html' -%}
+    {%- assign fire_conversion = true -%}
+  {%- endunless -%}
+{%- endif -%}
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id={{ site.google_ads.id }}"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id={{ gads_id }}"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
+  function gtag(){window.dataLayer.push(arguments);}
   gtag('js', new Date());
-
-  gtag('config', '{{ site.google_ads.id }}');
-{%- if site.google_ads.page_view_conversion -%}
-  gtag('event', 'conversion', {'send_to': '{{ site.google_ads.page_view_conversion }}'});
-{%- endif -%}
+  gtag('config', {{ gads_id | jsonify }});
 </script>
+{%- if fire_conversion %}
+<!-- Event snippet for Page view conversion -->
+<script>
+  gtag('event', 'conversion', {'send_to': {{ gads_conversion | jsonify }}});
+</script>
+{%- endif %}
