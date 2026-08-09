@@ -17,6 +17,8 @@ faqs:
     answer: "When you need parallel falsifiers across planes or skills, isolated workers with their own budgets, failure isolation, or auditability of specialist steps — branching is the job, not overhead."
   - question: "Is multi-agent always better for complex SRE work?"
     answer: "No. Complexity of the incident does not automatically require multiple agents. Use multi-agent when the work itself branches; use single-agent when one loop can own the dig end to end."
+  - question: "How much slower was multi-agent on a single-plane triage A/B?"
+    answer: "On our fair run, multi-agent took about 1.6× the wall time (~95s vs ~58s) and about 3.9× the tool calls (27 vs 7), with the same findings — extra cost was coordination and gate retries, not more inspection depth."
 ---
 
 The 2026 buying question is rarely “should we use AI agents?” It is **single-agent vs multi-agent orchestration** — one capable loop with tools, or a planner that coordinates specialists.
@@ -32,7 +34,7 @@ This is not a takedown of either. Both paths produced the **same class of findin
 ## TL;DR
 
 - **Single-agent** and **multi-agent** are both legitimate production shapes — not a fashion contest.
-- On a **single-plane** triage job, single-agent finished with less orchestration tax; multi-agent still reached the same Theory.
+- On our **single-plane** triage A/B, multi-agent took **~1.6× longer** (~95s vs ~58s) and **~3.9× more tool calls** (27 vs 7) — and still reached the **same** Theory.
 - On **multi-plane / parallel** work, the planner’s strengths — isolation, parallel digs, specialist context — are exactly why trees exist ([ReAcTree in production](/blog/reactree-bugs/)).
 - Choose by **branching need**, not by which architecture looks smarter in a slide.
 
@@ -77,9 +79,10 @@ So the fair story is **not** “one architecture found the truth and the other f
 
 **Where it shone in this A/B**
 
-- Shorter wall time on the same card
-- Fewer tool turns — collect → gate → summarize without a detour through child spawn
-- Cleaner completion: the root owned the dig and the gate in one altitude
+- **~58s** end-to-end vs **~95s** on the planner path (**~1.6×** faster)
+- **7** tool-call starts vs **27** (**~3.9×** leaner) — collect → gate → summarize without child spawn
+- **0** child agents (denied by design) vs **2** spawns on the planner path
+- Cleaner completion at one altitude: gate closed without the root retry storm
 - Easier operator story: one session to read, one place to steer ([mid-run steer](/blog/steer-ai-agents-mid-run/))
 
 **Why that is a real product win — not just “simpler is nicer”**
@@ -106,21 +109,25 @@ Even when this narrow A/B made the tree look expensive, the architecture exists 
 
 **Why the tree looked “heavier” on this particular job**
 
-On a single-plane card, the planner still did planner things: consider children, adaptive completion at the root, more note/search ceremony. That is not stupidity — it is an architecture optimized for branching, applied to a job that did not branch. **Wrong fit ≠ bad architecture.**
+On a single-plane card, the planner still did planner things: spawn children, adaptive completion at the root, more note/search ceremony. In our numbers that showed up as **~1.6× wall time** and **~3.9× tool calls** for the **same** findings — not because the dig needed more shell probes (both paths did three inspection rounds), but because coordination and gate retries piled on. That is not stupidity — it is an architecture optimized for branching, applied to a job that did not branch. **Wrong fit ≠ bad architecture.**
 
 ---
 
 ## Side-by-side (this A/B only)
 
-| Dimension | Single-agent | Multi-agent / ReAcTree |
-|-----------|--------------|-------------------------|
-| Finding quality | Same loci | Same loci |
-| Wall time on this card | Lower | Higher |
-| Tool chatter | Leaner | Heavier |
-| Child agents | None by design | Used |
-| Best fit signal | One plane, short loop | Parallel / multi-skill / isolation |
+One sequential fair run each after setup was honest. Same prompt, models, tools, and budgets.
 
-Treat the table as **evidence for a decision framework**, not a global ranking.
+| Dimension | Single-agent | Multi-agent / ReAcTree | Multi-agent vs single |
+|-----------|-------------:|------------------------:|----------------------:|
+| Wall time | **57.6 s** | **94.7 s** | **~1.6× higher** |
+| Tool-call starts | **7** | **27** | **~3.9× heavier** |
+| Child-agent spawns | 0 | 2 | — |
+| Inspection rounds (shell) | 3 | 3 | tie |
+| Completion-gate calls | 2 | 4 | **2×** |
+| Finding quality | Same loci | Same loci | tie |
+| Best fit signal | One plane, short loop | Parallel / multi-skill / isolation | — |
+
+Treat the table as **evidence for a decision framework**, not a global ranking. One A/B is not a latency SLA — it is a concrete “how much tax did orchestration add when branching was not required?”
 
 ---
 
