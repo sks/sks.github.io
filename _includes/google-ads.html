@@ -1,0 +1,16 @@
+{%- comment -%}
+  Google Ads (gtag.js) base tag + page-view conversion event.
+  IDs come from site.google_ads in _config.yml.
+{%- endcomment -%}
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id={{ site.google_ads.id }}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '{{ site.google_ads.id }}');
+{%- if site.google_ads.page_view_conversion -%}
+  gtag('event', 'conversion', {'send_to': '{{ site.google_ads.page_view_conversion }}'});
+{%- endif -%}
+</script>
