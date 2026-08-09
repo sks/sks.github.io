@@ -28,6 +28,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/) | Structural gates so fluency cannot outrun evidence |
 | [AI Agent Root Cause Analysis — Curiosity Before Confidence](/blog/curiosity-before-confidence/) | Soft prompts do not stop bad RCA; hard gates do |
 | [SRE for Agentic Systems](/blog/sre-for-agentic-systems/) | Why uptime alone is not enough when agents judge |
+| [When the Planner Costs More Than the Work](/blog/parent-first-vs-planner-trees/) | When a planner tree adds tax without better on-call findings |
 
 ## Related hubs
 
