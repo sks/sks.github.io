@@ -28,6 +28,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/) | Structural gates so fluency cannot outrun evidence |
 | [AI Agent Root Cause Analysis — Curiosity Before Confidence](/blog/curiosity-before-confidence/) | Soft prompts do not stop bad RCA; hard gates do |
 | [SRE for Agentic Systems](/blog/sre-for-agentic-systems/) | Why uptime alone is not enough when agents judge |
+| [Single-Agent vs Multi-Agent Orchestration: How to Choose](/blog/single-agent-vs-multi-agent/) | Single-agent vs multi-agent for incident triage — decision framework |
 
 ## Related hubs
 
