@@ -10,12 +10,19 @@ Written by a practitioner shipping agent infrastructure in production. Prefer th
 
 ## Start here
 
+- [SRE on-call starter pack]({{ "/start/sre-on-call/" | absolute_url }}): Five posts on triage, RCA, and observability for on-call.
+- [Go agent runtime starter pack]({{ "/start/go-runtime/" | absolute_url }}): Five posts on runtime definition, Go vs Python, and platform split.
 - [Building an Enterprise AI Agent Platform in Go]({{ "/series/enterprise-ai-agents-go/" | absolute_url }}): Practitioner series on production AI agents in Go — runtime design, workflows, SRE triage, and platform lessons.
 - [What Is an AI Agent Runtime?]({{ "/blog/what-is-an-ai-agent-runtime/" | absolute_url }}): Plain definition of the production agent loop vs platform, chatbot, or notebook demo.
 - [What Are SRE AI Agents?]({{ "/blog/what-are-sre-ai-agents/" | absolute_url }}): SRE AI agents for triage, RCA, and bounded autonomy — not demo theater.
 - [Python vs Go for AI Agents — Why We Chose Go]({{ "/blog/why-go/" | absolute_url }}): Go vs Python for production agent runtimes — concurrency, deployment, and when Python still wins.
 - [How to Debug Multi-Step AI Agent Workflows]({{ "/blog/bring-up-agent-workflows-like-hardware/" | absolute_url }}): Bring up multi-stage agent pipelines one stage at a time against a golden gate.
 - [AI Incident Triage for SREs — What Actually Helps On-Call](https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call): What helps on-call versus demo theater (canonical copy on StackGen).
+
+## Checklists
+
+- [Evidence-gated RCA checklist]({{ "/checklists/evidence-gated-rca/" | absolute_url }}): Prove with receipts before narrating.
+- [“Is the agent task done?” checklist]({{ "/checklists/agent-done/" | absolute_url }}): Completion checks that do not self-grade.
 
 ## Topics
 

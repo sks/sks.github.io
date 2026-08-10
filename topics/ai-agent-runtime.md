@@ -17,6 +17,8 @@ faqs:
 
 An **AI agent runtime** is the process that actually runs the agent: plan, call tools, manage context, finish or fail. Most “agent” marketing skips this layer and sells a platform, a chatbot, or a notebook demo instead.
 
+**Fast path:** [Go agent runtime starter pack](/start/go-runtime/) (five posts).
+
 These posts separate the **runtime** from the **platform**, and explain what broke when we treated them as the same thing.
 
 Part of the series [Building an Enterprise AI Agent Platform in Go](/series/enterprise-ai-agents-go/).
@@ -35,15 +37,5 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 - [Go AI agents](/topics/go-ai-agents/) — language and architecture
 - [AI agent workflows](/topics/ai-agent-workflows/) — multi-stage bring-up and verification
 - [AI agents for SRE](/topics/ai-agents-sre/) — triage, RCA, and on-call use
-
-## FAQ
-
-{% for faq in page.faqs %}
-
-### {{ faq.question }}
-
-{{ faq.answer }}
-
-{% endfor %}
 
 {% include subscribe.html %}

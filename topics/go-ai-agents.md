@@ -17,6 +17,8 @@ faqs:
 
 Every AI framework defaults to Python. We built ours in **Go** — and we'd do it again for production enterprise agents. These posts explain the trade-offs, the architecture patterns, and when you shouldn't follow our path.
 
+**Fast path:** [Go agent runtime starter pack](/start/go-runtime/).
+
 Part of the series [Building an Enterprise AI Agent Platform in Go](/series/enterprise-ai-agents-go/).
 
 Related hub: [AI agent runtime](/topics/ai-agent-runtime/) — definition and production failure modes for the loop itself.
@@ -30,14 +32,5 @@ Related hub: [AI agent runtime](/topics/ai-agent-runtime/) — definition and pr
 | [Go Platform Architecture at Speed — Without Drowning](/blog/anatomy-of-a-platform/) | Growing a Go codebase fast without drowning in complexity |
 | [AI Agent Runtime vs Platform — Why We Split Them](/blog/aiden-platform/) | CLI agent vs enterprise multi-tenant platform |
 | [Prompt Caching for AI Agents Is an Architecture Problem](/blog/prompt-caching-ai-agents/) | Stable context, early compaction, isolated helpers, and delegated budgets |
-
-## FAQ
-
-{% for faq in page.faqs %}
-### {{ faq.question }}
-
-{{ faq.answer }}
-
-{% endfor %}
 
 {% include subscribe.html %}

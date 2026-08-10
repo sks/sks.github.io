@@ -19,9 +19,9 @@ faqs:
     answer: "That is abandon-after-lead — different from inventing under emptiness. When the rule payload matches the pasted alert, ignore mismatched firing peers, pin query windows to fire time, and require Theory to cite the strongest metric or log lead instead of restating the checklist."
 ---
 
-**SRE AI agents** sit at the intersection of on-call pain and demo hype. Start with [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/) for the plain definition, then dig into triage, RCA, and observability below.
+**SRE AI agents** sit at the intersection of on-call pain and demo hype. Start with the **[SRE on-call starter pack](/start/sre-on-call/)** (five posts), or [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/) for the plain definition, then dig into triage, RCA, and observability below.
 
-Also see [AI incident triage](/topics/ai-incident-triage/) for the on-call-specific landing page.
+Also see [AI incident triage](/topics/ai-incident-triage/) for the on-call-specific landing page. Pocket checklists: [evidence-gated RCA](/checklists/evidence-gated-rca/) · [“done” checks](/checklists/agent-done/).
 
 Part of the series [Building an Enterprise AI Agent Platform in Go](/series/enterprise-ai-agents-go/).
 
@@ -44,14 +44,5 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [AI Agent Loop Detection — Don't Throw Away the Answer](/blog/ai-agent-loop-detection-salvage/) | Keep useful incident findings when the agent's finishing loop stalls |
 | [PII Redaction for AI Agents](/blog/pii-redaction-ai-agents/) | Protect model history while preserving authorized operator debugging |
 | [Single-Agent vs Multi-Agent Orchestration: How to Choose](/blog/single-agent-vs-multi-agent/) | When single-agent vs multi-agent fits SRE triage — fair A/B, both sides |
-
-## FAQ
-
-{% for faq in page.faqs %}
-### {{ faq.question }}
-
-{{ faq.answer }}
-
-{% endfor %}
 
 {% include subscribe.html %}

@@ -2,6 +2,7 @@
 layout: post
 title: "What Are SRE AI Agents?"
 date: 2026-08-07 14:00:00 -0700
+last_modified_at: 2026-08-09 17:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 37
 description: "What SRE AI agents are — AI for incident triage, diagnostics, and RCA with bounded autonomy — vs chatbots and open-ended remediation demos."
@@ -19,7 +20,7 @@ faqs:
 
 An **SRE AI agent** is an AI agent whose job is reliability work: shrink an incident, gather context from observability and change systems, propose a hypothesis, and draft RCA-shaped output humans can trust or reject. It is not a general chatbot with PagerDuty pasted into the prompt. It is also not “autonomous remediation” as a first demo — that is how you buy a second outage.
 
-The curated map is [AI agents for SRE](/topics/ai-agents-sre/). The triage landing page is [AI incident triage](/topics/ai-incident-triage/). The long essay on what helps versus demo theater lives on StackGen: [AI Incident Triage for SREs](https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call).
+Fast path: [SRE on-call starter pack](/start/sre-on-call/). The curated map is [AI agents for SRE](/topics/ai-agents-sre/). The triage landing page is [AI incident triage](/topics/ai-incident-triage/). The long essay on what helps versus demo theater lives on StackGen: [AI Incident Triage for SREs](https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call).
 
 ---
 
