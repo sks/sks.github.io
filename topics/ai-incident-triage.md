@@ -36,13 +36,4 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 - [AI agent workflows](/topics/ai-agent-workflows/) — multi-stage bring-up
 - [AI agent runtime](/topics/ai-agent-runtime/) — the loop underneath triage agents
 
-## FAQ
-
-{% for faq in page.faqs %}
-### {{ faq.question }}
-
-{{ faq.answer }}
-
-{% endfor %}
-
 {% include subscribe.html %}

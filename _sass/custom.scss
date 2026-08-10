@@ -578,6 +578,335 @@ hr {
   display: none;
 }
 
+.faq-section {
+  margin: 2.5rem 0 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--pn-border);
+}
+
+.faq-section h2 {
+  margin-top: 0;
+}
+
+.faq-section h3 {
+  margin-top: 1.25rem;
+  font-size: 1.05rem;
+}
+
+.faq-section p {
+  color: var(--pn-text-muted);
+  margin: 0.4rem 0 0;
+}
+
+.pack-table {
+  width: 100%;
+}
+
+// Series archive: dynamic picks, search, month-folded index.
+.series-browser {
+  margin: 2rem 0 1rem;
+}
+
+.series-browser__heading {
+  margin: 2rem 0 1rem;
+}
+
+.series-suggest {
+  margin-bottom: 2rem;
+  padding: 1.1rem 1.25rem 1.25rem;
+  border: 1px solid var(--pn-border);
+  border-radius: 0.75rem;
+  background: var(--pn-bg-elevated);
+}
+
+.series-suggest__heading {
+  margin: 0 0 0.85rem;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+}
+
+.series-suggest__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.series-suggest__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--pn-border);
+  border-radius: 0.6rem;
+  background: var(--pn-bg);
+}
+
+.series-suggest__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--pn-accent);
+}
+
+.series-suggest__link {
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.series-suggest__desc {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--pn-text-muted);
+}
+
+.series-suggest__progress {
+  margin: 0.9rem 0 0;
+  font-size: 0.85rem;
+  color: var(--pn-text-subtle);
+}
+
+.series-search__label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.series-search__row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.series-search__input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--pn-border);
+  border-radius: 0.5rem;
+  background: var(--pn-bg);
+  color: var(--pn-text);
+  font-size: 1rem;
+}
+
+.series-search__input:focus-visible,
+.series-chip:focus-visible,
+.series-control:focus-visible,
+.series-search__clear:focus-visible,
+.series-month__summary:focus-visible {
+  outline: 2px solid var(--pn-link);
+  outline-offset: 2px;
+}
+
+.series-search__clear,
+.series-control {
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--pn-border);
+  border-radius: 0.5rem;
+  background: var(--pn-bg-elevated);
+  color: var(--pn-text);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.series-search__clear:hover,
+.series-control:hover,
+.series-chip:hover {
+  background: var(--pn-toggle-hover);
+}
+
+.series-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.series-chip {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--pn-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--pn-text-muted);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.series-chip[aria-pressed="true"] {
+  border-color: var(--pn-accent);
+  background: var(--pn-bg-elevated);
+  color: var(--pn-text);
+}
+
+.series-chip__count {
+  color: var(--pn-text-subtle);
+  font-size: 0.75rem;
+}
+
+.series-search__status {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  color: var(--pn-text-subtle);
+}
+
+.series-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1.25rem 0 0.75rem;
+}
+
+.series-search[hidden],
+.series-controls[hidden] {
+  display: none;
+}
+
+.series-month {
+  border-bottom: 1px solid var(--pn-border);
+}
+
+.series-month[hidden] {
+  display: none;
+}
+
+.series-month__summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 0.2rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.series-month__summary::-webkit-details-marker {
+  display: none;
+}
+
+// Border-drawn chevron: avoids font fallback surprises with ▸/▾ glyphs.
+.series-month__summary::before {
+  content: "";
+  flex: none;
+  width: 0;
+  height: 0;
+  margin-right: 0.6rem;
+  border-top: 0.34rem solid transparent;
+  border-bottom: 0.34rem solid transparent;
+  border-left: 0.45rem solid var(--pn-text-subtle);
+  transform: translateY(0.1rem);
+}
+
+.series-month[open] > .series-month__summary::before {
+  border-top: 0.45rem solid var(--pn-text-subtle);
+  border-bottom: 0;
+  border-left: 0.34rem solid transparent;
+  border-right: 0.34rem solid transparent;
+}
+
+.series-month__name {
+  flex: 1;
+  font-weight: 600;
+}
+
+.series-month__count {
+  color: var(--pn-text-subtle);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.series-list {
+  margin: 0 0 0.75rem;
+  padding: 0 0 0 1.4rem;
+  list-style: none;
+}
+
+.series-item {
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--pn-border);
+}
+
+.series-item[hidden] {
+  display: none;
+}
+
+.series-item__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.series-item__order {
+  min-width: 1.9rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.35rem;
+  background: var(--pn-bg-elevated);
+  color: var(--pn-text-subtle);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.series-item__link {
+  font-weight: 600;
+}
+
+.series-item__read {
+  padding: 0.05rem 0.45rem;
+  border: 1px solid var(--pn-border);
+  border-radius: 999px;
+  color: var(--pn-text-subtle);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.series-item.is-read .series-item__link {
+  color: var(--pn-link-visited);
+}
+
+.series-item__desc {
+  margin: 0.3rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--pn-text-muted);
+}
+
+.series-item__meta {
+  margin: 0.3rem 0 0;
+  font-size: 0.78rem;
+  color: var(--pn-text-subtle);
+}
+
+.series-empty {
+  margin: 1.25rem 0;
+  color: var(--pn-text-muted);
+}
+
+.series-empty__reset {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pn-link);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .series-controls {
+    flex-wrap: wrap;
+  }
+
+  .series-list {
+    padding-left: 0.6rem;
+  }
+}
+
 // Mobile: keep theme toggle clear of the hamburger; restyle Minima’s light panel.
 @media screen and (max-width: 600px) {
   .site-header .wrapper {

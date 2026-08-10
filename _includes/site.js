@@ -107,8 +107,38 @@
     });
   }
 
+  // Local-only reading history; powers the dynamic picks on the series page.
+  function initReadingHistory() {
+    var canonical = document.querySelector("article.post .u-url");
+    if (!canonical) {
+      return;
+    }
+    var url = canonical.getAttribute("href");
+    if (!url) {
+      return;
+    }
+    var titleEl = document.querySelector(".post-title");
+    var entry = {
+      url: url,
+      title: titleEl ? titleEl.textContent.trim() : document.title,
+      ts: Date.now()
+    };
+    try {
+      var stored = JSON.parse(localStorage.getItem("pn-read"));
+      var history = Array.isArray(stored) ? stored : [];
+      history = history.filter(function (visit) {
+        return visit && visit.url && visit.url !== url;
+      });
+      history.unshift(entry);
+      localStorage.setItem("pn-read", JSON.stringify(history.slice(0, 60)));
+    } catch (e) {
+      /* private mode or corrupt payload */
+    }
+  }
+
   initThemeToggle();
   // Back-to-top reads scrollY; run it before copy-code DOM wraps force a reflow.
   initBackToTop();
   initCopyCode();
+  initReadingHistory();
 })();

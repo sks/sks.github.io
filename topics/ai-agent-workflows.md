@@ -43,13 +43,4 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [How to Steer an AI Agent Mid-Run Without Starting Over](/blog/steer-ai-agents-mid-run/) | Apply additive human feedback at safe iteration boundaries |
 | [Single-Agent vs Multi-Agent Orchestration: How to Choose](/blog/single-agent-vs-multi-agent/) | Decision framework from a fair triage A/B — both shapes have a home |
 
-## FAQ
-
-{% for faq in page.faqs %}
-### {{ faq.question }}
-
-{{ faq.answer }}
-
-{% endfor %}
-
 {% include subscribe.html %}

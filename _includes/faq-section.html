@@ -1,0 +1,9 @@
+{% if page.faqs and page.faqs.size > 0 %}
+<section class="faq-section" aria-labelledby="faq-heading">
+  <h2 id="faq-heading">FAQ</h2>
+  {% for faq in page.faqs %}
+  <h3>{{ faq.question }}</h3>
+  <p>{{ faq.answer }}</p>
+  {% endfor %}
+</section>
+{% endif %}
