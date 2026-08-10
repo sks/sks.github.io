@@ -4,7 +4,7 @@ Personal engineering blog — enterprise AI agents, workflows, Go, and productio
 
 **Live at:** [productionnotes.dev](https://productionnotes.dev) (GitHub Pages source: `sks.github.io`)
 
-**SEO & ops docs:** [`docs/dns-setup.md`](docs/dns-setup.md) · [`docs/search-console.md`](docs/search-console.md) · [`docs/distribution-sprint.md`](docs/distribution-sprint.md) · [`docs/gsc-weekly-checklist.md`](docs/gsc-weekly-checklist.md)
+**SEO & ops docs:** [`docs/dns-setup.md`](docs/dns-setup.md) · [`docs/search-console.md`](docs/search-console.md) · [`docs/distribution-sprint.md`](docs/distribution-sprint.md) · [`docs/linkedin-carousel-template.md`](docs/linkedin-carousel-template.md) · [`docs/geo-citation-probes.md`](docs/geo-citation-probes.md) · [`docs/gsc-weekly-checklist.md`](docs/gsc-weekly-checklist.md)
 
 ---
 
@@ -13,6 +13,12 @@ Personal engineering blog — enterprise AI agents, workflows, Go, and productio
 A 30+ post practitioner series on building a production AI agent platform in Go — from language choice through workflows, SRE triage, and enterprise platform lessons. Based on real production work on [Aiden](https://productionnotes.dev/blog/aiden-platform/), StackGen's enterprise agent orchestration platform.
 
 **Series hub:** [enterprise-ai-agents-go](https://productionnotes.dev/series/enterprise-ai-agents-go/)
+
+**Starter packs:** [SRE on-call](https://productionnotes.dev/start/sre-on-call/) · [Go runtime](https://productionnotes.dev/start/go-runtime/)
+
+**Checklists:** [Evidence-gated RCA](https://productionnotes.dev/checklists/evidence-gated-rca/) · [Done?](https://productionnotes.dev/checklists/agent-done/)
+
+**Distribution:** [`docs/distribution-sprint.md`](docs/distribution-sprint.md) · [`docs/linkedin-carousel-template.md`](docs/linkedin-carousel-template.md) · [`docs/geo-citation-probes.md`](docs/geo-citation-probes.md)
 
 | # | Post | What it covers |
 |---|------|----------------|

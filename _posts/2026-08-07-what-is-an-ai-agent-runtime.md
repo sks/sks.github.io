@@ -2,6 +2,7 @@
 layout: post
 title: "What Is an AI Agent Runtime?"
 date: 2026-08-07 10:00:00 -0700
+last_modified_at: 2026-08-09 17:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 36
 description: "What an AI agent runtime is — the production loop for planning, tools, and context — vs a GenAI platform, chatbot, or notebook demo."
@@ -19,7 +20,7 @@ faqs:
 
 An **AI agent runtime** is the process that owns the agent loop: plan the next step, call tools, fold results into context, decide whether to continue or stop. Everything else — chat UI, multi-tenant control plane, IaC for agents, Slack bots — sits around that loop. If you cannot point at the loop, you do not have a runtime. You have a wrapper.
 
-This post is the short answer. The longer engineering story is [why we split runtime from platform](/blog/aiden-platform/) and [why we chose Go](/blog/why-go/). The curated map lives at [AI agent runtime](/topics/ai-agent-runtime/).
+This post is the short answer. The longer engineering story is [why we split runtime from platform](/blog/aiden-platform/) and [why we chose Go](/blog/why-go/). Fast path: [Go agent runtime starter pack](/start/go-runtime/). The curated map lives at [AI agent runtime](/topics/ai-agent-runtime/).
 
 ---
 

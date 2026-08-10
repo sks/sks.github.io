@@ -14,14 +14,27 @@ I write about the engineering decisions, production bugs, and hard-won lessons f
 
 ## Start here
 
-New to the series? Read these three, in order:
+Pick a path — don't start from a 40-post wall:
+
+| Path | Best for |
+|------|----------|
+| **[SRE on-call starter pack](/start/sre-on-call/)** | Triage, RCA, observability — 5 posts |
+| **[Go agent runtime starter pack](/start/go-runtime/)** | Runtime definition, Go vs Python, platform split — 5 posts |
+| **[Full series (searchable)](/series/enterprise-ai-agents-go/)** | Month-folded archive + search |
+
+Or read these four in order:
 
 1. **[What Is an AI Agent Runtime?](/blog/what-is-an-ai-agent-runtime/)** — plain definition of the production agent loop
 2. **[Go vs Python for AI Agents](/blog/why-go/)** — why we chose Go for a production agent runtime
 3. **[What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/)** — triage vs RCA vs remediation without demo theater
 4. **[AI Incident Triage for SREs — What Actually Helps On-Call](https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call)** — what actually helps on-call (on StackGen)
 
-**Full series:** [Building an Enterprise AI Agent Platform in Go](/series/enterprise-ai-agents-go/)
+## Pocket checklists
+
+Shareable operator checklists (no proprietary schemas):
+
+- [Evidence-gated RCA](/checklists/evidence-gated-rca/)
+- [“Is the agent task done?”](/checklists/agent-done/)
 
 ## Topic hubs
 

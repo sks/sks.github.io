@@ -1,6 +1,28 @@
 User-agent: *
 Allow: /
 
+# Explicit allow for major AI / answer-engine crawlers (GEO).
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
 Sitemap: https://productionnotes.dev/sitemap.xml
 
 # LLM / agent site map (not a robots directive): https://productionnotes.dev/llms.txt
