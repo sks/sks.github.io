@@ -23,6 +23,7 @@ A short path for engineers choosing a language and architecture for production a
 ## Next
 
 - Hub: [AI agent runtime](/topics/ai-agent-runtime/) · [Go AI agents](/topics/go-ai-agents/)  
+- Related: [Claim-aware evidence packing](/blog/claim-aware-evidence-packing/)  
 - Full series: [Building an Enterprise AI Agent Platform in Go](/series/enterprise-ai-agents-go/?q=golang)  
 - On-call path: [SRE on-call starter pack](/start/sre-on-call/)
 

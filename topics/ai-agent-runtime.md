@@ -31,6 +31,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [AI Agent Runtime vs Platform — Why We Split Them](/blog/aiden-platform/) | Why the Go loop stays embeddable and Aiden owns tenancy |
 | [Go vs Python for AI Agents — Why We Chose Go](/blog/why-go/) | Language choice for a production agent runtime |
 | [Go Platform Architecture at Speed](/blog/anatomy-of-a-platform/) | Growing the codebase without drowning |
+| [Claim-Aware Evidence Packing](/blog/claim-aware-evidence-packing/) | Verifier bags that match answer claims; fail open when evidence was cut |
 
 ## Related on this site
 
