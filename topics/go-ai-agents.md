@@ -32,5 +32,6 @@ Related hub: [AI agent runtime](/topics/ai-agent-runtime/) — definition and pr
 | [Go Platform Architecture at Speed — Without Drowning](/blog/anatomy-of-a-platform/) | Growing a Go codebase fast without drowning in complexity |
 | [AI Agent Runtime vs Platform — Why We Split Them](/blog/aiden-platform/) | CLI agent vs enterprise multi-tenant platform |
 | [Prompt Caching for AI Agents Is an Architecture Problem](/blog/prompt-caching-ai-agents/) | Stable context, early compaction, isolated helpers, and delegated budgets |
+| [Claim-Aware Evidence Packing](/blog/claim-aware-evidence-packing/) | Pack verifier bags around claim tokens; fail open on truncation; keep the runtime domain-agnostic |
 
 {% include subscribe.html %}
