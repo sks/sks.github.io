@@ -30,6 +30,7 @@ Use this when reviewing an AI agent's incident write-up. Full essay: [Evidence-G
 
 - [Curiosity before confidence](/blog/curiosity-before-confidence/)  
 - [Hypothesis ladder](/blog/hypothesis-ladder/)  
+- [Claim-aware evidence packing](/blog/claim-aware-evidence-packing/)  
 - [SRE on-call starter pack](/start/sre-on-call/)  
 
 {% include subscribe.html %}
