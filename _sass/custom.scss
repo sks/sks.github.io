@@ -388,6 +388,23 @@ hr {
   background: var(--pn-bg-elevated);
 }
 
+.post-share {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: baseline;
+  margin: 2rem 0;
+  color: var(--pn-text-muted);
+}
+
+.post-share__label {
+  color: var(--pn-text);
+}
+
+.post-share a {
+  text-underline-offset: 0.15em;
+}
+
 .post-author-bio {
   margin-top: 0.25rem;
   font-size: 0.95rem;
