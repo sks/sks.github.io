@@ -1,0 +1,8 @@
+{%- assign share_url = page.url | absolute_url | uri_escape -%}
+{%- assign share_title = page.title | append: " — " | append: site.title | uri_escape -%}
+<nav class="post-share" aria-label="Share this post">
+  <span class="post-share__label">Share this post:</span>
+  <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ share_url }}" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+  <a href="https://x.com/intent/post?url={{ share_url }}&amp;text={{ share_title }}" target="_blank" rel="noopener noreferrer">X</a>
+  <a href="mailto:?subject={{ share_title }}&amp;body={{ share_url }}">Email</a>
+</nav>
