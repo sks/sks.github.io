@@ -44,5 +44,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [AI Agent Loop Detection — Don't Throw Away the Answer](/blog/ai-agent-loop-detection-salvage/) | Keep useful incident findings when the agent's finishing loop stalls |
 | [PII Redaction for AI Agents](/blog/pii-redaction-ai-agents/) | Protect model history while preserving authorized operator debugging |
 | [Single-Agent vs Multi-Agent Orchestration: How to Choose](/blog/single-agent-vs-multi-agent/) | When single-agent vs multi-agent fits SRE triage — fair A/B, both sides |
+| [AI SRE Agent Benchmarks: Wall Time, Tools, Tokens](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/) | Fair scorecard — wall time, tool calls, payload bytes, ReAcTree tax |
+| [Canary First: Consistency Evals for Live SRE Investigate](/blog/canary-first-sre-investigate-consistency-evals/) | Nightly black-box investigate — canary before tokens, draft ≠ done, concurrence |
 
 {% include subscribe.html %}
