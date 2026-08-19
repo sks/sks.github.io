@@ -4,7 +4,7 @@ title: "The Diary Learning Loop — From Daily Agent Digests to Human-Approved P
 date: 2026-07-14 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 21
-description: "AI agent learning loop for production — daily digests become human-approved workflow and policy changes, not bigger vector stores. HITL governance for enterprise agents."
+description: "AI agent learning loop: daily digests become human-approved workflow and policy changes — not a bigger vector store."
 image: /assets/images/og-governance.png
 tags: [ai-agents, learning, governance, workflows, policy, hitl, aiden, production, enterprise-agents]
 permalink: /blog/diary-learning-loop/

@@ -4,7 +4,7 @@ title: "AI Agent Runtime vs Platform — Why We Split Them"
 date: 2026-06-30 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 11
-description: "AI agent runtime vs multi-tenant platform for GenAI — why we split the Go runtime from enterprise orchestration (Aiden)."
+description: "AI agent runtime vs platform: why we split the Go runtime from Aiden, a multi-tenant orchestration layer for enterprise GenAI agents."
 image: /assets/images/og-platform.png
 tags: [aiden, platform, multi-tenant, architecture, ai-agents, stackgen]
 faqs:
@@ -112,7 +112,9 @@ This post covers *why* the runtime and platform are split the way they are. The 
 
 ## Related reading
 
+- [What Is an AI Agent Runtime?](/blog/what-is-an-ai-agent-runtime/) — the loop we split from the platform
 - [Go vs Python for AI Agents](/blog/why-go/) — the language bet under both layers
+- [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/) — the SRE work this platform is for
 - [Terraform for Agent Configuration](/blog/terraform-config/) — IaC for agent governance on the platform
 - More on [Go AI agents](/topics/go-ai-agents/) · full [series](/series/enterprise-ai-agents-go/)
 

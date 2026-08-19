@@ -2,7 +2,7 @@
 layout: page
 title: Go AI Agents
 permalink: /topics/go-ai-agents/
-description: "Building enterprise AI agent platforms in Go — language trade-offs, rapid platform architecture, and why we split runtime from multi-tenant orchestration."
+description: "Go vs Python for AI agents, plus Go platform architecture and why we split the runtime from multi-tenant orchestration."
 hub: go-ai-agents
 faqs:
   - question: "Why use Go instead of Python for AI agents?"

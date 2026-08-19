@@ -4,7 +4,7 @@ title: "TOML Over YAML and PKL — How We Stopped Fighting Config and Started Sh
 date: 2026-06-21 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 2
-description: "We tried YAML, considered PKL, and landed on TOML for agent configuration. The reason surprised us."
+description: "TOML vs YAML vs PKL for agent configuration: why we stopped fighting YAML, skipped PKL, and shipped on TOML."
 image: /assets/images/og-iac.png
 tags: [config, toml, yaml, devops, ai-agents]
 ---

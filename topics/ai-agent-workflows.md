@@ -2,7 +2,7 @@
 layout: page
 title: AI Agent Workflows
 permalink: /topics/ai-agent-workflows/
-description: "Production multi-stage AI agent workflows — bring-up discipline, evidence-gated orchestration, and verification patterns for enterprise pipelines."
+description: "How to debug multi-stage AI agent workflows: bring up one stage at a time, evidence-gated orchestration, and verification for enterprise pipelines."
 hub: ai-agent-workflows
 faqs:
   - question: "What are AI agent workflows?"
@@ -21,6 +21,8 @@ faqs:
 
 These posts cover how we **bring up**, **orchestrate**, and **verify** production agent pipelines.
 
+A company-site version of the bring-up write-up also lives on StackGen: [How We Debug Multi-Stage AI Agent Workflows](https://stackgen.com/blog/how-we-debug-multi-stage-ai-agent-workflows). Primary deep-link on this site: [How We Debug Multi-Stage AI Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/).
+
 Part of the series [Building an Enterprise AI Agent Platform in Go](/series/enterprise-ai-agents-go/).
 
 ## Featured posts
@@ -28,7 +30,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | Post | What you'll learn |
 |------|-------------------|
 | [From Vague GitHub Issue to PR with Aiden](/blog/from-vague-github-issue-to-pr-with-aiden/) | Board SDLC: Specify→Research→Plan comments, Status hops, optional review PR — and why card-drag ≠ issue webhook |
-| [Bring Up Agent Workflows Like Hardware](/blog/bring-up-agent-workflows-like-hardware/) | Green one stage at a time; golden gates; score effects not transcripts |
+| [How We Debug Multi-Stage AI Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/) | Green one stage at a time; golden gates; score effects not transcripts |
 | [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/) | Fixed DAG, structural evals, compound-AI orchestration for SRE RCA |
 | [Evidence-Based Verification](/blog/evidence-based-verification/) | Don't trust self-report — check ArgoCD, Datadog, systems of record |
 | [Is the Task Actually Done?](/blog/is-the-task-actually-done/) | Goal-scoped completion loops — independent checks, budgets, mutation-safe retries |

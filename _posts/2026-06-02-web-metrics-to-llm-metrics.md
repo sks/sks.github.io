@@ -3,7 +3,7 @@ layout: post
 title: "LLM Performance Metrics — From Lighthouse to the Token Era"
 permalink: /blog/web-metrics-to-llm-metrics/
 date: 2026-06-02 10:00:00 -0700
-description: "LLM performance metrics — TTFT, time per output token (TPOT), and token-era equivalents of web vitals for agent workloads."
+description: "LLM performance metrics for agents: TTFT, time per output token (TPOT), and the token-era equivalents of web vitals — what to measure when Lighthouse no longer applies."
 image: /assets/images/og-observability.png
 tags: [llm, performance, observability, web-vitals, ai-agents, system-design]
 series: "Building an Enterprise AI Agent Platform in Go"

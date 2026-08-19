@@ -5,7 +5,7 @@ date: 2026-08-07 10:00:00 -0700
 last_modified_at: 2026-08-11 23:30:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 36
-description: "What an AI agent runtime is — the production loop for planning, tools, and context — vs a GenAI platform, chatbot, or notebook demo."
+description: "What is an AI agent runtime? The production loop that plans, calls tools, and manages context — not a GenAI platform, chatbot, or notebook demo."
 image: /assets/images/og-default.png
 tags: [ai-agents, runtime, golang, production, aiden]
 permalink: /blog/what-is-an-ai-agent-runtime/
@@ -22,7 +22,9 @@ An **AI agent runtime** is the process that owns the agent loop. It plans the ne
 
 If you cannot point at the loop, you do not have a runtime. You have a wrapper around a model call.
 
-This post gives the short definition and the practical boundaries. The longer engineering story explains [why we split runtime from platform](/blog/aiden-platform/) and [why we chose Go](/blog/why-go/). If you want a reading path, use the [Go agent runtime starter pack](/start/go-runtime/) or browse the [runtime topic hub](/topics/ai-agent-runtime/).
+Searchers looking for an **agent runtime** or **AI agent runtime** usually want this distinction first: who owns the loop, and what sits around it.
+
+This post gives the short definition and the practical boundaries. The longer engineering story explains [why we split runtime from platform](/blog/aiden-platform/) and [why we chose Go](/blog/why-go/). If you want a reading path, use the [Go agent runtime starter pack](/start/go-runtime/) or browse the [runtime topic hub](/topics/ai-agent-runtime/). Related SRE path: [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/).
 
 ---
 
@@ -117,7 +119,7 @@ We wrote up the split in [AI Agent Runtime vs Platform](/blog/aiden-platform/). 
 
 - Definition and related posts: [AI runtime reading map](/topics/ai-agent-runtime/)
 - Language: [Go vs Python for AI agents](/blog/why-go/)
-- On-call use: [AI incident triage](/topics/ai-incident-triage/)
+- On-call use: [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/) · [AI incident triage](/topics/ai-incident-triage/)
 - Multi-stage pipelines: [AI agent workflows](/topics/ai-agent-workflows/)
 
 ---

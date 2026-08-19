@@ -4,7 +4,7 @@ title: "From Demo to Deploy — Failure Modes with Receipts"
 date: 2026-07-15 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 22
-description: "Production-ready AI agents need receipts, not fluent demos — evidence gates, bring-up discipline, HITL tiers, and eval checklists for enterprise agent pilots."
+description: "From demo to deploy: production-ready AI agents need receipts, not fluent demos — evidence gates, HITL tiers, and eval checklists for enterprise pilots."
 image: /assets/images/og-hitl.png
 tags: [ai-agents, production, sre, evaluation, hitl, workflows, aiden, compound-ai, enterprise-agents]
 permalink: /blog/demo-to-deploy-receipts/
@@ -76,7 +76,7 @@ Illustrative gate (shape only):
 
 **The demo illusion:** Run the full pipeline once on a clean fixture; declare victory.
 
-**The production reality:** When everything runs at once, every stage looks guilty. **Bring up one rail at a time** against golden gates under **live variance** (real production noise, not demo data) — [Bring Up Agent Workflows Like Hardware](/blog/bring-up-agent-workflows-like-hardware/). Score **expected vs detected class**, not transcript polish.
+**The production reality:** When everything runs at once, every stage looks guilty. **Bring up one rail at a time** against golden gates under **live variance** (real production noise, not demo data) — [How We Debug Multi-Stage AI Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/). Score **expected vs detected class**, not transcript polish.
 
 **The receipt:** per-stage green rates before you celebrate the final summary.
 
@@ -177,7 +177,7 @@ Elevator version: *“We don’t need smarter models first. We need receipts —
 - [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/) — structural gates so narration cannot leapfrog evidence
 - [Your RCA Agent Needs a Map](/blog/agents-need-a-map-not-a-script/) — topology and verify-first probes beat runbook-only agents
 - [AI Incident Triage for SREs](/blog/ai-incident-triage-sre/) — shrink the first thirty minutes with parallel context gather
-- [Bring Up Agent Workflows Like Hardware](/blog/bring-up-agent-workflows-like-hardware/) — stage-by-stage golden gates under live variance
+- [How We Debug Multi-Stage AI Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/) — stage-by-stage golden gates under live variance
 - [The HITL Paradox](/blog/hitl-paradox/) — risk-tiered approvals so review stays real
 - [LLM Tokenomics for Production Agents](/blog/maintaining-tokenomics-with-aiden/) — finish rate and compression as an operating model
 - [The Diary Learning Loop](/blog/diary-learning-loop/) — digests become human-approved workflow/policy changes

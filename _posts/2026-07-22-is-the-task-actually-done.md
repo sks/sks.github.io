@@ -4,7 +4,7 @@ title: "Is the Task Actually Done? — Completion Loops for Production Agents"
 date: 2026-07-22 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 25
-description: "Why production AI agents need an independent completion check — options we rejected, the goal-scoped loop we shipped, and the papers that shaped it."
+description: "Is the AI agent task actually done? Why production agents need an independent completion check — not a self-graded 'I'm finished.'"
 tags: [ai-agents, verification, llm-as-judge, production, golang, aiden, sre, budgets]
 permalink: /blog/is-the-task-actually-done/
 faqs:

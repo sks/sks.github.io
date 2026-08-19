@@ -4,7 +4,7 @@ title: "Reasoning Effort Is Not a Free Upgrade for Tool-Heavy Agents"
 date: 2026-08-12 12:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 42
-description: "Live A/Bs on SRE triage: blanket high reasoning effort timed out, low finished, adaptive low→high dug deeper — and still needed budgets, model routing, and completion contracts."
+description: "Reasoning effort is not a free upgrade for tool-heavy AI agents. Live SRE A/Bs: blanket high timed out, adaptive low→high dug deeper."
 image: /assets/images/og-default.png
 tags: [ai-agents, sre, reasoning, multi-agent, orchestration, incident-response, openai, golang, aiden]
 permalink: /blog/reasoning-effort-is-not-a-free-upgrade/

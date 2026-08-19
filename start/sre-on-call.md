@@ -2,7 +2,7 @@
 layout: page
 title: SRE on-call starter pack
 permalink: /start/sre-on-call/
-description: "Five production notes on SRE AI agents — triage, RCA, observability, and what helps on-call without demo theater."
+description: "Five production notes on SRE AI agents — incident triage, RCA, observability, and what helps on-call without demo theater."
 faqs:
   - question: "What should an SRE read first about AI agents?"
     answer: "Start with what SRE AI agents are, then incident triage that helps on-call, then evidence-gated RCA and observability. Skip autonomous remediation demos until triage and receipts are solid."

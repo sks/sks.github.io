@@ -4,7 +4,7 @@ title: "Beyond Confluence Runbooks: Why GitOps Triage Steps Matter in the AI Era
 date: 2026-07-13 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 20
-description: "Wiki playbooks trained a generation of on-call engineers. AI agents need procedures that change with your stack — and that's an argument for version-controlled runbooks, not against human-friendly docs."
+description: "Beyond Confluence runbooks: why GitOps triage steps matter for AI agents — version-controlled procedures that change with your stack."
 tags: [runbooks, gitops, confluence, sre, incident-response, ai-agents, golang]
 ---
 

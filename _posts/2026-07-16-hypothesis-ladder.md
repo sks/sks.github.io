@@ -4,7 +4,7 @@ title: "The Hypothesis Ladder — Ruling Things Out Before You Narrate"
 date: 2026-07-16 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 23
-description: "Hypothesis-driven debugging for AI SRE root cause analysis — climb identity and onset before deploy theories, keep parallel branches, prove first and narrate last."
+description: "Hypothesis-driven AI SRE root cause analysis: climb identity and onset before deploy theories, keep parallel branches, prove first and narrate last."
 image: /assets/images/og-evidence-rca.png
 tags: [sre, incident-response, root-cause-analysis, ai-agents, on-call, hypothesis-driven-debugging, production, aiden]
 permalink: /blog/hypothesis-ladder/

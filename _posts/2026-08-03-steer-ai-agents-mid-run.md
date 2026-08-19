@@ -4,7 +4,7 @@ title: "How to Steer an AI Agent Mid-Run Without Starting Over"
 date: 2026-08-03 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 31
-description: "How to steer an AI agent mid-run: additive feedback, iteration-boundary delivery, and completion gates so corrections change the active task."
+description: "Can you interrupt or redirect an AI agent mid-response? Yes. How to send steer or cancel signals mid-stream and change the active task without restarting."
 image: /assets/images/og-hitl.png
 tags: [ai-agents, hitl, human-in-the-loop, feedback, orchestration, ux, aiden, production]
 permalink: /blog/steer-ai-agents-mid-run/

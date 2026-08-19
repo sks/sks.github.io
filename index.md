@@ -1,7 +1,7 @@
 ---
 layout: home
 title: "Enterprise AI Agents in Go (Runtime & SRE)"
-description: "Learn how to build enterprise AI agent runtimes, durable workflows, and SRE automation in Go. Production notes by StackGen Principal Engineer Sabith K S."
+description: "Production notes on enterprise AI agent runtimes, SRE agents, and durable workflows in Go — by StackGen Principal Engineer Sabith K S."
 ---
 
 # Production Notes on Enterprise AI Agents

@@ -4,7 +4,7 @@ title: "Terraform for Agent Configuration — Infrastructure as Code Meets AI Go
 date: 2026-06-29 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 10
-description: "We use Terraform to configure our AI agents. Not YAML. Not a dashboard. Terraform. Here's why."
+description: "Terraform for AI agent configuration — why we use infrastructure as code, not YAML dashboards, to govern production agents."
 image: /assets/images/og-iac.png
 tags: [terraform, iac, gitops, ai-agents, governance]
 ---

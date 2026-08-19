@@ -4,7 +4,7 @@ title: "From Vibes to Contracts: How We Rebuilt Agent Evals Around an Industry S
 date: 2026-08-13 19:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 45
-description: "We stopped scoring single RCAs and adopted the industry's evaluation contract: eval sets, rubrics vs criteria, a grader stack, and pass^k reliability."
+description: "From vibes to contracts: how we rebuilt agent evals around eval sets, rubrics vs criteria, a grader stack, and pass^k reliability."
 image: /assets/images/og-default.png
 tags: [ai-agents, evaluation, reliability, sre, rca, adk, pass-at-k, incident-response, aiden, production]
 permalink: /blog/from-vibes-to-contracts-agent-evals/

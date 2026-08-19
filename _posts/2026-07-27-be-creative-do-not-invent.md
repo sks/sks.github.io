@@ -4,7 +4,7 @@ title: "Be Creative. Don't Invent."
 date: 2026-07-27 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 27
-description: "When an AI SRE agent hits a dead end during incident response, creativity means searching harder — not hallucinating rule IDs, metrics, or a tidy root cause analysis."
+description: "When an AI SRE agent hits a dead end, be creative — don't invent. Search harder instead of hallucinating rule IDs, metrics, or a tidy RCA."
 image: /assets/images/og-evidence-rca.png
 tags: [ai-agents, sre, root-cause-analysis, incident-response, on-call, prompt-engineering, aiden, production, llm-hallucination]
 permalink: /blog/be-creative-do-not-invent/

@@ -2,7 +2,7 @@
 layout: page
 title: AI Agent Runtime
 permalink: /topics/ai-agent-runtime/
-description: "What an AI agent runtime is — the production loop for planning, tools, and context — vs a GenAI platform, and how we run it in Go."
+description: "What is an AI agent runtime? The production loop for planning, tools, and context — vs a GenAI platform — and how we run it in Go."
 hub: ai-agent-runtime
 faqs:
   - question: "What is an AI agent runtime?"

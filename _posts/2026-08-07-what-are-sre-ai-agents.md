@@ -5,7 +5,7 @@ date: 2026-08-07 14:00:00 -0700
 last_modified_at: 2026-08-09 17:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 37
-description: "What SRE AI agents are — AI for incident triage, diagnostics, and RCA with bounded autonomy — vs chatbots and open-ended remediation demos."
+description: "What are SRE AI agents? AI for incident triage, diagnostics, and RCA with bounded autonomy — not a chatbot and not open-ended remediation demos."
 image: /assets/images/og-default.png
 tags: [ai-agents, sre, incident-response, on-call, production, aiden]
 permalink: /blog/what-are-sre-ai-agents/
@@ -66,6 +66,7 @@ An SRE agent still needs an [AI agent runtime](/topics/ai-agent-runtime/) — th
 
 - Hub: [AI agents for SRE](/topics/ai-agents-sre/)
 - Hub: [AI incident triage](/topics/ai-incident-triage/)
+- Definition: [What Is an AI Agent Runtime?](/blog/what-is-an-ai-agent-runtime/)
 - Essay: [What actually helps on-call](https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call)
 - Discipline: [Hypothesis ladder](/blog/hypothesis-ladder/) · [Evidence-gated RCA](/blog/evidence-gated-multiplane-rca/)
 

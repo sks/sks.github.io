@@ -4,7 +4,7 @@ title: "AI Agent Loop Detection — Don't Throw Away the Answer"
 date: 2026-08-01 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 29
-description: "AI agent loop detection can erase good work — preserve the best evidence-backed answer when a stalled run ends instead of a generic failure."
+description: "AI agent loop detection can erase a good answer. Preserve the best evidence-backed result when a stalled run ends — don't throw the work away."
 image: /assets/images/og-debug.png
 tags: [ai-agents, loop-detection, reliability, orchestration, sre, aiden, production]
 permalink: /blog/ai-agent-loop-detection-salvage/

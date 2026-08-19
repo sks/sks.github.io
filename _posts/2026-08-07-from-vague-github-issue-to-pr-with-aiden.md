@@ -4,7 +4,7 @@ title: "Aiden the Hard Way: Vague GitHub Issues to Review PRs"
 date: 2026-08-07 18:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 38
-description: "Wire Aiden board SDLC the hard way: every sg_* resource from provider and models through GitHub integration, agent, workflow, webhook, and status poll."
+description: "Aiden the hard way: turn a vague GitHub issue into a review PR — GitHub integration, agent, workflow, webhook, and status poll wired by hand."
 image: /assets/images/og-default.png
 tags: [ai-agents, github, workflows, aiden, terraform, opentofu, sdlc, beginners]
 permalink: /blog/from-vague-github-issue-to-pr-with-aiden/

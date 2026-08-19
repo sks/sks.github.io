@@ -2,7 +2,7 @@
 layout: page
 title: AI Agents for SRE
 permalink: /topics/ai-agents-sre/
-description: "SRE AI agents for incident triage, diagnostics, and RCA — what actually helps on-call teams versus demo theater, plus observability and tokenomics."
+description: "SRE AI agents for incident triage, diagnostics, and RCA — what actually helps on-call versus demo theater, plus observability and tokenomics."
 hub: ai-agents-sre
 faqs:
   - question: "What are SRE AI agents?"

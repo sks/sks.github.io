@@ -4,7 +4,7 @@ title: "Evidence-Based Verification — Don't Trust Self-Report, Check the Syste
 date: 2026-07-08 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 16
-description: "Evidence-based verification for AI agents — pull proof from ArgoCD, Datadog, and systems of record; let Go own pass/fail."
+description: "Evidence-based verification for AI agents: don't trust self-report — pull proof from ArgoCD, Datadog, and systems of record, then let Go own pass/fail."
 image: /assets/images/og-evidence-rca.png
 tags: [ai-agents, sre, verification, observability, production, golang]
 ---

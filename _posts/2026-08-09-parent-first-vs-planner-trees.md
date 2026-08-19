@@ -4,7 +4,7 @@ title: "Single-Agent vs Multi-Agent Orchestration: How to Choose"
 date: 2026-08-09 15:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 40
-description: "Single-agent vs multi-agent orchestration for SRE triage — a fair A/B, what each shape is good at, and a decision framework without defaulting to either."
+description: "Single-agent vs multi-agent for SRE triage: a fair A/B, what each shape wins at, and a decision framework so you stop defaulting to either."
 image: /assets/images/og-default.png
 tags: [ai-agents, multi-agent, orchestration, sre, reactree, incident-response, workflows, golang, aiden]
 permalink: /blog/single-agent-vs-multi-agent/
