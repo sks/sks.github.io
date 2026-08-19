@@ -4,7 +4,7 @@ title: "You Can't Debug What You Can't See — Observability for AI Agents"
 date: 2026-06-28 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 9
-description: "Observability for AI agents in production: session traces, tool attribution, token budgets, audit trails, and signals traditional APM misses."
+description: "Observability for AI agents: session traces, tool attribution, token budgets, and audit trails — the signals traditional APM misses in production."
 image: /assets/images/og-observability.png
 tags: [observability, ai-agents, langfuse, monitoring, production]
 faqs:

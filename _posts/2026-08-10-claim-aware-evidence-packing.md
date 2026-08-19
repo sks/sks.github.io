@@ -4,7 +4,7 @@ title: "Claim-Aware Evidence Packing — Don't Accuse Agents of Inventing What Y
 date: 2026-08-10 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 41
-description: "Why hallucination guards fail when they truncate evidence, how claim packing works, and the pitfalls of fail-open and brittle overlap."
+description: "Claim-aware evidence packing: don't accuse AI agents of inventing what you truncated. Why hallucination guards fail when they drop the receipts."
 image: /assets/images/og-default.png
 tags: [ai-agents, golang, runtime, hallucination, evidence, production]
 permalink: /blog/claim-aware-evidence-packing/
@@ -300,3 +300,7 @@ Torn notebooks make honest agents look like liars. Pack what they claimed, admit
 ---
 
 *Building a verifier that false-flags true tool rows — or debating where domain reshaping should live? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+
+---
+
+> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.

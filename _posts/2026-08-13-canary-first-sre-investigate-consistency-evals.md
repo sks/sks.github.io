@@ -4,7 +4,7 @@ title: "Canary First: Lessons from Black-Box Consistency Evals for Live SRE Inve
 date: 2026-08-13 18:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 44
-description: "Nightly black-box checks for live SRE investigate — canary before judge tokens, draft is not done, sync failures are not empty queues, and consistency means three RCAs that concur."
+description: "Canary-first evals for live SRE investigate: check the canary before burning judge tokens, and never treat a draft RCA as done."
 image: /assets/images/og-default.png
 tags: [ai-agents, sre, evaluation, consistency, tokenomics, incident-response, observability, aiden, production, rca]
 permalink: /blog/canary-first-sre-investigate-consistency-evals/

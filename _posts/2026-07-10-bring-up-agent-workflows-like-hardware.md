@@ -1,19 +1,22 @@
 ---
+
 layout: post
-title: "How to Debug Multi-Step AI Agent Workflows"
+title: "How We Debug Multi-Stage AI Agent Workflows"
 date: 2026-07-10 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 18
-description: "The best way to debug a multi-step AI agent and execution logs. Bring up multi-stage agent pipelines one stage at a time."
+description: "How to debug multi-step and multi-stage AI agent workflows and execution logs — green one stage at a time, score tool effects not transcripts."
 image: /assets/images/og-bring-up-workflows.png
 tags: [ai-agents, workflows, evaluation, golang, sre, testing]
 faqs:
-  - question: "How do you debug a multi-step AI agent workflow?"
-    answer: "Bring up one stage at a time against a golden gate — like hardware board bring-up. Green each stage repeatedly before adding the next. End-to-end runs hide which stage failed."
-  - question: "Why are full end-to-end agent runs a bad first debug loop?"
-    answer: "They are expensive in tokens, slow, and non-deterministic. A wrong answer can be smeared across every stage, so you cannot tell who to blame without isolating stages."
-  - question: "What should you score when bringing up agent pipelines?"
-    answer: "Score committed tool calls and stage gates, not raw transcripts. Models will narrate confident conclusions on top of broken middles."
+
+- question: "How do you debug a multi-step AI agent workflow?"
+answer: "Bring up one stage at a time against a golden gate — like hardware board bring-up. Green each stage repeatedly before adding the next. End-to-end runs hide which stage failed."
+- question: "Why are full end-to-end agent runs a bad first debug loop?"
+answer: "They are expensive in tokens, slow, and non-deterministic. A wrong answer can be smeared across every stage, so you cannot tell who to blame without isolating stages."
+- question: "What should you score when bringing up agent pipelines?"
+answer: "Score committed tool calls and stage gates, not raw transcripts. Models will narrate confident conclusions on top of broken middles."
+
 ---
 
 There's a scene in *Apollo 13* where the crew has to power the command module back up from stone-cold dead, on a battery budget so tight that flipping the wrong switch too early means everybody dies in the dark. They don't just hit the main breaker and vibe. Ken Mattingly sits in a simulator and brings it up **one system at a time, in a precise sequence, under a hard power budget.**
@@ -23,6 +26,8 @@ I thought about that scene a lot last week, because I was doing the software ver
 The instinct that saved me is the oldest one in hardware: **stop running the whole board. Green one rail. Then add the next.**
 
 This post is about why that discipline matters *specifically* for agentic systems — and about the most humbling plot twist of the week, the one where I spent hours interrogating an innocent suspect while the real culprit was standing behind me the whole time. (It was my scorer. The scorer did it.)
+
+A version of this write-up also lives on StackGen: [How We Debug Multi-Stage AI Agent Workflows](https://stackgen.com/blog/how-we-debug-multi-stage-ai-agent-workflows).
 
 ---
 
@@ -147,11 +152,11 @@ The transcript is contaminated *by construction*. It contains your instructions,
 
 This is just the agentic version of a sin we already know: asserting on log output instead of on state. We'd never ship a unit test that greps `println` output. It's weirdly easy to forget that when the "state" is a river of streaming JSON and the "log" is a multi-megabyte event dump that happens to contain literally everything.
 
-| You can score on… | What it actually measures | Verdict |
-|---------------------|---------------------------|---------|
-| The raw transcript / event stream | What the agent was *told* + what it *said* + streaming noise | ❌ **Contaminated** — a witness who overheard the instructions |
-| The rendered runbook or prompt | Your own words, read back to you | ❌ **Broken** — you're grading your prompt, not the work |
-| The committed tool calls + their arguments | What the agent actually *did* | ✅ **Ground truth** — the only metric that matters |
+| You can score on…                          | What it actually measures                                    | Verdict                                                       |
+| ------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------- |
+| The raw transcript / event stream          | What the agent was *told* + what it *said* + streaming noise | ❌ **Contaminated** — a witness who overheard the instructions |
+| The rendered runbook or prompt             | Your own words, read back to you                             | ❌ **Broken** — you're grading your prompt, not the work       |
+| The committed tool calls + their arguments | What the agent actually *did*                                | ✅ **Ground truth** — the only metric that matters             |
 
 ---
 
@@ -171,6 +176,7 @@ The best part of bring-up isn't that it finds bugs faster. It's that it turns "i
 
 - [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/) — the compound-AI architecture this bring-up ladder debugs
 - [Evidence-Based Verification](/blog/evidence-based-verification/) — don't trust self-report; check systems of record
+- [How We Debug Multi-Stage AI Agent Workflows](https://stackgen.com/blog/how-we-debug-multi-stage-ai-agent-workflows) — company-site version of this post
 - More on [AI agent workflows](/topics/ai-agent-workflows/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---

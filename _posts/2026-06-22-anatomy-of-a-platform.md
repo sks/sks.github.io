@@ -4,7 +4,7 @@ title: "Go Platform Architecture at Speed — Without Drowning"
 date: 2026-06-22 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 3
-description: "Go platform architecture for a production AI agent codebase — patterns that kept rapid development sustainable."
+description: "Go platform architecture for a production AI agent codebase — patterns that keep rapid development sustainable without drowning in process."
 image: /assets/images/og-platform.png
 tags: [go, architecture, ddd, engineering, ai-agents]
 ---

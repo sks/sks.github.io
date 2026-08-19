@@ -4,7 +4,7 @@ title: "When Your AI Agent Scorecard Lies"
 date: 2026-07-19 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 24
-description: "A production lesson in agent observability: measure telemetry quality before trusting reliability, correctness, cost, or latency scores."
+description: "When your AI agent scorecard lies: measure telemetry quality before you trust reliability, correctness, cost, or latency scores."
 image: /assets/images/og-observability.png
 tags: [observability, ai-agents, telemetry, evaluation, sre, production, langfuse]
 permalink: /blog/when-agent-observability-lies/

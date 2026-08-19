@@ -4,7 +4,7 @@ title: "PII Redaction for AI Agents — Two Views, One Trace"
 date: 2026-08-04 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 32
-description: "PII redaction for AI agents needs two views: protected model history and authorized operator visibility when debugging tool calls."
+description: "PII redaction for AI agents needs two views: a protected model history and authorized operator visibility when debugging tool calls."
 image: /assets/images/og-governance.png
 tags: [ai-agents, pii, privacy, security, observability, audit, aiden, production]
 permalink: /blog/pii-redaction-ai-agents/

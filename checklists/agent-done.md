@@ -2,7 +2,7 @@
 layout: page
 title: “Is the agent task done?” checklist
 permalink: /checklists/agent-done/
-description: "A shareable checklist for AI agent completion — independence, typed evidence, budgets, and mutation safety. No proprietary schemas."
+description: "Shareable checklist for AI agent completion — independent checks, typed evidence, budgets, and mutation safety. No proprietary schemas."
 faqs:
   - question: "How do you know an AI agent task is actually done?"
     answer: "Treat completion as a product surface: require an independent check with typed tool outcomes, goal-scoped activation so cheap turns stay cheap, and capped retries that do not re-fire unsafe writes."

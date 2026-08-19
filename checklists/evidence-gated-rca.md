@@ -2,7 +2,7 @@
 layout: page
 title: Evidence-gated RCA checklist
 permalink: /checklists/evidence-gated-rca/
-description: "A shareable checklist for AI agent root cause analysis — prove with receipts before narrating. No proprietary schemas."
+description: "Shareable checklist for AI agent root cause analysis — prove with receipts before narrating. No proprietary schemas."
 faqs:
   - question: "What is evidence-gated RCA?"
     answer: "Root cause analysis where the workflow refuses a confident narrative until required evidence tokens exist — identity, onset, and ruled-out branches — instead of trusting fluent prose."

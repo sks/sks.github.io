@@ -4,7 +4,7 @@ title: "AI SRE Agent Benchmarks: Wall Time, Tool Calls, Tokens, and ReAcTree Tax
 date: 2026-08-13 16:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 43
-description: "Fair A/B numbers for AI SRE agents — wall time, tool calls, token-ish completion units, tool payload bytes, evidence middleware, and when ReAcTree orchestration is worth the tax."
+description: "AI SRE agent benchmarks: wall time, tool calls, tokens, and ReAcTree tax — fair A/B numbers so you know when orchestration is worth the cost."
 image: /assets/images/og-default.png
 tags: [ai-agents, sre, benchmarking, tokenomics, reactree, multi-agent, incident-response, observability, aiden, production, evaluation]
 permalink: /blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/

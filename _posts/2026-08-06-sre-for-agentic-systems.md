@@ -4,7 +4,7 @@ title: "SRE for Agentic Systems: Why Uptime Isn't Enough Anymore"
 date: 2026-08-06 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 35
-description: "SRE for agentic systems and AI agents. Introducing Judgment SLOs and how to measure agentic drift in production."
+description: "SRE for agentic systems: uptime isn't enough. Judgment SLOs and how to measure agentic drift when the agent can be 'up' and still wrong."
 image: /assets/images/og-default.png
 tags: [ai-agents, sre, observability, golang]
 faqs:
