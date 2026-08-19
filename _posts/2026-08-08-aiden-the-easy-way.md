@@ -4,7 +4,7 @@ title: "Aiden the Easy Way: One Module from Vague Issue to Review PR"
 date: 2026-08-08 09:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 39
-description: "Adopt Aiden board SDLC with one OpenTofu module — Specify → Research → Plan → review PR — without wiring every sg_* resource by hand."
+description: "Aiden the easy way: one OpenTofu module from a vague GitHub issue to a review PR — Specify, Research, Plan, without wiring every resource by hand."
 image: /assets/images/og-default.png
 tags: [ai-agents, github, workflows, aiden, terraform, opentofu, sdlc, beginners]
 permalink: /blog/aiden-the-easy-way/

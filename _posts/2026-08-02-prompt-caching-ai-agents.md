@@ -4,7 +4,7 @@ title: "Prompt Caching for AI Agents Is an Architecture Problem"
 date: 2026-08-02 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 30
-description: "Prompt caching for AI agents fails when context is turbulent — stable prefixes, early compaction, isolated helpers, and references beat payload copies."
+description: "Prompt caching for AI agents is an architecture problem: stable prefixes, early compaction, and references beat copying a turbulent payload."
 image: /assets/images/og-tokenomics.png
 tags: [ai-agents, prompt-caching, llm, tokenomics, context-management, aiden, production]
 permalink: /blog/prompt-caching-ai-agents/

@@ -4,7 +4,7 @@ title: "Your RCA Agent Doesn't Need Another Runbook — It Needs a Map"
 date: 2026-07-12 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 19
-description: "Runbooks are fine for humans and stable ladders — bad as the agent's only navigation. After months of multi-plane RCA: topology, gates, and verify-first beat another forty-page notebook."
+description: "Your RCA agent doesn't need another runbook — it needs a map. Topology, gates, and verify-first navigation beat a forty-page notebook."
 image: /assets/images/og-agents-need-a-map.jpg
 tags: [ai-agents, sre, evaluation, compound-ai, workflows, golang]
 permalink: /blog/agents-need-a-map-not-a-script/
@@ -223,6 +223,10 @@ Research directions worth betting on: hypothesize-then-verify, offline causal gr
 **Further reading (same series):**
 
 - [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/)
-- [Bring Up Agent Workflows Like Hardware](/blog/bring-up-agent-workflows-like-hardware/)
+- [How We Debug Multi-Stage AI Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/)
 - [Evidence-Based Verification](/blog/evidence-based-verification/)
 - [AI-Augmented Incident Triage](/blog/ai-incident-triage-sre/)
+
+---
+
+> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.

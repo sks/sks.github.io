@@ -4,7 +4,7 @@ title: "Evidence-Gated RCA — Prove, Then Narrate"
 date: 2026-07-08 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 14
-description: "Evidence-gated multi-plane RCA — fixed DAG, structural evals, and token-aware tool loops for production agent workflows."
+description: "Evidence-gated RCA for AI SRE agents: prove with receipts, then narrate. Fixed stages, structural evals, and token-aware tool loops."
 image: /assets/images/og-evidence-rca.png
 tags: [ai-agents, compound-ai, orchestration, evaluation, sre, workflows]
 faqs:

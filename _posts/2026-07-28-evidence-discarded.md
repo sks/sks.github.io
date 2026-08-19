@@ -4,7 +4,7 @@ title: "AI Agent Root Cause Analysis — Evidence Discarded After the Lead"
 date: 2026-07-28 17:45:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 28
-description: "AI agent root cause analysis fails when digs find a lead and discard it — peer noise, wrong fire-time windows, and transcript gates for AI SRE agents."
+description: "AI agent root cause analysis fails when a dig finds a lead and discards it — peer noise, wrong fire-time windows, and transcript gates for AI SRE."
 image: /assets/images/og-evidence-rca.png
 tags: [ai-agents, sre, root-cause-analysis, incident-response, on-call, evaluation, prompt-engineering, aiden, production, observability]
 permalink: /blog/evidence-discarded/

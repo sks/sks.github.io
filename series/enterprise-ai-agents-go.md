@@ -3,7 +3,7 @@ layout: page
 title: Building an Enterprise AI Agent Platform in Go
 nav_title: Series
 permalink: /series/enterprise-ai-agents-go/
-description: "A practitioner series on building production AI agents in Go — runtime design, workflows, SRE triage, observability, and enterprise platform lessons from StackGen."
+description: "Enterprise AI agents in Go: a practitioner series on production runtimes, workflows, SRE triage, and platform lessons from Aiden at StackGen."
 faqs:
   - question: "Why build an enterprise AI agent platform in Go?"
     answer: "Go gives you static typing, simple deployment, and concurrency primitives that map cleanly to multi-stage agent workflows. This series covers when that trade-off beats Python-first AI frameworks in production."

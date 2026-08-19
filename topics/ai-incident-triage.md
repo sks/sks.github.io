@@ -2,7 +2,7 @@
 layout: page
 title: AI Incident Triage
 permalink: /topics/ai-incident-triage/
-description: "AI for incident triage — what helps on-call SRE teams gather context, form hypotheses, and draft RCA without demo theater."
+description: "AI incident triage for SREs: what helps on-call gather context, form hypotheses, and draft RCA — without demo theater."
 hub: ai-incident-triage
 faqs:
   - question: "What is AI incident triage?"

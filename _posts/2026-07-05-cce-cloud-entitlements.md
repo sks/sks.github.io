@@ -2,7 +2,7 @@
 layout: post
 title: "You Vibe-Coded the AWS Calls — Do You Know What IAM Permissions You Actually Need?"
 date: 2026-07-05 11:00:00 -0700
-description: "IAM permissions for vibe-coded AWS calls — cloud entitlements, CCE, and least privilege for agent tools."
+description: "Vibe-coded AWS calls hide IAM sprawl. How to discover the cloud entitlements your agent tools actually need — least privilege without guessing."
 image: /assets/images/og-governance.png
 tags: [cce, aws, iam, security, devops, ai-coding, go, github-actions]
 ---
@@ -454,3 +454,7 @@ The public CLI handles fast, local entitlement extraction. Scaling across an org
 ---
 
 *Sabith builds production AI and cloud governance systems in Go. Related on this blog: [defense-in-depth for agents](/blog/defense-in-depth/) · [Terraform for agent governance](/blog/terraform-config/).*
+
+---
+
+> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
