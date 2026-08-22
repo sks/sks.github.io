@@ -150,10 +150,13 @@ Strict `judge.success` did not flip on this five-task rerun. Next increments: di
 
 ---
 
+**Next:** [Running AppWorld Locally for Genie Agent Evals](/blog/running-appworld-locally-genie-agent-eval/) — reproduce the three-server stack (environment, APIs, MCP HTTP) before your next cohort.
+
 ## Related reading
 
 ### On this site
 
+- [Running AppWorld Locally](/blog/running-appworld-locally-genie-agent-eval/) — ops prerequisite (pt. 5)
 - [Fair Agent Evals](/blog/fair-agent-evals-before-performance/) — part 1
 - [Agent Orchestration Tax](/blog/agent-orchestration-tax-evals/) — part 2
 - [AI Agent Eval Failure Modes](/blog/ai-agent-eval-failure-modes/) — part 3 (pre-gate cohort)

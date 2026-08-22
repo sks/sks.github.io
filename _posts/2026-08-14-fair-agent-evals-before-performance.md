@@ -25,7 +25,7 @@ If you are trying to **evaluate AI agents** on a tool-using benchmark, the first
 
 We ran paired evals on [AppWorld](https://github.com/stonybrooknlp/appworld) — a controllable multi-app benchmark ([paper](https://arxiv.org/abs/2407.18901)) — through our agent runtime in Aiden, with domain APIs exposed via [Model Context Protocol](https://modelcontextprotocol.io/) (MCP). The early numbers lied. The planner path looked cheaper until we realized workers often had **zero** domain API calls while the single-agent loop was doing the job.
 
-This post is part one of a three-part series on **fair agent evals**: fix tool parity, then measure orchestration tax, then classify failure modes. Part two: [orchestration tax](/blog/agent-orchestration-tax-evals/). Part three: [failure modes](/blog/ai-agent-eval-failure-modes/). Sequel: [handoff gate](/blog/stop-duplicate-agent-workers-handoff-gate/).
+This post is part one of a three-part series on **fair agent evals**: fix tool parity, then measure orchestration tax, then classify failure modes. Part two: [orchestration tax](/blog/agent-orchestration-tax-evals/). Part three: [failure modes](/blog/ai-agent-eval-failure-modes/). Sequel: [handoff gate](/blog/stop-duplicate-agent-workers-handoff-gate/). **Ops prerequisite:** [running AppWorld locally](/blog/running-appworld-locally-genie-agent-eval/).
 
 ![AppWorld agent eval series: fair evals, orchestration tax, failure modes, handoff gate](/assets/images/appworld/series-banner.svg)
 
