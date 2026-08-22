@@ -5,7 +5,7 @@ date: 2026-08-15 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 47
 description: "Agent orchestration tax after a fair eval: on AppWorld tasks, planner paths cost ~1.6× tokens and ~3× iterations with the same zero judge passes as single-agent."
-image: /assets/images/og-default.png
+image: /assets/images/og-appworld-orchestration-tax.jpg
 tags: [ai-agents, evaluation, benchmarking, multi-agent, tokenomics, orchestration, reactree, workflows, aiden, production]
 permalink: /blog/agent-orchestration-tax-evals/
 faqs:
@@ -26,6 +26,8 @@ Once **fair agent evals** prove both modes can reach the same domain tools ([par
 We call that **agent orchestration tax** — extra tokens, model iterations, and spawn overhead on top of the AppWorld APIs themselves. This is not a dunk on multi-agent systems. It is the invoice you should see on the receipt before you default to a tree.
 
 Dataset: [AppWorld](https://github.com/stonybrooknlp/appworld) via MCP, judged by their evaluate harness. Observability: [Langfuse](https://langfuse.com/) aggregates. Runtime: Aiden.
+
+![Agent orchestration tax: coordination layers stacked on domain work](/assets/images/og-appworld-orchestration-tax.jpg)
 
 ---
 
@@ -70,6 +72,8 @@ After the handoff fix, every pair passed tool-access fairness.
 **Outcomes texture:** single-agent often hit iteration budget **without** calling evaluate (`ran_without_judge` on 7/10). Planner paths reached evaluate more often but still **failed judge** on all ten.
 
 Same findings class as our [SRE agent benchmarks](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/) post: coordination multiplies iterations; it does not automatically deepen inspection.
+
+![Where orchestration tax stacks on top of domain work](/assets/images/appworld/orchestration-stack.svg)
 
 ![Normalized orchestration tax: tokens 1.64x, iterations 3.0x, domain calls 1.49x vs single-agent baseline](/assets/images/appworld/orchestration-tax.svg)
 

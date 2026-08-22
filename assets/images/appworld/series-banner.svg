@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 100" role="img" aria-labelledby="title desc">
+  <title id="title">AppWorld agent eval blog series parts 1 through 4</title>
+  <desc id="desc">Series navigation banner linking four posts: fair evals, orchestration tax, failure modes, and handoff gate sequel.</desc>
+  <defs>
+    <style>
+      .title { font: 600 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6b7280; }
+      .part { font: 600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #ffffff; }
+      .sub { font: 400 9px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #e5e7eb; }
+    </style>
+  </defs>
+  <rect width="720" height="100" fill="#0f172a" rx="8"/>
+  <text x="360" y="22" text-anchor="middle" class="title">APPWORLD AGENT EVAL SERIES</text>
+  <rect x="16" y="36" width="160" height="52" fill="#2563eb" rx="6"/>
+  <text x="96" y="56" text-anchor="middle" class="part">1 Fair evals</text>
+  <text x="96" y="72" text-anchor="middle" class="sub">tools must match</text>
+  <rect x="188" y="36" width="160" height="52" fill="#dc2626" rx="6"/>
+  <text x="268" y="56" text-anchor="middle" class="part">2 Orchestration tax</text>
+  <text x="268" y="72" text-anchor="middle" class="sub">1.6&#215; tokens</text>
+  <rect x="360" y="36" width="160" height="52" fill="#7c3aed" rx="6"/>
+  <text x="440" y="56" text-anchor="middle" class="part">3 Failure modes</text>
+  <text x="440" y="72" text-anchor="middle" class="sub">budget &#183; PII &#183; 422</text>
+  <rect x="532" y="36" width="172" height="52" fill="#16a34a" rx="6"/>
+  <text x="618" y="56" text-anchor="middle" class="part">4 Handoff gate</text>
+  <text x="618" y="72" text-anchor="middle" class="sub">stop duplicate workers</text>
+  <polygon points="176,62 188,62 182,70" fill="#94a3b8"/>
+  <polygon points="348,62 360,62 354,70" fill="#94a3b8"/>
+  <polygon points="520,62 532,62 526,70" fill="#94a3b8"/>
+</svg>

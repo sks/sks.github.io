@@ -5,7 +5,7 @@ date: 2026-08-17 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 49
 description: "Stop duplicate agent workers: a handoff gate fixed fairness 5/5 and cut planner token tax, but strict AppWorld judge pass stayed 0/5 — pass% is not success."
-image: /assets/images/og-default.png
+image: /assets/images/og-appworld-handoff-gate.jpg
 tags: [ai-agents, evaluation, multi-agent, orchestration, workflows, handoff, subagent, aiden, production]
 permalink: /blog/stop-duplicate-agent-workers-handoff-gate/
 faqs:
@@ -26,6 +26,8 @@ We fixed **fair agent evals** and cut **agent orchestration tax** — and still 
 That is not a failure of honesty. It is what happens when you stop measuring the wrong thing. Parts [one](/blog/fair-agent-evals-before-performance/), [two](/blog/agent-orchestration-tax-evals/), and [three](/blog/ai-agent-eval-failure-modes/) of this series documented unfair handoffs, ~1.6× token overhead, and failure classes on a five-task [AppWorld](https://github.com/stonybrooknlp/appworld) cohort ([paper](https://arxiv.org/abs/2407.18901)) via [Model Context Protocol](https://modelcontextprotocol.io/) (MCP). This post is the sequel: what changed after we shipped a **successful handoff gate**, re-enabled note tooling, soft-dropped missing infra names on spawn, and capped worker nodes to one.
 
 Dataset unchanged. Judge unchanged (AppWorld TGC/SGC through `evaluate`). Observability: [Langfuse](https://langfuse.com/) aggregates only.
+
+![Handoff gate blocking duplicate worker spawns after successful subcontractor return](/assets/images/og-appworld-handoff-gate.jpg)
 
 ---
 
@@ -56,6 +58,8 @@ After [failure-mode](/blog/ai-agent-eval-failure-modes/) runs on the same `plan_
 | **Unattended mode** | No clarify / human-wait tools in benchmark runs |
 
 Same five delegation-fit tasks (phone → notes → SMS, inbox + contacts + Splitwise, workout note → Spotify, batch Venmo, trip ledger → Splitwise). Same model family and MCP tool pack.
+
+![Handoff gate sequence: one real worker, blocked duplicate spawn retries](/assets/images/appworld/handoff-gate-flow.svg)
 
 ---
 

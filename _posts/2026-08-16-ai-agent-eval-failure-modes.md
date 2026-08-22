@@ -5,7 +5,7 @@ date: 2026-08-16 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 48
 description: "AI agent eval failure modes on AppWorld: budget stops before evaluate, PII placeholders poison tool calls, 422 wrong methods, and prose PASS vs judge FAIL."
-image: /assets/images/og-default.png
+image: /assets/images/og-appworld-failure-modes.jpg
 tags: [ai-agents, evaluation, reliability, pii, redaction, verification, workflows, aiden, production]
 permalink: /blog/ai-agent-eval-failure-modes/
 faqs:
@@ -26,6 +26,8 @@ Parts [one](/blog/fair-agent-evals-before-performance/) and [two](/blog/agent-or
 This post is the failure-mode atlas: what broke, how we labeled it, and why **winner badges** would have lied.
 
 Benchmark: [AppWorld](https://github.com/stonybrooknlp/appworld) ([paper](https://arxiv.org/abs/2407.18901)). Tools: MCP. Judge: their evaluate harness (TGC/SGC). We publish **aggregates only** — AppWorld data is license-protected; see their repo for terms.
+
+![AI agent eval failure modes: budget, PII poison, wrong API, prose vs judge](/assets/images/og-appworld-failure-modes.jpg)
 
 ---
 
@@ -70,6 +72,8 @@ Tasks chosen to reward delegate-then-synthesize: phone → notes → SMS, inbox 
 | PII placeholder poison | **0** | **2** |
 | Wrong API method (422) | **0** | **1** |
 | Other (spawn infra, no judge) | **0** | **2** |
+
+![Failure mode taxonomy: all paths end at judge.success = false](/assets/images/appworld/failure-modes-flow.svg)
 
 ![Failure class counts on five delegation-fit tasks per mode](/assets/images/appworld/failure-modes.svg)
 

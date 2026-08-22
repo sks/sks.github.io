@@ -5,7 +5,7 @@ date: 2026-08-14 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 46
 description: "Fair agent evals for planner vs single-agent: match domain tool access on workers before you compare tokens, pass rate, or declare a routing winner."
-image: /assets/images/og-default.png
+image: /assets/images/og-appworld-fair-eval.jpg
 tags: [ai-agents, evaluation, benchmarking, multi-agent, workflows, orchestration, mcp, aiden, production]
 permalink: /blog/fair-agent-evals-before-performance/
 faqs:
@@ -25,7 +25,11 @@ If you are trying to **evaluate AI agents** on a tool-using benchmark, the first
 
 We ran paired evals on [AppWorld](https://github.com/stonybrooknlp/appworld) — a controllable multi-app benchmark ([paper](https://arxiv.org/abs/2407.18901)) — through our agent runtime in Aiden, with domain APIs exposed via [Model Context Protocol](https://modelcontextprotocol.io/) (MCP). The early numbers lied. The planner path looked cheaper until we realized workers often had **zero** domain API calls while the single-agent loop was doing the job.
 
-This post is part one of a three-part series on **fair agent evals**: fix tool parity, then measure orchestration tax, then classify failure modes. Part two: [orchestration tax](/blog/agent-orchestration-tax-evals/). Part three: [failure modes](/blog/ai-agent-eval-failure-modes/).
+This post is part one of a three-part series on **fair agent evals**: fix tool parity, then measure orchestration tax, then classify failure modes. Part two: [orchestration tax](/blog/agent-orchestration-tax-evals/). Part three: [failure modes](/blog/ai-agent-eval-failure-modes/). Sequel: [handoff gate](/blog/stop-duplicate-agent-workers-handoff-gate/).
+
+![AppWorld agent eval series: fair evals, orchestration tax, failure modes, handoff gate](/assets/images/appworld/series-banner.svg)
+
+![Fair agent evals: single-agent with tools vs planner worker without domain MCP access](/assets/images/og-appworld-fair-eval.jpg)
 
 ---
 
@@ -69,6 +73,8 @@ On an early three-task smoke, averages looked like this:
 The planner path burned tokens on `create_agent` / `search_tools` while never calling the apps under test. In at least one run the transcript claimed export success and evaluation pass with **no** tool receipts — classic self-report without a judge call.
 
 **Interpretation:** that is not “orchestration is cheaper.” That is **an invalid A/B**.
+
+![Eval pipeline: fairness gate before comparing tokens or modes](/assets/images/appworld/eval-fairness-flow.svg)
 
 ![Bar chart: domain API calls per run before handoff fix (single-agent ~14, planner ~0) vs after fix on n=10 cohort (13.8 vs 20.5)](/assets/images/appworld/fairness-gate.svg)
 
