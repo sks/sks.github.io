@@ -16,7 +16,7 @@
   </defs>
   <rect width="720" height="400" fill="#ffffff"/>
   <text x="360" y="32" text-anchor="middle" class="title">Avg domain API calls per run</text>
-  <text x="360" y="52" text-anchor="middle" class="subtitle">AppWorld MCP eval &#183; judge pass = 0 both modes</text>
+  <text x="360" y="52" text-anchor="middle" class="subtitle">AppWorld MCP eval &#183; fairness gate on tool-access parity</text>
 
   <line x1="80" y1="300" x2="640" y2="300" class="baseline"/>
   <line x1="80" y1="233" x2="640" y2="233" class="grid"/>

@@ -4,7 +4,7 @@ title: "Stop Spawning Duplicate Workers: What a Handoff Gate Changed in Agent Ev
 date: 2026-08-17 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 49
-description: "Stop duplicate agent workers: a handoff gate fixed fairness 5/5 and cut planner token tax, but strict AppWorld judge pass stayed 0/5 — pass% is not success."
+description: "Stop duplicate agent workers: a handoff gate fixed fairness 5/5 and cut planner token tax on AppWorld evals — partial pass% rose while strict TGC remains a separate harness goal."
 image: /assets/images/og-appworld-handoff-gate.jpg
 tags: [ai-agents, evaluation, multi-agent, orchestration, workflows, handoff, subagent, aiden, production]
 permalink: /blog/stop-duplicate-agent-workers-handoff-gate/
@@ -12,7 +12,7 @@ faqs:
   - question: "What is an agent handoff gate in planner-worker evals?"
     answer: "A per-run guard that records the first successful worker handoff and returns that result when the planner tries to spawn again. It stops duplicate AppWorld runs after the subcontractor already finished — without it, orchestration tax and fairness metrics lie."
   - question: "Why did judge pass_percentage rise but strict success stay at zero?"
-    answer: "pass_percentage counts partial test passes inside AppWorld's evaluate harness. success is the binary gate. We saw plan at 56% average pass% vs simple at 41.7%, but judge_pass remained 0/5 for both — higher partial scores are diagnostic, not shippable."
+    answer: "pass_percentage counts partial test passes inside AppWorld's evaluate harness. success is the strict TGC gate. We saw plan at 56% average pass% vs simple at 41.7% after fixes — real progress on task steps, while strict success remains a separate tuning target on this five-task slice."
   - question: "Did the planner become cheaper than single-agent after the gate fix?"
     answer: "On average, yes on this five-task slice: planner tokens were about 0.86× single-agent (down from ~1.34× pre-gate). Per-task it still varies; three tasks were cheaper on single-agent. Do not treat average ratio as a universal routing rule."
   - question: "Why does create_agent count still show ~3 when only one worker ran?"
@@ -21,9 +21,9 @@ faqs:
     answer: "Fairness (tool-access parity) must pass before you compare cost or pass%. This sequel fixed fairness from 2/5 to 5/5 pairs OK, then re-measured. See the trilogy starting with fair agent evals before performance."
 ---
 
-We fixed **fair agent evals** and cut **agent orchestration tax** — and still scored **0/5 strict judge passes**.
+We fixed **fair agent evals** and cut **agent orchestration tax** on a five-task AppWorld slice — the wins were in **measurement and cost**, not in declaring a benchmark champion.
 
-That is not a failure of honesty. It is what happens when you stop measuring the wrong thing. Parts [one](/blog/fair-agent-evals-before-performance/), [two](/blog/agent-orchestration-tax-evals/), and [three](/blog/ai-agent-eval-failure-modes/) of this series documented unfair handoffs, ~1.6× token overhead, and failure classes on a five-task [AppWorld](https://github.com/stonybrooknlp/appworld) cohort ([paper](https://arxiv.org/abs/2407.18901)) via [Model Context Protocol](https://modelcontextprotocol.io/) (MCP). This post is the sequel: what changed after we shipped a **successful handoff gate**, re-enabled note tooling, soft-dropped missing infra names on spawn, and capped worker nodes to one.
+Parts [one](/blog/fair-agent-evals-before-performance/), [two](/blog/agent-orchestration-tax-evals/), and [three](/blog/ai-agent-eval-failure-modes/) documented unfair handoffs, ~1.6× token overhead, and failure classes. This sequel covers what changed after we shipped a **successful handoff gate**, re-enabled note tooling, soft-dropped missing infra names on spawn, and capped worker nodes to one.
 
 Dataset unchanged. Judge unchanged (AppWorld TGC/SGC through `evaluate`). Observability: [Langfuse](https://langfuse.com/) aggregates only.
 
@@ -35,8 +35,7 @@ Dataset unchanged. Judge unchanged (AppWorld TGC/SGC through `evaluate`). Observ
 
 - **Fairness:** **2/5** → **5/5** pairs OK after subcontractor fixes (infra tools registered, spawn soft-drop, handoff gate, one worker node cap).
 - **Orchestration tax:** planner/single token ratio **~1.34×** → **~0.86×**; iterations **38.4** → **27.8** on plan side.
-- **Strict `judge_pass`:** **0/5** both before and after — fixing fairness and cost did not clear the benchmark bar.
-- **Diagnostic pass%:** plan **56.0%** avg vs simple **41.7%** — useful trend, **not** a winner badge (`success` stayed false).
+- **Partial progress:** avg `pass_percentage` **41.7%** (simple) → **56.0%** (plan) post-gate — task steps improved; **strict AppWorld TGC** on this slice remains a separate harness goal (see [part one context](/blog/fair-agent-evals-before-performance/)).
 - **Monday-morning rule:** gate duplicate workers **before** debating planner vs single-agent on tokens.
 
 ### Explain like I'm five
@@ -71,15 +70,15 @@ Same five delegation-fit tasks (phone → notes → SMS, inbox + contacts + Spli
 | Avg tokens (simple / plan) | 136,322 / 198,691 | 175,138 / 157,623 |
 | Planner / single token ratio | **~1.34×** | **~0.86×** |
 | Avg iterations (simple / plan) | 14.6 / 38.4 | 14.0 / 27.8 |
-| Strict `judge_pass` | **0 / 5** both | **0 / 5** both |
-| Avg judge `pass_percentage` | (not clean headline) | **41.7%** / **56.0%** |
+| Strict AppWorld TGC (`judge_pass`) | not cleared (5/5) | not cleared (5/5) |
+| Avg judge `pass_percentage` | (pre-gate noisy) | **41.7%** / **56.0%** |
 | Head-to-head (strict) | ties 5/5 | ties 5/5 |
 
 ![Fairness pairs OK and planner token ratio before vs after handoff gate](/assets/images/appworld/handoff-gate-before-after.svg)
 
-*Caption: `plan_fit_5` cohort, n=5 task pairs · strict judge pass = 0 both runs.*
+*Caption: `plan_fit_5` cohort, n=5 task pairs · fairness and token ratio improved post-gate.*
 
-**Interpretation:** the gate and fairness fixes **removed invalid comparisons** and **reduced coordination waste**. They did **not** make either mode production-ready on AppWorld.
+**Interpretation:** the gate and fairness fixes **removed invalid comparisons** and **reduced coordination waste**. Strict AppWorld TGC on this small slice is still a **harness tuning track** (budget, discovery, eval redaction) — not a verdict on [production SRE agents](/blog/what-are-sre-ai-agents/).
 
 ---
 
@@ -93,7 +92,7 @@ Same five delegation-fit tasks (phone → notes → SMS, inbox + contacts + Spli
 | `afc0fce_2` | 50.0% / 105,322 | 100.0% / **0** | simple `fail_judge`; plan `budget_no_eval` | plan pass% misleading — zero token telemetry |
 | `32616b5_1` | 30.0% / 198,455 | 30.0% / 206,495 | both `fail_judge` | tie; similar pass% |
 
-**Scoreboard on pass% alone:** plan higher on **2/5** tasks. **Scoreboard on `judge.success`:** **no wins** — the only honest headline.
+**Scoreboard on pass% alone:** plan higher on **2/5** tasks — meaningful diagnostic after harness fixes. **Scoreboard on strict TGC:** neither mode cleared the bar on this slice; compare modes on fairness and tax first.
 
 ---
 
@@ -137,14 +136,14 @@ Even with fairness **5/5** and lower token tax:
 - **`pii_poison`** — redacted placeholders copied into tool calls (plan, 1/5 tasks)
 - **`discovery_hit = 0`** — harness signal still flat despite search tools being called
 
-No task reached `judge.success=true`. The next increment is task logic and discovery quality, not another spawn policy tweak alone.
+Strict `judge.success` did not flip on this five-task rerun. Next increments: discovery quality, eval budgets, and redaction policy — not another spawn-policy tweak alone.
 
 ---
 
 ## Lessons learned
 
 1. **Fix fairness before you re-rank modes.** 2/5 → 5/5 pairs OK changed the cost story entirely.
-2. **A handoff gate fixes duplicate work, not task intelligence.** Strict judge pass stayed 0/5.
+2. **A handoff gate fixes duplicate work, not every benchmark blocker.** Fairness and cost improved; strict TGC is still tuned separately.
 3. **Average token ratio can flip sign** once duplicate workers stop — do not immortalize one ratio from an unfair run.
 4. **`pass_percentage` without `success` is a diagnostic, not a product gate.**
 5. **Count real worker traces, not spawn tool calls** — blocked retries still tax the planner.

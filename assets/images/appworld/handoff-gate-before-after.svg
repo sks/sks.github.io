@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" role="img" aria-labelledby="title desc">
   <title id="title">Fairness and planner token ratio before and after handoff gate fix</title>
-  <desc id="desc">Two-panel chart for plan_fit_5 cohort n=5. Left: fairness pairs OK rose from 2 to 5 of 5. Right: average planner-over-single token ratio fell from 1.34x to 0.86x. Strict judge pass remained 0 for both runs.</desc>
+  <desc id="desc">Two-panel chart for plan_fit_5 cohort n=5. Left: fairness pairs OK rose from 2 to 5 of 5. Right: average planner-over-single token ratio fell from 1.34x to 0.86x.</desc>
   <defs>
     <style>
       .title { font: 600 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
@@ -18,7 +18,7 @@
   </defs>
   <rect width="720" height="400" fill="#ffffff"/>
   <text x="360" y="32" text-anchor="middle" class="title">Before vs after handoff gate (plan_fit_5, n=5)</text>
-  <text x="360" y="52" text-anchor="middle" class="subtitle">AppWorld MCP eval &#183; strict judge pass = 0 both runs</text>
+  <text x="360" y="52" text-anchor="middle" class="subtitle">AppWorld MCP eval &#183; plan_fit_5 cohort, n=5</text>
 
   <!-- Left panel: Fairness pairs OK (scale 0-5) -->
   <rect x="40" y="72" width="300" height="280" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1" rx="8"/>

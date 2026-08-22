@@ -14,7 +14,7 @@
     </style>
   </defs>
   <rect width="720" height="320" fill="#ffffff"/>
-  <text x="360" y="28" text-anchor="middle" class="title">Failure modes when judge pass = 0 (plan_fit_5, n=5)</text>
+  <text x="360" y="28" text-anchor="middle" class="title">Failure modes on delegation-fit tasks (plan_fit_5, n=5)</text>
 
   <!-- Start -->
   <rect x="300" y="48" width="120" height="36" fill="#e5e7eb" stroke="#6b7280" rx="18"/>
