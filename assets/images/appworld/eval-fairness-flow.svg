@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 280" role="img" aria-labelledby="title desc">
+  <title id="title">Fair agent eval flow: tool parity before performance comparison</title>
+  <desc id="desc">Flow diagram. Unfair path skips domain tools and self-reports success. Fair path checks worker registry, runs domain APIs, then calls external judge. Fairness gate must pass before comparing tokens or modes.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#6b7280"/>
+    </marker>
+    <style>
+      .title { font: 600 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+      .box { font: 500 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+      .small { font: 400 10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6b7280; }
+      .lane { font: 600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #374151; }
+    </style>
+  </defs>
+  <rect width="720" height="280" fill="#ffffff" rx="8"/>
+  <text x="360" y="28" text-anchor="middle" class="title">Eval pipeline: fairness before performance</text>
+
+  <!-- Unfair lane -->
+  <text x="24" y="58" class="lane">Unfair (invalid A/B)</text>
+  <rect x="24" y="68" width="100" height="44" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5" rx="6"/>
+  <text x="74" y="88" text-anchor="middle" class="box">Spawn worker</text>
+  <text x="74" y="102" text-anchor="middle" class="small">no domain tools</text>
+  <line x1="124" y1="90" x2="148" y2="90" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="148" y="68" width="100" height="44" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5" rx="6"/>
+  <text x="198" y="88" text-anchor="middle" class="box">0 API calls</text>
+  <text x="198" y="102" text-anchor="middle" class="small">looks cheap</text>
+  <line x1="248" y1="90" x2="272" y2="90" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="272" y="68" width="120" height="44" fill="#fecaca" stroke="#b91c1c" stroke-width="2" rx="6"/>
+  <text x="332" y="88" text-anchor="middle" class="box">Prose says PASS</text>
+  <text x="332" y="102" text-anchor="middle" class="small">judge never ran</text>
+
+  <!-- Fair lane -->
+  <text x="24" y="148" class="lane">Fair (comparable)</text>
+  <rect x="24" y="158" width="100" height="44" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5" rx="6"/>
+  <text x="74" y="178" text-anchor="middle" class="box">Spawn worker</text>
+  <text x="74" y="192" text-anchor="middle" class="small">full MCP pack</text>
+  <line x1="124" y1="180" x2="148" y2="180" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="148" y="158" width="100" height="44" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5" rx="6"/>
+  <text x="198" y="178" text-anchor="middle" class="box">Domain APIs</text>
+  <text x="198" y="192" text-anchor="middle" class="small">13-21 calls/run</text>
+  <line x1="248" y1="180" x2="272" y2="180" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="272" y="158" width="100" height="44" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5" rx="6"/>
+  <text x="322" y="178" text-anchor="middle" class="box">evaluate()</text>
+  <text x="322" y="192" text-anchor="middle" class="small">external judge</text>
+  <line x1="372" y1="180" x2="396" y2="180" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="396" y="158" width="110" height="44" fill="#fef3c7" stroke="#d97706" stroke-width="1.5" rx="6"/>
+  <text x="451" y="178" text-anchor="middle" class="box">Then compare</text>
+  <text x="451" y="192" text-anchor="middle" class="small">tokens / modes</text>
+
+  <!-- Gate callout -->
+  <rect x="520" y="130" width="176" height="88" fill="#f0fdf4" stroke="#16a34a" stroke-width="2" rx="8"/>
+  <text x="608" y="152" text-anchor="middle" class="box" fill="#166534">Fairness gate</text>
+  <text x="608" y="170" text-anchor="middle" class="small">Worker registry lists</text>
+  <text x="608" y="184" text-anchor="middle" class="small">same domain tools?</text>
+  <text x="608" y="202" text-anchor="middle" class="small" fill="#16a34a">10/10 pairs OK (post-fix)</text>
+
+  <text x="360" y="262" text-anchor="middle" class="small">Cheaper is not better if the worker never touched the benchmark APIs.</text>
+</svg>

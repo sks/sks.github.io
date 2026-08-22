@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" role="img" aria-labelledby="title desc">
+  <title id="title">Planner orchestration tax normalized to single-agent baseline</title>
+  <desc id="desc">Grouped bar chart with single-agent baseline at 1.0. Fair ten-task cohort: tokens 1.64x, iterations 3.0x, domain tool calls 1.49x planner over single-agent. Judge pass 0 for both modes.</desc>
+  <defs>
+    <style>
+      .title { font: 600 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+      .subtitle { font: 400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6b7280; }
+      .axis { font: 400 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6b7280; }
+      .label { font: 500 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #374151; }
+      .value { font: 600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .legend { font: 400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #374151; }
+      .grid { stroke: #e5e7eb; stroke-width: 1; }
+      .baseline { stroke: #9ca3af; stroke-width: 1; }
+    </style>
+  </defs>
+  <rect width="720" height="400" fill="#ffffff"/>
+  <text x="360" y="32" text-anchor="middle" class="title">Orchestration tax (planner / single-agent)</text>
+  <text x="360" y="52" text-anchor="middle" class="subtitle">Fair ten-task AppWorld cohort &#183; judge pass = 0 both modes</text>
+
+  <line x1="80" y1="300" x2="640" y2="300" class="baseline"/>
+  <line x1="80" y1="233" x2="640" y2="233" class="grid"/>
+  <line x1="80" y1="167" x2="640" y2="167" class="grid"/>
+  <line x1="80" y1="100" x2="640" y2="100" class="grid"/>
+  <text x="72" y="304" text-anchor="end" class="axis">0</text>
+  <text x="72" y="242" text-anchor="end" class="axis">1.0</text>
+  <text x="72" y="179" text-anchor="end" class="axis">2.0</text>
+  <text x="72" y="117" text-anchor="end" class="axis">3.0</text>
+  <text x="28" y="200" text-anchor="middle" class="label" transform="rotate(-90 28 200)">Ratio vs single-agent</text>
+
+  <!-- max 3.0, plot height 200 -->
+  <rect x="130" y="233" width="40" height="67" fill="#2563eb" rx="3"/>
+  <rect x="176" y="191" width="40" height="109" fill="#dc2626" rx="3"/>
+  <text x="150" y="226" text-anchor="middle" class="value" fill="#2563eb">1.0</text>
+  <text x="196" y="184" text-anchor="middle" class="value" fill="#dc2626">1.64&#215;</text>
+  <text x="163" y="328" text-anchor="middle" class="label">Tokens</text>
+
+  <rect x="310" y="233" width="40" height="67" fill="#2563eb" rx="3"/>
+  <rect x="356" y="100" width="40" height="200" fill="#dc2626" rx="3"/>
+  <text x="330" y="226" text-anchor="middle" class="value" fill="#2563eb">1.0</text>
+  <text x="376" y="93" text-anchor="middle" class="value" fill="#dc2626">3.0&#215;</text>
+  <text x="343" y="328" text-anchor="middle" class="label">Iterations</text>
+
+  <rect x="490" y="233" width="40" height="67" fill="#2563eb" rx="3"/>
+  <rect x="536" y="201" width="40" height="99" fill="#dc2626" rx="3"/>
+  <text x="510" y="226" text-anchor="middle" class="value" fill="#2563eb">1.0</text>
+  <text x="556" y="194" text-anchor="middle" class="value" fill="#dc2626">1.49&#215;</text>
+  <text x="523" y="328" text-anchor="middle" class="label">Domain calls</text>
+
+  <rect x="220" y="362" width="14" height="14" fill="#2563eb" rx="2"/>
+  <text x="240" y="374" class="legend">Single-agent (= 1.0)</text>
+  <rect x="400" y="362" width="14" height="14" fill="#dc2626" rx="2"/>
+  <text x="420" y="374" class="legend">Planner path</text>
+</svg>
