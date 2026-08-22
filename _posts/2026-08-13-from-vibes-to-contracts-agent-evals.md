@@ -146,6 +146,8 @@ They fail independently. You can be correct-on-average but unreliable (our dogfo
 
 The homework is honest: our reliability gap is real (one thin trial in three), and the fix is upstream — preserve richer evidence through the whole grader path so a correct mechanism never arrives underdressed. But the important shift already landed. Our evals stopped asking "is this one good?" and started asking "can I trust this every time?" — which is the only question a 3 AM operator actually cares about.
 
+For tool-using benchmarks, the same contract applies at the wiring layer first: [fair agent evals](/blog/fair-agent-evals-before-performance/) before you trust mode comparisons.
+
 ---
 
 > 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.

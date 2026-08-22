@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title desc">
+  <title id="title">Planner orchestration tax normalized to single-agent baseline</title>
+  <desc id="desc">Bar chart with single-agent = 1.0 baseline. Fair ten-task cohort: tokens 1.64x, iterations 3.0x, domain tool calls 1.49x. Judge pass 0 for both modes.</desc>
+  <rect width="640" height="360" fill="#fafafa"/>
+  <text x="320" y="28" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="#111">Orchestration tax (planner / single-agent, fair cohort n=10)</text>
+  <text x="320" y="48" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#555">Normalized ratio · Source: AppWorld mixed tasks · judge pass = 0 both modes</text>
+  <line x1="80" y1="280" x2="560" y2="280" stroke="#ccc" stroke-width="1"/>
+  <text x="72" y="284" text-anchor="end" font-family="system-ui,sans-serif" font-size="10" fill="#666">0</text>
+  <text x="72" y="220" text-anchor="end" font-family="system-ui,sans-serif" font-size="10" fill="#666">1.0</text>
+  <text x="72" y="156" text-anchor="end" font-family="system-ui,sans-serif" font-size="10" fill="#666">2.0</text>
+  <text x="72" y="92" text-anchor="end" font-family="system-ui,sans-serif" font-size="10" fill="#666">3.0</text>
+  <text x="24" y="188" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#333" transform="rotate(-90 24 188)">Ratio vs single-agent</text>
+  <rect x="140" y="220" width="80" height="60" fill="#2563eb"/>
+  <rect x="140" y="100" width="80" height="180" fill="#dc2626"/>
+  <text x="180" y="300" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#333">Tokens</text>
+  <text x="180" y="92" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#dc2626">1.64×</text>
+  <rect x="280" y="220" width="80" height="60" fill="#2563eb"/>
+  <rect x="280" y="40" width="80" height="240" fill="#dc2626"/>
+  <text x="320" y="300" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#333">Iterations</text>
+  <text x="320" y="32" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#dc2626">3.0×</text>
+  <rect x="420" y="220" width="80" height="60" fill="#2563eb"/>
+  <rect x="420" y="131" width="80" height="149" fill="#dc2626"/>
+  <text x="460" y="300" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#333">Domain calls</text>
+  <text x="460" y="123" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#dc2626">1.49×</text>
+  <rect x="200" y="318" width="14" height="14" fill="#2563eb"/>
+  <text x="220" y="329" font-family="system-ui,sans-serif" font-size="11" fill="#333">Single-agent (=1.0)</text>
+  <rect x="360" y="318" width="14" height="14" fill="#dc2626"/>
+  <text x="380" y="329" font-family="system-ui,sans-serif" font-size="11" fill="#333">Planner path</text>
+</svg>

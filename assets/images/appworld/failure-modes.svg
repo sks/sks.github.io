@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 380" role="img" aria-labelledby="title desc">
+  <title id="title">Failure class counts on five delegation-fit AppWorld tasks</title>
+  <desc id="desc">Grouped bar chart for plan-fit cohort n=5 per mode. Single-agent: 4 budget without evaluate, 1 true judge fail. Planner: 2 budget, 2 PII placeholder poison, 1 wrong API method 422. Judge pass 0 for both.</desc>
+  <rect width="640" height="380" fill="#fafafa"/>
+  <text x="320" y="28" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="#111">Failure classes (delegation-fit cohort, n=5 per mode)</text>
+  <text x="320" y="48" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#555">Source: AppWorld judge · head-to-head ties 5/5 · judge pass = 0</text>
+  <line x1="72" y1="300" x2="580" y2="300" stroke="#ccc" stroke-width="1"/>
+  <text x="64" y="304" text-anchor="end" font-family="system-ui,sans-serif" font-size="10" fill="#666">0</text>
+  <text x="64" y="244" text-anchor="end" font-family="system-ui,sans-serif" font-size="10" fill="#666">2</text>
+  <text x="64" y="184" text-anchor="end" font-family="system-ui,sans-serif" font-size="10" fill="#666">4</text>
+  <text x="24" y="200" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#333" transform="rotate(-90 24 200)">Runs (of 5)</text>
+  <!-- Budget no eval -->
+  <rect x="100" y="140" width="36" height="160" fill="#2563eb"/>
+  <rect x="144" y="180" width="36" height="120" fill="#dc2626"/>
+  <text x="140" y="318" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#333">Budget,</text>
+  <text x="140" y="330" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#333">no evaluate</text>
+  <text x="118" y="132" text-anchor="middle" font-size="10" fill="#2563eb">4</text>
+  <text x="162" y="172" text-anchor="middle" font-size="10" fill="#dc2626">2</text>
+  <!-- True TGC fail / PII -->
+  <rect x="240" y="220" width="36" height="80" fill="#2563eb"/>
+  <rect x="284" y="180" width="36" height="120" fill="#7c3aed"/>
+  <text x="280" y="318" text-anchor="middle" font-size="9" fill="#333">Judge fail /</text>
+  <text x="280" y="330" text-anchor="middle" font-size="9" fill="#333">PII poison</text>
+  <text x="258" y="212" text-anchor="middle" font-size="10" fill="#2563eb">1</text>
+  <text x="302" y="172" text-anchor="middle" font-size="10" fill="#7c3aed">2</text>
+  <!-- Wrong method -->
+  <rect x="400" y="260" width="36" height="40" fill="#2563eb"/>
+  <rect x="444" y="220" width="36" height="80" fill="#ea580c"/>
+  <text x="440" y="318" text-anchor="middle" font-size="9" fill="#333">Wrong API</text>
+  <text x="440" y="330" text-anchor="middle" font-size="9" fill="#333">method (422)</text>
+  <text x="418" y="252" text-anchor="middle" font-size="10" fill="#2563eb">0</text>
+  <text x="462" y="212" text-anchor="middle" font-size="10" fill="#ea580c">1</text>
+  <rect x="160" y="348" width="12" height="12" fill="#2563eb"/>
+  <text x="178" y="358" font-size="10" fill="#333">Single-agent</text>
+  <rect x="260" y="348" width="12" height="12" fill="#dc2626"/>
+  <text x="278" y="358" font-size="10" fill="#333">Planner (budget)</text>
+  <rect x="380" y="348" width="12" height="12" fill="#7c3aed"/>
+  <text x="398" y="358" font-size="10" fill="#333">Planner (PII)</text>
+  <rect x="480" y="348" width="12" height="12" fill="#ea580c"/>
+  <text x="498" y="358" font-size="10" fill="#333">Planner (422)</text>
+</svg>

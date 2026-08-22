@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title desc">
+  <title id="title">Fairness and planner token ratio before and after handoff gate fix</title>
+  <desc id="desc">Grouped bar chart comparing pre-gate and post-gate plan_fit_5 cohorts. Fairness pairs OK rose from 2 to 5 of 5. Average planner-over-single token ratio fell from 1.34 to 0.86. Strict judge pass remained 0 for both runs.</desc>
+  <rect width="640" height="360" fill="#fafafa"/>
+  <text x="320" y="28" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="#111">Before vs after handoff gate (plan_fit_5, n=5)</text>
+  <text x="320" y="48" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#555">Source: AppWorld MCP eval · strict judge pass = 0 both runs</text>
+  <line x1="72" y1="280" x2="568" y2="280" stroke="#ccc" stroke-width="1"/>
+  <text x="64" y="284" text-anchor="end" font-family="system-ui,sans-serif" font-size="10" fill="#666">0</text>
+  <text x="64" y="220" text-anchor="end" font-family="system-ui,sans-serif" font-size="10" fill="#666">1.0</text>
+  <text x="64" y="156" text-anchor="end" font-family="system-ui,sans-serif" font-size="10" fill="#666">2.0</text>
+  <text x="64" y="92" text-anchor="end" font-family="system-ui,sans-serif" font-size="10" fill="#666">5.0</text>
+  <text x="24" y="188" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#333" transform="rotate(-90 24 188)">Scale (pairs OK or ratio)</text>
+  <!-- Fairness pairs OK -->
+  <rect x="120" y="168" width="44" height="112" fill="#2563eb"/>
+  <rect x="172" y="56" width="44" height="224" fill="#16a34a"/>
+  <text x="168" y="300" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#333">Fairness pairs OK</text>
+  <text x="142" y="160" text-anchor="middle" font-size="10" fill="#2563eb">2</text>
+  <text x="194" y="48" text-anchor="middle" font-size="10" fill="#16a34a">5</text>
+  <text x="168" y="316" text-anchor="middle" font-size="9" fill="#666">of 5 task pairs</text>
+  <!-- Token ratio plan/simple -->
+  <rect x="360" y="85" width="44" height="195" fill="#dc2626"/>
+  <rect x="412" y="132" width="44" height="148" fill="#ea580c"/>
+  <text x="416" y="300" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#333">Avg token ratio</text>
+  <text x="382" y="77" text-anchor="middle" font-size="10" fill="#dc2626">1.34×</text>
+  <text x="434" y="124" text-anchor="middle" font-size="10" fill="#ea580c">0.86×</text>
+  <text x="416" y="316" text-anchor="middle" font-size="9" fill="#666">planner / single-agent</text>
+  <!-- Legend -->
+  <rect x="160" y="332" width="12" height="12" fill="#2563eb"/>
+  <text x="178" y="342" font-size="10" fill="#333">Pre-gate</text>
+  <rect x="240" y="332" width="12" height="12" fill="#16a34a"/>
+  <text x="258" y="342" font-size="10" fill="#333">Post-gate (fairness)</text>
+  <rect x="360" y="332" width="12" height="12" fill="#dc2626"/>
+  <text x="378" y="342" font-size="10" fill="#333">Pre-gate (ratio)</text>
+  <rect x="460" y="332" width="12" height="12" fill="#ea580c"/>
+  <text x="478" y="342" font-size="10" fill="#333">Post-gate (ratio)</text>
+</svg>

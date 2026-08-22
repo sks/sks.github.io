@@ -44,5 +44,9 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [AI Agent Loop Detection — Don't Throw Away the Answer](/blog/ai-agent-loop-detection-salvage/) | Preserve the best evidence-backed answer when repetition stops a run |
 | [How to Steer an AI Agent Mid-Run Without Starting Over](/blog/steer-ai-agents-mid-run/) | Apply additive human feedback at safe iteration boundaries |
 | [Single-Agent vs Multi-Agent Orchestration: How to Choose](/blog/single-agent-vs-multi-agent/) | Decision framework from a fair triage A/B — both shapes have a home |
+| [Fair Agent Evals: Don't Compare Until Tools Match](/blog/fair-agent-evals-before-performance/) | Tool-access parity before planner vs single-agent benchmarks (AppWorld series pt. 1) |
+| [Agent Orchestration Tax After a Fair Eval](/blog/agent-orchestration-tax-evals/) | Tokens, iterations, and tool-call overhead when fairness is fixed (pt. 2) |
+| [AI Agent Eval Failure Modes](/blog/ai-agent-eval-failure-modes/) | Budget, PII placeholders, and self-report vs judge (pt. 3) |
+| [Stop Spawning Duplicate Workers](/blog/stop-duplicate-agent-workers-handoff-gate/) | Handoff gate sequel: fairness 5/5, lower token tax, pass% vs strict judge (pt. 4) |
 
 {% include subscribe.html %}
