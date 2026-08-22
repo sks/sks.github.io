@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" role="img" aria-labelledby="title desc">
+  <title id="title">Domain API calls per run before and after planner handoff fix</title>
+  <desc id="desc">Grouped bar chart. Before fix smoke cohort: single-agent about 14 domain calls per run, planner path about 0. After fix on ten-task fair cohort: single-agent 13.8, planner 20.5. Judge pass remained 0 for both modes.</desc>
+  <defs>
+    <style>
+      .title { font: 600 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+      .subtitle { font: 400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6b7280; }
+      .axis { font: 400 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6b7280; }
+      .label { font: 500 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #374151; }
+      .value { font: 600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .legend { font: 400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #374151; }
+      .grid { stroke: #e5e7eb; stroke-width: 1; }
+      .baseline { stroke: #9ca3af; stroke-width: 1; }
+    </style>
+  </defs>
+  <rect width="720" height="400" fill="#ffffff"/>
+  <text x="360" y="32" text-anchor="middle" class="title">Avg domain API calls per run</text>
+  <text x="360" y="52" text-anchor="middle" class="subtitle">AppWorld MCP eval &#183; judge pass = 0 both modes</text>
+
+  <line x1="80" y1="300" x2="640" y2="300" class="baseline"/>
+  <line x1="80" y1="233" x2="640" y2="233" class="grid"/>
+  <line x1="80" y1="167" x2="640" y2="167" class="grid"/>
+  <line x1="80" y1="100" x2="640" y2="100" class="grid"/>
+  <text x="72" y="304" text-anchor="end" class="axis">0</text>
+  <text x="72" y="237" text-anchor="end" class="axis">7</text>
+  <text x="72" y="171" text-anchor="end" class="axis">14</text>
+  <text x="72" y="104" text-anchor="end" class="axis">21</text>
+  <text x="28" y="200" text-anchor="middle" class="label" transform="rotate(-90 28 200)">Calls per run</text>
+
+  <!-- Before fix: 14 and 0 (max 21, plot height 200) -->
+  <rect x="160" y="167" width="56" height="133" fill="#2563eb" rx="3"/>
+  <line x1="228" y1="300" x2="284" y2="300" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/>
+  <text x="188" y="159" text-anchor="middle" class="value" fill="#2563eb">14</text>
+  <text x="256" y="288" text-anchor="middle" class="value" fill="#dc2626">0</text>
+  <text x="222" y="328" text-anchor="middle" class="label">Before fix</text>
+  <text x="222" y="342" text-anchor="middle" class="axis">smoke n=3</text>
+
+  <!-- After fix: 13.8 and 20.5 -->
+  <rect x="420" y="169" width="56" height="131" fill="#2563eb" rx="3"/>
+  <rect x="488" y="105" width="56" height="195" fill="#dc2626" rx="3"/>
+  <text x="448" y="161" text-anchor="middle" class="value" fill="#2563eb">13.8</text>
+  <text x="516" y="97" text-anchor="middle" class="value" fill="#dc2626">20.5</text>
+  <text x="482" y="328" text-anchor="middle" class="label">After fix</text>
+  <text x="482" y="342" text-anchor="middle" class="axis">fair cohort n=10</text>
+
+  <rect x="220" y="362" width="14" height="14" fill="#2563eb" rx="2"/>
+  <text x="240" y="374" class="legend">Single-agent loop</text>
+  <rect x="380" y="362" width="14" height="14" fill="#dc2626" rx="2"/>
+  <text x="400" y="374" class="legend">Planner + worker</text>
+</svg>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" role="img" aria-labelledby="title desc">
+  <title id="title">Handoff gate blocks duplicate worker spawns after successful subcontractor return</title>
+  <desc id="desc">Sequence diagram. Without gate: planner spawns worker three times, inflating create_agent count and token tax. With gate: first worker completes handoff, repeat spawn attempts return cached result. One real worker per task.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#6b7280"/>
+    </marker>
+    <style>
+      .title { font: 600 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+      .actor { font: 600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #374151; }
+      .msg { font: 500 10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+      .blocked { font: 500 10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #dc2626; }
+      .ok { font: 500 10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #16a34a; }
+      .lane { stroke: #e5e7eb; stroke-width: 1; stroke-dasharray:4 4; }
+    </style>
+  </defs>
+  <rect width="720" height="300" fill="#ffffff"/>
+  <text x="360" y="28" text-anchor="middle" class="title">Handoff gate: one worker, not three spawn attempts</text>
+
+  <!-- Before gate panel -->
+  <text x="180" y="52" text-anchor="middle" class="actor">Before gate</text>
+  <line x1="60" y1="64" x2="60" y2="250" class="lane"/>
+  <line x1="180" y1="64" x2="180" y2="250" class="lane"/>
+  <line x1="300" y1="64" x2="300" y2="250" class="lane"/>
+  <text x="60" y="58" text-anchor="middle" class="actor">Planner</text>
+  <text x="180" y="58" text-anchor="middle" class="actor">Worker 1</text>
+  <text x="300" y="58" text-anchor="middle" class="actor">Worker 2?</text>
+
+  <line x1="60" y1="88" x2="175" y2="88" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="118" y="82" text-anchor="middle" class="msg">create_agent</text>
+  <line x1="175" y1="108" x2="65" y2="108" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="118" y="102" text-anchor="middle" class="ok">handoff OK</text>
+  <line x1="60" y1="128" x2="295" y2="128" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="180" y="122" text-anchor="middle" class="blocked">create_agent again</text>
+  <line x1="60" y1="148" x2="295" y2="148" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="180" y="142" text-anchor="middle" class="blocked">create_agent again</text>
+  <text x="180" y="168" text-anchor="middle" class="blocked">SSE count ~3 &#183; 1 real worker</text>
+  <text x="180" y="232" text-anchor="middle" class="actor" fill="#dc2626">Token tax inflated</text>
+
+  <!-- After gate panel -->
+  <text x="540" y="52" text-anchor="middle" class="actor">After gate</text>
+  <line x1="420" y1="64" x2="420" y2="250" class="lane"/>
+  <line x1="540" y1="64" x2="540" y2="250" class="lane"/>
+  <line x1="660" y1="64" x2="660" y2="250" class="lane"/>
+  <text x="420" y="58" text-anchor="middle" class="actor">Planner</text>
+  <text x="540" y="58" text-anchor="middle" class="actor">Worker</text>
+  <text x="660" y="58" text-anchor="middle" class="actor">Gate</text>
+
+  <line x1="420" y1="88" x2="535" y2="88" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="478" y="82" text-anchor="middle" class="msg">create_agent</text>
+  <line x1="535" y1="108" x2="425" y2="108" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="478" y="102" text-anchor="middle" class="ok">handoff OK</text>
+  <line x1="425" y1="128" x2="655" y2="128" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="540" y="122" text-anchor="middle" class="msg">store result</text>
+  <line x1="420" y1="148" x2="655" y2="148" stroke="#f97316" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="540" y="142" text-anchor="middle" class="blocked">retry spawn</text>
+  <line x1="655" y1="158" x2="425" y2="158" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="540" y="172" text-anchor="middle" class="ok">return cached handoff</text>
+  <text x="540" y="200" text-anchor="middle" class="ok">Fairness 5/5 &#183; ratio 0.86&#215;</text>
+  <text x="540" y="232" text-anchor="middle" class="actor" fill="#16a34a">Still judge pass 0/5</text>
+
+  <line x1="360" y1="64" x2="360" y2="250" stroke="#d1d5db" stroke-width="2"/>
+</svg>

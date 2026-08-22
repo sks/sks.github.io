@@ -173,6 +173,7 @@ We keep both. We use the A/B to stop treating “multi-agent” as a status symb
 
 ## Where to go next
 
+- [Fair Agent Evals: Tools Must Match](/blog/fair-agent-evals-before-performance/) — eval sequel: fix handoff before you compare modes
 - [ReAcTree production bugs](/blog/reactree-bugs/) — why trees need hard depth and shared governance
 - [Is the task actually done?](/blog/is-the-task-actually-done/) — completion that is not prose
 - [What are SRE AI agents?](/blog/what-are-sre-ai-agents/) — triage vs RCA vs remediation

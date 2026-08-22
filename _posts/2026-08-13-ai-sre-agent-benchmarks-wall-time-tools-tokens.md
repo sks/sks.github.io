@@ -164,7 +164,7 @@ That is the same class of pitfall that makes ReAcTree look “slow” when the p
 | Why is Theory undetermined with many tools? | Wrong plane / orchestration | Incomplete PII-off twin, selectors, empty Collect |
 | Why did OFF finish faster with more bytes? | N/A | Fewer Collect retries; no soft-cap → fewer re-queries |
 
-An honest SRE agent scorecard is a **matrix**, not a single winner badge.
+An honest SRE agent scorecard is a **matrix**, not a single winner badge. The same discipline on public tool benchmarks: [fair agent evals](/blog/fair-agent-evals-before-performance/), [orchestration tax](/blog/agent-orchestration-tax-evals/), and [failure modes](/blog/ai-agent-eval-failure-modes/).
 
 ---
 
