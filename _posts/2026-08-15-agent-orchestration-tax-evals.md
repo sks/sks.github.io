@@ -4,7 +4,7 @@ title: "Agent Orchestration Tax: Tokens, Iterations, and Tool Calls After a Fair
 date: 2026-08-15 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 47
-description: "Agent orchestration tax after a fair eval: on AppWorld tasks, planner paths cost ~1.6× tokens and ~3× iterations with the same zero judge passes as single-agent."
+description: "Agent orchestration tax after a fair eval: on AppWorld tasks, planner paths cost ~1.6× tokens and ~3× iterations — measure coordination cost separately from benchmark success."
 image: /assets/images/og-appworld-orchestration-tax.jpg
 tags: [ai-agents, evaluation, benchmarking, multi-agent, tokenomics, orchestration, reactree, workflows, aiden, production]
 permalink: /blog/agent-orchestration-tax-evals/
@@ -12,9 +12,9 @@ faqs:
   - question: "What is agent orchestration tax?"
     answer: "Extra tokens, model iterations, and tool calls spent on spawning workers, repairing handoffs, and gate retries — on top of the domain work itself. It shows up whenever a planner coordinates instead of calling tools directly."
   - question: "How much orchestration tax did planner mode pay on a fair AppWorld eval?"
-    answer: "On a fair ten-task cohort with tool-access parity, planner paths averaged about 1.6× tokens, 3.0× model iterations, and 1.5× domain tool calls versus single-agent — with judge pass 0 for both modes."
+    answer: "On a fair ten-task cohort with tool-access parity, planner paths averaged about 1.6× tokens, 3.0× model iterations, and 1.5× domain tool calls versus single-agent. Compare tax on equal footing — benchmark TGC is a separate gate from orchestration cost."
   - question: "Does higher tool call count mean better results on agent benchmarks?"
-    answer: "Not automatically. In our fair cohort, more domain calls and more iterations did not produce a single AppWorld judge pass. Measure tax separately from external judge success."
+    answer: "Not automatically. In our fair cohort, more domain calls and more iterations did not correlate with clearing strict AppWorld TGC on this slice. Measure tax separately from external judge success."
   - question: "When is planner orchestration worth the tax?"
     answer: "When work branches — parallel independent reads across apps or planes, isolated worker budgets, or auditability of specialist steps. Skip it for ID-chained mutations one loop can own."
   - question: "How does this relate to ReAcTree tax on SRE triage?"
@@ -34,8 +34,8 @@ Dataset: [AppWorld](https://github.com/stonybrooknlp/appworld) via MCP, judged b
 ## TL;DR
 
 - **Fair ten-task cohort** (tool-access parity **10/10**): planner **~1.6×** tokens, **~3.0×** iterations, **~1.5×** domain tool calls vs single-agent.
-- **Judge pass: 0** for both modes — orchestration tax did not buy success on this sample.
-- **Delegation-fit five-task cohort:** token ratio **~1.3×**, iterations **~2.6×**, head-to-head **ties 5/5** — still **0** judge passes.
+- **Orchestration tax is the story here** — extra coordination cost is measurable once fairness holds; benchmark TGC on this slice is a separate tuning problem.
+- **Delegation-fit five-task cohort:** token ratio **~1.3×**, iterations **~2.6×**, head-to-head **ties 5/5** (both modes hit the same benchmark ceiling).
 - **Monday-morning rule:** pay the tax when branching is the job; refuse it when one loop already owns an ID-chained mutation chain.
 
 ### Explain like I'm five
@@ -67,9 +67,9 @@ After the handoff fix, every pair passed tool-access fairness.
 | Avg model iterations | **14.6** | **43.8** | **~3.0×** |
 | Avg domain tool calls | **13.8** | **20.5** | **~1.49×** |
 | Avg worker spawns | **0** | **~3.2** | — |
-| Judge pass | **0 / 10** | **0 / 10** | tie |
+| Strict AppWorld TGC | not cleared (10/10) | not cleared (10/10) | tie on benchmark bar |
 
-**Outcomes texture:** single-agent often hit iteration budget **without** calling evaluate (`ran_without_judge` on 7/10). Planner paths reached evaluate more often but still **failed judge** on all ten.
+**Outcomes texture:** single-agent often hit iteration budget **without** calling evaluate (`ran_without_judge` on 7/10). Planner paths reached evaluate more often — useful for diagnosing harness gaps, not a routing win by itself.
 
 Same findings class as our [SRE agent benchmarks](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/) post: coordination multiplies iterations; it does not automatically deepen inspection.
 
@@ -77,7 +77,7 @@ Same findings class as our [SRE agent benchmarks](/blog/ai-sre-agent-benchmarks-
 
 ![Normalized orchestration tax: tokens 1.64x, iterations 3.0x, domain calls 1.49x vs single-agent baseline](/assets/images/appworld/orchestration-tax.svg)
 
-*Caption: Fair ten-task AppWorld cohort · judge pass = 0 both modes.*
+*Caption: Fair ten-task AppWorld cohort · orchestration tax measured after tool parity.*
 
 ---
 
@@ -91,10 +91,10 @@ We then picked five tasks that *should* favor delegate-then-synthesize: cross-ap
 | Avg iterations | **14.6** | **38.4** |
 | Token ratio | — | **~1.34×** |
 | Head-to-head | — | **ties 5/5** (0 plan wins, 0 single wins) |
-| Judge pass | **0 / 5** | **0 / 5** |
+| Strict AppWorld TGC | not cleared (5/5) | not cleared (5/5) |
 | Fairness | — | **2 / 5** pairs OK (infra tool drop on spawn) |
 
-Even on “planner-shaped” work, **no mode cleared the external judge**. Higher `pass_percentage` in logs did not imply `success: true` — a recurring theme for [part three](/blog/ai-agent-eval-failure-modes/).
+On “planner-shaped” work, **neither mode cleared strict TGC** on this five-task slice. Higher `pass_percentage` in logs (often **~50%**) did not imply `success: true` — a recurring theme for [part three](/blog/ai-agent-eval-failure-modes/).
 
 ---
 
@@ -125,9 +125,9 @@ For **LLM token budget** discipline when tax is unavoidable, see [maintaining to
 ## Lessons learned
 
 1. **Fairness first, tax second.** Without tool parity, tax numbers are meaningless.
-2. **More iterations ≠ better.** ~3× iterations with 0 judge passes is expensive noise.
-3. **Domain calls can rise without success.** Planner workers called more APIs and still failed TGC.
-4. **Delegation-fit tasks are not auto-wins.** 0/5 judge pass, 3/5 unfair spawns on infra naming.
+2. **More iterations ≠ better routing.** ~3× iterations bought coordination overhead on this slice — compare against whether branching was actually required.
+3. **Domain calls can rise without clearing TGC.** Planner workers called more APIs; benchmark success is still a separate harness tuning track.
+4. **Delegation-fit tasks are not auto-wins.** 3/5 unfair spawns on infra naming dominated early runs — fix fairness before reading mode rankings.
 5. **Record spawn count.** ~3.2 spawns per task on a budget meant for “one worker” is its own failure mode.
 
 ---

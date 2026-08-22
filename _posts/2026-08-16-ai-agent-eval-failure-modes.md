@@ -21,7 +21,7 @@ faqs:
     answer: "Same contract: systems of record — here AppWorld's evaluate — vote before you trust narration. Self-report is a failure mode, not a tie-breaker."
 ---
 
-Parts [one](/blog/fair-agent-evals-before-performance/) and [two](/blog/agent-orchestration-tax-evals/) fixed tool fairness and measured **agent orchestration tax**. Both modes still scored **judge pass 0** on every clean cohort we finished.
+Parts [one](/blog/fair-agent-evals-before-performance/) and [two](/blog/agent-orchestration-tax-evals/) fixed tool fairness and measured **agent orchestration tax**. This post classifies **what blocked benchmark success** on a small AppWorld slice — harness issues (budget, spawn infra, redaction) mixed with task-hardness signals.
 
 This post is the failure-mode atlas: what broke, how we labeled it, and why **winner badges** would have lied.
 
@@ -33,7 +33,7 @@ Benchmark: [AppWorld](https://github.com/stonybrooknlp/appworld) ([paper](https:
 
 ## TL;DR
 
-- **Head-to-head ties 5/5** on delegation-fit tasks — because **both** modes failed the external judge, not because quality matched.
+- **Head-to-head ties 5/5** on delegation-fit tasks — harness rule: both modes must clear strict TGC to win; neither did on this slice.
 - **Single-agent dominant mode:** `budget_no_eval` — burned iterations before `evaluate`.
 - **Planner dominant modes:** `pii_poison`, `wrong_method_422`, spawn infra hard-fails — more moving parts, more ways to die.
 - **Never trust prose PASS** without judge `success: true` — see [Is the task actually done?](/blog/is-the-task-actually-done/) and [evidence-based verification](/blog/evidence-based-verification/).
@@ -77,7 +77,7 @@ Tasks chosen to reward delegate-then-synthesize: phone → notes → SMS, inbox 
 
 ![Failure class counts on five delegation-fit tasks per mode](/assets/images/appworld/failure-modes.svg)
 
-*Caption: Judge pass 0 both modes · head-to-head ties 5/5.*
+*Caption: Failure-class mix on delegation-fit cohort · head-to-head ties 5/5 on strict TGC.*
 
 ### Why “tie” is not “good”
 
@@ -89,7 +89,7 @@ Examples from the paired runs:
 - Planner transcript claimed **EVALUATE PASS 100%** while harness labeled `budget_no_eval` and judge unknown.
 - Single-agent made **partial mutations** (e.g., comments on some payments) and still failed evaluate.
 
-Use [From Vibes to Contracts](/blog/from-vibes-to-contracts-agent-evals/) vocabulary: **correctness, consistency, reliability** are separate gates. Here we could not clear correctness at all.
+Use [From Vibes to Contracts](/blog/from-vibes-to-contracts-agent-evals/) vocabulary: **correctness, consistency, reliability** are separate gates. On this slice, harness blockers (budget, poison, spawn) dominated before task logic could shine.
 
 ---
 
@@ -107,7 +107,7 @@ Planner paths hit **`pii_poison` on 2/5** tasks in this cohort; single-agent hit
 
 On the fair **ten-task** cohort, single-agent runs ended without judge on **7/10** tasks — fluent progress, then “execution budget” with no evaluate.
 
-Planner paths failed judge more often but **did** reach evaluate more consistently. That is a trade-off, not a win: **fail_judge 10/10** is still fail.
+Planner paths reached `evaluate` more consistently on the ten-task cohort. That is a **harness diagnostic** (did we even reach the judge?), not evidence that planner mode is production-ready for AppWorld.
 
 Checklist cross-link: [Is the agent task done?](/checklists/agent-done/)
 
@@ -132,12 +132,12 @@ Without publishing internal wiring: we treated these as harness and policy issue
 1. **Classify failures before comparing modes.** Budget and poison are different fixes.
 2. **pass_percentage without success misleads.** Log both; gate on `success`.
 3. **Prose PASS is a failure mode** when judge disagrees.
-4. **Ties mean both lost** when the external judge is the contract.
-5. **Small n, honest ceiling.** Five tasks, zero passes — the right headline is “not ready,” not “planner vs single-agent.”
+4. **Ties on strict TGC mean “same benchmark ceiling,”** not equal quality — check partial `pass_percentage` and failure class.
+5. **Small n, separate concerns.** Five tasks expose failure taxonomy; they are not a product scorecard for [SRE workflows](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/) Aiden already runs.
 
 ---
 
-**Next:** [Stop Spawning Duplicate Workers](/blog/stop-duplicate-agent-workers-handoff-gate/) — what changed after a handoff gate fixed fairness 5/5 and cut planner token tax (strict judge pass still 0/5).
+**Next:** [Stop Spawning Duplicate Workers](/blog/stop-duplicate-agent-workers-handoff-gate/) — what changed after a handoff gate fixed fairness 5/5 and cut planner token tax.
 
 ## Related reading
 

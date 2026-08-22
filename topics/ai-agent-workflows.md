@@ -47,6 +47,6 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [Fair Agent Evals: Don't Compare Until Tools Match](/blog/fair-agent-evals-before-performance/) | Tool-access parity before planner vs single-agent benchmarks (AppWorld series pt. 1) |
 | [Agent Orchestration Tax After a Fair Eval](/blog/agent-orchestration-tax-evals/) | Tokens, iterations, and tool-call overhead when fairness is fixed (pt. 2) |
 | [AI Agent Eval Failure Modes](/blog/ai-agent-eval-failure-modes/) | Budget, PII placeholders, and self-report vs judge (pt. 3) |
-| [Stop Spawning Duplicate Workers](/blog/stop-duplicate-agent-workers-handoff-gate/) | Handoff gate sequel: fairness 5/5, lower token tax, pass% vs strict judge (pt. 4) |
+| [Stop Spawning Duplicate Workers](/blog/stop-duplicate-agent-workers-handoff-gate/) | Handoff gate sequel: fairness 5/5, lower token tax, harness tuning (pt. 4) |
 
 {% include subscribe.html %}

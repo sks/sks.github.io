@@ -16,7 +16,7 @@
   </defs>
   <rect width="720" height="420" fill="#ffffff"/>
   <text x="360" y="32" text-anchor="middle" class="title">Failure classes (delegation-fit cohort)</text>
-  <text x="360" y="52" text-anchor="middle" class="subtitle">n=5 per mode &#183; head-to-head ties 5/5 &#183; judge pass = 0</text>
+  <text x="360" y="52" text-anchor="middle" class="subtitle">n=5 per mode &#183; head-to-head ties 5/5 on strict TGC</text>
 
   <!-- Y axis: 0-5, 40px per unit, baseline y=320 -->
   <line x1="72" y1="320" x2="680" y2="320" class="baseline"/>
