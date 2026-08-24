@@ -138,6 +138,7 @@ For **LLM token budget** discipline when tax is unavoidable, see [maintaining to
 
 - [Fair Agent Evals: Tools Must Match](/blog/fair-agent-evals-before-performance/) — part one
 - [AI Agent Eval Failure Modes](/blog/ai-agent-eval-failure-modes/) — part three
+- [Simple vs Plan: When to Use Which](/blog/simple-vs-plan-when-to-use-which/) — smoke cohort routing guide
 - [AI SRE Agent Benchmarks: Wall Time, Tools, Tokens](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/) — same tax idea on triage
 - [Single-Agent vs Multi-Agent](/blog/single-agent-vs-multi-agent/) — when to branch
 

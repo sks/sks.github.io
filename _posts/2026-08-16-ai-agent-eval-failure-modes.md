@@ -137,7 +137,7 @@ Without publishing internal wiring: we treated these as harness and policy issue
 
 ---
 
-**Next:** [Stop Spawning Duplicate Workers](/blog/stop-duplicate-agent-workers-handoff-gate/) — handoff gate fixed fairness 5/5 and cut planner token tax. Then [how to evaluate unattended agents](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/) and [multi-agent vs single-agent](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/).
+**Next:** [Stop Spawning Duplicate Workers](/blog/stop-duplicate-agent-workers-handoff-gate/) — handoff gate fixed fairness 5/5 and cut planner token tax. Then [how to evaluate unattended agents](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/), [multi-agent vs single-agent](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/), and [simple vs plan: when to use which](/blog/simple-vs-plan-when-to-use-which/).
 
 ## Related reading
 
@@ -146,6 +146,7 @@ Without publishing internal wiring: we treated these as harness and policy issue
 - [Fair Agent Evals](/blog/fair-agent-evals-before-performance/) · [Orchestration Tax](/blog/agent-orchestration-tax-evals/)
 - [How to evaluate AI agents (clarify + zero-tool)](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/)
 - [Multi-agent vs single-agent (MCP tool tax + pass@k)](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/)
+- [Simple vs plan: when to use which](/blog/simple-vs-plan-when-to-use-which/)
 - [PII Redaction in AI Agents](/blog/pii-redaction-ai-agents/)
 - [Evidence-Based Verification](/blog/evidence-based-verification/)
 - [From Vibes to Contracts](/blog/from-vibes-to-contracts-agent-evals/)
