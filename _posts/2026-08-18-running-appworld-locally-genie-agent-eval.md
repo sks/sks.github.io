@@ -21,6 +21,8 @@ faqs:
     answer: "Probe environment and APIs with HTTP GET, then list_tools on MCP (non-empty). We gate cohorts on all three; starting Genie when MCP is down produces confusing tool-missing errors."
 ---
 
+> **Skip this post** if you only want eval lessons — start with [how to evaluate AI agents](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/) or [multi-agent vs single-agent](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/). Come back here when you need to reproduce the stack.
+
 **Prerequisite for the AppWorld eval series** ([fair evals](/blog/fair-agent-evals-before-performance/) → [orchestration tax](/blog/agent-orchestration-tax-evals/) → [failure modes](/blog/ai-agent-eval-failure-modes/) → [handoff gate](/blog/stop-duplicate-agent-workers-handoff-gate/)): get the benchmark running on your machine before you argue about planner tax or failure modes.
 
 We wired [Genie](https://github.com/stackgenhq/genie) to the official [AppWorld](https://github.com/stonybrooknlp/appworld) [MCP server](https://github.com/stonybrooknlp/appworld#electric_plug-introducing-appworld-mcp-server-and-client) ([paper](https://arxiv.org/abs/2407.18901)) for simple-vs-plan routing evals. This post is the **ops guide** we wanted on day one: Docker Compose, copy-paste snippets, and the traps that burned an afternoon.
@@ -321,6 +323,14 @@ appworld verify tasks \
   --remote-mcp-url http://127.0.0.1:10000
 ```
 
+### Experiment dashboard (cohort progress)
+
+While a cohort runs, open:
+
+`http://127.0.0.1:8000/dashboard?experiment=genie_routing&task_ids=29caf6f_1,3aa1a22_3,b0a8eae_3,60d0b5b_1`
+
+The UI shows per-task status, the latest API call (“where it is now”), and a re-evaluate action. Polls every few seconds.
+
 ---
 
 ## Wire your agent (Genie example)
@@ -376,7 +386,7 @@ This unblocks harness and judge work while you fix LFS/bundles for a single-cont
 
 ## What's next
 
-With the stack up, run the eval series: [fair tool parity](/blog/fair-agent-evals-before-performance/) → [orchestration tax](/blog/agent-orchestration-tax-evals/) → [failure taxonomy](/blog/ai-agent-eval-failure-modes/) → [handoff gate](/blog/stop-duplicate-agent-workers-handoff-gate/).
+With the stack up, run the eval series: [fair tool parity](/blog/fair-agent-evals-before-performance/) → [orchestration tax](/blog/agent-orchestration-tax-evals/) → [failure taxonomy](/blog/ai-agent-eval-failure-modes/) → [handoff gate](/blog/stop-duplicate-agent-workers-handoff-gate/) → [how to evaluate unattended agents](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/) → [multi-agent vs single-agent](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/).
 
 **AppWorld codebase**
 
