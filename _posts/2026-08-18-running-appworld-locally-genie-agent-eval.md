@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Running AppWorld Locally for Genie Agent Evals: Docker Compose, MCP, and Things We Wish We Knew Upfront"
+title: "Running AppWorld Locally for Aiden Agent Evals: Docker Compose, MCP, and Things We Wish We Knew Upfront"
 date: 2026-08-18 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 50
-description: "Run AppWorld locally with Genie: docker-compose, MCP HTTP wiring, health gates, and lessons from replacing custom shims with the official three-server stack."
+description: "Run AppWorld locally with the Aiden agent runtime: docker-compose, MCP HTTP wiring, health gates, and lessons from replacing custom shims with the official three-server stack."
 image: /assets/images/og-default.png
 tags: [ai-agents, evaluation, benchmarking, appworld, mcp, docker, workflows, orchestration, production]
 permalink: /blog/running-appworld-locally-genie-agent-eval/
@@ -18,14 +18,14 @@ faqs:
   - question: "Does the agent call load_task or evaluate?"
     answer: "No — not via MCP. Official MCP exposes app API tools only ({app}__{method}). Your eval harness must POST /initialize before the agent runs and POST /save + /evaluate after."
   - question: "How do I know the stack is ready before a cohort?"
-    answer: "Probe environment and APIs with HTTP GET, then list_tools on MCP (non-empty). We gate cohorts on all three; starting Genie when MCP is down produces confusing tool-missing errors."
+    answer: "Probe environment and APIs with HTTP GET, then list_tools on MCP (non-empty). We gate cohorts on all three; starting the agent when MCP is down produces confusing tool-missing errors."
 ---
 
 > **Skip this post** if you only want eval lessons — start with [how to evaluate AI agents](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/) or [multi-agent vs single-agent](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/). Come back here when you need to reproduce the stack.
 
 **Prerequisite for the AppWorld eval series** ([fair evals](/blog/fair-agent-evals-before-performance/) → [orchestration tax](/blog/agent-orchestration-tax-evals/) → [failure modes](/blog/ai-agent-eval-failure-modes/) → [handoff gate](/blog/stop-duplicate-agent-workers-handoff-gate/)): get the benchmark running on your machine before you argue about planner tax or failure modes.
 
-We wired [Genie](https://github.com/stackgenhq/genie) to the official [AppWorld](https://github.com/stonybrooknlp/appworld) [MCP server](https://github.com/stonybrooknlp/appworld#electric_plug-introducing-appworld-mcp-server-and-client) ([paper](https://arxiv.org/abs/2407.18901)) for simple-vs-plan routing evals. This post is the **ops guide** we wanted on day one: Docker Compose, copy-paste snippets, and the traps that burned an afternoon.
+We wired the **Aiden agent runtime** to the official [AppWorld](https://github.com/stonybrooknlp/appworld) [MCP server](https://github.com/stonybrooknlp/appworld#electric_plug-introducing-appworld-mcp-server-and-client) ([paper](https://arxiv.org/abs/2407.18901)) for simple-vs-plan routing evals. This post is the **ops guide** we wanted on day one: Docker Compose, copy-paste snippets, and the traps that burned an afternoon.
 
 ![AppWorld local stack: environment, APIs, MCP HTTP](/assets/images/appworld/orchestration-stack.svg)
 
@@ -47,7 +47,7 @@ AppWorld is a pretend city with fake apps. The **environment** desk hands you to
 ## Architecture (one screen)
 
 ```text
-eval harness                agent (Genie, etc.)
+eval harness                agent (Aiden runtime, etc.)
      |                              |
      | POST /initialize             | streamable_http MCP
      v                              v
@@ -68,7 +68,7 @@ environment :8000              MCP HTTP :10000/mcp
 | 9000 | `appworld serve apis` | Stateful mock HTTP APIs (agent reaches these via MCP) |
 | 10000 | [`appworld serve mcp http`](https://github.com/stonybrooknlp/appworld#link-starting-mcp-server) | `list_tools` / `call_tool` — names like `spotify__login` |
 
-Genie prefixes the MCP server name: `spotify__login` → `appworld_spotify__login`.
+Our runtime prefixes the MCP server name: `spotify__login` → `appworld_spotify__login`.
 
 Upstream documents the full three-server flow for terminal agents in [`guides/evaluating_terminal_agents.md`](https://github.com/stonybrooknlp/appworld/blob/main/guides/evaluating_terminal_agents.md).
 
@@ -155,7 +155,7 @@ On older installs, start **apis first**, wait, then environment, then MCP. Our D
 
 ### 5. Env+apis can look healthy while MCP is dead
 
-We repeatedly hit: `curl :8000` and `:9000` return 200, cohort starts, Genie lists zero MCP tools. **Always gate on MCP `list_tools`** before burning API credits — upstream ships [`scripts/call_mcp_server.py`](https://github.com/stonybrooknlp/appworld/blob/main/scripts/call_mcp_server.py) for exactly this smoke test.
+We repeatedly hit: `curl :8000` and `:9000` return 200, cohort starts, the agent lists zero MCP tools. **Always gate on MCP `list_tools`** before burning API credits — upstream ships [`scripts/call_mcp_server.py`](https://github.com/stonybrooknlp/appworld/blob/main/scripts/call_mcp_server.py) for exactly this smoke test.
 
 ### 6. Do not duplicate `data/` under your agent repo
 
@@ -249,7 +249,7 @@ export GENIE_APPWORLD_ROUTING=/path/to/genie/examples/appworld-routing
 # Build + run
 DOCKER_BUILDKIT=1 docker compose -p genie-appworld up -d --build
 
-# Or use the helper script in the Genie example
+# Or use the helper script in the open-source appworld-routing harness
 USE_DOCKER=1 ./scripts/appworld_stack.sh
 
 # Stop
@@ -333,7 +333,7 @@ The UI shows per-task status, the latest API call (“where it is now”), and a
 
 ---
 
-## Wire your agent (Genie example)
+## Wire your agent (reference harness)
 
 Point MCP at HTTP transport — not a custom stdio shim:
 
@@ -386,7 +386,7 @@ This unblocks harness and judge work while you fix LFS/bundles for a single-cont
 
 ## What's next
 
-With the stack up, run the eval series: [fair tool parity](/blog/fair-agent-evals-before-performance/) → [orchestration tax](/blog/agent-orchestration-tax-evals/) → [failure taxonomy](/blog/ai-agent-eval-failure-modes/) → [handoff gate](/blog/stop-duplicate-agent-workers-handoff-gate/) → [how to evaluate unattended agents](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/) → [multi-agent vs single-agent](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/).
+With the stack up, run the eval series: [fair tool parity](/blog/fair-agent-evals-before-performance/) → [orchestration tax](/blog/agent-orchestration-tax-evals/) → [failure taxonomy](/blog/ai-agent-eval-failure-modes/) → [handoff gate](/blog/stop-duplicate-agent-workers-handoff-gate/) → [how to evaluate unattended agents](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/) → [multi-agent vs single-agent](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/) → [simple vs plan: when to use which](/blog/simple-vs-plan-when-to-use-which/).
 
 **AppWorld codebase**
 
@@ -402,4 +402,4 @@ With the stack up, run the eval series: [fair tool parity](/blog/fair-agent-eval
 **Our wiring**
 
 - [GAGE AppWorld Dockerfile](https://github.com/HiThink-Research/GAGE/blob/83cc359dbb3056ea8f4090f4c398ba2f066231a0/docker/appworld/Dockerfile) — extend-base-image pattern we copied
-- [Genie `appworld-routing` example](https://github.com/stackgenhq/genie/tree/main/examples/appworld-routing) — harness, compose, and stack scripts
+- [Open-source `appworld-routing` harness](https://github.com/stackgenhq/genie/tree/main/examples/appworld-routing) — reference compose, stack scripts, and eval drivers (paths retain legacy env var names)

@@ -154,7 +154,7 @@ Strict `judge.success` did not flip on this five-task rerun. Next increments: di
 
 ---
 
-**Next:** [Running AppWorld Locally for Genie Agent Evals](/blog/running-appworld-locally-genie-agent-eval/) — reproduce the three-server stack before your next cohort. Then [multi-agent vs single-agent quality and token tax](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/).
+**Next:** [Running AppWorld Locally for Aiden Agent Evals](/blog/running-appworld-locally-genie-agent-eval/) — reproduce the three-server stack before your next cohort. Then [multi-agent vs single-agent quality and token tax](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/) and [simple vs plan: when to use which](/blog/simple-vs-plan-when-to-use-which/).
 
 ## Related reading
 
