@@ -21,11 +21,13 @@ faqs:
     answer: "Fairness (tool-access parity) must pass before you compare cost or pass%. This sequel fixed fairness from 2/5 to 5/5 pairs OK, then re-measured. See the trilogy starting with fair agent evals before performance."
 ---
 
-We fixed **fair agent evals** and cut **agent orchestration tax** on a five-task AppWorld slice — the wins were in **measurement and cost**, not in declaring a benchmark champion.
+**Rule:** the first successful worker handoff wins. Extra `create_agent` calls return that result — they do not launch another subcontractor. Without that gate, multi-agent evals double-count workers and lie about orchestration tax.
 
-Parts [one](/blog/fair-agent-evals-before-performance/), [two](/blog/agent-orchestration-tax-evals/), and [three](/blog/ai-agent-eval-failure-modes/) documented unfair handoffs, ~1.6× token overhead, and failure classes. This sequel covers what changed after we shipped a **successful handoff gate**, re-enabled note tooling, soft-dropped missing infra names on spawn, and capped worker nodes to one.
+We fixed **fair agent evals** and cut **agent orchestration tax** on a five-task AppWorld slice — the wins were in **measurement and cost**, not in declaring a benchmark champion. **Strict judge pass stayed 0/5** on this slice; the gate did not “win AppWorld,” it stopped invalid comparisons.
 
-Dataset unchanged. Judge unchanged (AppWorld TGC/SGC through `evaluate`). Observability: [Langfuse](https://langfuse.com/) aggregates only.
+Parts [one](/blog/fair-agent-evals-before-performance/), [two](/blog/agent-orchestration-tax-evals/), and [three](/blog/ai-agent-eval-failure-modes/) documented unfair handoffs, ~1.6× token overhead, and failure classes. This sequel covers what changed after we shipped the **handoff gate**, re-enabled note tooling, soft-dropped missing infra names on spawn, and capped worker nodes to one.
+
+Dataset unchanged. Judge unchanged (AppWorld `/evaluate`, strict `success` bit). Observability: [Langfuse](https://langfuse.com/) aggregates only.
 
 ![Handoff gate blocking duplicate worker spawns after successful subcontractor return](/assets/images/og-appworld-handoff-gate.jpg)
 
@@ -37,6 +39,8 @@ Dataset unchanged. Judge unchanged (AppWorld TGC/SGC through `evaluate`). Observ
 - **Orchestration tax:** planner/single token ratio **~1.34×** → **~0.86×**; iterations **38.4** → **27.8** on plan side.
 - **Partial progress:** avg `pass_percentage` **41.7%** (simple) → **56.0%** (plan) post-gate — task steps improved; **strict AppWorld TGC** on this slice remains a separate harness goal (see [part one context](/blog/fair-agent-evals-before-performance/)).
 - **Monday-morning rule:** gate duplicate workers **before** debating planner vs single-agent on tokens.
+
+**Sequel:** [How to evaluate AI agents: clarify + zero-tool failures](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/) — workers that report success without domain MCP calls.
 
 ### Explain like I'm five
 
@@ -89,7 +93,7 @@ Same five delegation-fit tasks (phone → notes → SMS, inbox + contacts + Spli
 | `29caf6f_1` | 50.0% / 110,581 | 50.0% / 124,037 | both `fail_judge` | tie; simple cheaper |
 | `3aa1a22_3` | 28.6% / 275,342 | 50.0% / 193,229 | both fail (plan `budget_no_eval`) | plan higher pass%, lower tokens |
 | `b0a8eae_3` | 50.0% / 185,992 | 50.0% / 264,356 | both `fail_judge` | tie; simple cheaper |
-| `afc0fce_2` | 50.0% / 105,322 | 100.0% / **0** | simple `fail_judge`; plan `budget_no_eval` | plan pass% misleading — zero token telemetry |
+| `afc0fce_2` | 50.0% / 105,322 | **100.0% ⚠️ / 0 tokens** | simple `fail_judge`; plan `budget_no_eval` | **telemetry bug** — 100% pass% with zero Langfuse tokens is not a victory |
 | `32616b5_1` | 30.0% / 198,455 | 30.0% / 206,495 | both `fail_judge` | tie; similar pass% |
 
 **Scoreboard on pass% alone:** plan higher on **2/5** tasks — meaningful diagnostic after harness fixes. **Scoreboard on strict TGC:** neither mode cleared the bar on this slice; compare modes on fairness and tax first.
@@ -150,30 +154,27 @@ Strict `judge.success` did not flip on this five-task rerun. Next increments: di
 
 ---
 
-**Next:** [Running AppWorld Locally for Genie Agent Evals](/blog/running-appworld-locally-genie-agent-eval/) — reproduce the three-server stack (environment, APIs, MCP HTTP) before your next cohort.
+**Next:** [Running AppWorld Locally for Genie Agent Evals](/blog/running-appworld-locally-genie-agent-eval/) — reproduce the three-server stack before your next cohort. Then [multi-agent vs single-agent quality and token tax](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/).
 
 ## Related reading
 
 ### On this site
 
-- [Running AppWorld Locally](/blog/running-appworld-locally-genie-agent-eval/) — ops prerequisite (pt. 5)
-- [Fair Agent Evals](/blog/fair-agent-evals-before-performance/) — part 1
-- [Agent Orchestration Tax](/blog/agent-orchestration-tax-evals/) — part 2
-- [AI Agent Eval Failure Modes](/blog/ai-agent-eval-failure-modes/) — part 3 (pre-gate cohort)
-- [Single-Agent vs Multi-Agent](/blog/single-agent-vs-multi-agent/) — when branching is worth it
+- [Running AppWorld Locally](/blog/running-appworld-locally-genie-agent-eval/) — ops prerequisite
+- [Fair Agent Evals](/blog/fair-agent-evals-before-performance/)
+- [Agent Orchestration Tax](/blog/agent-orchestration-tax-evals/)
+- [AI Agent Eval Failure Modes](/blog/ai-agent-eval-failure-modes/)
+- [How to evaluate AI agents (clarify + zero-tool)](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/)
+- [Multi-agent vs single-agent](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/)
 - [Is the Task Actually Done?](/blog/is-the-task-actually-done/)
 
 ### Elsewhere
 
 - [AppWorld](https://github.com/stonybrooknlp/appworld) · [paper](https://arxiv.org/abs/2407.18901)
 - [Model Context Protocol](https://modelcontextprotocol.io/) · [Langfuse](https://langfuse.com/)
-- [Google ADK evaluation](https://google.github.io/adk-docs/evaluate/)
-- [LangGraph](https://langchain-ai.github.io/langgraph/) · [CrewAI](https://docs.crewai.com/) · [AutoGen](https://microsoft.github.io/autogen/) · [OpenAI Agents](https://openai.github.io/openai-agents-python/)
 
 ---
 
 **Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
-
----
 
 > 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
