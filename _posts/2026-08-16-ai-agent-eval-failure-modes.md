@@ -21,11 +21,11 @@ faqs:
     answer: "Same contract: systems of record — here AppWorld's evaluate — vote before you trust narration. Self-report is a failure mode, not a tie-breaker."
 ---
 
+The transcript said pass. The judge said fail. **AI agent evaluation** on tool-using benchmarks fails in repeatable ways — and most of them are harness or policy bugs, not “the model is dumb.”
+
 Parts [one](/blog/fair-agent-evals-before-performance/) and [two](/blog/agent-orchestration-tax-evals/) fixed tool fairness and measured **agent orchestration tax**. This post classifies **what blocked benchmark success** on a small AppWorld slice — harness issues (budget, spawn infra, redaction) mixed with task-hardness signals.
 
-This post is the failure-mode atlas: what broke, how we labeled it, and why **winner badges** would have lied.
-
-Benchmark: [AppWorld](https://github.com/stonybrooknlp/appworld) ([paper](https://arxiv.org/abs/2407.18901)). Tools: MCP. Judge: their evaluate harness (TGC/SGC). We publish **aggregates only** — AppWorld data is license-protected; see their repo for terms.
+Benchmark: [AppWorld](https://github.com/stonybrooknlp/appworld) ([paper](https://arxiv.org/abs/2407.18901)). Tools: MCP. Judge: AppWorld `/evaluate` — **`success: true`** is strict all-tests pass (TGC). Partial `pass_percentage` can look “close” while `success` stays false. We publish **aggregates only** — AppWorld data is license-protected; see their repo for terms.
 
 ![AI agent eval failure modes: budget, PII poison, wrong API, prose vs judge](/assets/images/og-appworld-failure-modes.jpg)
 
@@ -45,7 +45,7 @@ The robot wrote “I finished homework” on the page but never handed it in. Th
 
 ---
 
-## Failure-class taxonomy (copy for your harness)
+## Failure-class taxonomy (what we saw on this slice)
 
 | Class | What it means | Typical fix |
 |-------|---------------|-------------|
@@ -53,9 +53,9 @@ The robot wrote “I finished homework” on the page but never handed it in. Th
 | `true_tgc_fail` | Evaluate called; judge `success: false` | Task logic, discovery, API usage |
 | `pii_poison` | Redacted placeholder copied into tool `method` | Align redaction policy for eval twins ([PII post](/blog/pii-redaction-ai-agents/)) |
 | `wrong_method_422` | Documented API name mismatch | Search docs tool before call; retry on `did_you_mean` |
-| `ran_without_judge` | Run ended with no parsed evaluate | Unattended mode + completion gate |
 | `create_agent_tools_unavailable` | Spawn hard-failed on missing tool names | Soft-drop or fix registry / AlwaysInclude |
-| `assistant_asks_clarification` | Human prompt in unattended eval | Deny clarify tools in benchmark config |
+| `assistant_asks_clarification` | Human prompt or clarify stall in unattended eval | Deny clarify tools in benchmark config ([harness post](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/)) |
+| `zero_tool_worker` | Plan step reports success with zero domain MCP calls | Force `tool_calling` on worker steps; fail when tool count is 0 |
 
 ---
 
@@ -137,13 +137,15 @@ Without publishing internal wiring: we treated these as harness and policy issue
 
 ---
 
-**Next:** [Stop Spawning Duplicate Workers](/blog/stop-duplicate-agent-workers-handoff-gate/) — what changed after a handoff gate fixed fairness 5/5 and cut planner token tax.
+**Next:** [Stop Spawning Duplicate Workers](/blog/stop-duplicate-agent-workers-handoff-gate/) — handoff gate fixed fairness 5/5 and cut planner token tax. Then [how to evaluate unattended agents](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/) and [multi-agent vs single-agent](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/).
 
 ## Related reading
 
 ### On this site
 
 - [Fair Agent Evals](/blog/fair-agent-evals-before-performance/) · [Orchestration Tax](/blog/agent-orchestration-tax-evals/)
+- [How to evaluate AI agents (clarify + zero-tool)](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/)
+- [Multi-agent vs single-agent (MCP tool tax + pass@k)](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/)
 - [PII Redaction in AI Agents](/blog/pii-redaction-ai-agents/)
 - [Evidence-Based Verification](/blog/evidence-based-verification/)
 - [From Vibes to Contracts](/blog/from-vibes-to-contracts-agent-evals/)
@@ -154,13 +156,10 @@ Without publishing internal wiring: we treated these as harness and policy issue
 - [AppWorld](https://github.com/stonybrooknlp/appworld) · [paper](https://arxiv.org/abs/2407.18901)
 - [Model Context Protocol](https://modelcontextprotocol.io/) · [Langfuse](https://langfuse.com/)
 - [Microsoft Presidio](https://github.com/microsoft/presidio) — PII detection/redaction reference
-- [Google ADK evaluation](https://google.github.io/adk-docs/evaluate/)
-- [LangGraph](https://langchain-ai.github.io/langgraph/) · [CrewAI](https://docs.crewai.com/) · [AutoGen](https://microsoft.github.io/autogen/) · [OpenAI Agents](https://openai.github.io/openai-agents-python/)
+- [Anthropic: demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents)
 
 ---
 
 **Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
-
----
 
 > 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.

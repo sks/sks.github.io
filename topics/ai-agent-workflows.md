@@ -49,5 +49,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [AI Agent Eval Failure Modes](/blog/ai-agent-eval-failure-modes/) | Budget, PII placeholders, and self-report vs judge (pt. 3) |
 | [Stop Spawning Duplicate Workers](/blog/stop-duplicate-agent-workers-handoff-gate/) | Handoff gate sequel: fairness 5/5, lower token tax, harness tuning (pt. 4) |
 | [Running AppWorld Locally for Genie Agent Evals](/blog/running-appworld-locally-genie-agent-eval/) | Docker Compose, official MCP HTTP, health gates, and setup pitfalls (pt. 5 — ops prerequisite) |
+| [How to Evaluate AI Agents: Clarify + Zero-Tool Failures](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/) | Unattended eval harness rules: deny clarify, fail zero-tool workers, MCP vs plan layers, policy in TOML (pt. 6) |
+| [Multi-Agent vs Single-Agent: MCP Tool Tax + pass@k](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/) | When planning beats reacting; 453-tool catalog tax; 292-byte handoffs; pass@1 vs pass@3 (pt. 7) |
 
 {% include subscribe.html %}
