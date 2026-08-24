@@ -23,7 +23,7 @@ faqs:
 
 After the [harness stops lying](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/), **planning can beat one-shot react** on some errands — and still cost more total tokens. Measure **peak and total**; measure **pass@1 and pass@3**.
 
-Same [AppWorld](https://github.com/stonybrooknlp/appworld) stack rebuild (453 MCP tools) through [Genie](https://github.com/stackgenhq/genie). Part of the [AI agent evaluation series](/blog/fair-agent-evals-before-performance/). Earlier posts often showed plan **losing** to a direct MCP baseline when orchestration blocked before domain bugs mattered. Fresh series after fixes: **plan won quality** on the first two cohort tasks — with caveats below.
+Same [AppWorld](https://github.com/stonybrooknlp/appworld) stack rebuild (453 MCP tools) through the **Aiden agent runtime**. Part of the [AI agent evaluation series](/blog/fair-agent-evals-before-performance/). Earlier posts often showed plan **losing** to a direct MCP baseline when orchestration blocked before domain bugs mattered. Fresh series after fixes: **plan won quality** on the first two cohort tasks — with caveats below. A follow-up smoke cohort ([simple vs plan: when to use which](/blog/simple-vs-plan-when-to-use-which/)) shows plan is not universal: simple ties on hard action tasks and wins on speed/cost.
 
 ---
 
@@ -156,6 +156,7 @@ Log **failure class per attempt** (`instruction_over_broad`, `clarifying_questio
 
 ## Related reading
 
+- [Simple vs Plan: When to Use Which](/blog/simple-vs-plan-when-to-use-which/) — smoke cohort: plan wins some, ties some; choose by fit
 - [How to evaluate AI agents: clarify + zero-tool failures](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/)
 - [Agent orchestration tax](/blog/agent-orchestration-tax-evals/)
 - [Fair agent evals before performance](/blog/fair-agent-evals-before-performance/)

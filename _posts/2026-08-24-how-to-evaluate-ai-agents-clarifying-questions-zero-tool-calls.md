@@ -23,7 +23,7 @@ faqs:
 
 If a human is not at the keyboard, **“ask a question”** and **“I finished with zero API calls”** are harness failures — not agent features. A direct MCP script can still reach the apps while your planner never leaves the hallway.
 
-This is part of our [AI agent evaluation series](/blog/fair-agent-evals-before-performance/) on [AppWorld](https://github.com/stonybrooknlp/appworld) ([paper](https://arxiv.org/abs/2407.18901)) through [Genie](https://github.com/stackgenhq/genie). Prerequisite: [running AppWorld locally](/blog/running-appworld-locally-genie-agent-eval/). **Next in the pair:** [multi-agent vs single-agent quality and token tax](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/).
+This is part of our [AI agent evaluation series](/blog/fair-agent-evals-before-performance/) on [AppWorld](https://github.com/stonybrooknlp/appworld) ([paper](https://arxiv.org/abs/2407.18901)) through the **Aiden agent runtime**. Prerequisite: [running AppWorld locally](/blog/running-appworld-locally-genie-agent-eval/). **Next in the pair:** [multi-agent vs single-agent quality and token tax](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/). **Capstone:** [simple vs plan: when to use which](/blog/simple-vs-plan-when-to-use-which/).
 
 ---
 
@@ -64,7 +64,7 @@ On a four-task plan cohort, **3/4 passed** only after we treated `ask_clarifying
 | `ask_clarifying_question` in logs | Force `success = false` even if evaluate later passes |
 | Coordinator blocked on human-in-the-loop | Same — unattended mode must not wait on UI |
 
-Genie’s persona already says “infer from tools, don’t ask.” Benchmark config must **enforce** it:
+The runtime persona already says “infer from tools, don’t ask.” Benchmark config must **enforce** it:
 
 ```toml
 # appworld-plan.toml (harness)
@@ -102,7 +102,7 @@ Same errand, same judge, two shapes — **Spotify playlist from workout note** (
 | Mode | Score (pre-fix cohort) | Dominant blocker |
 |------|------------------------:|------------------|
 | MCP baseline (direct script) | **60%** | AppWorld `show_song` / `search_songs` HTTP 500s; queue duration eval |
-| Plan (Genie ReAcTree) | **0%** | Zero-tool workers, clarify stalls, auth loop traps |
+| Plan (planner tree) | **0%** | Zero-tool workers, clarify stalls, auth loop traps |
 
 That gap is not “MCP is smarter.” It is **layer separation**:
 
@@ -125,7 +125,7 @@ Unattended AppWorld policy is easy to put in the wrong layer.
 | Worker must tool-call | `AGENTS.md` / plan TOML `task_type` | Avoid prose-complete theater |
 | Login / loop overrides | Harness docs + TOML | Task-world specifics, not core runtime |
 
-**Do not fork Genie production packages** for AppWorld-only guards. Product runtime stays general; the benchmark is opinionated. If a knob only exists to make AppWorld green, keep it in the [example harness](https://github.com/stackgenhq/genie/tree/main/examples/appworld-routing).
+**Do not fork the production agent runtime** for AppWorld-only guards. Product runtime stays general; the benchmark is opinionated. If a knob only exists to make AppWorld green, keep it in the [open-source harness](https://github.com/stackgenhq/genie/tree/main/examples/appworld-routing).
 
 Product code can still grow **generic** gates (handoff size, domain tool counts) when they help every customer. AppWorld task IDs in `pkg/` is the smell.
 
@@ -162,6 +162,7 @@ Pair with [Anthropic’s agent eval guide](https://www.anthropic.com/engineering
 - [AI agent eval failure modes](/blog/ai-agent-eval-failure-modes/) — full taxonomy
 - [Stop duplicate agent workers](/blog/stop-duplicate-agent-workers-handoff-gate/) — handoff gate sequel
 - [Multi-agent vs single-agent: MCP tool tax + pass@k](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/) — when planning is worth the cost
+- [Simple vs plan: when to use which](/blog/simple-vs-plan-when-to-use-which/) — smoke cohort: both modes stay in the toolkit
 - [Fair agent evals before performance](/blog/fair-agent-evals-before-performance/) — series start
 - [Running AppWorld locally](/blog/running-appworld-locally-genie-agent-eval/) — ops prerequisite
 
