@@ -21,7 +21,9 @@ faqs:
 
 **SRE AI agents** sit at the intersection of on-call pain and demo hype. Start with the **[SRE on-call starter pack](/start/sre-on-call/)** (five posts), or [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/) for the plain definition, then dig into triage, RCA, and observability below.
 
-Also see [AI incident triage](/topics/ai-incident-triage/) for the on-call-specific landing page. Pocket checklists: [evidence-gated RCA](/checklists/evidence-gated-rca/) · [“done” checks](/checklists/agent-done/).
+Also see [AI incident triage](/topics/ai-incident-triage/) for the on-call-specific landing page. Pocket checklists: [evidence-gated RCA](/checklists/evidence-gated-rca/) · [“done” checks](/checklists/agent-done/) · [SRE as service](/checklists/sre-as-service/).
+
+**Also read:** [Service Rendered Efficiently](/series/service-rendered-efficiently/) — culture and product decisions when AI investigation is a service for on-call, not an engineering credibility project. Starter: [SRE as service](/start/sre-as-service/).
 
 Part of the series [Building an Enterprise AI Agent Platform in Go](/series/enterprise-ai-agents-go/).
 
@@ -46,5 +48,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [Single-Agent vs Multi-Agent Orchestration: How to Choose](/blog/single-agent-vs-multi-agent/) | When single-agent vs multi-agent fits SRE triage — fair A/B, both sides |
 | [AI SRE Agent Benchmarks: Wall Time, Tools, Tokens](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/) | Fair scorecard — wall time, tool calls, payload bytes, ReAcTree tax |
 | [Canary First: Consistency Evals for Live SRE Investigate](/blog/canary-first-sre-investigate-consistency-evals/) | Nightly black-box investigate — canary before tokens, draft ≠ done, concurrence |
+| [Service Rendered Efficiently](/blog/service-rendered-efficiently/) | Culture frame — AI investigation as a service product, not engineering cred |
+| [Stop Re-Investigating the Same Alert](/blog/stop-re-investigating-the-same-alert/) | Reuse-first policy; investigations per alert as a service metric |
 
 {% include subscribe.html %}

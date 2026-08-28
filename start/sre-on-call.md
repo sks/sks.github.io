@@ -27,6 +27,7 @@ Downloadable principles (no proprietary schemas): [Evidence-gated RCA checklist]
 ## Next
 
 - Hub: [AI agents for SRE](/topics/ai-agents-sre/) · [AI incident triage](/topics/ai-incident-triage/)  
+- **Also read:** [SRE as service starter pack](/start/sre-as-service/) · [Service Rendered Efficiently](/series/service-rendered-efficiently/) — incentives and investigation product decisions  
 - Full series: [Building an Enterprise AI Agent Platform in Go](/series/enterprise-ai-agents-go/?q=sre)  
 - Runtime basics: [Go / runtime starter pack](/start/go-runtime/)
 
