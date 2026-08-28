@@ -19,8 +19,10 @@ Pick a path — don't start from a 40-post wall:
 | Path | Best for |
 |------|----------|
 | **[SRE on-call starter pack](/start/sre-on-call/)** | Triage, RCA, observability — 5 posts |
+| **[SRE as service starter pack](/start/sre-as-service/)** | Service Rendered Efficiently — culture + investigation product — 5 posts |
 | **[Go agent runtime starter pack](/start/go-runtime/)** | Runtime definition, Go vs Python, platform split — 5 posts |
 | **[Full series (searchable)](/series/enterprise-ai-agents-go/)** | Month-folded archive + search |
+| **[Service Rendered Efficiently](/series/service-rendered-efficiently/)** | AI investigation as a service product for on-call |
 
 Or read these four in order:
 
@@ -35,12 +37,14 @@ Shareable operator checklists (no proprietary schemas):
 
 - [Evidence-gated RCA](/checklists/evidence-gated-rca/)
 - [“Is the agent task done?”](/checklists/agent-done/)
+- [SRE as service](/checklists/sre-as-service/)
 
 ## Topic hubs
 
 - [AI agent runtime](/topics/ai-agent-runtime/) — what a runtime is vs a GenAI platform
 - [AI agent workflows](/topics/ai-agent-workflows/) — bring-up, evidence-gated RCA, verification
 - [AI agents for SRE](/topics/ai-agents-sre/) — triage, observability, tokenomics
+- [Service Rendered Efficiently](/topics/service-rendered-efficiently/) — AI investigation as a service product
 - [AI incident triage](/topics/ai-incident-triage/) — on-call triage vs demo theater
 - [Go AI agents](/topics/go-ai-agents/) — language choice, platform architecture
 

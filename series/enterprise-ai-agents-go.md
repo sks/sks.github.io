@@ -21,6 +21,7 @@ This series documents what we learned building a **production AI agent runtime**
 |------|-----|
 | [Go agent runtime](/start/go-runtime/) | Runtime definition, Go vs Python, platform split |
 | [SRE on-call](/start/sre-on-call/) | Triage, RCA, observability |
+| [SRE as service](/start/sre-as-service/) | Service Rendered Efficiently culture pack |
 | [Evidence-gated RCA checklist](/checklists/evidence-gated-rca/) | Operator review of agent write-ups |
 | [“Done” checklist](/checklists/agent-done/) | When not to trust agent completion |
 
@@ -30,6 +31,7 @@ Dive by theme:
 
 - [AI agent workflows](/topics/ai-agent-workflows/) — multi-stage pipelines, bring-up, evidence-gated RCA
 - [AI agents for SRE](/topics/ai-agents-sre/) — incident triage, observability, tokenomics
+- [Service Rendered Efficiently](/topics/service-rendered-efficiently/) — AI investigation as a service product (sibling series)
 - [Go AI agents](/topics/go-ai-agents/) — language choice, platform architecture, IaC config
 - [AI agent runtime](/topics/ai-agent-runtime/) — loop vs platform
 
