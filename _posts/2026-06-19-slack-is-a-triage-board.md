@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Slack Is a Triage Board, Not a Log Dump"
-date: 2026-08-29 10:00:00 -0700
+date: 2026-06-19 10:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 3
 description: "SRE AI in Slack should look like a triage board — KPI strips, findings-so-far, searchable Activity — not a dense log wall."

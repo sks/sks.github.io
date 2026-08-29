@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Ungrounded Synthesis Must Read as Hypothesis"
-date: 2026-08-31 14:00:00 -0700
+date: 2026-07-24 14:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 8
 description: "When grounding fails, the primary chat bubble must show hypothesis language — not a confirmed RCA with a quiet side note."

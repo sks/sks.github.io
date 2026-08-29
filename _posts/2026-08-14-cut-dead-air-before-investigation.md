@@ -1,23 +1,23 @@
 ---
 layout: post
-title: "Cut the Dead Air Before Investigation Starts"
-date: 2026-09-02 10:00:00 -0700
+title: "Why AI SRE Feels Stuck Before the First Tool Call"
+date: 2026-08-14 10:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 11
-description: "First useful SRE tool call should not wait on vault re-checks and catalog re-index — cold start is an on-call SLA."
+description: "On-call sees 'the bot is stuck' while vault re-checks and MCP catalog re-index burn cold start. Treat time-to-first-tool as an SLA."
 image: /assets/images/og-default.png
-tags: [sre, ai-agents, service, incident-response, aiden, performance, on-call]
+tags: [ai-agents, sre, on-call, incident-response, observability, mcp]
 permalink: /blog/cut-dead-air-before-investigation/
 faqs:
-  - question: "What slows AI investigation cold start?"
-    answer: "Often vault readiness checks and re-indexing unchanged tool catalogs — not the LLM. Shared readiness and skipping unchanged upserts move first useful tool calls earlier."
+  - question: "What slows AI SRE investigation cold start?"
+    answer: "Often vault readiness checks and re-indexing unchanged MCP tool catalogs — not the LLM. Shared readiness and skipping unchanged upserts move first useful tool calls earlier."
   - question: "Should one Grafana 502 abort the whole triage run?"
     answer: "No. A single automatic retry on proxy gateway failures avoids opening the circuit for the rest of the investigation on a transient blip."
-  - question: "Why is cold-start latency a service concern?"
-    answer: "On-call experiences dead air as 'the bot is stuck.' Cutting vault and index tax is leverage — Efficiently — not infra trivia."
+  - question: "Why is cold-start latency an on-call SLA?"
+    answer: "Operators experience dead air as 'the bot is stuck.' Cutting vault and index tax moves the first useful PromQL earlier — not infra trivia."
 ---
 
-The slow part of “start investigating” was often vault checks and re-indexing the same tool catalog — not the model.
+Page fires. Chat says “investigating.” Nothing useful happens. The model isn’t thinking — vault re-checks and MCP catalog re-index ate the cold start.
 
 *The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
 
@@ -52,7 +52,7 @@ Tokenomics context: [maintaining tokenomics](/blog/maintaining-tokenomics-with-a
 
 - Measure time-to-first-useful-tool-call on investigate
 - Page on sustained cold-start regressions the way you page on API latency
-- Do not accept “the model is thinking” as the explanation for vault thrash
+- Do not accept “the model is thinking” as the explanation for repeated vault readiness checks
 
 ## If you ship the agent platform
 
@@ -70,6 +70,6 @@ Tokenomics context: [maintaining tokenomics](/blog/maintaining-tokenomics-with-a
 
 ---
 
-**Acknowledgments.** Cold-start and Grafana retry lessons from Guild integration work. Patterns composite.
+**Acknowledgments.** Cold-start and Grafana retry lessons from Aiden integration work. Patterns composite.
 
 *Building AI for incident triage without the demo theater? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
