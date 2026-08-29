@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Stop Re-Investigating the Same Alert"
-date: 2026-08-28 14:00:00 -0700
+date: 2026-06-12 14:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 2
 description: "Reuse-first SRE AI: stop burning tokens on every Slack follow-up when a completed RCA already exists for the alert."

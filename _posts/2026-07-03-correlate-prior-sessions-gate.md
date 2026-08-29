@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "When the Operator Asks to Correlate, Make It a Gate"
-date: 2026-08-30 10:00:00 -0700
+date: 2026-07-03 10:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 5
 description: "Natural-language correlation goals need server-side gates — not hope the LLM remembers to search prior incidents."
