@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Empty Query ≠ Absent Signal: Plane Blindness and Adaptive Ladders"
-date: 2026-09-01 10:00:00 -0700
+date: 2026-07-31 10:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 9
 description: "When Grafana says no_data, the investigation isn't over — it's mis-scoped. Plane blindness and adaptive ladders for AI SRE."

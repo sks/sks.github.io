@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Deliver Findings at the Budget Cap — Not an Apology"
-date: 2026-08-31 10:00:00 -0700
+date: 2026-07-17 10:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 7
 description: "When an SRE AI agent hits MaxLLMCalls, synthesize findings — don't wipe the run with a budget_exhausted apology."

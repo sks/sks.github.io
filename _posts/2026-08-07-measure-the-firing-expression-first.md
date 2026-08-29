@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Measure the Firing Expression Before You Invent PromQL"
-date: 2026-09-01 14:00:00 -0700
+date: 2026-08-07 14:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 10
 description: "The alert title said latency. The rule was ClickHouse. Efficiency means measuring the stamped expression before inventing queries."

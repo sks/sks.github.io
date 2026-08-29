@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "\"No Data\" Is Often Truncated Data"
-date: 2026-08-30 14:00:00 -0700
+date: 2026-07-10 14:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 6
 description: "AI SRE agents calling truncated Grafana previews 'no data' is a product failure — spill recovery and honesty vocabulary fix it."

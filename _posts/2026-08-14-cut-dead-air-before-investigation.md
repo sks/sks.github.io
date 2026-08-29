@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Cut the Dead Air Before Investigation Starts"
-date: 2026-09-02 10:00:00 -0700
+date: 2026-08-14 10:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 11
 description: "First useful SRE tool call should not wait on vault re-checks and catalog re-index — cold start is an on-call SLA."

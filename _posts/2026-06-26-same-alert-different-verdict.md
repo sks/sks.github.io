@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Same Alert, Different Verdict: Entry Path Is Context"
-date: 2026-08-29 14:00:00 -0700
+date: 2026-06-26 14:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 4
 description: "Don't paste the alert in the UI and wonder why Slack gave a different impact score — entry path carries investigation context."

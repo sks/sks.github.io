@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Service Rendered Efficiently: SRE AI Is Not an Engineering Credibility Project"
-date: 2026-08-28 10:00:00 -0700
+date: 2026-06-05 10:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 1
 description: "SRE as Service Rendered Efficiently — stop optimizing for engineering credibility; measure what AI investigation makes possible for on-call."

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "One Zip, One Conversation: Post-Incident Handoff for Teams You Serve"
-date: 2026-09-02 14:00:00 -0700
+date: 2026-08-21 14:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 12
 description: "When support says this conversation went wrong, download one debug zip for the thread — and grade batches to drive product gates."
