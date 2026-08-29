@@ -1,23 +1,23 @@
 ---
 layout: post
-title: "Deliver Findings at the Budget Cap — Not an Apology"
+title: "AI Agent Hit Max Turns? Deliver Partial RCA, Not Apology"
 date: 2026-07-17 10:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 7
-description: "When an SRE AI agent hits MaxLLMCalls, synthesize findings — don't wipe the run with a budget_exhausted apology."
+description: "When an AI SRE agent hits its LLM-call budget, synthesize Theory/Unknowns from gathered evidence. Zero output at the cap is the product failure."
 image: /assets/images/og-default.png
-tags: [sre, ai-agents, service, incident-response, aiden, tokenomics, on-call]
+tags: [ai-agents, sre, token-cost, on-call, incident-response, rca]
 permalink: /blog/deliver-findings-at-the-budget-cap/
 faqs:
-  - question: "What should happen when an investigation agent hits its budget?"
+  - question: "What should happen when an AI SRE agent hits its LLM-call budget?"
     answer: "The last allowed turn should synthesize Theory and Unknowns from evidence already gathered. Findings lead; budget caveats follow. Do not replace the answer with a canned budget_exhausted message."
-  - question: "Is hitting MaxLLMCalls a failure?"
-    answer: "Hitting a ceiling is normal on long Grafana digs. Zero output at the ceiling is the product failure."
-  - question: "How does this relate to loop-detection salvage?"
-    answer: "Same service idea: keep useful incident findings when the finishing loop stalls. Budget finalization is the cousin for execution ceilings."
+  - question: "Is hitting the max LLM-call budget a failure for investigate agents?"
+    answer: "Hitting a ceiling is normal on long Grafana digs. Zero output at the ceiling — no partial RCA — is the product failure."
+  - question: "How does budget finalization relate to loop-detection salvage?"
+    answer: "Same idea: keep useful incident findings when the finishing loop stalls. Budget finalization is the cousin for execution ceilings."
 ---
 
-Your on-call agent ran out of turns. That should not mean zero RCA.
+Your on-call AI SRE agent ran out of turns mid-Grafana dig. That should mean a partial RCA — Theory, Unknowns, what was checked — not a blank `budget_exhausted` apology.
 
 *The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
 
@@ -38,7 +38,7 @@ If the school bell rings while you are writing a book report, turn in the pages 
 
 ## The wrong product behavior
 
-A twenty-minute Grafana / change-plane dig hits `MaxLLMCalls`. The UI shows a canned exhaustion marker. Everything the agent already collected vanishes behind an apology.
+A twenty-minute Grafana / change dig hits the max LLM-call budget (`MaxLLMCalls`). The UI shows a canned exhaustion marker. Everything the agent already collected vanishes behind an apology.
 
 Operators experience that as: “the bot did nothing.” The logs know better. The service failed to **render**.
 
@@ -65,7 +65,7 @@ Partial RCA beats silent failure on an incident timeline.
 
 ## If you ship the agent platform
 
-- Implement budget finalization in the expert loop, not as a UI apology
+- Implement budget finalization in the agent loop, not as a UI apology
 - Prefer preserving observed answers over discarding the run
 - Log salvage length so you can measure how often ceilings still produced value
 

@@ -1,23 +1,23 @@
 ---
 layout: post
-title: "\"No Data\" Is Often Truncated Data"
+title: "AI Agents Call Truncated Grafana 'No Data'—It's Spill"
 date: 2026-07-10 14:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 6
-description: "AI SRE agents calling truncated Grafana previews 'no data' is a product failure — spill recovery and honesty vocabulary fix it."
+description: "Large tool results get preview-truncated; AI SRE agents invent 'Unavailable.' Spill recovery and COMPLETE/PARTIAL/FAILED fix dishonest RCA."
 image: /assets/images/og-default.png
-tags: [sre, ai-agents, service, incident-response, aiden, observability, grafana]
+tags: [ai-agents, sre, observability, grafana, rca, context-engineering]
 permalink: /blog/no-data-is-often-truncated-data/
 faqs:
-  - question: "Why do AI agents say no data when metrics exist?"
-    answer: "Large tool outputs get preview-truncated. Agents answer from the snippet and invent Unavailable. The full series often still sits in a spill file on disk."
-  - question: "What is spill recovery for observability tools?"
+  - question: "Why do AI SRE agents say no data when Grafana metrics exist?"
+    answer: "Large tool outputs get preview-truncated for the context window. Agents answer from the snippet and invent Unavailable. The full series often still sits in a spill file on disk."
+  - question: "What is spill recovery for observability tool results?"
     answer: "A shared model that forces return_full before pattern greps, pages when byte caps hit, and exposes spill_path for compact aggregates — plus COMPLETE / PARTIAL / FAILED vocabulary."
-  - question: "How should agents report incomplete observability evidence?"
+  - question: "How should AI agents report incomplete observability evidence?"
     answer: "Say PARTIAL or FAILED with what was retrieved. Never claim no signal when the preview was truncated."
 ---
 
-Agents were answering from preview snippets of large Grafana outputs and calling it done. Utilization reports said “Unavailable.” The evidence was still on disk.
+Your AI SRE agent skimmed a truncated Grafana preview, wrote “Unavailable,” and closed the dig. The full series was still on disk — truncated tool results, not missing metrics.
 
 *The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
 
@@ -40,7 +40,7 @@ If you only read the first page of a cookbook and say “there are no recipes fo
 
 Large PromQL / LogQL / warehouse results hit context limits. The runtime shows a preview. The model treats the preview as the universe. RCA claims the plane has no data. A human re-runs the same query and gets series.
 
-That is not curiosity. That is **unrendered craft** — the service lied about what it saw.
+That is not curiosity. That is **the product lied about completeness** — the service claimed no signal when it only saw a preview.
 
 Related packing discipline: [claim-aware evidence packing](/blog/claim-aware-evidence-packing/).
 
@@ -78,6 +78,6 @@ Related packing discipline: [claim-aware evidence packing](/blog/claim-aware-evi
 
 ---
 
-**Acknowledgments.** Spill recovery lessons from shipping observability tools in the Aiden / Guild stack. Patterns composite.
+**Acknowledgments.** Spill recovery lessons from shipping observability tools in Aiden. Patterns composite.
 
 *Building AI for incident triage without the demo theater? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
