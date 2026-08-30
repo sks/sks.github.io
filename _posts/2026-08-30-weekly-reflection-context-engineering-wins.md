@@ -4,9 +4,10 @@ title: "Weekly Reflection: Context Engineering Beat the Language Wars"
 date: 2026-08-30 11:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 55
-description: "Weekly reflection for Aug 24 to 30: context engineering is the craft that matters, deep harnesses for long jobs only, and why Go vs Python is the wrong debate for agent quality."
+description: "Weekly reflection: context engineering over language wars, plus public libraries and servers for write/select/compress/isolate with multi-language or MCP clients."
+last_modified_at: 2026-08-30 12:00:00 -0700
 image: /assets/images/og-default.png
-tags: [ai-agents, context-engineering, weekly-reflection, industry, orchestration, sre, evaluation, tokenomics, aiden]
+tags: [ai-agents, context-engineering, weekly-reflection, industry, orchestration, sre, evaluation, tokenomics, memory, mcp, aiden]
 permalink: /blog/weekly-reflection-context-engineering-wins/
 faqs:
   - question: "What is context engineering for AI agents?"
@@ -21,6 +22,8 @@ faqs:
     answer: "Unnecessary autonomy, stuffing every tool and document every turn, role-heavy multi-agent theater, compacting only after the model is already confused, and rewriting the runtime language as a quality strategy."
   - question: "Which open-source repos should I clone to learn these agent patterns?"
     answer: "Start with LangGraph (Python) or LangGraph.js / Mastra (TypeScript) or trpc-agent-go (Go) for graphs; DeepAgents or the Claude Agent SDK for deep harnesses; Pydantic AI, OpenAI Agents SDK, or Vercel AI SDK for lean ReAct; and the Model Context Protocol SDKs plus modelcontextprotocol/servers for tools."
+  - question: "Which libraries or servers help with context engineering and support multiple client languages?"
+    answer: "For memory write/select: Mem0 (Python + TypeScript + MCP) or Hindsight (Python + NPM + MCP). For temporal entity graphs: Graphiti with its MCP server (Zep cloud adds Python/TypeScript/Go). For window compress: provider clear/compact APIs in any language client. For prove-it: Langfuse traces and RAGAS-style evals. Prefer tools with a few clear verbs or MCP so your host language does not matter."
 ---
 
 This week I kept getting the same question in different clothes: *would our agents be smarter in Python or TypeScript?*
@@ -40,6 +43,7 @@ This is a **weekly reflection**: industry patterns worth stealing, plus what we 
 - **Adopt:** MCP, durable notes, tool-result clearing, compaction before rot, lean tools, traces + outcome scorecards.
 - **Avoid:** autonomy theater, context stuffing, role-tax crews, language rewrites as a quality plan.
 - **Build:** clone public OSS by ideology (LangGraph / DeepAgents / Mastra / trpc-agent-go / MCP SDKs). Tables below.
+- **CE tooling:** Mem0 / Hindsight / Graphiti (+ MCP) for write/select; provider clear/compact for compress; Langfuse + RAGAS to prove it.
 
 ### Explain like I'm five
 
@@ -212,6 +216,63 @@ Stars are popularity, not fitness. Prefer the repo that matches the ideology you
 
 ---
 
+## Libraries and servers for context engineering
+
+Frameworks give you a loop. These tools help you **assemble the window**: write facts outside it, select what belongs this turn, compress what does not, and isolate noisy digs. Bar for inclusion: **easy mental model**, **public OSS core**, and **client reach** (Python + TypeScript at least, a Go SDK when it matters, or MCP so any host language works).
+
+### How to judge a CE tool
+
+1. Can you explain the API in one sentence with a few verbs?
+2. Can a non-Python service call it (native SDK or MCP)?
+3. Can you self-host the core without a cloud-only lock-in?
+4. Do docs show write/select/compress against a real token budget?
+
+Skip Claude-Code-only session cleaners and one-star compaction wrappers until they prove multi-host value.
+
+### Write and select (memory)
+
+| Tool | Mental model | Clients / access | Why checkout |
+|------|--------------|------------------|--------------|
+| [mem0ai/mem0](https://github.com/mem0ai/mem0) (+ [mem0-mcp](https://github.com/mem0ai/mem0-mcp) OpenMemory) | `add` / `search` / `get_all` | Python + TypeScript; MCP for Cursor, Claude, and other hosts | Fastest bolt-on memory layer. Keep facts outside the chat transcript. |
+| [vectorize-io/hindsight](https://github.com/vectorize-io/hindsight) | **retain / recall / reflect** | Python + NPM clients; Docker server; MCP | Learning-oriented memory server with a three-verb API that is easy to teach a team. |
+| [getzep/graphiti](https://github.com/getzep/graphiti) (+ in-repo MCP server) | Temporal knowledge graph: entities + facts with validity windows | Python library + MCP tools; Zep cloud SDKs for Python, TypeScript, and Go | When “what was true when” matters more than a flat vector recall. |
+| [langchain-ai/langmem](https://github.com/langchain-ai/langmem) | Manage/search memory tools on LangGraph store | Python (LangGraph-native) | Use when you already live in LangGraph and want hot-path memory tools without a new service. |
+
+**Caution:** Letta is a full stateful *runtime*, not a drop-in memory library. Cognee is strong on ingest-to-graph in Python; wrap it behind REST or MCP if your agents are not Python.
+
+### Compress and isolate (active window)
+
+| Tool | Mental model | Clients / access | Why checkout |
+|------|--------------|------------------|--------------|
+| Provider context APIs (Claude memory tool, tool-result clearing, server compaction) | Clear re-fetchable payloads; compact the transcript; note durable facts | Any language HTTP client / official SDKs | Language-neutral compress. Start here before inventing a summarizer. See Anthropic’s [context engineering cookbook](https://platform.claude.com/cookbook/tool-use-context-engineering-context-engineering-tools). |
+| [langchain-ai/deepagents](https://github.com/langchain-ai/deepagents) | Offload bulky results to a filesystem, then summarize; isolate work in subagents | Python (patterns travel) | Best open reference for offload-before-summarize and context isolation. Steal the pattern even if your runtime is Go or TS. |
+| MCP resources + spill/note stores | Pointer in-window, payload out-of-window | Any MCP client language | Same ideology as observation masking: durable note first, shrink the live window second. |
+
+### Select backends and prove-it tooling
+
+| Tool | Role | Clients / access |
+|------|------|------------------|
+| [qdrant/qdrant](https://github.com/qdrant/qdrant) | Production vector select | Go server; Python / TypeScript / Go / Rust clients |
+| [chroma-core/chroma](https://github.com/chroma-core/chroma) | Simple local/dev vector select | Multi-language clients |
+| [lancedb/lancedb](https://github.com/lancedb/lancedb) | Embedded vector/table select | Multi-language clients |
+| [modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers) | Reference MCP tool/resource servers | MCP (any host) |
+| [langfuse/langfuse](https://github.com/langfuse/langfuse) | Trace tokens and context growth per turn | Multi-language SDKs / OpenTelemetry |
+| [vibrantlabsai/ragas](https://github.com/vibrantlabsai/ragas) (RAGAS) | Score whether selected context actually helped | Python |
+
+### Decision cheat sheet
+
+| You need… | Start here |
+|-----------|------------|
+| Memory tomorrow on any host language | **Mem0** or **Hindsight** (prefer MCP if the host is Cursor/Claude) |
+| Entity relationships and “true when” | **Graphiti** (+ MCP); Zep cloud if you want managed Py/TS/Go SDKs |
+| Already on LangGraph | **LangMem** |
+| Tool dumps blowing the window | Provider **clear/compact** first; DeepAgents patterns for offload + isolate |
+| Proof CE helped | **Langfuse** traces + outcome scorecard (RAGAS or your own rubric) |
+
+Industry surveys in 2026 keep landing on the same split: Mem0 for bolt-on personalization, Graphiti/Zep for temporal graphs, LangMem when the graph runtime is already LangGraph, and MCP when you refuse to couple memory to one SDK. See also [Atlan’s CE tools guide](https://atlan.com/know/context-engineering/context-engineering-tools-for-ai-agents/) and recent Mem0 / Zep / LangMem / Hindsight comparisons.
+
+---
+
 ## Monday-morning checklist
 
 1. Name the ideology for each product surface: workflow, ReAct, or deep harness.
@@ -220,6 +281,7 @@ Stars are popularity, not fitness. Prefer the repo that matches the ideology you
 4. Keep both simple and plan (or equivalent) behind a router. Do not crown a religion.
 5. Ask one hostile question in review: *did we make the agent smarter, or just louder?*
 6. Clone one public repo from the tables above in the language you ship. Run a one-tool loop before you design a crew.
+7. Pick one CE library from the cheat sheet (Mem0, Hindsight, or Graphiti). Wire write + select before you tune compress.
 
 ---
 
