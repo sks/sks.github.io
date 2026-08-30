@@ -19,6 +19,8 @@ faqs:
     answer: "MCP for tools, durable notes before shrinking the window, tool-result clearing for re-fetchable payloads, compaction before context rot, lean tool lists, traces plus outcome evals, and contract-first subagent handoffs."
   - question: "What should teams avoid in agent architecture?"
     answer: "Unnecessary autonomy, stuffing every tool and document every turn, role-heavy multi-agent theater, compacting only after the model is already confused, and rewriting the runtime language as a quality strategy."
+  - question: "Which open-source repos should I clone to learn these agent patterns?"
+    answer: "Start with LangGraph (Python) or LangGraph.js / Mastra (TypeScript) or trpc-agent-go (Go) for graphs; DeepAgents or the Claude Agent SDK for deep harnesses; Pydantic AI, OpenAI Agents SDK, or Vercel AI SDK for lean ReAct; and the Model Context Protocol SDKs plus modelcontextprotocol/servers for tools."
 ---
 
 This week I kept getting the same question in different clothes: *would our agents be smarter in Python or TypeScript?*
@@ -37,6 +39,7 @@ This is a **weekly reflection**: industry patterns worth stealing, plus what we 
 - **Our week:** [simple vs plan](/blog/simple-vs-plan-when-to-use-which/) both belong in the toolkit; [observation masking](/blog/host-reclaim-plan-mode-ab-lessons/) can cut spend and still lose the RCA.
 - **Adopt:** MCP, durable notes, tool-result clearing, compaction before rot, lean tools, traces + outcome scorecards.
 - **Avoid:** autonomy theater, context stuffing, role-tax crews, language rewrites as a quality plan.
+- **Build:** clone public OSS by ideology (LangGraph / DeepAgents / Mastra / trpc-agent-go / MCP SDKs). Tables below.
 
 ### Explain like I'm five
 
@@ -216,6 +219,7 @@ Stars are popularity, not fitness. Prefer the repo that matches the ideology you
 3. Prefer offload-then-clear over “summarize everything.”
 4. Keep both simple and plan (or equivalent) behind a router. Do not crown a religion.
 5. Ask one hostile question in review: *did we make the agent smarter, or just louder?*
+6. Clone one public repo from the tables above in the language you ship. Run a one-tool loop before you design a crew.
 
 ---
 
