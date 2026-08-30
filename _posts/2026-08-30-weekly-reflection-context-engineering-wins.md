@@ -152,6 +152,63 @@ Build the portable layer hard. Rent the local helpers.
 
 ---
 
+## Repos to clone this week (public OSS)
+
+Steal the ideology from code, not from slides. Below are **public** GitHub repos worth checking out, grouped by the pattern they teach. Pick one per language you ship in. Stars move; the *why* does not.
+
+### Workflows and explicit graphs
+
+| Lang | Repo | Why checkout |
+|------|------|--------------|
+| **Python** | [langchain-ai/langgraph](https://github.com/langchain-ai/langgraph) | The reference for stateful graphs, checkpoints, HITL interrupts, and durable resume. Read this when you want the control Anthropic calls “workflows.” |
+| **TypeScript** | [langchain-ai/langgraphjs](https://github.com/langchain-ai/langgraphjs) | Same graph ideas in JS/TS. Useful when your product already lives in Node and you want LangGraph-shaped control without a Python sidecar. |
+| **Go** | [trpc-group/trpc-agent-go](https://github.com/trpc-group/trpc-agent-go) | GraphAgent + runners + MCP in a Go-native stack. Closest “LangGraph for Go” if you care about service-shaped concurrency and single-binary deploy. |
+
+### Deep harness (plan + spill + subagents)
+
+| Lang | Repo | Why checkout |
+|------|------|--------------|
+| **Python** | [langchain-ai/deepagents](https://github.com/langchain-ai/deepagents) | Batteries on top of LangGraph: planning, filesystem offload, subagents. The open-source shape of “deep” long-horizon work. |
+| **Python / TypeScript** | [anthropics/claude-agent-sdk-python](https://github.com/anthropics/claude-agent-sdk-python) · [anthropics/claude-agent-sdk-typescript](https://github.com/anthropics/claude-agent-sdk-typescript) | The Claude Code harness as a library: compaction, permissions, subagents, MCP. Study how a production loop manages context, not just how it calls tools. |
+| **Go** | [google/adk-go](https://github.com/google/adk-go) | Google’s Agent Development Kit in Go: workflow runtime, sessions, multi-agent patterns without forcing Python. Pair with [google/adk-python](https://github.com/google/adk-python) if you want the fuller examples. |
+
+### Lean ReAct / typed single agents
+
+| Lang | Repo | Why checkout |
+|------|------|--------------|
+| **Python** | [pydantic/pydantic-ai](https://github.com/pydantic/pydantic-ai) | Type-safe agents and tools with validation as a first-class citizen. Best “simple ReAct with contracts” starting point in Python. |
+| **Python** | [huggingface/smolagents](https://github.com/huggingface/smolagents) | Minimal code-first agents. Good for learning the loop without drowning in orchestration. |
+| **Python / TypeScript** | [openai/openai-agents-python](https://github.com/openai/openai-agents-python) · [openai/openai-agents-js](https://github.com/openai/openai-agents-js) | Small primitives: agent, tools, handoffs, sessions, guardrails. Provider-friendly and easy to read end-to-end. |
+| **TypeScript** | [vercel/ai](https://github.com/vercel/ai) | Streaming + UI + agent loop helpers for product teams. Reach for this when the agent is a feature inside a Next.js app, not a separate control plane. |
+| **Go** | [cloudwego/eino](https://github.com/cloudwego/eino) | CloudWeGo’s Go agent/orchestration toolkit. Another public Go path if you want to compare designs next to trpc-agent-go. |
+
+### Multi-agent / role crews (use carefully)
+
+| Lang | Repo | Why checkout |
+|------|------|--------------|
+| **Python** | [crewAIInc/crewAI](https://github.com/crewAIInc/crewAI) | Fastest path to role-based crews. Worth reading so you understand the token tax of personas, and when Flows keep autonomy inside a workflow. |
+| **TypeScript** | [mastra-ai/mastra](https://github.com/mastra-ai/mastra) | TS-native agents + graph workflows + memory + evals in one package. Best “batteries included” TypeScript start without porting Python mental models. |
+
+### Tool plane and context delivery (MCP)
+
+| Lang | Repo | Why checkout |
+|------|------|--------------|
+| **Spec + servers** | [modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers) | Reference MCP servers. Start here to see how tools and resources are exposed as a standard. |
+| **Python** | [modelcontextprotocol/python-sdk](https://github.com/modelcontextprotocol/python-sdk) | Official Python MCP SDK. |
+| **TypeScript** | [modelcontextprotocol/typescript-sdk](https://github.com/modelcontextprotocol/typescript-sdk) | Official TS MCP SDK. |
+| **Go** | [modelcontextprotocol/go-sdk](https://github.com/modelcontextprotocol/go-sdk) · [mark3labs/mcp-go](https://github.com/mark3labs/mcp-go) | Official Go MCP SDK plus a widely used community Go MCP library. Checkout both if you build Go tool servers. |
+
+### Suggested learning path
+
+1. **Day 1:** Clone one lean ReAct repo in your language (`pydantic-ai`, `vercel/ai`, or `eino` / `trpc-agent-go`). Run a single tool loop.
+2. **Day 2:** Add MCP with the matching language SDK. One tool, one resource, one log of what entered the window.
+3. **Day 3:** Read LangGraph (or GraphAgent examples in trpc-agent-go) for write/select/compress/isolate on a real state object.
+4. **Day 4:** Only then open DeepAgents or the Claude Agent SDK. Steal the harness pieces you need; do not copy the whole religion.
+
+Stars are popularity, not fitness. Prefer the repo that matches the ideology you need this week.
+
+---
+
 ## Monday-morning checklist
 
 1. Name the ideology for each product surface: workflow, ReAct, or deep harness.
