@@ -72,6 +72,7 @@ Related packing discipline: [claim-aware evidence packing](/blog/claim-aware-evi
 
 ## Related
 
+- Sequel: [Cursor paging for spilled agent tool output](/blog/cursor-paging-spilled-agent-tool-output/) — opaque cursors beat grep-as-primary
 - Previous: [Correlate prior sessions](/blog/correlate-prior-sessions-gate/)
 - Next: [Deliver Findings at the Budget Cap](/blog/deliver-findings-at-the-budget-cap/)
 - [Claim-aware evidence packing](/blog/claim-aware-evidence-packing/)
