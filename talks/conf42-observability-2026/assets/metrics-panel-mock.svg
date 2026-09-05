@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 320" role="img" aria-labelledby="title desc">
+  <title id="title">Token and tool cost metrics panel</title>
+  <desc id="desc">Grafana/Datadog-style panel: session token burn and per-tool latency attribution.</desc>
+  <defs>
+    <style>
+      .chrome { fill: #1e293b; }
+      .bg { fill: #f8fafc; }
+      .panel { fill: #ffffff; stroke: #e2e8f0; }
+      .header { font: 600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #f8fafc; }
+      .title { font: 600 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; }
+      .query { font: 400 11px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #64748b; }
+      .axis { stroke: #e2e8f0; stroke-width: 1; }
+      .line { fill: none; stroke: #00add8; stroke-width: 2.5; }
+      .line2 { fill: none; stroke: #f59e0b; stroke-width: 2; stroke-dasharray: 4 3; }
+      .legend { font: 400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #374151; }
+      .cell { font: 500 11px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #0f172a; }
+      .muted { font: 400 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #64748b; }
+    </style>
+  </defs>
+  <rect width="760" height="320" class="bg"/>
+  <rect x="0" y="0" width="760" height="36" class="chrome"/>
+  <text x="20" y="23" class="header">Grafana / Datadog-style · token budgets + tool attribution (anonymized)</text>
+
+  <rect x="24" y="52" width="420" height="248" class="panel" rx="6"/>
+  <text x="40" y="78" class="title">session_token_burn vs budget</text>
+  <text x="40" y="98" class="query">sum(rate(agent_tokens_total[5m])) by (agent)</text>
+  <line x1="50" y1="220" x2="420" y2="220" class="axis"/>
+  <line x1="50" y1="130" x2="420" y2="130" class="axis"/>
+  <polyline points="50,200 110,190 170,175 230,185 290,150 350,145 410,120" class="line"/>
+  <polyline points="50,160 410,160" class="line2"/>
+  <rect x="40" y="240" width="12" height="12" fill="#00add8"/>
+  <text x="58" y="251" class="legend">Token burn</text>
+  <rect x="160" y="240" width="12" height="12" fill="#f59e0b"/>
+  <text x="178" y="251" class="legend">Budget / rolling avg</text>
+  <text x="40" y="278" class="muted">Alert when session exceeds N× rolling average</text>
+
+  <rect x="460" y="52" width="276" height="248" class="panel" rx="6"/>
+  <text x="476" y="78" class="title">Per-tool (this session)</text>
+  <text x="476" y="110" class="cell">grafana_query   820ms  ×2</text>
+  <text x="476" y="132" class="cell">llm.generate    1.1s   2.4k</text>
+  <text x="476" y="154" class="cell">llm.subagent    0.9s   1.2k</text>
+  <text x="476" y="176" class="cell">k8s.get_events  410ms  ×1</text>
+  <text x="476" y="210" class="muted">Which call cost what</text>
+  <text x="476" y="232" class="muted">latency · tokens · repeats</text>
+  <text x="476" y="268" class="muted">Service counters ? LLM tree</text>
+</svg>

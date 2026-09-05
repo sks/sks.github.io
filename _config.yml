@@ -48,6 +48,11 @@ header_pages:
   - series/enterprise-ai-agents-go.md
   - about.md
 
+# Talk source packs (Marp decks, transcripts, demo YAML) stay in git for
+# GitHub browsing. Only talks/index.md is a published page — unlisted
+# (not in header_pages or post cross-links). Direct URL: /talks/
+exclude:
+  - talks/conf42-observability-2026/
 markdown: kramdown
 highlighter: rouge
 permalink: /blog/:title/

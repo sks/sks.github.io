@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" role="img" aria-labelledby="title desc">
+  <title id="title">Dual-sink observability for AI agents</title>
+  <desc id="desc">Agent execution feeds Langfuse for LLM traces, Observe Prometheus for service metrics, and structured logs with OTEL trace IDs.</desc>
+  <defs>
+    <style>
+      .title { font: 600 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+      .subtitle { font: 400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6b7280; }
+      .box { fill: #f9fafb; stroke: #e5e7eb; stroke-width: 1.5; rx: 8; }
+      .box-accent { fill: #ecfeff; stroke: #00add8; stroke-width: 1.5; rx: 8; }
+      .label { font: 600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+      .sublabel { font: 400 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6b7280; }
+      .arrow { stroke: #9ca3af; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#9ca3af"/>
+    </marker>
+  </defs>
+  <rect width="800" height="360" fill="#ffffff"/>
+  <text x="400" y="32" text-anchor="middle" class="title">Dual-sink observability</text>
+  <text x="400" y="52" text-anchor="middle" class="subtitle">Go runtime ù OpenTelemetry hops ù Langfuse-style LLM tree ù Grafana/Datadog panels</text>
+
+  <rect x="280" y="80" width="240" height="100" class="box-accent"/>
+  <text x="400" y="108" text-anchor="middle" class="label">Agent execution (Go)</text>
+  <text x="400" y="128" text-anchor="middle" class="sublabel">plan / gather / present</text>
+  <text x="400" y="148" text-anchor="middle" class="sublabel">LLM ù tools ù sub-agents</text>
+
+  <line x1="340" y1="180" x2="140" y2="230" class="arrow"/>
+  <line x1="400" y1="180" x2="400" y2="230" class="arrow"/>
+  <line x1="460" y1="180" x2="660" y2="230" class="arrow"/>
+
+  <rect x="40" y="230" width="200" height="90" class="box"/>
+  <text x="140" y="258" text-anchor="middle" class="label">Langfuse-style</text>
+  <text x="140" y="278" text-anchor="middle" class="sublabel">session / tool / evidence</text>
+  <text x="140" y="296" text-anchor="middle" class="sublabel">tokens ∑ cost ∑ evals</text>
+
+  <rect x="300" y="230" width="200" height="90" class="box"/>
+  <text x="400" y="258" text-anchor="middle" class="label">Prometheus / Grafana</text>
+  <text x="400" y="278" text-anchor="middle" class="sublabel">token budgets ∑ SLOs</text>
+  <text x="400" y="296" text-anchor="middle" class="sublabel">Datadog-style panels OK</text>
+
+  <rect x="560" y="230" width="200" height="90" class="box"/>
+  <text x="660" y="258" text-anchor="middle" class="label">Structured logs</text>
+  <text x="660" y="278" text-anchor="middle" class="sublabel">OpenTelemetry traceID</text>
+  <text x="660" y="296" text-anchor="middle" class="sublabel">trace ? logs join</text>
+
+  <text x="400" y="340" text-anchor="middle" class="sublabel">Do not grep Tempo for LLM generations  use the right sink for each question</text>
+</svg>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" role="img" aria-labelledby="title desc">
+  <title id="title">Semantic identity backbone for agent telemetry</title>
+  <desc id="desc">Session flows to workflow, stage, and persona agent name for scoreable agent traces.</desc>
+  <defs>
+    <style>
+      .title { font: 600 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+      .subtitle { font: 400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6b7280; }
+      .node { fill: #f9fafb; stroke: #1758a8; stroke-width: 2; rx: 8; }
+      .node-strong { fill: #ecfeff; stroke: #00add8; stroke-width: 2; rx: 8; }
+      .label { font: 600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+      .sublabel { font: 400 10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6b7280; }
+      .arrow { stroke: #9ca3af; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#9ca3af"/>
+    </marker>
+  </defs>
+  <rect width="800" height="320" fill="#ffffff"/>
+  <text x="400" y="32" text-anchor="middle" class="title">Identity is the backbone</text>
+  <text x="400" y="52" text-anchor="middle" class="subtitle">Trace IDs connect hops; semantic identity connects intent</text>
+
+  <rect x="40" y="120" width="130" height="70" class="node"/>
+  <text x="105" y="148" text-anchor="middle" class="label">Session</text>
+  <text x="105" y="168" text-anchor="middle" class="sublabel">conversation scope</text>
+
+  <rect x="210" y="120" width="130" height="70" class="node"/>
+  <text x="275" y="148" text-anchor="middle" class="label">Workflow</text>
+  <text x="275" y="168" text-anchor="middle" class="sublabel">procedure name</text>
+
+  <rect x="380" y="120" width="130" height="70" class="node"/>
+  <text x="445" y="148" text-anchor="middle" class="label">Stage</text>
+  <text x="445" y="168" text-anchor="middle" class="sublabel">investigate · verdict</text>
+
+  <rect x="550" y="120" width="130" height="70" class="node-strong"/>
+  <text x="615" y="148" text-anchor="middle" class="label">Persona</text>
+  <text x="615" y="168" text-anchor="middle" class="sublabel">guild.agent_name</text>
+
+  <line x1="170" y1="155" x2="210" y2="155" class="arrow"/>
+  <line x1="340" y1="155" x2="380" y2="155" class="arrow"/>
+  <line x1="510" y1="155" x2="550" y2="155" class="arrow"/>
+
+  <rect x="120" y="230" width="560" height="60" class="node"/>
+  <text x="400" y="255" text-anchor="middle" class="label">Every child span inherits: session · workflow · stage · workload class · model</text>
+  <text x="400" y="275" text-anchor="middle" class="sublabel">Without this envelope you inspect isolated spans but cannot reconstruct intent</text>
+</svg>
