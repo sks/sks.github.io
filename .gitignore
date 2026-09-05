@@ -28,3 +28,9 @@ terraform/override.tf.json
 terraform/*_override.tf
 terraform/*_override.tf.json
 # Commit terraform/.terraform.lock.hcl after tofu init
+
+# Local secrets / noise (never commit)
+nohup.out
+**/.env
+.env
+*.env.local
