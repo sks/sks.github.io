@@ -1,73 +1,122 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" role="img" aria-labelledby="title desc">
-  <title id="title">Anonymized Langfuse-style session trace</title>
-  <desc id="desc">Mock UI: plan, gather, present stages with per-tool cost and latency attribution.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 440" role="img" aria-labelledby="title desc">
+  <title id="title">Session trace</title>
+  <desc id="desc">Trace tree with plan, gather, and present stages, tool latency, and token cost.</desc>
   <defs>
     <style type="text/css"><![CDATA[
-      .chrome { fill: #1e293b; }
-      .bg { fill: #f8fafc; }
-      .panel { fill: #ffffff; stroke: #e2e8f0; }
-      .tree { stroke: #cbd5e1; stroke-width: 1.5; fill: none; }
-      .span-llm { fill: #dbeafe; stroke: #2563eb; }
-      .span-tool { fill: #dcfce7; stroke: #16a34a; }
-      .span-stage { fill: #ecfeff; stroke: #00add8; }
-      .label { font: 500 12px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #0f172a; }
-      .meta { font: 400 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #64748b; }
-      .header { font: 600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #f8fafc; }
-      .cost { font: 600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #b45309; }
-      .ok { font: 600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #15803d; }
-      .warn { font: 600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #b45309; }
+      .bg { fill: #0b1220; }
+      .top { fill: #111827; }
+      .panel { fill: #111827; stroke: #1f2937; }
+      .row { fill: #0f172a; stroke: #1e293b; }
+      .row-alt { fill: #0b1324; stroke: #1e293b; }
+      .pill-trace { fill: #1e3a5f; stroke: #3b82f6; }
+      .pill-gen { fill: #172554; stroke: #60a5fa; }
+      .pill-tool { fill: #052e1c; stroke: #34d399; }
+      .pill-span { fill: #083344; stroke: #22d3ee; }
+      /* tool rows use .pill-tool */
+      .h { font: 600 13px ui-sans-serif, system-ui, -apple-system, sans-serif; fill: #e5e7eb; }
+      .m { font: 400 11px ui-sans-serif, system-ui, -apple-system, sans-serif; fill: #94a3b8; }
+      .t { font: 500 12px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #e2e8f0; }
+      .c { font: 500 11px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #94a3b8; }
+      .ok { font: 600 11px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #34d399; }
+      .warn { font: 600 11px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #fbbf24; }
+      .tree { stroke: #334155; stroke-width: 1.25; fill: none; }
     ]]></style>
   </defs>
-  <rect width="760" height="420" class="bg"/>
-  <rect x="0" y="0" width="760" height="36" class="chrome"/>
-  <text x="20" y="23" class="header">Langfuse-style trace | acme-demo (anonymized) | Go runtime</text>
 
-  <rect x="24" y="52" width="712" height="348" class="panel" rx="6"/>
-  <text x="40" y="76" class="meta">session: sess-demo-42 | workflow: sre-investigate | OTEL trace linked</text>
+  <rect width="920" height="440" class="bg" rx="10"/>
+  <rect x="0" y="0" width="920" height="44" class="top" rx="10"/>
+  <rect x="0" y="22" width="920" height="22" class="top"/>
+  <text x="20" y="28" class="h">Traces / sess_8f2a91c</text>
+  <text x="700" y="28" class="m">12.4s  $0.184  4,612 tok</text>
 
-  <rect x="40" y="88" width="280" height="24" class="span-stage" rx="4"/>
-  <text x="52" y="104" class="label">stage: plan</text>
-  <text x="340" y="104" class="cost">$0.02 | 0.6k tok | 0.4s</text>
+  <rect x="16" y="56" width="888" height="368" class="panel" rx="8"/>
 
-  <line x1="52" y1="112" x2="52" y2="128" class="tree"/>
-  <line x1="52" y1="128" x2="68" y2="128" class="tree"/>
-  <rect x="68" y="118" width="260" height="22" class="span-llm" rx="4"/>
-  <text x="80" y="133" class="label">llm.generate (plan)</text>
+  <text x="32" y="82" class="m">Name</text>
+  <text x="520" y="82" class="m">Type</text>
+  <text x="620" y="82" class="m">Latency</text>
+  <text x="720" y="82" class="m">Tokens</text>
+  <text x="820" y="82" class="m">Cost</text>
+  <line x1="32" y1="92" x2="880" y2="92" stroke="#1e293b"/>
 
-  <rect x="40" y="150" width="280" height="24" class="span-stage" rx="4"/>
-  <text x="52" y="166" class="label">stage: gather</text>
-  <text x="340" y="166" class="cost">$0.14 | 3.1k tok</text>
+  <rect x="28" y="104" width="864" height="34" class="row" rx="4"/>
+  <rect x="40" y="112" width="210" height="18" class="pill-trace" rx="4"/>
+  <text x="50" y="125" class="t">sre-investigate</text>
+  <text x="520" y="126" class="c">TRACE</text>
+  <text x="620" y="126" class="c">12.4s</text>
+  <text x="720" y="126" class="c">4,612</text>
+  <text x="820" y="126" class="c">$0.184</text>
 
-  <line x1="52" y1="174" x2="52" y2="190" class="tree"/>
-  <line x1="52" y1="190" x2="84" y2="190" class="tree"/>
-  <rect x="84" y="180" width="260" height="22" class="span-tool" rx="4"/>
-  <text x="96" y="195" class="label">tool.grafana_query_range</text>
-  <text x="360" y="195" class="meta">820ms | $0.00</text>
+  <path d="M52 138 v22 h16" class="tree"/>
+  <rect x="68" y="148" width="824" height="32" class="row-alt" rx="4"/>
+  <rect x="80" y="155" width="92" height="18" class="pill-span" rx="4"/>
+  <text x="90" y="168" class="t">plan</text>
+  <text x="520" y="169" class="c">SPAN</text>
+  <text x="620" y="169" class="c">412ms</text>
+  <text x="720" y="169" class="c">612</text>
+  <text x="820" y="169" class="c">$0.018</text>
 
-  <line x1="52" y1="202" x2="52" y2="218" class="tree"/>
-  <line x1="52" y1="218" x2="84" y2="218" class="tree"/>
-  <rect x="84" y="208" width="260" height="22" class="span-tool" rx="4"/>
-  <text x="96" y="223" class="label">tool.grafana_query_range</text>
-  <text x="360" y="223" class="warn">790ms | REPEAT</text>
+  <path d="M80 180 v18 h16" class="tree"/>
+  <rect x="96" y="186" width="796" height="28" class="row" rx="4"/>
+  <rect x="108" y="192" width="150" height="16" class="pill-gen" rx="3"/>
+  <text x="116" y="204" class="t">gpt-4.1-mini</text>
+  <text x="520" y="205" class="c">GENERATION</text>
+  <text x="620" y="205" class="c">390ms</text>
+  <text x="720" y="205" class="c">612</text>
+  <text x="820" y="205" class="c">$0.018</text>
 
-  <line x1="52" y1="230" x2="52" y2="246" class="tree"/>
-  <line x1="52" y1="246" x2="68" y2="246" class="tree"/>
-  <rect x="68" y="236" width="260" height="22" class="span-llm" rx="4"/>
-  <text x="80" y="251" class="label">llm.generate (gather)</text>
-  <text x="360" y="251" class="cost">1.8k tok</text>
+  <path d="M52 214 v22 h16" class="tree"/>
+  <rect x="68" y="224" width="824" height="32" class="row-alt" rx="4"/>
+  <rect x="80" y="231" width="108" height="18" class="pill-span" rx="4"/>
+  <text x="90" y="244" class="t">gather</text>
+  <text x="520" y="245" class="c">SPAN</text>
+  <text x="620" y="245" class="c">8.9s</text>
+  <text x="720" y="245" class="c">3,104</text>
+  <text x="820" y="245" class="c">$0.128</text>
 
-  <rect x="40" y="270" width="280" height="24" class="span-stage" rx="4"/>
-  <text x="52" y="286" class="label">stage: present</text>
-  <text x="340" y="286" class="cost">$0.04 | 0.9k tok</text>
+  <path d="M80 256 v16 h16" class="tree"/>
+  <rect x="96" y="260" width="796" height="26" class="row" rx="4"/>
+  <rect x="108" y="265" width="188" height="16" class="pill-tool" rx="3"/>
+  <text x="116" y="277" class="t">grafana_query_range</text>
+  <text x="520" y="278" class="c">TOOL</text>
+  <text x="620" y="278" class="c">820ms</text>
+  <text x="720" y="278" class="c"></text>
+  <text x="820" y="278" class="c">$0.00</text>
 
-  <line x1="52" y1="294" x2="52" y2="310" class="tree"/>
-  <line x1="52" y1="310" x2="68" y2="310" class="tree"/>
-  <rect x="68" y="300" width="260" height="22" class="span-llm" rx="4"/>
-  <text x="80" y="315" class="label">llm.generate (present)</text>
-  <text x="360" y="315" class="ok">evidence: cited tools</text>
+  <path d="M80 286 v16 h16" class="tree"/>
+  <rect x="96" y="290" width="796" height="26" class="row-alt" rx="4"/>
+  <rect x="108" y="295" width="188" height="16" class="pill-tool" rx="3"/>
+  <text x="116" y="307" class="t">grafana_query_range</text>
+  <text x="520" y="308" class="c">TOOL</text>
+  <text x="620" y="308" class="warn">790ms</text>
+  <text x="700" y="308" class="warn">x2</text>
+  <text x="720" y="308" class="c"></text>
+  <text x="820" y="308" class="c">$0.00</text>
 
-  <text x="40" y="350" class="meta">Tool attribution: which call | latency | tokens/$ | loop signal on repeat</text>
-  <text x="40" y="370" class="meta">Session ~4.6k tok shown | CFP hook case was ~40k narrating a wrong answer</text>
-  <text x="40" y="392" class="meta">Mock for slides - replace with live capture for recording (no live cloud)</text>
+  <path d="M80 316 v16 h16" class="tree"/>
+  <rect x="96" y="320" width="796" height="26" class="row" rx="4"/>
+  <rect x="108" y="325" width="150" height="16" class="pill-gen" rx="3"/>
+  <text x="116" y="337" class="t">gpt-4.1-mini</text>
+  <text x="520" y="338" class="c">GENERATION</text>
+  <text x="620" y="338" class="c">1.12s</text>
+  <text x="720" y="338" class="c">1,840</text>
+  <text x="820" y="338" class="c">$0.074</text>
+
+  <path d="M52 346 v18 h16" class="tree"/>
+  <rect x="68" y="352" width="824" height="32" class="row-alt" rx="4"/>
+  <rect x="80" y="359" width="108" height="18" class="pill-span" rx="4"/>
+  <text x="90" y="372" class="t">present</text>
+  <text x="520" y="373" class="c">SPAN</text>
+  <text x="620" y="373" class="c">1.8s</text>
+  <text x="720" y="373" class="c">896</text>
+  <text x="820" y="373" class="c">$0.038</text>
+
+  <path d="M80 384 v14 h16" class="tree"/>
+  <rect x="96" y="386" width="796" height="26" class="row" rx="4"/>
+  <rect x="108" y="391" width="150" height="16" class="pill-gen" rx="3"/>
+  <text x="116" y="403" class="t">gpt-4.1-mini</text>
+  <text x="520" y="404" class="c">GENERATION</text>
+  <text x="620" y="404" class="c">1.74s</text>
+  <text x="720" y="404" class="c">896</text>
+  <text x="820" y="404" class="ok">cited</text>
 </svg>

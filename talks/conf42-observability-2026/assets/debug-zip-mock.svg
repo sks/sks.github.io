@@ -1,43 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" role="img" aria-labelledby="title desc">
-  <title id="title">Debug ZIP contents mockup</title>
-  <desc id="desc">Mock file listing for conversation-scoped debug export.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 380" role="img" aria-labelledby="title desc">
+  <title id="title">Debug zip contents</title>
+  <desc id="desc">File listing for a conversation-scoped debug export.</desc>
   <defs>
     <style type="text/css"><![CDATA[
+      .bg { fill: #0f172a; }
       .chrome { fill: #1e293b; }
-      .bg { fill: #f8fafc; }
-      .panel { fill: #ffffff; stroke: #e2e8f0; }
-      .header { font: 600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #f8fafc; }
-      .folder { font: 600 14px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #0f172a; }
-      .row { font: 500 13px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #0f172a; }
-      .meta { font: 400 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #64748b; }
-      .file { fill: #f1f5f9; stroke: #cbd5e1; }
+      .panel { fill: #111827; stroke: #334155; }
+      .file { fill: #1e293b; stroke: #334155; }
+      .h { font: 600 13px ui-sans-serif, system-ui, -apple-system, sans-serif; fill: #f8fafc; }
+      .folder { font: 600 13px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #e2e8f0; }
+      .row { font: 500 12px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #e2e8f0; }
+      .meta { font: 400 11px ui-sans-serif, system-ui, -apple-system, sans-serif; fill: #94a3b8; }
+      .size { font: 400 11px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #64748b; }
     ]]></style>
   </defs>
-  <rect width="760" height="420" class="bg"/>
-  <rect x="0" y="0" width="760" height="36" class="chrome"/>
-  <text x="20" y="23" class="header">conversation-debug.zip | unpacked (anonymized)</text>
+  <rect width="760" height="380" class="bg" rx="8"/>
+  <rect x="0" y="0" width="760" height="40" class="chrome" rx="8"/>
+  <rect x="0" y="20" width="760" height="20" class="chrome"/>
+  <text x="20" y="26" class="h">conversation-debug.zip</text>
+  <text x="620" y="26" class="meta">2.4 MB || unzipped</text>
 
-  <rect x="24" y="52" width="712" height="348" class="panel" rx="6"/>
-  <text x="40" y="82" class="folder">conversation-debug/</text>
+  <rect x="20" y="56" width="720" height="300" class="panel" rx="6"/>
+  <text x="36" y="84" class="folder">conversation-debug/</text>
 
-  <rect x="48" y="96" width="640" height="36" class="file" rx="4"/>
-  <text x="64" y="119" class="row">manifest.json</text>
-  <text x="280" y="119" class="meta">versions, execution ids, export time</text>
+  <rect x="44" y="100" width="672" height="40" class="file" rx="4"/>
+  <text x="60" y="125" class="row">manifest.json</text>
+  <text x="320" y="125" class="meta">schema 3 || export 2026-09-04T18:12:03Z</text>
+  <text x="660" y="125" class="size">1.2 KB</text>
 
-  <rect x="48" y="144" width="640" height="36" class="file" rx="4"/>
-  <text x="64" y="167" class="row">execution.json</text>
-  <text x="280" y="167" class="meta">DAG the watch UI uses</text>
+  <rect x="44" y="150" width="672" height="40" class="file" rx="4"/>
+  <text x="60" y="175" class="row">execution.json</text>
+  <text x="320" y="175" class="meta">DAG || 7 nodes || watch UI source</text>
+  <text x="660" y="175" class="size">84 KB</text>
 
-  <rect x="48" y="192" width="640" height="36" class="file" rx="4"/>
-  <text x="64" y="215" class="row">subscribe-events.ndjson</text>
-  <text x="280" y="215" class="meta">SSE replay timeline</text>
+  <rect x="44" y="200" width="672" height="40" class="file" rx="4"/>
+  <text x="60" y="225" class="row">subscribe-events.ndjson</text>
+  <text x="320" y="225" class="meta">SSE timeline || 412 events</text>
+  <text x="660" y="225" class="size">1.9 MB</text>
 
-  <rect x="48" y="240" width="640" height="36" class="file" rx="4"/>
-  <text x="64" y="263" class="row">judge-report.json</text>
-  <text x="280" y="263" class="meta">optional evidence / rubric grade</text>
+  <rect x="44" y="250" width="672" height="40" class="file" rx="4"/>
+  <text x="60" y="275" class="row">judge-report.json</text>
+  <text x="320" y="275" class="meta">rubric || evidence cites || score 0.82</text>
+  <text x="660" y="275" class="size">12 KB</text>
 
-  <text x="40" y="330" class="meta">One download. Same bundle as the watch page.</text>
-  <text x="40" y="352" class="meta">Offline RCA without guessing which of twelve executions was bad.</text>
-  <text x="40" y="380" class="meta">Mock for slides - safe for recording (no live cloud).</text>
+  <text x="44" y="330" class="meta">sess_8f2a91c || workflow sre-investigate || one thread</text>
 </svg>
