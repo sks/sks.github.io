@@ -3,42 +3,39 @@
   <title id="title">One zip per conversation vs per-execution export</title>
   <desc id="desc">Before: many execution exports per support ticket. After: one conversation-scoped debug zip.</desc>
   <defs>
-    <style>
+    <style type="text/css"><![CDATA[
       .title { font: 600 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
       .subtitle { font: 400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #6b7280; }
-      .panel { fill: #f9fafb; stroke: #e5e7eb; stroke-width: 1; rx: 8; }
-      .panel-good { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.5; rx: 8; }
-      .panel-title { font: 600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
-      .item { font: 400 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #374151; }
-      .badge-bad { fill: #fee2e2; stroke: #dc2626; }
-      .badge-good { fill: #dcfce7; stroke: #16a34a; }
-      .badge-text { font: 600 10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
-    </style>
+      .box { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .box-good { fill: #ecfdf5; stroke: #10b981; stroke-width: 1.5; }
+      .label { font: 600 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; }
+      .item { font: 400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #475569; }
+      .arrow { stroke: #94a3b8; stroke-width: 2; fill: none; marker-end: url(#ah2); }
+    ]]></style>
+    <marker id="ah2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#94a3b8"/>
+    </marker>
   </defs>
   <rect width="720" height="400" fill="#ffffff"/>
-  <text x="360" y="32" text-anchor="middle" class="title">Debug handoff: one zip, one conversation</text>
-  <text x="360" y="52" text-anchor="middle" class="subtitle">Support thinks in threads  export should too</text>
+  <text x="360" y="32" text-anchor="middle" class="title">One zip, one conversation</text>
+  <text x="360" y="52" text-anchor="middle" class="subtitle">Support thinks in threads - not twelve execution IDs</text>
 
-  <rect x="40" y="72" width="300" height="280" class="panel"/>
-  <text x="190" y="96" text-anchor="middle" class="panel-title">Before: per-execution hunt</text>
-  <rect x="70" y="115" width="240" height="28" class="badge-bad" rx="4"/>
-  <text x="190" y="133" text-anchor="middle" class="badge-text">exec-7a2.zip</text>
-  <rect x="70" y="155" width="240" height="28" class="badge-bad" rx="4"/>
-  <text x="190" y="173" text-anchor="middle" class="badge-text">exec-9f1.zip</text>
-  <rect x="70" y="195" width="240" height="28" class="badge-bad" rx="4"/>
-  <text x="190" y="213" text-anchor="middle" class="badge-text">exec-b04.zip</text>
-  <text x="190" y="260" text-anchor="middle" class="item">Which step failed?</text>
-  <text x="190" y="280" text-anchor="middle" class="item">Guesswork for support</text>
-  <text x="190" y="320" text-anchor="middle" class="item">12 sticky notes in 12 lockers</text>
+  <rect x="40" y="90" width="260" height="220" class="box" rx="8"/>
+  <text x="170" y="120" text-anchor="middle" class="label">Before</text>
+  <text x="170" y="160" text-anchor="middle" class="item">exec-01.zip</text>
+  <text x="170" y="185" text-anchor="middle" class="item">exec-02.zip</text>
+  <text x="170" y="210" text-anchor="middle" class="item">exec-03.zip</text>
+  <text x="170" y="235" text-anchor="middle" class="item">...</text>
+  <text x="170" y="270" text-anchor="middle" class="item">Scavenger hunt</text>
 
-  <rect x="380" y="72" width="300" height="280" class="panel-good"/>
-  <text x="530" y="96" text-anchor="middle" class="panel-title">After: conversation export</text>
-  <rect x="410" y="115" width="240" height="120" fill="#ffffff" stroke="#16a34a" stroke-width="1.5" rx="6"/>
-  <text x="530" y="140" text-anchor="middle" class="item">conversation-debug.zip</text>
-  <text x="530" y="162" text-anchor="middle" class="item">manifest.json</text>
-  <text x="530" y="182" text-anchor="middle" class="item">execution.json (DAG)</text>
-  <text x="530" y="202" text-anchor="middle" class="item">subscribe-events.ndjson</text>
-  <text x="530" y="222" text-anchor="middle" class="item">judge report (optional)</text>
-  <text x="530" y="280" text-anchor="middle" class="item">Whole thread in one artifact</text>
-  <text x="530" y="320" text-anchor="middle" class="item">Grade a week ’ product gates</text>
+  <line x1="320" y1="200" x2="380" y2="200" class="arrow"/>
+
+  <rect x="400" y="90" width="280" height="220" class="box-good" rx="8"/>
+  <text x="540" y="120" text-anchor="middle" class="label">After</text>
+  <text x="540" y="170" text-anchor="middle" class="item">conversation-debug.zip</text>
+  <text x="540" y="200" text-anchor="middle" class="item">whole thread</text>
+  <text x="540" y="230" text-anchor="middle" class="item">trace + events + grade</text>
+  <text x="540" y="270" text-anchor="middle" class="item">One download</text>
+
+  <text x="360" y="360" text-anchor="middle" class="item">Then grade a week of folders - recurring patterns become product gates</text>
 </svg>
