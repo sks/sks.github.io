@@ -1,0 +1,100 @@
+# yaml-language-server: $schema=https://appcd-dev.github.io/solutions/schemas/guild-kinded-manifest.schema.json
+# Kinded Aiden YAML for stackgen ai apply (CLI ≥ v0.82.0-rc.1).
+# Conf42 Observability demo: multi-stage run → conversation debug zip.
+# Lives with the talk deck in sks.github.io (not solutions).
+# Apply:  stackgen ai apply -f obs-debug-zip.yaml --approve
+# Dry-run: stackgen ai apply -f obs-debug-zip.yaml --dry-run
+apiVersion: guild.stackgen.com/v1
+kind: Agent
+metadata:
+  name: obs-signal-investigator
+  tags: [observability, conf42, example, debug-zip]
+spec:
+  persona: |
+    You investigate a synthetic production symptom for an observability demo.
+    You have no cloud integrations — reason from the workflow input only.
+
+    Required behavior (so the session produces useful traces):
+    1. Call the `note` tool at least THREE times with distinct titles:
+       - "symptom" — restate the input symptom in one sentence
+       - "hypothesis" — one primary hypothesis and one alternate
+       - "evidence-gap" — what signal you would query next if Grafana/logs were connected
+    2. Load skill `obs-debug-checklist` via `load_skill` before your final reply.
+    3. End with a short plain-English summary and:
+       stage_gate:investigate=complete
+
+    Do not invent metrics numbers or claim you queried a live system.
+    Stay concrete and short — this run is for debug-export demos.
+  hitl:
+    alwaysAllowed: [note, load_skill]
+  autoApproveTools:
+    - tool: note
+    - tool: load_skill
+---
+apiVersion: guild.stackgen.com/v1
+kind: Agent
+metadata:
+  name: obs-handoff-summarizer
+  tags: [observability, conf42, example, debug-zip]
+spec:
+  persona: |
+    You write the support handoff for an observability demo.
+    Read the prior investigate stage. Call `note` once with title "handoff"
+    summarizing: symptom, top hypothesis, evidence gap, next human action.
+    Then reply with a paste-ready handoff block operators can put in Slack.
+    End with: stage_gate:handoff=complete
+    Do not invent live query results.
+  hitl:
+    alwaysAllowed: [note]
+  autoApproveTools:
+    - tool: note
+---
+apiVersion: guild.stackgen.com/v1
+kind: Skill
+metadata:
+  name: obs-debug-checklist
+  tags: [observability, conf42, example]
+spec:
+  skillMd: |
+    ---
+    name: obs-debug-checklist
+    description: Checklist for agent observability demos — what a good debug zip must show
+    ---
+    # Observability debug checklist
+
+    When summarizing an investigation for a debug-export demo, include:
+
+    1. **Session identity** — what symptom / input started this run
+    2. **Tool trail** — which `note` titles you wrote (symptom, hypothesis, evidence-gap)
+    3. **Honest gaps** — name signals you did *not* have (no live PromQL, no logs)
+    4. **Handoff ask** — one concrete next step for a human or a connected plane
+
+    Never claim a tool ran against a live backend when it did not.
+---
+apiVersion: guild.stackgen.com/v1
+kind: Workflow
+metadata:
+  name: obs-debug-zip-demo
+  domain: platform
+  tags: [observability, conf42, example, debug-zip]
+  approve: true
+spec:
+  requiredInputs: [symptom]
+  jobs:
+    investigate:
+      description: Structured notes + skill load for a synthetic symptom (trace-rich).
+      agent: obs-signal-investigator
+      skillRefs: [obs-debug-checklist]
+      note: |
+        Workflow input `symptom` is the only evidence.
+        Use note at least three times (symptom, hypothesis, evidence-gap).
+        Load skill obs-debug-checklist before the final summary.
+        End with stage_gate:investigate=complete
+    handoff:
+      description: Support-ready handoff from investigate notes.
+      needs: [investigate]
+      agent: obs-handoff-summarizer
+      note: |
+        Read the investigate stage output.
+        Write one note titled handoff, then a Slack-ready handoff block.
+        End with stage_gate:handoff=complete
