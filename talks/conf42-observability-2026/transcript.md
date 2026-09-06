@@ -1,15 +1,11 @@
-# Transcript — Conf42 Observability 2026
+# Recording script — Conf42 Observability 2026
 
 **You Can't Debug What You Can't See: Observability for AI Agents**  
-~27 minutes spoken · 30-minute slot
-
-Speak to the room, not to the bullets. The slide already has the dense words — point, then tell the story. Pause when there’s a table so people can read.
+About 27 minutes. Slide numbers match `deck.md` / `exports/deck.pdf` (32 slides). Advance when you finish each block.
 
 ---
 
-## Act 1 — Problem + primitives
-
-### Title
+**Slide 1 — You Can't Debug What You Can't See**
 
 Hello everyone. Thanks to Conf42 for having me.
 
@@ -19,7 +15,7 @@ Today I want to talk about what breaks when your dashboards are green and the ag
 
 ---
 
-### The 3 AM page that looked fine
+**Slide 2 — The 3 AM page that looked fine**
 
 Picture on-call getting a write-up that sounds senior. Full sentences. Calm. Confident.
 
@@ -31,7 +27,7 @@ That’s the whole talk in one line. Classic monitoring sees “slow request.”
 
 ---
 
-### Agents don't crash
+**Slide 3 — Agents don't crash**
 
 When a microservice dies, you get a restart or a stack. Agents often stay “healthy” while they spin.
 
@@ -43,7 +39,7 @@ You finish the night with a long chat log and a bad answer. No pod crash to poin
 
 ---
 
-### APM asks vs on-call asks
+**Slide 4 — APM asks vs on-call asks**
 
 Left side is what we’ve asked for years. Right side is what people ask me after a bad agent run.
 
@@ -53,7 +49,7 @@ Especially that last one — did it actually look at real tool output, or did it
 
 ---
 
-### New primitives agents need
+**Slide 5 — New primitives agents need**
 
 This is the shopping list. Four things we had to add because APM alone wasn’t enough.
 
@@ -68,7 +64,7 @@ That last line on the slide is the goal for the rest of the talk.
 
 ---
 
-### Cost is the canary
+**Slide 6 — Cost is the canary**
 
 We didn’t learn this from a whitepaper. We learned it from invoices.
 
@@ -82,21 +78,19 @@ Ship a spend cap and a loop cap before you scale traffic.
 
 ---
 
-### Agenda
+**Slide 7 — Agenda**
 
 Quick map. How we wire it. Where the data goes. When the dashboards lie. How we hand a broken run to a human. And a short list you can use on Monday.
 
 ---
 
-### Act 2 divider
+**Slide 8 — Act 2 · What we instrument**
 
 What we actually put in the product.
 
 ---
 
-## Act 2 — What we instrument
-
-### Session traces — plan, gather, present
+**Slide 9 — Pillar 1 — Session traces (plan → gather → present)**
 
 Think of one investigation as three chapters, not one span.
 
@@ -110,7 +104,7 @@ If you only instrument the final HTTP response, you will never answer “where d
 
 ---
 
-### Trace walkthrough
+**Slide 10 — Trace walkthrough**
 
 Here’s a made-up but realistic tree. Safe for slides — no live cloud.
 
@@ -122,7 +116,7 @@ If that pattern shows up and the session is already way over average, you can ki
 
 ---
 
-### Tool cost + budgets
+**Slide 11 — Pillar 2 — Tool attribution + token budgets**
 
 Two zoom levels. One tool: slow versus chatty versus looping. Whole run: is this weird for this agent?
 
@@ -132,7 +126,7 @@ For every agent, know the healthy tool-call count and alert when a run blows pas
 
 ---
 
-### Metrics panel
+**Slide 12 — Metrics panel**
 
 Left is burn versus a budget line. Right is a tiny table of who spent what in this run.
 
@@ -140,7 +134,7 @@ That left chart will never show you the wrong RCA text. The tree will. Don’t a
 
 ---
 
-### Evidence checks
+**Slide 13 — Pillar 3 — Evidence checks**
 
 This is the one people underbuild.
 
@@ -154,7 +148,7 @@ Don’t ship “correctness” dashboards that never look at whether gather ran.
 
 ---
 
-### Audit without becoming a secret store
+**Slide 14 — Audit without becoming a secret store**
 
 Keep a log of what ran. Scrub secrets before you store it.
 
@@ -162,7 +156,7 @@ If your debug store holds raw keys, the next incident review just got worse.
 
 ---
 
-### Metrics vs traces
+**Slide 15 — Metrics vs traces**
 
 Pages and SLOs live here. “Why did it loop?” lives over there.
 
@@ -170,7 +164,7 @@ One hard rule we paid for: don’t put session IDs on Prometheus labels. Tool na
 
 ---
 
-### Dual sink
+**Slide 16 — Dual sink**
 
 Go process in the middle. Three exits on purpose.
 
@@ -180,7 +174,7 @@ If you go hunting LLM steps in the wrong backend, you’ll open a ticket for “
 
 ---
 
-### Correlation
+**Slide 17 — Correlation that actually works**
 
 Every outbound hop should carry the standard trace header — MCP, gateway, the lot.
 
@@ -188,7 +182,7 @@ And the id you put in the log must be the same hex id the tracer uses. Not your 
 
 ---
 
-### Identity
+**Slide 18 — Identity backbone**
 
 Trace id alone isn’t enough. We stamp who this work belongs to — session, workflow, stage, persona — on the child spans.
 
@@ -198,15 +192,13 @@ Session id plus stage on every child span, or you can’t compare runs later.
 
 ---
 
-### Act 3 divider
+**Slide 19 — Act 3 · When visibility lies**
 
 When the numbers look fine and still mislead you.
 
 ---
 
-## Act 3 — When visibility lies
-
-### The scorecard that lied
+**Slide 20 — The scorecard that lied**
 
 We built a scorecard. It looked polished. It was wrong.
 
@@ -216,7 +208,7 @@ The bug was upstream of the chart.
 
 ---
 
-### Missing data is not a passing grade
+**Slide 21 — Missing data is not a passing grade**
 
 Empty is not green.
 
@@ -229,7 +221,7 @@ If coverage is thin, say “unknown.” Don’t invent an A+.
 
 ---
 
-### Rule
+**Slide 22 — Rule**
 
 One sentence, then stop.
 
@@ -239,15 +231,13 @@ Stamp the chapters when the span starts. Price the tools. Only call it correct w
 
 ---
 
-### Act 4 divider
+**Slide 23 — Act 4 · Debug after the fact**
 
 The run already failed. Now what does a human need?
 
 ---
 
-## Act 4 — Debug after the fact
-
-### What support actually needs
+**Slide 24 — What support actually needs**
 
 Someone says the AI investigation went wrong.
 
@@ -255,13 +245,13 @@ They remember a conversation, not twelve execution ids. Give them one package fo
 
 ---
 
-### Trace again
+**Slide 25 — Trace again**
 
 Same tree as before. Start here: where it looped, what it cost, whether present cited tools.
 
 ---
 
-### Debug zip
+**Slide 26 — Debug zip**
 
 One zip. Manifest for versions. The graph the UI uses. The event stream so you can replay. Sometimes a short grade of the run.
 
@@ -269,7 +259,7 @@ Same stuff you’d see on the watch page, offline. No guessing which of a dozen 
 
 ---
 
-### One zip
+**Slide 27 — One zip**
 
 Before: sticky notes across many lockers. After: one folder.
 
@@ -277,7 +267,7 @@ Then you can review a week of folders the way you review incidents — and turn 
 
 ---
 
-### Batch grading → product gates
+**Slide 28 — Batch grading → product gates**
 
 We saw the same dig twice — make reuse the default.  
 Different answers from Slack versus the web — fix how context arrives.  
@@ -287,26 +277,27 @@ Measure what you blocked your own users from doing. Then ship a gate, not anothe
 
 ---
 
-## Close
+**Slide 29 — Starter set — why did this agent do that?**
 
-### Starter set
+This is the slide to screenshot. Hold a few seconds.
 
-This is the slide to take a picture of. Six signals. None of them are “is the pod up.”
+Six signals. None of them are “is the pod up.”
 
 If you only do two things next week:
 
-1. Alert when session spend is N times that agent’s rolling average — and when tool-call count blows a healthy ceiling.
-2. Refuse to call a run “good” unless present cites gather.
+One — alert when session spend is N times that agent’s rolling average, and when tool-call count blows a healthy ceiling.
+
+Two — refuse to call a run “good” unless present cites gather.
 
 That’s the cheapest path from green dashboards to “why did it do that.”
 
-The write-up at productionnotes.dev has the longer checklist. This table is enough to start a ticket Monday morning.
+The write-up at productionnotes.dev has the longer checklist. This table is enough to open a ticket Monday morning.
 
 ---
 
-### Five lessons
+**Slide 30 — Five lessons**
 
-I’ll leave the list on screen. Spoken version is shorter:
+I’ll leave the list on screen. Spoken version is shorter.
 
 Watch money early.  
 Trace the chapters.  
@@ -318,7 +309,7 @@ If you remember nothing else: cost, loop count, and grounded present.
 
 ---
 
-### Thank you
+**Slide 31 — Thank you**
 
 Longer write-up is at productionnotes.dev — same title. Also on the CNCF blog.
 
@@ -328,6 +319,6 @@ I’m Sabith — GitHub sks. Thanks again to Conf42.
 
 ---
 
-### Questions
+**Slide 32 — Questions?**
 
 You can’t debug what you can’t see.
