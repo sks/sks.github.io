@@ -24,6 +24,13 @@ A short path for on-call and platform SREs evaluating AI agents. No blueprint �
 
 Downloadable principles (no proprietary schemas): [Evidence-gated RCA checklist](/checklists/evidence-gated-rca/) · [“Done” checklist](/checklists/agent-done/)
 
+## Also from the latest benches
+
+- [Six model×orchestration combos on one alert+logs job](/blog/six-model-mode-combos-alert-logs-bench/)
+- [What is ReAcTree?](/blog/what-is-reactree/)
+- [How to evaluate an AI agent for RCA](/blog/how-to-evaluate-ai-agent-root-cause-analysis/)
+- [Stop retrying the same failed query](/blog/stop-retrying-the-same-failed-query/)
+
 ## Next
 
 - Hub: [AI agents for SRE](/topics/ai-agents-sre/) · [AI incident triage](/topics/ai-incident-triage/)  
