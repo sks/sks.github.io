@@ -32,6 +32,8 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [Go vs Python for AI Agents — Why We Chose Go](/blog/why-go/) | Language choice for a production agent runtime |
 | [Go Platform Architecture at Speed](/blog/anatomy-of-a-platform/) | Growing the codebase without drowning |
 | [Claim-Aware Evidence Packing](/blog/claim-aware-evidence-packing/) | Verifier bags that match answer claims; fail open when evidence was cut |
+| [AI Agent Runtime: What to Measure Before You Buy](/blog/ai-agent-runtime-what-to-measure-before-you-buy/) | Buyer checklist with multi-model triage receipts |
+| [Best Way to Debug a Multi-Step AI Agent](/blog/best-way-to-debug-multi-step-ai-agent/) | Golden prompt → one zip → host gates before prompt edits |
 
 ## Related on this site
 

@@ -47,6 +47,9 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [PII Redaction for AI Agents](/blog/pii-redaction-ai-agents/) | Protect model history while preserving authorized operator debugging |
 | [Single-Agent vs Multi-Agent Orchestration: How to Choose](/blog/single-agent-vs-multi-agent/) | When single-agent vs multi-agent fits SRE triage — fair A/B, both sides |
 | [AI SRE Agent Benchmarks: Wall Time, Tools, Tokens](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/) | Fair scorecard — wall time, tool calls, payload bytes, ReAcTree tax |
+| [What Is ReAcTree?](/blog/what-is-reactree/) | Hierarchical agent trees vs single-agent ReAct — plain English |
+| [Six Model×Orchestration Combos on One Alert+Logs Job](/blog/six-model-mode-combos-alert-logs-bench/) | xAI / gpt-5.4 / Responses × single-agent·hierarchical — wall, tokens, cost, correctness |
+| [How to Evaluate an AI Agent for RCA](/blog/how-to-evaluate-ai-agent-root-cause-analysis/) | Checklist-first RCA grading sheet from a live dual-part prompt |
 | [Canary First: Consistency Evals for Live SRE Investigate](/blog/canary-first-sre-investigate-consistency-evals/) | Nightly black-box investigate — canary before tokens, draft ≠ done, concurrence |
 | [Service Rendered Efficiently](/blog/service-rendered-efficiently/) | Culture frame — AI investigation as a service product, not engineering cred |
 | [Stop Re-Investigating the Same Alert](/blog/stop-re-investigating-the-same-alert/) | Reuse-first policy; investigations per alert as a service metric |
