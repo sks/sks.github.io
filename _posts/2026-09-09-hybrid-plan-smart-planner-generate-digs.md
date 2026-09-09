@@ -4,20 +4,20 @@ title: "Hybrid Plan Mode: Smart Planner, Generate Digs"
 date: 2026-09-09 21:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 68
-description: "Plan roots already route to planning; digs default to tool_calling. Mapping a high-effort reasoning model onto every task burns dig wall. Split the roster instead."
+description: "Plan roots already route to planning; digs default to tool calling. Putting a high-thinking reasoning model on every task makes workers slow. Use a thinking model for the planner and a normal chat model for digs."
 image: /assets/images/og-default.png
 tags: [ai-agents, reasoning, orchestration, reactree, evaluation, tokenomics, sre, aiden]
 permalink: /blog/hybrid-plan-smart-planner-generate-digs/
 faqs:
   - question: "Do I need a new execution mode for hybrid plan?"
-    answer: "No. Hierarchical plan already sends the root to a planning task type and dig workers to tool_calling by default. The fix is the model roster: reasoning for planning, generate for digs."
-  - question: "Why did an all-reasoning plan bench burn wall clock?"
-    answer: "Every good_for_task row, including tool_calling, pointed at the same high-effort Responses seat. Digs asked for tools and still got a slow reasoning model for Grafana loops."
-  - question: "What did the hybrid roster change?"
-    answer: "Planning and synthesis stayed on a medium-effort reasoning preview. Digs, efficiency helpers, and summarizer seats moved to generate-class models. Dig Expert.Do times dropped from multi-minute reasoning digs to tens of seconds or a couple of minutes."
+    answer: "No. Hierarchical plan already sends the root to a planning task type and dig workers to tool_calling by default. The fix is which model each role gets: a reasoning model for planning, a normal chat model for digs."
+  - question: "Why did an all-reasoning plan bench burn so much time?"
+    answer: "Every task type, including tool workers, pointed at the same high-thinking Responses model. Digs asked for tools and still got a slow reasoning model for Grafana loops."
+  - question: "What did the hybrid model map change?"
+    answer: "Planning and synthesis stayed on a medium-thinking reasoning preview. Digs, efficiency helpers, and summarizers moved to normal chat models. Dig run times dropped from many minutes to tens of seconds or a couple of minutes."
 ---
 
-[Reasoning effort is not free](/blog/reasoning-effort-is-not-a-free-upgrade/). [Reasoning vs generate](/blog/reasoning-vs-generate-tool-heavy-agents/) asked which *seat* belongs on a tool-heavy job. This post is the next cut: **split the roster inside hierarchical plan**, not another orchestration mode.
+[Reasoning effort is not free](/blog/reasoning-effort-is-not-a-free-upgrade/). [Reasoning vs generate](/blog/reasoning-vs-generate-tool-heavy-agents/) asked which *model class* belongs on a tool-heavy job. This post is the next cut: **give the planner and the workers different models**, not another orchestration mode. Confirm workers actually used a normal chat model by checking response ids and reasoning token fields ([Completions vs Responses](/blog/chat-completions-vs-responses-api/)).
 
 Cousins: [hierarchical vs single-agent](/blog/plan-mode-merits-demerits-observability/) · [what is ReAcTree?](/blog/what-is-reactree/).
 
@@ -93,6 +93,7 @@ We stopped a fresh all-reasoning rematch early once the first dig already select
 2. **Keep dig `task_type` off planning.** Host prompts that set digs to `planning` reintroduce the tax even with a good default.
 3. **Remap summarizer and efficiency** too. Fallbacks that inherit the reasoner quietly rebuild the bill.
 4. **Start medium on the planner.** Raise only if Theory quality regresses. High everywhere is how the basement floods.
+5. **Verify from the export.** Worker spans should show a normal chat model (or zero / off thinking). Planner spans may show Responses ids (`resp_…`) plus reasoning tokens ([how to read Completions vs Responses](/blog/chat-completions-vs-responses-api/)).
 
 ---
 
