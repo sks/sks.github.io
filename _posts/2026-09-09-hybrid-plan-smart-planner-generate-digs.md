@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Hybrid Plan Mode: Smart Planner, Generate Digs"
-date: 2026-09-09 20:00:00 -0700
+date: 2026-09-09 21:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 68
 description: "Plan roots already route to planning; digs default to tool_calling. Mapping a high-effort reasoning model onto every task burns dig wall. Split the roster instead."
