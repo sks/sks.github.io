@@ -67,6 +67,7 @@ A deep thinker and a fast writer both visit the same leaky basement. The deep th
 
 - Default Collect: **efficient reasoning or generate**, measured.  
 - Synthesis-only high effort: still valid ([adaptive effort](/blog/reasoning-effort-is-not-a-free-upgrade/)).  
-- Preview reasoning: **canary** behind gates, never silent default.
+- Preview reasoning: **canary** behind gates, never silent default.  
+- Hierarchical plan: **split the roster** — reasoning on `planning`, generate on dig `tool_calling` ([hybrid plan](/blog/hybrid-plan-smart-planner-generate-digs/)). Mapping high-effort reasoning onto every task is how digs burn eight minutes measuring one PromQL.
 
 Ship a mix. Bill the mix. Do not romanticize the dial.
