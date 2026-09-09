@@ -10,13 +10,15 @@ tags: [ai-agents, sre, reasoning, multi-agent, orchestration, incident-response,
 permalink: /blog/reasoning-effort-is-not-a-free-upgrade/
 faqs:
   - question: "Does higher reasoning effort make SRE agents better?"
-    answer: "Not automatically. On tool-heavy triage, higher effort can burn wall-clock budget on slower turns and extra exploration, so the agent never reaches the completion gate."
+    answer: "Not automatically. On tool-heavy triage, higher effort can burn the time budget on slower model turns and extra exploration, so the agent never finishes with a usable summary."
   - question: "What is adaptive reasoning effort for multi-agent triage?"
     answer: "Give collectors a cheap thinking budget and reserve expensive reasoning for one synthesis pass after evidence exists — instead of one global setting for every delegated dig."
   - question: "Why do some new models reject tools plus reasoning on Chat Completions?"
-    answer: "Several current OpenAI models only allow function tools with non-none reasoning on the Responses API. Chat Completions returns an error unless you drop reasoning or change transport."
+    answer: "Several current OpenAI models only allow tools and thinking together on the Responses API. Chat Completions returns an error unless you turn thinking off or switch APIs. See Completions vs Responses for how to tell which API a run used."
+  - question: "Is the Responses API slower than Chat Completions?"
+    answer: "Usually no. Same model without extra thinking takes about the same time on either API. Runs feel slow when the model spends hidden thinking tokens, when every worker thinks hard, or when the client fails on Completions and retries on Responses."
   - question: "What still breaks after effort dials work?"
-    answer: "Fan-out spawn counts, missing completion tools on the synthesis agent, parent-only tools delegated to children, and uncredited child gate receipts can still prevent a clean close."
+    answer: "Too many parallel workers, missing completion tools on the synthesis agent, parent-only tools delegated to children, and child completion receipts that the parent never counts."
 ---
 
 Providers keep shipping a new dial: **reasoning effort**. The marketing story is simple — turn it up and the model thinks harder.
@@ -32,7 +34,7 @@ This post stands alone. You do not need the rest of the series. It covers three 
 - On a tool-heavy API-gateway error-rate dig, **blanket low finished**; **blanket high hit the wall clock** without a usable Summary or completion gate.
 - Letting the parent set effort **per child** worked: collectors got low, synthesis got high — and dug deeper than blanket low.
 - Adaptive still timed out: **spawn fan-out** and a **missing gate tool on the synthesizer** beat the dial.
-- Newer models often refuse **tools + non-none reasoning** on Chat Completions; until Responses API is wired, you need a **hybrid model mix** or you pay for failed requests. On hierarchical plan, that mix is concrete: reasoning on the planner, generate on digs ([hybrid plan](/blog/hybrid-plan-smart-planner-generate-digs/)).
+- Newer models often refuse **tools + thinking** on Chat Completions; the runtime must call the **Responses API** (or try Completions, then Responses after an error), or you pay for failed requests. On hierarchical plan, still split models: thinking model for the planner, normal chat model for workers ([hybrid plan](/blog/hybrid-plan-smart-planner-generate-digs/) · [Completions vs Responses](/blog/chat-completions-vs-responses-api/)).
 - In unknown waters, discovery and negative evidence worked — but **correlated ≠ drain-the-cluster**, and child completion receipts must count for the parent.
 
 ### Explain like I'm five
@@ -112,19 +114,19 @@ On the same alert class, the parent actually toggled:
 
 While probing newer models for the adaptive config, we hit a sharp platform edge:
 
-- Some current models reject **function tools + non-none reasoning** on `/v1/chat/completions`
+- Some current models reject **tools + thinking** on `/v1/chat/completions`
 - They want the **Responses** API for that combination
-- Our agent runtime’s OpenAI path is still Chat Completions today (this is an industry-wide gap in several Go agent frameworks, not a one-off)
+- Completions-only runtimes (ours included, for a while) paid for **HTTP 400 errors**, or a **failed Completions call plus a Responses retry**, before the dig even started
 
-So the practical mix became:
+So the practical mix became two layers. First, **which API**: Responses (or Completions then Responses on refuse) when tools and thinking are both required. Second, **which model**: who is allowed to think hard.
 
-| Role | Safe shape today |
+| Role | Safe shape |
 | --- | --- |
-| Parent / summarizer | Newest capable model with reasoning **off** (or none) when tools are in play |
-| Tool-bearing collectors / synthesis | Slightly older sibling that still accepts tools + low/high on Chat Completions |
-| Planning fallback | Same tool-friendly sibling when the newer model refuses |
+| Plan / synthesis | Reasoning model on Responses, medium thinking unless you measured otherwise |
+| Tool workers / collectors | Normal chat model (or thinking off / low) — do not put every worker on high-thinking Responses |
+| Parent / summarizer | Normal chat model, or thinking off, when the job is mostly coordination prose |
 
-**Finding 4.** “Turn reasoning up on the newest model” can be a **400**, not a quality win. Until Responses support lands, treat model choice and effort as a **joint** routing problem — or force none whenever tools are attached ([prompt caching](/blog/prompt-caching-ai-agents/) and tokenomics posts rhyme here: the cheap path is the one that actually runs).
+**Finding 4.** “Turn reasoning up on the newest model” can still be a **400** on Completions, or a slow dig on Responses if every tool turn thinks. Treat **model + effort + API** as one routing problem. Supporting Responses does not make high effort free ([Completions vs Responses](/blog/chat-completions-vs-responses-api/) · [prompt caching](/blog/prompt-caching-ai-agents/)).
 
 ---
 
@@ -175,7 +177,8 @@ Or shorter: **effort is not IQ. It is a schedule.**
 - [ ] Spawn fan-out and per-child timeouts are capped independently of effort  
 - [ ] Synthesis owns the completion gate tool — and child receipts count for the parent  
 - [ ] Parent-only tools cannot be delegated  
-- [ ] Model routing knows which lanes accept tools + reasoning (Chat Completions vs Responses)  
+- [ ] Model routing knows which APIs accept tools + thinking (Chat Completions vs Responses)  
+- [ ] Workers are not silently mapped to high-thinking Responses just because that API works  
 - [ ] Correlated findings cannot recommend production traffic changes without human authority  
 - [ ] New entities are both “change” and “telemetry artifact” until split  
 
@@ -185,6 +188,8 @@ Shareable cousins: [evidence-gated RCA checklist](/checklists/evidence-gated-rca
 
 ## Where to go next
 
+- [Chat Completions vs Responses API](/blog/chat-completions-vs-responses-api/) — how to tell which API a run used, and why Responses is not automatically slow  
+- [Hybrid plan: smart planner, generate digs](/blog/hybrid-plan-smart-planner-generate-digs/) — different models for planner and workers after Responses works  
 - [Single-agent vs multi-agent orchestration](/blog/single-agent-vs-multi-agent/) — another tax that looks like quality  
 - [Is the task actually done?](/blog/is-the-task-actually-done/) — gates that are not prose  
 - [Evidence-gated multiplane RCA](/blog/evidence-gated-multiplane-rca/) — when deeper digs earn their keep  

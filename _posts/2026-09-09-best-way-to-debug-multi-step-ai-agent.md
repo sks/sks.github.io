@@ -14,7 +14,7 @@ faqs:
   - question: "Should I start by rewriting the system prompt?"
     answer: "No. Prompt changes hide harness bugs. Fix typed failures, fan-out, and completion gates first; use prompts for role and output shape only."
   - question: "What artifacts do I need?"
-    answer: "Session id, wall clock, token totals, tool call list with outcomes, final Theory text, and ideally a single zip that holds the conversation plus tool payloads."
+    answer: "Session id, elapsed seconds, token totals, tool call list with outcomes, final Theory text, and ideally a single zip that holds the conversation plus tool payloads. To see which OpenAI API and how much thinking ran, check whether response ids start with resp_ or chatcmpl_, and whether usage lists reasoning tokens."
 ---
 
 Here is the debug loop we use on multi-step agents in production — not a framework tour. Runtime notes from [Aiden](/blog/aiden-platform/) where useful; the steps are shape-agnostic.
@@ -47,10 +47,11 @@ Record: model, **orchestration shape** (**single-agent** ReAct vs **hierarchical
 
 Prefer a single artifact: transcript + tool results + stage timeline. If you only have logs, at least pull:
 
-- wall seconds  
+- elapsed seconds  
 - token in/out  
 - tool names + error strings  
 - final Theory / Unknowns / Do-this-now  
+- per model call: model name, whether the response id starts with `resp_` (Responses API) or `chatcmpl_` (Chat Completions), and whether usage lists reasoning tokens ([Completions vs Responses](/blog/chat-completions-vs-responses-api/))
 
 For hierarchical runs, merge parent and child spans from session traces. Parent-only logs lie.
 

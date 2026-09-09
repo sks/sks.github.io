@@ -25,7 +25,7 @@ Company-site version of that last post: [How We Debug Multi-Stage AI Agent Workf
 ## Next
 
 - Hub: [AI agent runtime](/topics/ai-agent-runtime/) · [Go AI agents](/topics/go-ai-agents/)  
-- Related: [Best way to debug a multi-step AI agent](/blog/best-way-to-debug-multi-step-ai-agent/) · [Runtime: what to measure before you buy](/blog/ai-agent-runtime-what-to-measure-before-you-buy/) · [Claim-aware evidence packing](/blog/claim-aware-evidence-packing/)  
+- Related: [Best way to debug a multi-step AI agent](/blog/best-way-to-debug-multi-step-ai-agent/) · [Chat Completions vs Responses API](/blog/chat-completions-vs-responses-api/) · [Runtime: what to measure before you buy](/blog/ai-agent-runtime-what-to-measure-before-you-buy/) · [Claim-aware evidence packing](/blog/claim-aware-evidence-packing/)  
 - Full series: [Building an Enterprise AI Agent Platform in Go](/series/enterprise-ai-agents-go/?q=golang)  
 - On-call path: [SRE on-call starter pack](/start/sre-on-call/)
 

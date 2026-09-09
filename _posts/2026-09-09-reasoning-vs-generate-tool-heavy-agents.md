@@ -4,20 +4,20 @@ title: "Reasoning vs Generate Models for Tool-Heavy Agents"
 date: 2026-09-09 16:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 65
-description: "Merits and demerits of reasoning vs generate seats on a live Grafana triage job — wall, tokens, Theory style, and when each earns the bill."
+description: "Merits and demerits of reasoning vs normal chat models on a live Grafana triage job — elapsed time, tokens, Theory style, and when each earns the bill."
 image: /assets/images/og-default.png
 tags: [ai-agents, reasoning, openai, evaluation, tokenomics, sre, reactree, aiden]
 permalink: /blog/reasoning-vs-generate-tool-heavy-agents/
 faqs:
   - question: "Should tool-heavy SRE agents always use reasoning models?"
-    answer: "No. On our dual-part observability bench, a generate seat (gpt-5.4) matched correctness with lower wall than a Responses reasoning preview, while an xAI reasoning seat won efficiency. Pick by receipt."
+    answer: "No. On our dual-part observability bench, a normal chat model (gpt-5.4) matched correctness with lower elapsed time than a heavy Responses reasoning preview, while an efficient xAI reasoning model won on cost/time. Pick by measured receipts, not brand."
   - question: "What are the merits of reasoning models here?"
     answer: "Stronger skepticism (artifact vs leak), denser numeric Theories on efficient reasoners, and better recovery when host gates stop dead retries."
   - question: "What are the demerits?"
-    answer: "Higher wall and tokens, hierarchical ReAcTree quality collapse without gates, and a habit of exploring catalogs before measuring."
+    answer: "Higher elapsed time and tokens, hierarchical ReAcTree quality collapse without gates, and a habit of exploring catalogs before measuring."
 ---
 
-[Reasoning effort is not free](/blog/reasoning-effort-is-not-a-free-upgrade/). This is the cousin question: **reasoning seat vs generate seat** when the job is mostly tools.
+[Reasoning effort is not free](/blog/reasoning-effort-is-not-a-free-upgrade/). This is the cousin question: **reasoning model vs normal chat model** when the job is mostly tools. Which OpenAI API you call is a third choice ([Completions vs Responses](/blog/chat-completions-vs-responses-api/)). A slow dig whose ids start with `resp_` is usually hidden thinking or the wrong model on workers, not “Responses is slow.”
 
 Data: [six combos](/blog/six-model-mode-combos-alert-logs-bench/), voice: [what they write](/blog/what-reasoning-models-write-on-triage/). We A/B’d **single-agent ReAct** and **hierarchical ReAcTree** on each class ([what is ReAcTree?](/blog/what-is-reactree/) · [PDF](https://arxiv.org/pdf/2511.02424)).
 
@@ -45,7 +45,7 @@ A deep thinker and a fast writer both visit the same leaky basement. The deep th
 
 ## Demerits of reasoning seats
 
-1. **Wall and tokens** climb fast on preview-class models.  
+1. **Elapsed time and tokens** climb fast on preview-class models. Calling the Responses API is not the tax; **hidden thinking tokens and high effort** are ([Completions vs Responses](/blog/chat-completions-vs-responses-api/)).  
 2. **Hierarchical ReAcTree fragility** without observation gates.  
 3. **Catalog thrash** — empty `search_file`, skill loads, before the first PromQL.
 
