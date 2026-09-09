@@ -79,4 +79,6 @@ Wave 2 gpt-5.4 hierarchical nearly **doubled** tokens vs its own wave-1 hierarch
 | Preview reasoning model, weak host gates | **single-agent** until gates land |
 | Multi-plane parallel falsifiers | **hierarchical / tree** ([when multi-agent](/blog/single-agent-vs-multi-agent/)) |
 
+When you *do* keep hierarchical plan, split the model roster so digs stay on generate seats — [hybrid plan: smart planner, generate digs](/blog/hybrid-plan-smart-planner-generate-digs/). The tree already routes planning vs tool_calling; an all-reasoning map wastes that split.
+
 Ship both. Pick with a receipt, not a vibe.
