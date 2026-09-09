@@ -32,7 +32,7 @@ This post stands alone. You do not need the rest of the series. It covers three 
 - On a tool-heavy API-gateway error-rate dig, **blanket low finished**; **blanket high hit the wall clock** without a usable Summary or completion gate.
 - Letting the parent set effort **per child** worked: collectors got low, synthesis got high — and dug deeper than blanket low.
 - Adaptive still timed out: **spawn fan-out** and a **missing gate tool on the synthesizer** beat the dial.
-- Newer models often refuse **tools + non-none reasoning** on Chat Completions; until Responses API is wired, you need a **hybrid model mix** or you pay for failed requests.
+- Newer models often refuse **tools + non-none reasoning** on Chat Completions; until Responses API is wired, you need a **hybrid model mix** or you pay for failed requests. On hierarchical plan, that mix is concrete: reasoning on the planner, generate on digs ([hybrid plan](/blog/hybrid-plan-smart-planner-generate-digs/)).
 - In unknown waters, discovery and negative evidence worked — but **correlated ≠ drain-the-cluster**, and child completion receipts must count for the parent.
 
 ### Explain like I'm five
