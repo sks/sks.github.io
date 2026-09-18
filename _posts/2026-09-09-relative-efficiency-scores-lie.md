@@ -66,4 +66,4 @@ Also log **contention**: how many sessions shared the tool server. Our second wa
 
 If you cannot paste both, you are not done measuring.
 
-Related: [web metrics → LLM metrics](/blog/web-metrics-to-llm-metrics/), [fair evals before performance](/blog/fair-agent-evals-before-performance/).
+Related: [web metrics → LLM metrics](/blog/web-metrics-to-llm-metrics/), [fair evals before performance](/blog/fair-agent-evals-before-performance/), [same incident then swap models](/blog/same-problem-sre-model-bake-off/).
