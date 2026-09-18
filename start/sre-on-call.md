@@ -26,6 +26,7 @@ Downloadable principles (no proprietary schemas): [Evidence-gated RCA checklist]
 
 ## Also from the latest benches
 
+- [Same incident, five models](/blog/same-problem-sre-model-bake-off/) — freeze the fault before you rank investigators
 - [Six model×orchestration combos on one alert+logs job](/blog/six-model-mode-combos-alert-logs-bench/)
 - [What is ReAcTree?](/blog/what-is-reactree/)
 - [How to evaluate an AI agent for RCA](/blog/how-to-evaluate-ai-agent-root-cause-analysis/)
