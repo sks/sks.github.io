@@ -123,6 +123,6 @@ Caveat: wave 2 kept six Grafana clients hot in parallel for the full run. Conten
 1. Publish **wall, tokens, cost, correctness** as four columns. Efficiency is a fifth, labeled relative.
 2. Never crown a model on one shape. Single-agent ReAct and hierarchical ReAcTree are different products.
 3. Treat “reasoning preview” seats as **expensive explorers** until they prove closes under your gate.
-4. When a harness change lands, re-run the **same prompt**. Narrative without a rematch is cosplay.
+4. When a harness change lands, re-run the **same prompt**. Narrative without a rematch is cosplay. Random one-incident eval reruns are the same trap with extra models ([same incident, five models](/blog/same-problem-sre-model-bake-off/)).
 
 Related: [What is ReAcTree?](/blog/what-is-reactree/), [hierarchical vs single-agent on this job](/blog/plan-mode-merits-demerits-observability/), [hybrid plan roster](/blog/hybrid-plan-smart-planner-generate-digs/), [AI SRE benchmarks](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/), [reasoning effort is not free](/blog/reasoning-effort-is-not-a-free-upgrade/).

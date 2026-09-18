@@ -127,3 +127,5 @@ Rule for both:
 > Publish Correct-rate, wall seconds, tokens, and dollars first. Only then print a combined score. Never invent a scale that “all Correct + thrifty” can exceed by design.
 
 If your suite needs one number for a pass/fail check, cap it at accuracy times 100 and put the savings on the axes operators actually bill and wait on.
+
+Worked example: a frozen checkout-outage rematch where every Correct seat under budget printed the same 100, so we ranked on wall and new input tokens instead ([same incident, five models](/blog/same-problem-sre-model-bake-off/)).
