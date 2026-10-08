@@ -52,5 +52,12 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [How to Evaluate AI Agents: Clarify + Zero-Tool Failures](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/) | Unattended eval harness rules: deny clarify, fail zero-tool workers, MCP vs plan layers, policy in TOML (pt. 6) |
 | [Multi-Agent vs Single-Agent: MCP Tool Tax + pass@k](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/) | When planning beats reacting; 453-tool catalog tax; 292-byte handoffs; pass@1 vs pass@3 (pt. 7) |
 | [Simple vs Plan: When to Use Which](/blog/simple-vs-plan-when-to-use-which/) | Smoke cohort: plan wins some, ties some; cost tax vs fit — both modes stay in the toolkit (pt. 8) |
+| [From Vibes to Contracts](/blog/from-vibes-to-contracts-agent-evals/) | Eval sets, rubrics vs criteria, grader stack, pass^k |
+| [AI Agent Evaluation: Why the Grader Must Be Separate](/blog/ai-agent-evaluation-separate-grader/) | Agent model ≠ judge model; build for the trial OS |
+| [The AI Agent Testing Pyramid](/blog/ai-agent-testing-pyramid/) | What belongs in CI vs weekly live trials |
+| [Deterministic Checks vs LLM-as-a-Judge](/blog/deterministic-checks-vs-llm-judge/) | Grade the deliverable, not a scripted tool path |
+| [How to Test AI Agent Loops Without Overfitting](/blog/test-ai-agent-loops-with-evidence/) | Evidence completeness over name-ban loop detection |
+| [Multi-Agent Handoff Testing](/blog/multi-agent-handoff-testing-context-loss/) | Short brief contracts; mutation tests for context loss |
+| [AI Agent Evals in CI/CD](/blog/ai-agent-evals-cicd-flakes/) | Opt-in suites, best attempt, fail missing baseline tasks |
 
 {% include subscribe.html %}

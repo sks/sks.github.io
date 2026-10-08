@@ -36,6 +36,12 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [Best Way to Debug a Multi-Step AI Agent](/blog/best-way-to-debug-multi-step-ai-agent/) | Golden prompt → one zip → host gates before prompt edits |
 | [Chat Completions vs Responses](/blog/chat-completions-vs-responses-api/) | Two OpenAI APIs vs reasoning models; how to tell them apart in a debug export |
 | [Reasoning Effort Is Not a Free Upgrade](/blog/reasoning-effort-is-not-a-free-upgrade/) | Where to spend thinking time on tool-heavy digs |
+| [AI Agent Evaluation: Why the Grader Must Be Separate](/blog/ai-agent-evaluation-separate-grader/) | Separate agent and judge models; prompt as public interface |
+| [The AI Agent Testing Pyramid](/blog/ai-agent-testing-pyramid/) | Fast bounds, fact contracts, few live trials; opt-in CI |
+| [Deterministic Checks vs LLM-as-a-Judge](/blog/deterministic-checks-vs-llm-judge/) | Code for facts; judge for tone; no planted tool scripts |
+| [How to Test AI Agent Loops Without Overfitting](/blog/test-ai-agent-loops-with-evidence/) | Evidence and failure limits over tool-name bans |
+| [Multi-Agent Handoff Testing](/blog/multi-agent-handoff-testing-context-loss/) | Brief as contract; catch context loss at the seam |
+| [AI Agent Evals in CI/CD](/blog/ai-agent-evals-cicd-flakes/) | Best-attempt gates, missing-task fails, trial id = trace id |
 
 ## Related on this site
 
