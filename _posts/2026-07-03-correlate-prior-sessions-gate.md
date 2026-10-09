@@ -42,6 +42,10 @@ For automated triggers, webhook acknowledgements can return correlation fields (
 
 The distinction is also central to [curiosity before confidence](/blog/curiosity-before-confidence/) and [evidence-gated RCA](/blog/evidence-gated-multiplane-rca/): host code checks whether the search ran; the model explains what the search found. A gate proves the action occurred, not that the retrieved incident is relevant.
 
+![Flow from an operator correlation request to a recorded goal, prior-incident and prior-session searches, and a server-side verdict gate](/assets/images/diagrams/july-workflows/correlation-goal-gate.svg)
+
+*The gate requires a recorded search or explicit failure; it does not judge whether a prior case matches.*
+
 ---
 
 ## What operators can check

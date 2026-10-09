@@ -44,6 +44,10 @@ Initially the agent waited synchronously for every approval. If an operator was 
 
 This is asynchronous approval, not an assurance that work always continues. If the next step depends on the approved call, the session shows "waiting for approval" and pauses that work.
 
+![Parent and delegated tool calls pass the same governance boundary, then auto-approve, wait for a human decision, or hard-deny.](/assets/images/diagrams/june-operations/hitl-tool-gates.svg)
+
+The middle branch is a pending request with an expiry, not permission to execute later without checking the decision.
+
 A delayed decision creates **state drift**: production may have changed since the command was proposed. Short time-to-live limits (TTLs) expire old requests, and session-scoped caching avoids executing long-deferred approvals without re-evaluation. A short TTL reduces but cannot eliminate that risk.
 
 Operators can see pending requests grouped by tool and handle some in bulk. Bulk review is most suitable for read-only investigation commands. State-changing calls should be inspected individually, or batching simply moves the rubber stamp to a larger button. If a request is rejected, the agent receives a tool error and can plan again; feedback such as "use staging instead" can guide that replanning. This is related to [steering an AI agent mid-run](/blog/steer-ai-agents-mid-run/).

@@ -40,6 +40,10 @@ In a matched gateway-timeout investigation, clearing ran and the ON arm was fast
 
 ## What clearing changes
 
+![Observation masking after durable notes branches into OFF and ON context, then compares RCA quality despite ON cost savings](/assets/images/diagrams/aug-evals/masking-rca-gate.svg)
+
+*Caption: The ON run saved context cost but failed equal-evidence RCA parity; note readability alone was insufficient.*
+
 A model has a limited active context window: its instructions, conversation, and tool responses all compete for space. A large Grafana response can remain there long after a useful finding has been written down. [LangChain’s Deep Agents context management](https://www.langchain.com/blog/context-management-for-deepagents) describes **offload before summarize**: preserve useful findings outside the window before shrinking what remains. Observation masking hides older tool outputs while retaining recent turns and reasoning. Its value depends on whether the notes preserve what later steps need.
 
 Here, **tool-result clearing** is our host-side observation-masking step after a successful note: large prior tool bodies in session context are replaced with short pointers so later turns stay smaller. It is opt-in (default off). A lightweight no-plan path can skip clearing when the run does not need it.

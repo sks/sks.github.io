@@ -70,6 +70,10 @@ Avoid unique session IDs as Prometheus labels: each new value creates another ti
 
 For our platform, traces are the starting point for debugging individual tasks, metrics are useful for alerting, and audit records explain what was allowed and executed. None alone tells us whether an answer was useful to an on-call engineer.
 
+![An agent session fans out to traces for span sequence, bounded metrics for trends, and audit records for reconstruction.](/assets/images/diagrams/june-operations/telemetry-views.svg)
+
+These are complementary views of one session: a metric alerts, a trace explains a sequence, and an audit record helps reconstruct decisions.
+
 ## Related reading
 
 - [LLM Tokenomics for Production Agents](/blog/maintaining-tokenomics-with-aiden/) — context budgets and cost attribution

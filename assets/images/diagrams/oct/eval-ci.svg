@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 590" role="img" aria-labelledby="title desc">
+<title id="title">CI reports all agent trial attempts and classifies failures</title>
+<desc id="desc">A known regression task retains three example attempt records: an infrastructure timeout, an agent miss, and a pass. Classification precedes a narrowly scoped infrastructure-flake retry policy. A separate required-task inventory catches skipped or absent tasks. The final report shows every attempt rather than silently turning a green rerun into a clean pass.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 10 5 0 10Z" fill="#255d78"/></marker></defs>
+<rect width="960" height="590" fill="#fffdf8"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+  <text x="480" y="46" text-anchor="middle" font-size="26" font-weight="700">A rerun cannot erase the attempt history</text>
+  <text x="46" y="86" font-size="18" font-weight="700">Illustrative attempt records for a required regression task</text>
+  <rect x="46" y="105" width="278" height="205" rx="13" fill="#e4efff" stroke="#456077" stroke-width="2"/>
+  <text x="69" y="141" font-size="20" font-weight="700">Keep each attempt</text>
+  <text x="69" y="181" font-size="18">1 · timeout, no file</text>
+  <text x="69" y="222" font-size="18">2 · deliverable misses task</text>
+  <text x="69" y="263" font-size="18">3 · deliverable passes</text>
+  <path d="M327 207H355" fill="none" stroke="#255d78" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="367" y="105" width="274" height="205" rx="13" fill="#fff0d1" stroke="#80602f" stroke-width="2"/>
+  <text x="390" y="141" font-size="20" font-weight="700">Classify first</text>
+  <text x="390" y="181" font-size="18">1 · inspect infrastructure</text>
+  <text x="390" y="222" font-size="18">2 · agent miss, not flake</text>
+  <text x="390" y="263" font-size="18">3 · pass</text>
+  <path d="M645 207H672" fill="none" stroke="#255d78" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="683" y="105" width="231" height="205" rx="13" fill="#dff0e8" stroke="#416657" stroke-width="2"/>
+  <text x="706" y="141" font-size="20" font-weight="700">Apply retry policy</text>
+  <text x="706" y="178" font-size="17">Known task: retry an</text>
+  <text x="706" y="203" font-size="17">identified infra flake.</text>
+  <text x="706" y="246" font-size="17">Do not excuse an</text>
+  <text x="706" y="271" font-size="17">intermittent agent miss.</text>
+  <rect x="46" y="345" width="420" height="91" rx="12" fill="#f6e9ed" stroke="#755162" stroke-width="2"/>
+  <text x="67" y="378" font-size="20" font-weight="700">Required-task inventory</text>
+  <text x="67" y="410" font-size="17">Absent or skipped task → unsuccessful report</text>
+  <rect x="514" y="345" width="400" height="91" rx="12" fill="#e4efff" stroke="#456077" stroke-width="2"/>
+  <text x="535" y="378" font-size="20" font-weight="700">Trace correlation</text>
+  <text x="535" y="410" font-size="17">Trial ID ↔ trace ID; retain build identity</text>
+  <path d="M256 440V457H370V468 M714 440V457H590V468" fill="none" stroke="#255d78" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="170" y="476" width="620" height="82" rx="13" fill="#dff0e8" stroke="#416657" stroke-width="2"/>
+  <text x="480" y="508" text-anchor="middle" font-size="21" font-weight="700">Report: gate status + per-attempt outcomes</text>
+  <text x="480" y="538" text-anchor="middle" font-size="17">Publish misses, skips, artifacts and retry rationale</text>
+</g>
+</svg>

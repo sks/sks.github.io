@@ -52,6 +52,11 @@ That is not “reasoning is bad at SRE.” It is **reasoning spent on the wrong 
 
 ## The hybrid roster
 
+![A planning model coordinates narrower tool-using workers](/assets/images/diagrams/sept/planner-workers.svg)
+
+*Count worker costs and check their evidence before treating a cheaper roster as a win.*
+
+
 | Task class | Seat | Effort |
 |------------|------|--------|
 | `planning`, `scientific_reasoning`, `general_task` | Responses reasoning preview | medium (not high for the first pass) |

@@ -58,6 +58,10 @@ This tests the live workflow rather than comparing model quality in isolation. R
 
 ## Lesson 1 — Canary first, tokens second
 
+![Alert discovery and a single terminal-success canary precede structural checks, repeated judged investigations, and concurrence](/assets/images/diagrams/aug-runtime/canary-eval.svg)
+
+*Prove the live path works once before paying to judge repeated runs.*
+
 The full path uses both live investigation wall time and large language model (LLM) judge and concurrence calls.
 
 Running three investigations immediately cost time and model calls before we had checked:

@@ -44,6 +44,10 @@ This reflection separates three choices: **context engineering** (what informati
 
 ## Ideas from the ecosystem worth testing
 
+![Four context engineering operations: write, select, compress and isolate, with a shared requirement to check outcome quality](/assets/images/diagrams/aug-evals/weekly-context-operations.svg)
+
+*Caption: Writing, selecting, compressing and isolating context can control the active window, but outcome checks still decide.*
+
 ### 1. Context is more than the system prompt
 
 LangChain's [context engineering for agents](https://www.langchain.com/blog/context-engineering-for-agents) offers a useful four-operation vocabulary:

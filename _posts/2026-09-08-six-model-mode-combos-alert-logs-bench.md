@@ -35,6 +35,11 @@ There was one run per cell in each wave. The rankings below describe those runs 
 
 ## Shapes we compared
 
+![Fair comparison holds task and tool conditions steady while comparing outcomes](/assets/images/diagrams/sept/model-benchmark.svg)
+
+*The benchmark compares models and execution shapes under the same task and tool access.*
+
+
 Two orchestration shapes. First mention definitions (used everywhere below):
 
 | Shape | Open name | Meaning |

@@ -37,6 +37,10 @@ I use **Service Rendered Efficiently** as a way to ask who benefits from our wor
 
 ## The incentive shift
 
+This comparison shows how rewarding a shipped framework differs from designing around a useful on-call answer and a relevant prior investigation.
+
+![Two SRE delivery paths: build-first repeats full digs, while service-first checks an existing RCA and hands off useful findings](/assets/images/diagrams/june-foundations/sre-service-outcome.svg)
+
 | Engineering-org identity | Service-org identity |
 |--------------------------|----------------------|
 | Success = what we built | Success = what on-call can do next |

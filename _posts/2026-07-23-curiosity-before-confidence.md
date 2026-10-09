@@ -127,6 +127,10 @@ Those must not look the same to the runtime. Otherwise every confident agent inv
 
 You can debate *how* to prove prior work. The product requirement is simpler: **strong RCA claims require evidence that the curiosity step ran**, including when the answer was “nothing left open.”
 
+![RCA submission flow showing required digs, batched validation gaps, and the difference between skipped and checked-empty curiosity.](/assets/images/diagrams/july-investigation/curiosity-before-confidence.svg)
+
+*Diagram: The arrows move a candidate claim through required digs and a submission gate; the lower path distinguishes a skipped checklist from an affirmatively checked-empty one before allowing stronger wording.*
+
 ---
 
 ## How Do You Stop AI Agents From Closing Root Cause Analysis Too Early?

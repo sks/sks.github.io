@@ -43,6 +43,10 @@ We separated packages for tool providers, identity, observability, orchestration
 
 ## The Test Pyramid
 
+The test scopes show why fast isolated fakes were not enough to catch failures in compiled, composed workflows.
+
+![Unit tests with fakes lead to composed-workflow integration tests against a mock model and a smaller manual acceptance layer](/assets/images/diagrams/june-foundations/go-platform-test-scopes.svg)
+
 Most of the test suite is fast, isolated unit tests built on generated fakes (test implementations of dependencies). A smaller slice is integration tests that compile and execute full, composed workflows against a mock model — these caught faults that isolated tests missed at the composed-system level (see the [ReAcTree bugs post](/blog/reactree-bugs/) for concrete examples). A final, small slice is manual acceptance testing against real user-facing scenarios.
 
 Our merge checks run linting, formatting, and the test suite. Those checks reduce avoidable regressions but do not establish production correctness.

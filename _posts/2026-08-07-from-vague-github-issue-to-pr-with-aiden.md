@@ -33,6 +33,10 @@ We dogfooded this on this blog’s repo and a personal GitHub Project. This post
 
 ## Best practices for AI kanban automation
 
+![GitHub event drives Specify, Research, Plan, and optional review PR, while merge remains a human decision](/assets/images/diagrams/aug-runtime/github-issue-to-pr.svg)
+
+*The workflow leaves issue receipts and a review PR; people decide whether to merge.*
+
 Before writing code, apply [bring-up discipline](/blog/bring-up-agent-workflows-like-hardware/) to the board.
 
 | Do | Don’t |

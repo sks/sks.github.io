@@ -29,6 +29,10 @@ PromQL (Prometheus metric queries), LogQL (log queries), and warehouse queries c
 
 The fault is a missing completeness contract, not evidence that the data source was empty. A genuine empty full result and an unread remainder require different conclusions.
 
+![Oversized query output branches into preview and stored remainder, with retrieval or aggregation before completeness labels and no-signal claims](/assets/images/diagrams/july-workflows/spill-completeness-contract.svg)
+
+*A preview is partial evidence; only a complete read of the requested scope supports a no-signal conclusion.*
+
 Related packing discipline: [claim-aware evidence packing](/blog/claim-aware-evidence-packing/).
 
 ---

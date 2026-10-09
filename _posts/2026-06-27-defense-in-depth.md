@@ -55,6 +55,10 @@ Our most instructive failure was a delegation route that initially bypassed gove
 
 The practical lesson is to restrict available tools and credentials, enforce policy consistently, use human review where it adds judgment, verify claims against traces and system state, and retain a usable audit record. Those controls have different jobs and should be tested separately. The right mix depends on the systems and privileges an agent can reach.
 
+![Request check leads to policy at every tool route and an allow, approval, or deny gate; execution is followed by claim review and audit.](/assets/images/diagrams/june-operations/defense-layers.svg)
+
+The diagram separates preventive gates from post-execution claim review and audit; a record of an action cannot prevent it.
+
 ## Related reading
 
 - [The HITL Paradox](/blog/hitl-paradox/) — when human approval helps or hurts

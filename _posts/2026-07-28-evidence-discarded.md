@@ -64,6 +64,10 @@ Strip the product names. The shape repeats on any alert-card triage agent doing 
 
 The actionable report would say what the metric showed, how tentative that interpretation is, and which log query could test it. Asking for a new identifier without reconciling the matching rule and metric result loses useful work.
 
+![Alert-card and fire-window investigation flow retaining a metric lead despite fingerprint or log gaps.](/assets/images/diagrams/july-investigation/evidence-discarded.svg)
+
+*Diagram: The arrows trace a matching alert rule through a query around fire time into an observed lead; a fingerprint miss or blind log query prompts further checking, not omission of the lead from a tentative synthesis.*
+
 ---
 
 ## Four submission checks for incident triage

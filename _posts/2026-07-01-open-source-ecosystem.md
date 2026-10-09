@@ -11,6 +11,10 @@ tags: [open-source, community, ai-agents, go, engineering]
 
 We build a proprietary agent product on an open-source Go framework. We merged 17 pull requests (PRs) into that framework while keeping product-specific code private. The boundary is less about whether code is valuable than whether the change belongs in a reusable framework.
 
+![Framework interfaces and fixes flow upstream while product-specific policy stays private; a temporary fork bridges pending review](/assets/images/diagrams/july-workflows/upstream-private-boundary.svg)
+
+*Reusable fixes go upstream; the product uses those interfaces without publishing customer-specific behavior. A pending fix may require a temporary fork.*
+
 ---
 
 ## The Dependency Graph

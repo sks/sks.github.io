@@ -97,6 +97,10 @@ Anything that teaches *how* to dig is not *what was observed*. If procedure blob
 
 ## Pattern: claim-aware packing
 
+![Answer claim tokens rank relevant tool observations under a budget; complete and truncated bags produce different verifier decisions](/assets/images/diagrams/aug-runtime/claim-aware-packing.svg)
+
+*If evidence was truncated, absence alone cannot prove an invented claim.*
+
 Once you accept a budget, packing becomes the product.
 
 **Claim-aware packing:** extract a small set of tokens from the **answer**, then prefer tool chunks whose text overlaps those tokens.

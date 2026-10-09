@@ -42,6 +42,10 @@ The comparison tests a narrow, sequential cluster-health task. It does not measu
 
 ## What people mean by single-agent vs multi-agent
 
+![A parent-first loop calls tools directly while a planner tree coordinates children, with branching need guiding the choice](/assets/images/diagrams/aug-runtime/orchestration-shapes.svg)
+
+*Use child loops when parallel digs justify their coordination cost.*
+
 | Shape | What it is | Good faith strength |
 |-------|------------|---------------------|
 | **Single-agent** | One plan → tool → context loop. The root calls tools itself. | Simple to reason about, usually lower latency and token tax, one place to put budgets and human-in-the-loop (HITL) approval |

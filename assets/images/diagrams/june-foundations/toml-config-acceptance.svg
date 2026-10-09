@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="500" viewBox="0 0 960 500" role="img" aria-labelledby="title desc">
+<title id="title">A TOML file is not accepted just because it parses</title>
+<desc id="desc">A hand-edited file or form-generated TOML expresses explicit types and sections. The Go decoder produces structs, then required-field and policy checks either accept the config or reject it before agent use.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#174a69"/></marker></defs>
+<rect width="960" height="500" fill="#fbfcfa"/>
+<text x="36" y="42" font-family="system-ui, sans-serif" font-size="24" font-weight="700" fill="#182b3a" text-anchor="start">A TOML file is not accepted just because it parses</text>
+<rect x="27" y="161" width="166" height="105" rx="12" fill="#eef5f8" stroke="#174a69" stroke-width="2"/>
+<text x="110.0" y="207.0" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Hand-edited or</text>
+<text x="110.0" y="232.0" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">builder output</text>
+<rect x="239" y="161" width="166" height="105" rx="12" fill="#eef5f8" stroke="#174a69" stroke-width="2"/>
+<text x="322.0" y="194.5" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">TOML file</text>
+<text x="322.0" y="219.5" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">quoted strings</text>
+<text x="322.0" y="244.5" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">named sections</text>
+<rect x="451" y="161" width="166" height="105" rx="12" fill="#eef5f8" stroke="#174a69" stroke-width="2"/>
+<text x="534.0" y="207.0" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Go decode</text>
+<text x="534.0" y="232.0" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">typed structs</text>
+<rect x="663" y="161" width="170" height="105" rx="12" fill="#fff3df" stroke="#926013" stroke-width="2"/>
+<text x="748.0" y="207.0" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Validate</text>
+<text x="748.0" y="232.0" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">fields + policy</text>
+<polyline points="193,213 229,213" fill="none" stroke="#174a69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow)"/>
+<polyline points="405,213 441,213" fill="none" stroke="#174a69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow)"/>
+<polyline points="617,213 653,213" fill="none" stroke="#174a69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow)"/>
+<rect x="709" y="337" width="203" height="82" rx="12" fill="#eaf5ed" stroke="#286443" stroke-width="2"/>
+<text x="810.5" y="371.5" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Agent uses</text>
+<text x="810.5" y="396.5" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">valid config</text>
+<rect x="418" y="337" width="203" height="82" rx="12" fill="#fff0eb" stroke="#935646" stroke-width="2"/>
+<text x="519.5" y="371.5" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Reject bad config</text>
+<text x="519.5" y="396.5" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">before use</text>
+<polyline points="790,266 790,327" fill="none" stroke="#174a69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow)"/>
+<polyline points="708,266 708,302 519,302 519,327" fill="none" stroke="#174a69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow)"/>
+<text x="817" y="311" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#182b3a" text-anchor="start">valid</text>
+<text x="592" y="293" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#182b3a" text-anchor="start">invalid</text>
+<text x="480" y="472" font-family="system-ui, sans-serif" font-size="16" font-weight="400" fill="#182b3a" text-anchor="middle">Explicit syntax reduces ambiguity; validation still enforces the contract.</text>
+</svg>

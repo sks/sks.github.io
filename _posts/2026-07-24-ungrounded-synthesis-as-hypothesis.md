@@ -35,6 +35,10 @@ For example, suppose the agent names `checkout-svc` as the failed service, but t
 
 The delivered message should reflect the verification result. This is related to [curiosity before confidence](/blog/curiosity-before-confidence/) and [be creative, don't invent](/blog/be-creative-do-not-invent/): unsupported details should remain uncertain or be removed.
 
+![Grounding flow from candidate synthesis to record check, with unsupported names downgraded in delivered and cached messages.](/assets/images/diagrams/july-investigation/ungrounded-synthesis-as-hypothesis.svg)
+
+*Diagram: The upper arrows compare a candidate narrative to returned records; the lower path shows a failed name check changing the primary message and stored copies to hypothesis wording, or withholding the claim.*
+
 ---
 
 ## If you lead an SRE team

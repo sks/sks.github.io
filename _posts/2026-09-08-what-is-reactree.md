@@ -55,6 +55,11 @@ For a bounded task such as reading an alert rule, then querying logs with LogQL 
 
 ## ReAcTree: tree + control flow
 
+![A parent agent splits a task among child loops and verifies the returned evidence](/assets/images/diagrams/sept/reactree.svg)
+
+*A tree can isolate parallel investigations, but the parent still owns the final answer.*
+
+
 From the paper: the parent does not only call leaf tools. It builds a **tree of agent nodes**. Children get scoped subgoals. The paper specifies three control-flow arrangements:
 
 | Flow | Plain meaning |

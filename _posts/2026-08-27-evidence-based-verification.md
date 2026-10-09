@@ -42,6 +42,10 @@ Pasting monitoring links into a prompt is not the same as fetching them. The mod
 
 ## Keep the decision boundary in Go
 
+![Remediation claim moves through operator checklist, read-only system checks, timestamped evidence, Go pass-fail gate, then explanatory summary](/assets/images/diagrams/aug-evals/evidence-verification-gate.svg)
+
+*Caption: Read-only systems of record provide fresh evidence; the Go gate decides before the model explains.*
+
 We do not ask the language model to read a raw log dump and pronounce the system healthy. It may select checks; the Go runtime executes them and evaluates structured results. This sketch shows the boundary, not production types:
 
 ```go

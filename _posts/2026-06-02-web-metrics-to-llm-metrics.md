@@ -49,6 +49,10 @@ Log output-token count and per-step durations. Long outputs, low throughput, seq
 
 ## The wait before generation
 
+The timeline shows why first-token latency includes queueing and prompt processing, while a safely usable result can require validation after the last token.
+
+![Timeline of an LLM request from routing and queueing through pre-fill, decoding, and validation, with TTFT and completion intervals marked](/assets/images/diagrams/june-foundations/llm-request-timeline.svg)
+
 **Pre-fill**, also called prompt processing, is the inference work on input tokens before the model starts producing output. **Queue time** is the wait for available inference capacity. Both contribute to TTFT, along with routing and network time; TTFT is not measured *after* pre-fill.
 
 | Phase | What happens | What to inspect |

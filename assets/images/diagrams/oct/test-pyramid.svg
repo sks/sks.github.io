@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 550" role="img" aria-labelledby="title desc">
+<title id="title">Layered testing pyramid for AI agents</title>
+<desc id="desc">The widest base contains many fast stubbed checks on each push. Above it are source-of-truth contract checks, then a smaller set of live regression trials by opt-in or schedule. The narrow tip contains exploratory weekly tasks whose results need investigation before becoming a gate.</desc>
+<rect width="960" height="550" fill="#fffdf8"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17283c" text-anchor="middle">
+  <text x="480" y="49" font-size="26" font-weight="700">Put each question at the cheapest useful layer</text>
+  <path d="M423 95H537L609 177H351Z" fill="#f7e5e8" stroke="#6d5060" stroke-width="2"/>
+  <text x="480" y="135" font-size="19" font-weight="700">Exploratory</text>
+  <text x="480" y="160" font-size="16">unfamiliar tasks</text>
+  <path d="M343 187H617L690 269H270Z" fill="#fff0d1" stroke="#80602f" stroke-width="2"/>
+  <text x="480" y="220" font-size="21" font-weight="700">Live regression trials</text>
+  <text x="480" y="248" font-size="17">real model + tools · opt-in or weekly</text>
+  <path d="M262 279H698L772 361H188Z" fill="#dff0e8" stroke="#416657" stroke-width="2"/>
+  <text x="480" y="313" font-size="21" font-weight="700">Contract checks</text>
+  <text x="480" y="341" font-size="17">file exists · CI value · trial / trace ID</text>
+  <path d="M180 371H780L860 458H100Z" fill="#e3efff" stroke="#456077" stroke-width="2"/>
+  <text x="480" y="407" font-size="21" font-weight="700">Fast checks with stubbed models</text>
+  <text x="480" y="437" font-size="17">input cap · repeated observation · handoff bound · each push</text>
+  <text x="480" y="508" font-size="18" fill="#344960">Broad, repeatable base → fewer, costlier whole-job trials</text>
+</g>
+</svg>

@@ -30,6 +30,10 @@ Similarity therefore cannot be the only criterion for recall. We also need to kn
 
 This separation does not make stored information correct. It does let us apply different checks and lifetimes to each kind.
 
+![Four Pensieve memory types branch from agent work: task-scoped working state, ranked episodes, cross-session notes, and reusable skills.](/assets/images/diagrams/june-operations/memory-lifetimes.svg)
+
+The diagram contrasts lifetimes and recall checks; a stored episode or procedure still needs validation before use.
+
 ### Working memory: a task blackboard
 
 When a parent agent delegates work to smaller agents through ReAcTree, our task-delegation approach, they can share a session-scoped key-value store (named entries with values):

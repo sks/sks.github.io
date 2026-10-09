@@ -25,6 +25,10 @@ In `#incidents-prod`, an on-call site reliability engineering (SRE) operator nee
 
 ## What the channel needs
 
+The diagram separates the facts on-call needs in the Slack card from detailed evidence and searchable conversation metadata elsewhere.
+
+![Investigation findings flow into a concise Slack triage card, with links to detailed evidence and authorized Activity search](/assets/images/diagrams/june-foundations/slack-triage-card.svg)
+
 **Helps on-call**
 
 - Headline counts (a compact KPI, or key-performance-indicator strip) and a priority summary that can be skimmed quickly

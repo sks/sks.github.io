@@ -74,6 +74,10 @@ We also evaluated [CUE](https://cuelang.org/), created by Marcel van Lohuizen (w
 
 ## Why TOML Won
 
+The config path shows what TOML makes explicit and why typed decoding must still be followed by validation before an agent uses a file.
+
+![Hand-edited or generated TOML passes through Go typed decoding and field and policy validation before acceptance or rejection](/assets/images/diagrams/june-foundations/toml-config-acceptance.svg)
+
 [TOML](https://toml.io/) (Tom's Obvious, Minimal Language) matched our constraints:
 
 ### 1. Explicit types — no surprises

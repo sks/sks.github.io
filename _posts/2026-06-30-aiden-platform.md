@@ -32,6 +32,10 @@ A local runtime needs to execute a task. A shared platform must also recover int
 
 We considered putting the runtime behind its own network service. Instead, Aiden imports it as a library in the same process: the runtime manages the agent loop while the platform manages persistence, policies, and orchestration. This avoids a network hop, serialization boundary, and separate service version for each call between those components.
 
+![One Aiden process contains an imported runtime for agent execution and a platform for workflows, policy, tenant scope, budgets, and audit; durable workflows support resumption.](/assets/images/diagrams/june-operations/runtime-platform-split.svg)
+
+The split is by responsibility rather than network service: the embedded runtime handles the loop, while platform workflows support waits and recovery.
+
 The tradeoff is weaker process isolation. A severe failure in one agent's execution can affect other agents sharing that process. We use checkpointed, resumable tasks and per-agent resource limits to reduce the effect, not to provide hardware isolation. At our scale of dozens of teams, we judged a separate service's operational complexity greater than its current benefit; stronger isolation requirements would change that decision.
 
 ## Long Tasks Need Resumption

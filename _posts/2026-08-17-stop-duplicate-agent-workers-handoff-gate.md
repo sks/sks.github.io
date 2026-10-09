@@ -43,6 +43,10 @@ With the worker tools registered, optional missing names handled, and duplicate 
 
 ## What we fixed (behavior, not blueprint)
 
+![Coordinator sends one worker, records a successful return, rejects a duplicate spawn, then separates spawn attempts from actual workers and judge outcome](/assets/images/diagrams/aug-evals/handoff-worker-gate.svg)
+
+*Caption: The handoff gate avoids duplicate workers; spawn-attempt telemetry and external task success remain separate measures.*
+
 After [failure-mode](/blog/ai-agent-eval-failure-modes/) runs on the same `plan_fit_5` tasks, we addressed harness and runtime issues that made planner mode look worse than it was:
 
 | Fix | What it does |

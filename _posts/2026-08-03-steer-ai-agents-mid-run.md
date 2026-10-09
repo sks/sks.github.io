@@ -45,6 +45,10 @@ That is different from both a new task and an approval decision. Approval asks w
 
 ## The First Failure: Feedback Waiting at the Wrong Boundary
 
+![Operator feedback enters after an in-flight tool call and before the next reasoning turn; empty turns are rejected](/assets/images/diagrams/aug-runtime/mid-run-steering.svg)
+
+*Apply a correction at the next safe checkpoint, not after the run ends.*
+
 Long-running agents have natural checkpoints: after a model turn, after a tool result, before the next planning step, and before completion.
 
 If feedback is only checked when the task finishes or becomes stuck, a healthy-looking run can sail past the correction. The operator’s message sits in a queue while the model continues from stale assumptions.

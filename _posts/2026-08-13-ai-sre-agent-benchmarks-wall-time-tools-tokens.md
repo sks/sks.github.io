@@ -39,6 +39,10 @@ The scorecard below keeps the two axes separate; each pair is a small comparison
 
 ## The results in context
 
+![Orchestration and evidence middleware are separate benchmark axes with matched configurations and a shared wall-time, tools, bytes, tokens, and quality scorecard](/assets/images/diagrams/aug-runtime/benchmark-axes.svg)
+
+*Compare one axis at a time and flag invalid configurations before interpreting costs.*
+
 - **Measure four numbers together:** wall time, tool-call starts, tool result bytes, model completion units — then ask whether Theory named real loci.
 - **ReAcTree tax is real on single-plane work:** ~**1.6×** wall (~95s vs ~58s) and ~**3.9×** tools (27 vs 7) for the **same** findings.
 - **Fair evidence middleware A/B (Node Not Ready):** both sides closed **probable** Theories on the same Ready=unknown locus. OFF finished in **~39s** vs ON **~46s**, tied at **10** tools, kept ~**584 KB** vs ~**199 KB** of tool-result text, and showed **0** `[HIDDEN:]` placeholders in the stream (ON had soft-caps + a few redacted tokens).

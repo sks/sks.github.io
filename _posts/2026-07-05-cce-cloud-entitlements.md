@@ -41,6 +41,10 @@ CCE does **not** replace security sign-off. It gives reviewers and platform team
 
 An AI-assisted editor can produce compilable cloud calls without settling their permission scope. CCE gives reviewers a source-based inventory to compare with IAM policy and to diff when new SDK calls appear. Dynamic dispatch and unmapped wrappers still require manual or runtime review.
 
+![Static CCE path from SDK source call sites through parsing and lenses to candidate entitlements for human and CI review](/assets/images/diagrams/july-workflows/cce-source-to-entitlement.svg)
+
+*Mapped operations are review candidates, not a calculation of effective IAM permissions.*
+
 ---
 
 ## What CCE is not

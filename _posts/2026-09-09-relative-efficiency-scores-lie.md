@@ -33,6 +33,11 @@ A cohort-normalized efficiency score increased between two benchmark waves even 
 
 ## The formula we used
 
+![Relative ranking and absolute latency answer different questions](/assets/images/diagrams/sept/relative-scores.svg)
+
+*A candidate can rank first in a slower cohort while taking longer for users.*
+
+
 ```text
 eff = correctness / (0.45·wall/median + 0.45·tokens/median + 0.10·cost/median)
 ```

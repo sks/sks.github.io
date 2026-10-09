@@ -25,6 +25,10 @@ An alert title suggested latency, but the stored rule queried ClickHouse. An AI 
 
 ## Start with the alert rule
 
+![Alert label leads to stored rule retrieval and real query measurement before branching to metrics, logs, or warehouse digs](/assets/images/diagrams/aug-runtime/alert-rule-first.svg)
+
+*Measure the stored expression before choosing which system to investigate.*
+
 - **Title ≠ stored query** — read and run the alert rule’s actual query first
 - Efficiency is the **right system first** (metrics vs logs vs warehouse), not fewer tool calls on the wrong one
 - When title and stored query disagree, measure the stored query before parallel digs

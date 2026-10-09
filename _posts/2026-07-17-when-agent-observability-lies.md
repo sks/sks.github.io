@@ -211,6 +211,10 @@ If collection is incomplete, label the report accordingly or withhold the affect
 
 This is the observability version of validating your test harness before trusting the benchmark.
 
+![Scorecard data-quality flow from workload classification and coverage checks to qualified scoring.](/assets/images/diagrams/july-investigation/when-agent-observability-lies.svg)
+
+*Diagram: The upper arrows classify traces and audit identity, usage, evaluation, and collection coverage before scoring; the lower path turns missing coverage into unscored or qualified dimensions rather than a passing grade.*
+
 ---
 
 ## A Practical Review Checklist

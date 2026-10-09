@@ -62,6 +62,10 @@ The loop, generically:
 
 This bring-up is **cumulative, not mocked**. To test stage 3, we run stages 1 through 3 for real and leave stage 4 off. We did not freeze outputs from earlier stages because stage 3 must tolerate the variation they produce. Savings come from skipping downstream stages, not from pretending earlier stages have no variance.
 
+![Cumulative stage bring-up moves from time window to identity to corroboration, with repeated golden gates before a full workflow run](/assets/images/diagrams/july-workflows/cumulative-stage-bringup.svg)
+
+*Each slice includes earlier stages for real; only downstream stages are skipped during bring-up.*
+
 This is where writing the runtime in Go paid off, and not for the reasons people usually cite. The bring-up ladder is *the* canonical Go idiom — a table — and each rung is a stage plus the gate it has to clear:
 
 ```go

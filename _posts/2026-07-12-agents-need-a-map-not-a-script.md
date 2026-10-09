@@ -57,6 +57,10 @@ When an operator confirms or corrects a verdict, store the class, service finger
 
 Confirmed and corrected verdicts could make later searches more focused, provided the stored fingerprints and decisions are reviewable. This is a design direction, not evidence that memory already prevents repeat mistakes.
 
+![Comparison of a fixed query-check-write runbook with a topology-led investigation map that retries probes and reconciles evidence before verdict memory](/assets/images/diagrams/july-workflows/map-not-script.svg)
+
+*The map is a proposed navigation layer; stable runbook recipes remain useful overlays.*
+
 ```
 RUNBOOK (script)                 MAP (environment)
 ─────────────────                ───────────────────

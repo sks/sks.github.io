@@ -33,6 +33,10 @@ In production debug exports for a mid-size software-as-a-service (SaaS) customer
 
 This is distinct from [Evidence Discarded After the Lead](/blog/evidence-discarded/), where evidence reached the session but was not used. Here some evidence may never reach the investigation at all.
 
+![Slack thread, UI paste, and later hourly run carry different alert identity, thread context, or current status into an assessment.](/assets/images/diagrams/june-operations/alert-entry-context.svg)
+
+The three paths illustrate why matching alert wording is not enough: compare structured context and the time of the alert state before comparing verdicts.
+
 ## For On-Call Teams
 
 Compare sessions through the watch links in the Slack thread when possible, rather than creating a new session by pasting alert text. Check the alert state and timing as well as the wording. A Slack connection does not itself mean every alert is investigated automatically: webhook and polling paths are separate. If the impact assessment differs, ask whether the entry paths and alert states matched before concluding the model was inconsistent.

@@ -101,6 +101,10 @@ Four boundaries we use:
 
 This is the same spirit as [evidence-gated RCA](/blog/evidence-gated-multiplane-rca/): **prove with artifacts, then narrate.** Here the artifact is a reviewable proposal, not an investigation key.
 
+![Diary learning loop from bounded digest and evaluator proposals through a human approval decision to typed draft changes and normal review](/assets/images/diagrams/july-workflows/diary-human-approved-loop.svg)
+
+*The evaluator proposes only; approval and ordinary change review precede any production change.*
+
 ---
 
 ## Insight Shapes Worth Detecting

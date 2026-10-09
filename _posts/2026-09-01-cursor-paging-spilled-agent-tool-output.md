@@ -87,6 +87,11 @@ Single-shot `return_full` with a byte cap fails the same way in practice: one wi
 
 ## Cursor paging contract
 
+![Large tool output stays retrievable through a cursor instead of being dropped](/assets/images/diagrams/sept/tool-output.svg)
+
+*The model gets a bounded page; it can request the remaining source data when the first page is not enough.*
+
+
 A cursor is a continuation token supplied by the server. The agent passes it back rather than guessing file offsets. This makes it possible to retrieve a large result in bounded chunks, provided the spill remains stable for the paging session.
 
 ```

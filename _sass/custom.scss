@@ -290,6 +290,18 @@ code,
   color: var(--pn-text);
 }
 
+// Diagrams use a light canvas with their own contrast-safe palette in both themes.
+.post-content img[src*="/assets/images/diagrams/"] {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: auto;
+  margin: 1.5rem auto 0.5rem;
+  border: 1px solid var(--pn-border);
+  border-radius: 0.5rem;
+  background: #fff;
+}
+
 .highlight,
 .highlighter-rouge .highlight,
 pre.highlight {

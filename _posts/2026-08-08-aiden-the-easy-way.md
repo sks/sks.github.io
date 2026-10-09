@@ -44,6 +44,10 @@ The module supplies a persona, workflow, and webhook configuration. You still ne
 
 ## What to expect
 
+![One configured module routes GitHub gestures into Specify, Research, Plan, optional review PR, and a post-merge Done receipt](/assets/images/diagrams/aug-runtime/github-issue-to-pr.svg)
+
+*The module simplifies wiring, not the human review and merge boundary.*
+
 By the end of this post you will have applied one module and wired three GitHub gestures. For **one** Project item per run, the intended workflow is:
 
 1. Vague issue → **Specify** comment + Status hop  

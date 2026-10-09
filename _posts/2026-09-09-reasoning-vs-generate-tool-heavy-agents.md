@@ -62,6 +62,11 @@ Data: [six combos](/blog/six-model-mode-combos-alert-logs-bench/), voice: [what 
 
 ## Practical mix
 
+![Reasoning effort and tool calls both contribute to run time](/assets/images/diagrams/sept/reasoning-cost.svg)
+
+*Compare how much the model thinks and what the tool calls actually return on the same task.*
+
+
 - Default Collect: **efficient reasoning or generate**, measured.  
 - Synthesis-only high effort: still valid ([adaptive effort](/blog/reasoning-effort-is-not-a-free-upgrade/)).  
 - Preview reasoning: **canary** behind gates, never silent default.  

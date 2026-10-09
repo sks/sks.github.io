@@ -43,6 +43,11 @@ This post separates those three with language you can reuse in a runbook, plus f
 
 ## Two separate decisions
 
+![API endpoint, model choice and reasoning effort are different settings](/assets/images/diagrams/sept/api-vs-model.svg)
+
+*A response ID identifies an endpoint, not how much reasoning the model performed.*
+
+
 Think of a grid:
 
 | | Normal chat model | Reasoning model |

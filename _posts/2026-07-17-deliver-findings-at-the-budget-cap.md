@@ -48,6 +48,10 @@ Cousin: [AI agent loop detection — don't throw away the answer](/blog/ai-agent
 
 A labeled partial RCA can help during an incident, but it is not a verified root cause.
 
+![Budget-cap flow from saved tool outcomes to a partial findings report, including hard-timeout fallback to notes.](/assets/images/diagrams/july-investigation/deliver-findings-at-the-budget-cap.svg)
+
+*Diagram: The arrows show tool results being saved before the cap, then assembled into a final account if a call remains; the lower path salvages incremental notes when a hard timeout blocks that call.*
+
 ---
 
 ## If you lead an SRE team

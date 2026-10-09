@@ -25,6 +25,10 @@ A *deterministic grader* is a program with an explicit rule; it gives the same r
 
 ---
 
+![Route exact facts to code checks and open-ended qualities to a reviewer](/assets/images/diagrams/oct/deterministic-judge.svg)
+
+*A code check can match a number; judging whether prose helps a reader needs a rubric and review.*
+
 ## Start with the deliverable
 
 Tell the agent what the user needs and which claims it must substantiate. Avoid listing private calls only so a grader can search for their names in the answer. If the requirement is “delegate at least twice,” count delegated work in logs after the run rather than requiring the agent to print a phrase. With truncated logs, a short handoff receipt in the log can establish that a delegation occurred, but it cannot prove the quality of the work; inspect the deliverable too.

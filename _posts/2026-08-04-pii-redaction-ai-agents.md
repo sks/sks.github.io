@@ -47,6 +47,10 @@ One sanitized transcript cannot satisfy all three safely.
 
 ## The Two-View Principle
 
+![Trace redaction produces placeholders for model history and broad logs but permits audited late reveal to authorized operators](/assets/images/diagrams/aug-runtime/pii-two-views.svg)
+
+*The model and broad logs stay redacted; only an authorized viewer gets a late reveal.*
+
 The useful abstraction is not “redacted or unredacted.” It is **purpose-bound views**.
 
 | View | Audience | Data state |

@@ -19,6 +19,10 @@ Our implementation exposed six failures in the surrounding runtime. These are ob
 
 ## How the delegated plan works
 
+The graph shows how parallel children fan out and rejoin, and which session, deadline, and governance boundaries the later fixes had to enforce.
+
+![Parent agent fans out to isolated child sessions with per-step deadlines, joins their results, and governs each child tool path](/assets/images/diagrams/june-foundations/delegated-graph-safeguards.svg)
+
 If you haven't read the paper, here's the idea:
 
 Instead of one agent trying to do everything, you build a **tree of agents**. A parent agent receives a task like "investigate this production outage," decomposes it into sub-goals ("check logs," "query metrics," "review recent deployments"), and delegates each to a specialized child agent.

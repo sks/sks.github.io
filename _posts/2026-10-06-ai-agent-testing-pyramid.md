@@ -25,6 +25,10 @@ An *agent trial* here means a run with a real model, tools, and a user-shaped ta
 
 ---
 
+![Fast checks, contract checks and a small live suite have different jobs](/assets/images/diagrams/oct/test-pyramid.svg)
+
+*Test each property at the cheapest layer that can actually answer the question.*
+
 ## Which checks go where?
 
 | Layer | Example | Why use it | Limit |

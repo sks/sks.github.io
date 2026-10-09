@@ -35,6 +35,11 @@ We ran both a **single-agent ReAct loop** (one model alternating tool calls and 
 
 ## The menu that showed up in good closes
 
+![From tool discovery to a checked observability finding](/assets/images/diagrams/sept/tool-choice.svg)
+
+*Finding a tool is only the start; the returned measurement must support the final claim.*
+
+
 For the single-agent runs on this Grafana/Loki task, these were the tool families worth separating. PromQL queries read metrics; LogQL queries read Loki logs. A catalog lookup only tells the agent what tools exist; it does not test the incident hypothesis:
 
 | Tool family | Role |

@@ -94,6 +94,11 @@ When people [benchmark agents](/blog/ai-sre-agent-benchmarks-wall-time-tools-tok
 
 ## The shape that stays honest
 
+![Agent answers pass an accuracy gate before comparing cost](/assets/images/diagrams/sept/accuracy-vs-cost.svg)
+
+*Fewer tokens are not valuable if the diagnosis is wrong.*
+
+
 ```text
 token_factor = clip(token_allowance / tokens_used, 0.25, 1.0)
 wall_factor  = clip(wall_allowance / wall_seconds, 0.25, 1.0)

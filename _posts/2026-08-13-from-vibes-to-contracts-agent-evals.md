@@ -53,6 +53,10 @@ None of this is exotic. It is just what happens when evals grow organically inst
 
 ## Separating the parts of an evaluation contract
 
+![Stable case and rubric flow through independent criteria and graders into distinct correctness, consistency, and every-trial reliability gates](/assets/images/diagrams/aug-runtime/eval-contract-gates.svg)
+
+*Correctness, agreement, and all-trials passing are different checks.*
+
 The frameworks we considered differ in implementation, but four useful concerns recur in evaluation design:
 
 | Concept | What it holds | Why it exists |

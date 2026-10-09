@@ -40,6 +40,10 @@ That is why a healthy cache strategy starts before the API call. You have to con
 
 ## Stability Beats Cleverness
 
+![Stable ordered instructions and schemas feed a reusable prompt prefix while evidence references and utility calls stay outside it](/assets/images/diagrams/aug-runtime/cache-boundaries.svg)
+
+*Keep the reusable prefix stable and large observations out of repeated prompts.*
+
 Start with deterministic ordering.
 
 If the same tools appear in a different order on each turn, the shared prefix changes even when the capabilities are identical. If instructions are assembled from maps or registries without a stable order, logically equivalent prompts become different byte sequences.

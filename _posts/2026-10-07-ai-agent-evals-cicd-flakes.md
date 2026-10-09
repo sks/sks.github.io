@@ -25,6 +25,10 @@ A *live trial* runs the agent with its model and tools on a task. A *flake* is a
 
 ---
 
+![CI evaluation records every attempt and the source of each failure](/assets/images/diagrams/oct/eval-ci.svg)
+
+*A single green rerun should not erase earlier agent, harness, or service failures.*
+
 ## Place and report the suite deliberately
 
 Fast checks run on pushes; live trials sit at the top of the [testing pyramid](/blog/ai-agent-testing-pyramid/) and run by pull-request opt-in or weekly schedule. Build the image once and load its archive in parallel jobs. Avoid a single serial job when tasks can safely run independently.

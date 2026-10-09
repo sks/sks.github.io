@@ -25,6 +25,10 @@ We once let the model that wrote an answer score that answer. Its score was gene
 
 ---
 
+![A task is performed by the agent and checked against evidence by an independent grader](/assets/images/diagrams/oct/separate-grader.svg)
+
+*The agent writes the result; code, a separate model, or a person checks it against evidence.*
+
 ## Separate the work from the assessment
 
 [Anthropic's demystifying evals](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) describes code-based, model-based, and human graders. They serve different purposes. A code check can compare an identifier with a record; a model judge can read whether an explanation addresses the user's question; a human can inspect disputed or high-stakes results. A separate judge can still be wrong or share the agent's blind spots, so compare its judgments with human examples before relying on a gate.

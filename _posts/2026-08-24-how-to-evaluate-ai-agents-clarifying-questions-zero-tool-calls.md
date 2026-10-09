@@ -48,6 +48,10 @@ The **judge** is AppWorld’s `/evaluate` endpoint (`success: true` = strict all
 
 ## Ban clarifying questions in unattended evals
 
+![Unattended AppWorld eval path from harness clarification policy through worker domain calls to state-based judge and failure classification](/assets/images/diagrams/aug-evals/unattended-eval-gates.svg)
+
+*Caption: The harness blocks unattended stalls and zero-tool mutation claims; the external judge checks resulting app state.*
+
 In a four-task plan cohort, **3/4** met the reported pass condition after the unattended harness rejected `ask_clarifying_question`. This small before/after observation does not isolate that policy from other fixes.
 
 **Spotify playlist from workout note** (`b0a8eae_3`): the coordinator burned ~3 minutes asking for playlist confirmation while the **4-minute wall clock** expired. The judge never ran.

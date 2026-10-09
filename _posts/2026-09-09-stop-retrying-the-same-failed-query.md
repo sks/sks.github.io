@@ -52,6 +52,11 @@ In this wave, the generate and xAI seats met the checklist. That local pattern s
 
 ## Gates that are not prompts
 
+![Diagnose an empty result or error before retrying a query](/assets/images/diagrams/sept/retry-query.svg)
+
+*The next action depends on whether a query was valid, empty, or rejected.*
+
+
 | Gate | Behavior |
 |------|----------|
 | Typed failure class | All-failed query envelope → upstream failure |

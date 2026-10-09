@@ -105,6 +105,10 @@ When two explanations remain plausible, keep both visible and identify a low-cos
 
 The AI-specific risk is that a model may combine unresolved alternatives into one tidy paragraph. Keeping a structured list of supported, rejected, and untested explanations outside the generated prose helps prevent that collapse. A controller should accept “unknown” when the necessary checks are unavailable.
 
+![Hypothesis ladder from symptom framing to competing probes, with untestable branches kept distinct from ruled-out causes.](/assets/images/diagrams/july-investigation/hypothesis-ladder.svg)
+
+*Diagram: The upper arrows follow framing, falsification, and competing explanations; the lower path keeps an untestable branch visible before wording a supported finding or an unknown with a next probe.*
+
 ---
 
 ## Prove First, Narrate Last

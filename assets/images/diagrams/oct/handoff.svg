@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 570" role="img" aria-labelledby="title desc">
+<title id="title">Bounded worker handoff preserves facts, evidence, and unknowns</title>
+<desc id="desc">The worker sends a bounded brief to its parent with goal, settled facts and retrievable evidence pointers, open questions, and stop reason. The parent uses facts without repeating work, keeps open gaps visible, and either closes the task when gaps are resolved or leaves it unfinished. An oversized transcript is not the handoff.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 10 5 0 10Z" fill="#255d78"/></marker></defs>
+<rect width="960" height="570" fill="#fffdf8"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+  <text x="480" y="47" text-anchor="middle" font-size="26" font-weight="700">A handoff must preserve what is still unknown</text>
+  <rect x="40" y="142" width="157" height="132" rx="13" fill="#e4efff" stroke="#456077" stroke-width="2"/>
+  <text x="118" y="191" text-anchor="middle" font-size="21" font-weight="700">Worker</text>
+  <text x="118" y="223" text-anchor="middle" font-size="17">Investigates</text>
+  <text x="118" y="249" text-anchor="middle" font-size="17">subtask</text>
+  <path d="M202 208H225" fill="none" stroke="#255d78" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="238" y="100" width="388" height="290" rx="15" fill="#dff0e8" stroke="#416657" stroke-width="2"/>
+  <text x="432" y="136" text-anchor="middle" font-size="22" font-weight="700">Bounded brief, not transcript</text>
+  <line x1="258" y1="155" x2="606" y2="155" stroke="#416657" stroke-width="2"/>
+  <text x="263" y="186" font-size="18">Goal + reason worker stopped</text>
+  <rect x="258" y="206" width="348" height="69" rx="9" fill="#fffdf8" stroke="#416657" stroke-width="1.5"/>
+  <text x="275" y="233" font-size="18" font-weight="700">Settled facts</text>
+  <text x="275" y="258" font-size="17">+ retrievable evidence pointers</text>
+  <rect x="258" y="288" width="348" height="75" rx="9" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+  <text x="275" y="317" font-size="18" font-weight="700">Open gaps / questions</text>
+  <text x="275" y="345" font-size="17">never silently trimmed away</text>
+  <path d="M630 208H657" fill="none" stroke="#255d78" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="670" y="142" width="250" height="132" rx="13" fill="#e4efff" stroke="#456077" stroke-width="2"/>
+  <text x="795" y="184" text-anchor="middle" font-size="21" font-weight="700">Parent</text>
+  <text x="795" y="216" text-anchor="middle" font-size="17">Uses settled facts;</text>
+  <text x="795" y="243" text-anchor="middle" font-size="17">checks open gaps</text>
+  <path d="M795 279V397H233V414 M795 397H733V414" fill="none" stroke="#255d78" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="40" y="426" width="386" height="96" rx="13" fill="#f6e9ed" stroke="#755162" stroke-width="2"/>
+  <text x="233" y="462" text-anchor="middle" font-size="20" font-weight="700">Gap remains or field missing</text>
+  <text x="233" y="493" text-anchor="middle" font-size="17">Keep unfinished; do not claim closure</text>
+  <rect x="545" y="426" width="375" height="96" rx="13" fill="#dff0e8" stroke="#416657" stroke-width="2"/>
+  <text x="733" y="462" text-anchor="middle" font-size="20" font-weight="700">Gaps closed within hop budget</text>
+  <text x="733" y="493" text-anchor="middle" font-size="17">Stop delegating; write deliverable</text>
+  <text x="480" y="552" text-anchor="middle" font-size="17" fill="#344960">Brief size and downstream behavior are both part of the contract.</text>
+</g>
+</svg>

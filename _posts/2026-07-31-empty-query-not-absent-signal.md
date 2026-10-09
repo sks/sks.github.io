@@ -40,6 +40,10 @@ Fictional setup serving multiple customer tenants:
 
 Another composite follows Kafka lag—a backlog in a message-stream partition—through a tenant GUID (unique customer identifier) to customer impact. An instant `count(...)` at alert time returns 0, but a week-long range contains the mapping. The long range helps resolve identity; it does not by itself prove current impact. Writing `UNRESOLVED` before checking that range would lose a possible link.
 
+![Empty PromQL investigation flow distinguishing narrow zero results, wider queries, blocked tools, and scope-limited conclusions.](/assets/images/diagrams/july-investigation/empty-query-not-absent-signal.svg)
+
+*Diagram: The arrows widen the scope of an empty instant query by checking labels, range, and relevant sources; the lower path distinguishes a successful zero from a blocked request and limits any identity or impact claim to what was actually measured.*
+
 ---
 
 ## If you lead an SRE team

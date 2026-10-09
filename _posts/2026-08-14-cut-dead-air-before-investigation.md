@@ -31,6 +31,10 @@ For an alert that needs a Grafana metric query, record the time from the operato
 
 ## Two efficient fixes
 
+![Cold-start sequence from alert through shared vault readiness and catalog hash check to first Grafana query, then bounded retry on gateway errors](/assets/images/diagrams/aug-evals/cold-start-first-query.svg)
+
+*Caption: Shared readiness and skipped no-op catalog writes shorten setup before the first useful query; a 502/503 gets one bounded retry.*
+
 **1. Catalog and secrets tax.** Re-checking vault and re-upserting an unchanged tool index delays first PromQL, Grafana’s query language for metrics. Cache readiness for the worker’s lifetime; hash the catalog and skip no-op writes. Invalidate the cache when credentials or tool definitions change, or stale access can become a security and correctness problem.
 
 **2. Gateway blip ≠ circuit open.** A 502 or 503 is a gateway/server error, not proof that the Grafana data source will stay unavailable. One such response used to mark it dead for the rest of the run. Retry once with a short bound, then surface the failure; unlimited retries would hide a real outage and delay the operator.

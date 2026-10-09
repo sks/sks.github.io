@@ -81,6 +81,10 @@ Related: [single-agent vs multi-agent](/blog/single-agent-vs-multi-agent/) — a
 
 ## Adaptive: low collectors, high synthesis
 
+![Fixed wall-clock budget moves from low-effort collection to high-effort synthesis and a completion gate, with failure branches for fan-out and missing tools](/assets/images/diagrams/aug-runtime/reasoning-budget.svg)
+
+*Spend expensive reasoning on synthesis, while reserving time and tools to finish.*
+
 Global knobs are blunt. The better product question is: **can the parent choose effort per delegated dig?**
 
 We taught the orchestrator a portable effort field on child spawn: cheap for bounded evidence collection, expensive for competing-hypothesis synthesis. Omission keeps the model’s configured default. Bad values should **fail soft** (warn and fall back), not abort the whole investigation because the LLM invented `"turbo"`.

@@ -52,6 +52,10 @@ Several published approaches use related techniques. [Prosus ARC](https://medium
 
 We were already building toward tiers 3 and 4 in places. We had not named the model clearly enough for operators.
 
+![Four tiers of agent context feed a bounded model turn with pinned task data, sliding recent turns, summaries, and selectively fetched archive](/assets/images/diagrams/july-workflows/tiered-context-paths.svg)
+
+*The archive remains retrievable; it need not be replayed verbatim on every turn.*
+
 ---
 
 ## Layered Defenses — What We Ship

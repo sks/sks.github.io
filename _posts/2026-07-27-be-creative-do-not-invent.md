@@ -40,6 +40,10 @@ Adding another `FORBIDDEN` paragraph to a system prompt did not address these ca
 
 The proposed boundary applies at specific decision points: metric identifiers, queries, control-plane status (the systems managing infrastructure), terms used to broaden log searches, and the conclusion when a symptom cannot be reproduced. This narrows what can be checked mechanically; it does not guarantee the remaining interpretation is right.
 
+![Alert-sourced search path through empty-query recovery and identifier validation, ending unresolved if evidence is absent.](/assets/images/diagrams/july-investigation/be-creative-do-not-invent.svg)
+
+*Diagram: The arrows broaden a search only from sourced identifiers, then validate query inputs before synthesis; the lower path keeps a failed search unresolved rather than filling the gap with a guessed metric or mechanism.*
+
 > **An unresolved result with next checks is more useful than a fabricated cause.**
 
 An unresolved finding with named next checks gives responders something to evaluate. A fabricated identifier, by contrast, can waste time in an active incident. Recorded monitoring data is a stronger basis for a claim than plausible prose, though it too can be incomplete.

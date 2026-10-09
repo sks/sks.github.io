@@ -93,6 +93,11 @@ That alternative diagnosis is useful only if the agent checks sample density and
 
 ## What to enforce in the host (not another prompt paragraph)
 
+![Incident facts, tool observations and a root-cause claim must connect](/assets/images/diagrams/sept/rca-eval.svg)
+
+*Different writing styles still need claims grounded in the same observations.*
+
+
 1. **Force disposition + falsifier** in the completion gate.  
 2. **Reject closes** that name neither a locus nor an Unknown with a blocked query.  
 3. Do not hard-code a preferred diagnosis. Require the exact query, observation window, and unresolved alternative for each consequential claim; see [curiosity before confidence](/blog/curiosity-before-confidence/). ([post](/blog/curiosity-before-confidence/)).

@@ -34,6 +34,11 @@ Root cause analysis (RCA) is an explanation of what caused an incident, supporte
 
 ## The checklist we used
 
+![Compare an agent root-cause answer against incident evidence](/assets/images/diagrams/sept/rca-eval.svg)
+
+*The evaluation checks whether the final claim matches the source record, not just how confident it sounds.*
+
+
 From a live Grafana/Loki job ([numbers](/blog/six-model-mode-combos-alert-logs-bench/)), comparing a **single-agent ReAct loop** and a **hierarchical ReAcTree planner** ([primer](/blog/what-is-reactree/) · [PDF](https://arxiv.org/pdf/2511.02424)):
 
 **Part A**

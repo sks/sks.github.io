@@ -39,6 +39,10 @@ The repeated diagnosis was not necessarily wrong. The entry path treated each hu
 
 ## What reuse-first looks like
 
+The decision path shows when a follow-up can reuse a completed RCA and when changed evidence or an explicit request should start a fresh investigation.
+
+![Reuse-first alert decision gate checking a completed RCA and relevance before choosing a summary with watch link or a fresh investigation](/assets/images/diagrams/june-foundations/reuse-first-alert-gate.svg)
+
 When a recent completed root-cause analysis (RCA) exists for the alert (a default cooldown on the order of hours):
 
 1. Check that the alert identity matches, the prior run is complete, and its evidence is still relevant.

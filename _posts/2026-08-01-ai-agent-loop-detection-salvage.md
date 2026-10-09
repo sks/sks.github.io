@@ -46,6 +46,10 @@ We had already seen the sibling failure where an agent [finds evidence and disca
 
 ## Loop Health and Answer Quality Are Different Signals
 
+![Flow from a repetition halt through the saved answer and evidence gate to delivery or an incomplete status](/assets/images/diagrams/aug-runtime/loop-salvage.svg)
+
+*Stop repetition without discarding a good earlier answer; missing evidence still blocks delivery.*
+
 A stalled loop does not imply that every output produced during the loop is bad.
 
 The run can be unhealthy while an earlier answer is still valuable:

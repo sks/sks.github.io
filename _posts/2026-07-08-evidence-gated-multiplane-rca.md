@@ -84,6 +84,10 @@ We changed the graph so presentation receives **gather output + gate**. The gate
 
 The gate carries the decision; gathered evidence carries the facts the summary must use.
 
+![Fixed investigation graph where planning feeds evidence gathering, structural gate checks requirements, and presentation receives both decision and facts](/assets/images/diagrams/july-workflows/evidence-gated-rca.svg)
+
+*Presentation needs both the gate decision and the gathered evidence, not a navigation token alone.*
+
 ---
 
 ## Pattern 4: Parallel Tool Execution With Explicit Promotion

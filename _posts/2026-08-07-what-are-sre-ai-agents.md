@@ -58,6 +58,10 @@ Triage can remain read-only. Remediation requires separate authorization, rollba
 
 ## Where the runtime fits
 
+![Platform policy surrounds a bounded runtime loop that manages model choices, tools, context, stop conditions, and trace](/assets/images/diagrams/aug-runtime/agent-runtime-boundary.svg)
+
+*An SRE agent needs a bounded execution loop, not just a fluent model answer.*
+
 An SRE agent still needs an [AI agent runtime](/topics/ai-agent-runtime/) — the loop that plans, calls tools, and stops. Enterprise packaging (tenancy, policy, many teams) is the [platform layer](/blog/aiden-platform/). Keeping those layers separate helps locate budget enforcement and mid-run steering.
 
 ---

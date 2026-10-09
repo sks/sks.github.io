@@ -25,6 +25,10 @@ Here a *loop* means the agent keeps acting without resolving the task or learnin
 
 ---
 
+![Loop detection compares outcomes rather than merely counting repeated tool names](/assets/images/diagrams/oct/loop-evidence.svg)
+
+*A repeated call can add evidence; a new identifier can hide a result that says nothing new.*
+
 ## Record outcomes rather than names
 
 We removed the same-tool-again middleware. We kept a failure limit, a typed outcome for each call, and a bounded result summary. The outcome distinguishes success from validation, rejected, runtime, and upstream failures. A failure cap keeps a broken tool from being retried indefinitely; choose the cap for your cost and recovery needs rather than assuming every repeated call is wrong.

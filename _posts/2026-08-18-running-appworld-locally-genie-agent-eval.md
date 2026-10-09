@@ -39,6 +39,10 @@ There are three services: the **environment** on port `8000` starts and grades t
 
 ## Architecture (one screen)
 
+![AppWorld local service architecture with eval harness, environment 8000, agent and MCP 10000, app APIs 9000, and external judge](/assets/images/diagrams/aug-evals/appworld-local-boundaries.svg)
+
+*Caption: The harness owns initialization and grading; the agent reaches simulated apps through MCP, with all three services checked first.*
+
 ```text
 eval harness                agent (Aiden runtime, etc.)
      |                              |

@@ -34,6 +34,11 @@ Shapes: **single-agent ReAct loop** vs **hierarchical ReAcTree planner** ([what 
 
 ## Five questions for any runtime vendor
 
+![A runtime surrounds model tool use with bounds, policy and a trace](/assets/images/diagrams/sept/runtime-checklist.svg)
+
+*Ask a runtime vendor to show execution controls as well as a successful answer.*
+
+
 1. **Show the loop.** Inspect a trace from model request to tool call to returned observation. If a result is truncated, what identifier and paging method retrieve the missing bytes?
 2. **Show failure classes.** A PromQL metric query with no matching series differs from a backend error or a truncated result. Does the tool envelope distinguish all three?
 3. **Show the done condition.** Can the host reject a final answer that skipped the log comparison, while allowing an explicit Unknown when Loki is unavailable?

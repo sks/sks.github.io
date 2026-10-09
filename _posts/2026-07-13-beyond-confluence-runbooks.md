@@ -207,6 +207,10 @@ The split we use is **not** "delete Confluence." It is a deliberate split:
 
 The wiki article remains a fine **training artifact**. The Git revision is the **execution contract**. Export or link from wiki to Git on each release if that is how your org discovers docs.
 
+![Wiki narrative stays human-facing while Git-managed steps and metadata pass CI checks and bind to runtime skills and evidence gates](/assets/images/diagrams/july-workflows/wiki-git-execution-boundary.svg)
+
+*The wiki explains context; the bound Git revision and runtime receipts control execution.*
+
 Think of it like infrastructure: you would not replace your architecture wiki with a Helm chart, but you would not deploy production from a Confluence table either.
 
 ---

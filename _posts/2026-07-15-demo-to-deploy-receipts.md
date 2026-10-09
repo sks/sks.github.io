@@ -48,6 +48,10 @@ Receipt first (illustrative — not a product schema), narrative second:
 
 **The receipt:** evidence fields exist before the summary is generated. Their presence makes the proposed checks inspectable, but a field alone does not show that its value is accurate or causal.
 
+![Diagram of a demo claim passing through stage checks into a receipt, with missing checks requiring a qualified account.](/assets/images/diagrams/july-investigation/demo-to-deploy-receipts.svg)
+
+*Diagram: The arrows move from a polished demo claim through recorded stage checks to an inspectable receipt; missing checks instead feed a qualified operator account, and even a filled receipt does not prove causation.*
+
 ### 2. Open loops that quit early
 
 **The demo illusion:** The agent calls a tool and marks the investigation complete without showing its stopping criteria.

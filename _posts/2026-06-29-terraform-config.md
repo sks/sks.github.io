@@ -29,6 +29,10 @@ A plan is particularly valuable when adding a production tool or changing an app
 
 If an agent is already working in a durable workflow, we keep the configuration it started with for that execution. A new configuration takes effect on the next invocation. Without that boundary, an active investigation could gain or lose a tool midway through its task.
 
+![Git pull request goes through Terraform plan, review, and apply; a running task keeps its starting configuration while a new invocation uses the applied configuration.](/assets/images/diagrams/june-operations/terraform-config-flow.svg)
+
+The invocation boundary matters: an applied tool or policy change does not rewrite the configuration of a task already running.
+
 ## References Between Resources
 
 Terraform's dependency graph lets an agent refer to a governance policy by its resource ID. The policy can be created before the agent that uses it. A plan can also expose a proposed deletion of a referenced policy before apply. That is useful, though the provider and platform still need to validate references and handle external changes; a graph alone does not prevent every orphaned reference.

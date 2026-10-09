@@ -63,6 +63,11 @@ A green pipeline still is not a Correct diagnosis. Same lesson as [canary-first 
 
 ## How we made the comparison fair
 
+![The same saved incident and conditions feed each candidate](/assets/images/diagrams/sept/model-benchmark.svg)
+
+*Compare quality, wall time and cost using the same incident rather than unrelated reruns.*
+
+
 Hold the **fault** constant. Change only the **model** on the investigator.
 
 1. Freeze one known case: checkout fails because a payment feature flag is set to fail 100% of charges. The firing alert is high request error rate on **payment**, not a pending-pod sibling.

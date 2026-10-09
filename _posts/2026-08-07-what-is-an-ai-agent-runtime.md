@@ -54,6 +54,10 @@ Not a tool library. Tool definitions tell a model what it may call. They do not 
 
 ## What a runtime owns
 
+![Platform policy supplies a runtime that limits model and tool turns, manages context, and returns a trace or human intervention](/assets/images/diagrams/aug-runtime/agent-runtime-boundary.svg)
+
+*The runtime, not the model, owns tool execution and stopping rules.*
+
 A useful runtime has a small but demanding job. It turns an open-ended model conversation into bounded execution. At a high level, it owns:
 
 - The current run state and the next action.

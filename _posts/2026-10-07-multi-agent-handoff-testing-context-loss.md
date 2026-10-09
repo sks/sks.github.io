@@ -25,6 +25,10 @@ A *handoff* is the information passed from a worker agent to the parent that ass
 
 ---
 
+![A worker handoff transfers facts, evidence pointers and unresolved gaps](/assets/images/diagrams/oct/handoff.svg)
+
+*The parent should receive both findings and what remains unknown.*
+
 ## Specify what crosses the boundary
 
 | Participant | Responsibility |

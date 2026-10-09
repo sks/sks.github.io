@@ -125,6 +125,10 @@ func RunUntilDone(ctx context.Context, goal string, maxAttempts int, budget *Spe
 
 In short: propose with the planner, check within a bounded loop, and account for cost and state-changing actions in the host application.
 
+![Goal-scoped completion loop with worker candidate, tool ledger, evaluator, and unverified fallback.](/assets/images/diagrams/july-investigation/is-the-task-actually-done.svg)
+
+*Diagram: The arrows pass a worker candidate through recorded tool outcomes to a separate check; rejection or evaluator unavailability routes to bounded retry or an explicitly unverified result, with unknown writes checked externally before retry.*
+
 ---
 
 ## 4. Papers and Traditions We Were Inspired By

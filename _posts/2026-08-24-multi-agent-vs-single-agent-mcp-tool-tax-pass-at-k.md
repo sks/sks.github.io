@@ -61,6 +61,10 @@ When comparing modes, record **failure class** next to pass% — an 85.7% with m
 
 ## MCP tool catalog tax: peak ≠ total
 
+![Comparison of one agent with a full MCP catalog versus a coordinator and focused worker, showing peak prompt and total prompts as separate measurements](/assets/images/diagrams/aug-evals/mcp-tool-tax-modes.svg)
+
+*Caption: Simple keeps the catalog in one seat; plan narrows each seat but can spend more across all calls.*
+
 With **453 MCP tools** after stack rebuild, simple mode pays the full catalog in one prompt. Plan’s coordinator sees meta-tools (`search_tools`, `create_agent`, …) plus compact handoffs.
 
 | Task | Mode | Coordinator peak prompt | Total prompt (all agents) | LLM calls |

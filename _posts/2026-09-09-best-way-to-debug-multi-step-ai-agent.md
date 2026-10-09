@@ -56,6 +56,11 @@ For hierarchical runs, merge parent and child spans (timed records of model and 
 
 ## Step 3 — Inspect observations and claims
 
+![Freeze a task, export the trace, find the faulty step and replay it](/assets/images/diagrams/sept/debug-run.svg)
+
+*Change one host or tool behavior at a time so the next run is a useful comparison.*
+
+
 Read the sequence from tool request to observation to final claim. For example, an HTTP 200 may carry a query envelope whose `outcome` is `failed`; transport success is not measurement success. Ask four questions:
 
 | Question | Fail looks like |

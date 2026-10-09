@@ -64,6 +64,10 @@ Workers absorbed the bulk of the tokens. Subagent isolation held — compact han
 
 ## When to use which
 
+![Decision fork from task shape to simple agent or plan worker, converging on judge outcome, failure class, wall time and total prompt](/assets/images/diagrams/aug-evals/simple-plan-routing.svg)
+
+*Caption: Route by task shape, then test strict outcome and cost rather than declaring a universal mode winner.*
+
 | Reach for **simple** when… | Reach for **plan** when… |
 |----------------------------|--------------------------|
 | Latency or $ matter more than a few points of judge score | The errand is **collect → classify → mutate** |

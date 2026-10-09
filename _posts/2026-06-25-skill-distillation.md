@@ -21,6 +21,10 @@ After a task, the agent searches its existing skill library for a similar proced
 
 We combine the novelty decision and potential draft in one model pass rather than paying for a separate screening call on every completed task. That reduces calls for routine tasks; it does not make the assessment free or guarantee a good decision.
 
+![Completed task flows through evidence and existing-skill search to skip, update, or new-file decisions.](/assets/images/diagrams/june-operations/skill-distillation.svg)
+
+The branches show that a completed task does not automatically become a new skill: routine work can be skipped, and an edge case can revise an existing file.
+
 ## Avoiding Duplicate Skills
 
 Searching by meaning before writing helps avoid many versions of "check pod logs." It also lets a skill evolve when the next incident reveals an exception. Similarity is not enough to establish that two systems behave the same way, so an update still deserves review.

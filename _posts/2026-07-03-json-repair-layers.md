@@ -63,6 +63,10 @@ For recoverable syntax errors, attempt repair before schema validation: either a
 
 Don't remove validation. It produces structured errors models can learn from. **Fix the order.**
 
+![Tool argument pipeline showing syntax repair before schema validation, followed by domain-specific checks and rejection of unsafe ambiguity](/assets/images/diagrams/july-workflows/json-repair-order.svg)
+
+*Repairing syntax first preserves validation while keeping domain meaning checks separate.*
+
 ---
 
 ## What's Redundant vs What's Not

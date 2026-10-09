@@ -69,6 +69,11 @@ Wave 2 gpt-5.4 hierarchical used nearly **twice** the tokens of its wave-1 run w
 
 ## Decision table
 
+![Decision path from task scope to a single loop or planner](/assets/images/diagrams/sept/plan-shapes.svg)
+
+*The coordinator earns its cost only when separated work improves the outcome enough to justify it.*
+
+
 | Situation | Prefer |
 |-----------|--------|
 | One observability plane, tight latency | **single-agent** (ReAct) |

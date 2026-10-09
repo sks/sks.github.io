@@ -31,6 +31,10 @@ Suppose an alert started more than one investigation and the final message says 
 
 ## Handoff as service
 
+![Conversation debug handoff: search thread, aggregate runs into one protected zip, inspect replay and judge, grade recurring failures into gates](/assets/images/diagrams/aug-evals/one-zip-conversation.svg)
+
+*Caption: One protected conversation bundle connects execution history to reproducible support diagnosis and product gates.*
+
 Support and platform engineers talk in conversations. Debug export that only exists one execution at a time forces them to guess which step mattered. Conversation-scoped zip download (same bundle as the watch page: DAG, event replay, judge report) is the handoff artifact the service owed them.
 
 Pair it with Activity rows that answer who started the thread and which channel it came from. Related honesty about agent observability: [when agent observability lies](/blog/when-agent-observability-lies/).

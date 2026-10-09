@@ -36,6 +36,10 @@ This is **agentic drift**: decision quality decays over time, potentially becaus
 
 ## The Solution: Judgment SLOs
 
+![Agent decisions are judged live against rubrics and nightly against historical incidents, separately from uptime](/assets/images/diagrams/aug-runtime/judgment-slo.svg)
+
+*A healthy API response does not prove the agent made a sound decision.*
+
 We added **Judgment service-level objectives (SLOs)**: explicit targets for decision quality, alongside operational targets.
 
 A Judgment SLO measures the fidelity and correctness of an agent's decisions against a known baseline. For example, a service might target 99.9% of HTTP requests returning a 200 within 200ms; a judgment target here asks that 95% of root-cause hypotheses match a historical human-verified cause for comparable incidents. Neither target alone establishes that the live decision is safe.
