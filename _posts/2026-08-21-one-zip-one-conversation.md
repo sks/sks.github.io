@@ -17,22 +17,15 @@ faqs:
     answer: "Qualifier search for initiator and Slack channel so you can find the thread without opening every row."
 ---
 
-Support: “this AI investigation went wrong.” You should download **one** debug zip for the whole conversation — then grade a week of those exports to decide what to build next.
+Support hears, “this AI investigation went wrong.” A single conversation may have several separate agent runs. A debug zip containing the whole thread lets support see which run produced which claim; reviewing a week of such exports can reveal repeated failures worth fixing.
 
 *The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
-## TL;DR
+## What the bundle needs to answer
 
-- Per-conversation debug export > per-execution scavenger hunt
-- Activity search: initiator + Slack channel qualifiers
-- **Methodology:** grade a week of exports → encode fixes as gates (reuse, correlate, honesty about truncated vs full tool output)
-- Service SRE learns from the teams you serve by reading their handoffs, not by shipping more frameworks
-
-### Explain like I'm five
-
-If a group project goes wrong, you want the whole folder of what everyone did — not twelve sticky notes in twelve lockers. Then you look at a pile of folders to see the same mistake repeating.
+Suppose an alert started more than one investigation and the final message says “no data.” Support needs to find the conversation by who started it and its Slack channel, then see the sequence of runs, the actual tool results, and the grading report in one download. A diagram of the execution dependencies (a directed acyclic graph, or DAG), an event-by-event replay, and the judge report are useful together: a shortened preview may hide data that the full tool result contained. A bundle makes diagnosis easier, but it must be access-controlled and redacted appropriately; it is not a reason to circulate raw customer traces.
 
 ---
 
@@ -46,7 +39,7 @@ Pair it with Activity rows that answer who started the thread and which channel 
 
 ## How batch grading drove the product
 
-Composite table from a **7-day anonymized** export set (rounded):
+Composite table from a **7-day anonymized** export set (rounded). These examples show recurring patterns, not measured prevalence across customers:
 
 | Pattern | What we saw | Product response |
 |---------|-------------|------------------|
@@ -66,12 +59,12 @@ Canary evals still matter for live path health ([canary-first consistency](/blog
 ## If you lead an SRE team
 
 - Require one-zip handoff for any “conversation went wrong” ticket
-- Schedule weekly export grading the way you schedule incident review
+- Consider regular export grading alongside incident review when support volume warrants it
 - Prioritize backlog by recurring service failures (duplicates, dishonest empties), not by shiny agent demos
 
 ## If you ship the agent platform
 
-- Conversation-scoped debug download from Activity
+- Conversation-scoped debug download from Activity, with authorization and retention controls
 - Qualifier search for initiator and channel
 - Feed grading themes into gates; keep raw customer exports off the public internet and out of blog posts
 

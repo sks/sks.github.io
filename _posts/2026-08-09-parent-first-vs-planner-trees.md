@@ -21,26 +21,22 @@ faqs:
     answer: "On our fair run, multi-agent took about 1.6× the wall time (~95s vs ~58s) and about 3.9× the tool calls (27 vs 7), with the same findings — extra cost was coordination and gate retries, not more inspection depth."
 ---
 
-The 2026 buying question is rarely “should we use AI agents?” It is **single-agent vs multi-agent orchestration** — one capable loop with tools, or a planner that coordinates specialists.
+For an AI agent that investigates incidents—software that uses a model to select tools and examine results—one design decision is **single-agent vs multi-agent orchestration**: one loop with tools, or a planner coordinating several loops. More loops can enable parallel work, but they also add handoffs and cost.
 
-Vendors sell the diagram. Engineers want to build the diagram. On-call teams inherit the bill.
+We compared the two shapes on one [incident triage](/topics/ai-incident-triage/) job for site reliability engineering (SRE): **same prompt, models, tools, and budgets**; the intended difference was execution shape. One path was a **single parent-first agent**. The other kept a **ReAcTree-style planner** that could spawn children.
 
-We ran a fair A/B on the same [incident triage](/topics/ai-incident-triage/) job to force an honest answer: **same prompt, models, tools, and budgets** — differ only by execution shape. One path was a **single parent-first agent**. The other kept a **ReAcTree-style planner** that could spawn children.
-
-This is not a takedown of either. Both paths produced the **same class of findings**. The lesson is fit: when each shape earns its keep, and when it does not.
+This is not a takedown of either. Both paths produced the **same class of findings** in this single run. The comparison helps decide what to test next, not which architecture always wins.
 
 ---
 
-## TL;DR
+## What this comparison shows
 
 - **Single-agent** and **multi-agent** are both legitimate production shapes — not a fashion contest.
-- On our **single-plane** triage A/B, multi-agent took **~1.6× longer** (~95s vs ~58s) and **~3.9× more tool calls** (27 vs 7) — and still reached the **same** Theory.
+- On our **single-plane** triage A/B, multi-agent took **~1.6× longer** (~95s vs ~58s) and **~3.9× more tool calls** (27 vs 7) — and still reached the **same** proposed explanation.
 - On **multi-plane / parallel** work, the planner’s strengths — isolation, parallel digs, specialist context — are exactly why trees exist ([ReAcTree in production](/blog/reactree-bugs/)).
-- Choose by **branching need**, not by which architecture looks smarter in a slide.
+- Choose by **branching need** and measured latency or isolation requirements.
 
-### Explain like I'm five
-
-Sometimes one detective with a notebook is enough. Sometimes you need a team that splits up and reports back. Hiring the whole team for a lost library book is wasteful. Sending one detective into a city-wide investigation alone is also wasteful. Match the team to the mystery.
+The comparison tests a narrow, sequential cluster-health task. It does not measure whether parallel specialists would help on incidents spanning metrics, logs, and change history.
 
 ---
 
@@ -48,7 +44,7 @@ Sometimes one detective with a notebook is enough. Sometimes you need a team tha
 
 | Shape | What it is | Good faith strength |
 |-------|------------|---------------------|
-| **Single-agent** | One plan → tool → context loop. The root calls tools itself. | Simple to reason about, usually lower latency and token tax, one place to put budgets and HITL |
+| **Single-agent** | One plan → tool → context loop. The root calls tools itself. | Simple to reason about, usually lower latency and token tax, one place to put budgets and human-in-the-loop (HITL) approval |
 | **Multi-agent orchestration** | A planner (or foreman) coordinates child agents with handoffs | Parallelism, specialist personas, failure isolation, clearer audit of who did which dig |
 
 Counting tools does not make a system multi-agent. **Counting cognitive loops** does. One loop with twenty tools is still single-agent. Two loops with a handoff is multi-agent.
@@ -87,7 +83,7 @@ So the fair story is **not** “one architecture found the truth and the other f
 
 **Why that is a real product win — not just “simpler is nicer”**
 
-On-call assist is a latency product. Every extra model hop is a second the human stares at a spinner. For jobs that fit one plane and one checklist, a capable root with the right tools is often enough. Industry write-ups in 2026 keep rediscovering the same thing: many fleets could have been one good agent with structured tools.
+On-call assist is a latency product. Every extra model hop is a second the human stares at a spinner. For jobs that fit one plane and one checklist, a capable root with the right tools is often enough. This run supports testing whether a single loop can complete a narrow job before adding a planner; it does not establish a general fleet-level result.
 
 **What single-agent is *not* claiming**
 
@@ -101,21 +97,21 @@ It is not “never delegate.” It is “do not pay for a second cognitive loop 
 
 Even when this narrow A/B made the tree look expensive, the architecture exists for good reasons:
 
-1. **Parallel falsifiers** — metrics vs logs vs deploys should race, not queue. A single agent serializes; a tree can fan out ([bring-up discipline](/blog/bring-up-agent-workflows-like-hardware/)).
-2. **Specialist context** — a dig worker with a tight persona and tool set stays sharp; a mega-root that “does everything” often gets mediocre at all of it.
+1. **Parallel falsifiers** — metrics vs logs vs deploys should race, not queue. A single loop may serialize these digs; a tree can fan out when its tools and budgets permit ([bring-up discipline](/blog/bring-up-agent-workflows-like-hardware/)).
+2. **Specialist context** — a worker can receive a narrower tool set and context, though specialization adds setup and handoff costs.
 3. **Failure isolation** — a bad dig can fail without poisoning the parent’s whole turn; partial progress is salvageable.
 4. **Governance and audit** — per-child budgets, HITL, and traces nest cleanly when specialists are first-class ([observability for agents](/blog/observability/)).
 5. **Depth with hard limits** — ReAcTree-style systems can allow structured delegation while still capping recursion ([production tree bugs we fixed](/blog/reactree-bugs/)).
 
 **Why the tree looked “heavier” on this particular job**
 
-On a single-plane card, the planner still did planner things: spawn children, adaptive completion at the root, more note/search ceremony. In our numbers that showed up as **~1.6× wall time** and **~3.9× tool calls** for the **same** findings — not because the dig needed more shell probes (both paths did three inspection rounds), but because coordination and gate retries piled on. That is not stupidity — it is an architecture optimized for branching, applied to a job that did not branch. **Wrong fit ≠ bad architecture.**
+On a single-plane card, the planner still did planner things: spawn children, adaptive completion at the root, more note/search ceremony. In our numbers that showed up as **~1.6× wall time** and **~3.9× tool calls** for the **same** findings — not because the dig needed more shell probes (both paths did three inspection rounds), but because coordination and gate retries piled on. This suggests a mismatch between the branching design and this sequential task, not a defect in multi-agent orchestration overall.
 
 ---
 
 ## Side-by-side (this A/B only)
 
-One sequential fair run each after setup was honest. Same prompt, models, tools, and budgets.
+One sequential fair run each after setup was honest. Same prompt, models, tools, and budgets; one sequential run per shape is too small to estimate typical latency or variance.
 
 | Dimension | Single-agent | Multi-agent / ReAcTree | Multi-agent vs single |
 |-----------|-------------:|------------------------:|----------------------:|
@@ -142,7 +138,7 @@ Ask these before you pick a shape:
 5. **What must you audit?** Step-level specialist trails → multi-agent. One session narrative → single-agent may be enough.
 6. **Are you fair-testing?** Mis-set budgets, over-redaction, HITL clarify stalls, or completion checks at the wrong altitude can fake a winner ([PII for agents](/blog/pii-redaction-ai-agents/), [completion loops](/blog/is-the-task-actually-done/), [loop salvage](/blog/ai-agent-loop-detection-salvage/)).
 
-**Rule of thumb:** start with the simpler shape that can still finish the card; graduate to orchestration when production usage shows real branching — not when the architecture diagram looks cooler.
+**Rule of thumb:** start with the simpler shape that can complete the task; test orchestration when independent digs or isolation requirements justify the added coordination.
 
 ---
 
@@ -167,7 +163,7 @@ If those are broken, you are not measuring single-agent vs multi-agent. You are 
 - A **single agent** is a tool for decisive, same-plane work.
 - A **multi-agent tree** is a tool for parallel uncertainty and specialist isolation.
 
-We keep both. We use the A/B to stop treating “multi-agent” as a status symbol and “single-agent” as a compromise. Each is a product choice with a good-faith home.
+We keep both shapes. This A/B supports using the simpler loop for narrow triage while evaluating a tree separately on tasks that actually require parallel digs.
 
 ---
 
@@ -187,4 +183,4 @@ We keep both. We use the A/B to stop treating “multi-agent” as a status symb
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

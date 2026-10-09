@@ -17,22 +17,20 @@ faqs:
     answer: "Force measuring the rule's real query before parallel tool digs. Do not invent PromQL from the title alone."
 ---
 
-3am page. Alert title says latency. Your AI SRE agent invents PromQL. The rule was ClickHouse — wrong system, fluent wrong RCA.
+An alert title suggested latency, but the stored rule queried ClickHouse. An AI agent used for site reliability engineering (SRE) could infer a Prometheus Query Language (PromQL) metric from that title and produce the wrong root cause analysis (RCA).
 
 *The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
-## TL;DR
+## Start with the alert rule
 
 - **Title ≠ stored query** — read and run the alert rule’s actual query first
 - Efficiency is the **right system first** (metrics vs logs vs warehouse), not fewer tool calls on the wrong one
 - When title and stored query disagree, measure the stored query before parallel digs
-- Human investigators who re-query the rule beat “storm-first, measure-second” agents
+- In these examples, investigators who re-queried the rule found issues missed by agents that searched broadly first
 
-### Explain like I'm five
-
-If the fire alarm sign says “kitchen” but the sensor wire goes to the basement, you check the basement first. Reading the sign and then searching the kitchen is busy work.
+The title is a label, not the measurement definition. Fetch the stored rule expression, check the query backend and time range, and run it before choosing additional data sources.
 
 ---
 
@@ -40,7 +38,7 @@ If the fire alarm sign says “kitchen” but the sensor wire goes to the baseme
 
 - Disk / capacity-flavored title
 - Agent narrates “>80% capacity storm” without live samples
-- Human measures the rule’s stored query, finds a double-count or a warehouse query that never touched Prom
+- Human measures the rule’s stored query, finds a double-count or a warehouse query that never touched Prometheus
 
 Or: AI Governance–style alert; human finds CDN 500s + application exception; agent restates the symptom with `not_enough_information` after querying the wrong place.
 
@@ -52,7 +50,7 @@ This is [hypothesis ladder](/blog/hypothesis-ladder/) discipline applied at the 
 
 - In RCA review: “Did they measure the rule expression?” as a checklist item
 - Stop rewarding fluent narratives that never touched the stored query
-- Prefer agents that say PARTIAL after measuring over agents that invent a metrics-vs-logs story
+- Prefer a partial finding after measurement to an unsupported metrics-vs-logs explanation
 
 ## If you ship the agent platform
 

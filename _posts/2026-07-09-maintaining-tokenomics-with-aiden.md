@@ -16,21 +16,21 @@ faqs:
     answer: "Keep context budget, tool compression, and session completion in balance so triage finishes instead of dying mid-investigation."
 ---
 
-Finance asked us to cut LLM spend. Engineering's first instinct was routing everything to a smaller model. That helped on salutations. It did **nothing** for the incident where a log query returned a wall of JSON and the session died mid-triage — not because reasoning was expensive, but because we **ran out of context**.
+Finance asked us to reduce large language model (LLM) spend. Routing simple greetings to a smaller model helped with those calls, but it did not address an incident investigation that exhausted its context window—the amount of text a model can handle in one request—after a large log-query result.
 
-That failure reframed the problem. **Tokenomics** is not a model-picker exercise. It is an operating model for [production AI agents on-call](/topics/ai-agents-sre/): keep three things in balance at once.
+That failure reframed the problem. For [production incident agents](/topics/ai-agents-sre/), **tokenomics** means managing the volume and cost of text sent to models while preserving enough evidence to finish a task. We track three competing outcomes:
 
 - **Finish rate** — sessions complete the task instead of hitting context limits
 - **Signal fidelity** — compression does not hide the smoking gun
 - **Unit economics** — cost per *successful* workflow, not per chat message
 
-We split the work across the **agent runtime** (middleware, session memory, routing) and **Aiden** (ingress, workflows, operator visibility). Neither layer alone is enough. This post is the umbrella — how the pieces fit, what industry is doing better, and where we still have gaps.
+We split the work across the **agent runtime** (middleware, session memory, routing) and **Aiden** (ingress, workflows, operator visibility). Neither layer alone is enough. This post describes our architecture and its gaps; it does not claim a measured industry-wide optimum.
 
 ---
 
 ## Four Tiers of Context
 
-Most production blow-ups come from stuffing **tier 2** (verbatim history) while neglecting **tier 3** (structured digests) and **tier 4** (archived data you can fetch on demand).
+In our longer sessions, replaying verbatim history (tier 2) crowded out compact digests (tier 3) and archived data fetched only when needed (tier 4). The tiers are a design model, not a universal storage standard.
 
 | Tier | What lives here | Typical mistake |
 |------|-----------------|-----------------|
@@ -48,7 +48,7 @@ Data should flow **into** the model from the right tier — not all tiers at ful
   [Tier 1: Active task]       --> hard-pinned instructions ----+
 ```
 
-Industry teams are converging on the same shape. [Prosus ARC](https://medium.com/prosus-ai-tech-blog/context-compression-for-production-ai-agents-d6cc34bd3358) replaces a single condensation pass with a structured rolling summary plus optional retrieval when the summary is not enough. [Maxim's context-engineering guide](https://www.getmaxim.ai/articles/context-engineering-for-ai-agents-production-optimization-strategies/) argues for proactive compaction before you hit the wall, not after the API returns a context-length error. Recent [long-horizon agent research](https://arxiv.org/html/2606.10209v1) shows recency pruning of whole tool call/response pairs — plus summarizing what you evicted — can improve task success while cutting tokens materially.
+Several published approaches use related techniques. [Prosus ARC](https://medium.com/prosus-ai-tech-blog/context-compression-for-production-ai-agents-d6cc34bd3358) replaces a single condensation pass with a structured rolling summary plus optional retrieval when the summary is not enough. [Maxim's context-engineering guide](https://www.getmaxim.ai/articles/context-engineering-for-ai-agents-production-optimization-strategies/) argues for proactive compaction before you hit the wall, not after the API returns a context-length error. The cited [long-horizon agent research](https://arxiv.org/html/2606.10209v1) reports that pruning whole tool call/response pairs and summarizing what was removed can improve task success while reducing tokens in its studied setting; that result is not a measurement of our incident workload.
 
 We were already building toward tiers 3 and 4 in places. We had not named the model clearly enough for operators.
 
@@ -67,7 +67,7 @@ Think of tokenomics as **defense in depth**: ingress caps, tool middleware, sess
 
 ### Tool boundary compression (and why Go fits)
 
-Integrations love completeness. Log APIs return everything; agents ask broad questions; the combination is a context-window suicide pact.
+A broad log request can return far more data than the next model turn can accommodate. Returning the entire payload also makes it harder to find the incident signal.
 
 We shape tool output **before** it enters the model's working memory — not "hope the model ignores the noise." In production, every tool call runs through a **composable middleware chain** in Go: the tool executes first; shaping runs on the **return path**. Cheap byte work happens on the hot path; an LLM summarizer is invoked only when mechanical cuts are not enough. That ordering matters when you are processing large JSON blobs on every integration response.
 
@@ -113,7 +113,7 @@ func responseShapingMiddleware(summarize summarizeFunc) func(next Handler) Handl
 }
 ```
 
-Production chains many more links—audit, semantic cache, loop detection—but **return-path shaping** is where most tokens are won or lost. The snippet above is the pedagogical core, not a copy of our wiring diagram.
+Our production chain includes audit, semantic cache, and loop detection. Return-path shaping is one important place to reduce model input, though the impact varies by integration. The snippet above is the pedagogical core, not a copy of our wiring diagram.
 
 The tiered pattern in plain language:
 
@@ -134,7 +134,7 @@ For chat follow-ups, we compact prior user prompts and maintain a small **observ
 
 ### Duplicate-work prevention
 
-The cheapest token is the one you never send. Semantic memoization on tool calls (same intent, same args shape) skips re-execution. Loop detection stops identical tool streaks before they become a doom spiral. Circuit breakers and rate limits are reliability tools first — but stopping a runaway loop is also a FinOps win.
+Avoiding redundant calls saves tokens. Semantic memoization—reusing a recent result for a tool call with equivalent intent and arguments—can skip re-execution when the data is still fresh. Loop detection stops identical tool streaks before they become a doom spiral. Circuit breakers and rate limits are reliability tools first — but stopping a runaway loop also reduces cloud spend. FinOps here means attributing operational cost to the work that caused it.
 
 ### Workflow and ingress budgets
 
@@ -153,9 +153,9 @@ Not every call needs your best model. Classification, salutations, and simple lo
 
 ### The FinOps loop
 
-Session-level invoices lie. One triage session might include cheap classification, one massive log summarization, three verification retries, and a reasoning model only for the final paragraph. Charge it all to "triage" and nobody fixes the summarization middleware — and Finance cannot forecast whether next month's margin holds.
+Session totals can obscure which component spent the tokens. One triage session might include cheap classification, one massive log summarization, three verification retries, and a reasoning model only for the final paragraph. Charge it all to "triage" and nobody fixes the summarization middleware — and Finance cannot forecast whether next month's margin holds.
 
-We attribute tokens and cost at **tool boundaries** — parent tool identity in telemetry, like distributed tracing for LLM spend. That turns optimization into a conversation both engineering and finance can act on: which integration blew the budget, which middleware avoided a repeat model call, which workflow stage needs a tighter spawn contract. Predictable **unit economics per successful run** matter as much as a monthly cap.
+We attribute tokens and cost at **tool boundaries** — parent tool identity in telemetry, like distributed tracing for LLM spend. That turns optimization into a conversation both engineering and finance can act on: which integration blew the budget, which middleware avoided a repeat model call, which workflow stage needs a tighter spawn contract. We therefore review cost per successful run alongside monthly spend; a cheap failed run is not useful savings.
 
 That pairs with middleware instrumentation: did cache hit avoid a model call? did shaping reduce the next turn? did the circuit breaker stop a retry storm? The vocabulary for what to measure is in [LLM performance metrics](/blog/web-metrics-to-llm-metrics/). Per-trace summaries and agent USD budgets give operators a stop signal; historical cost bands on workflows set expectations before a run starts.
 
@@ -163,7 +163,7 @@ That pairs with middleware instrumentation: did cache hit avoid a model call? di
 
 ## Roadmap: What We Are Stealing and What Is Still Missing
 
-One table — industry patterns we are adopting, plus honest gaps. Roadmap thinking, not commitments.
+These are patterns we are considering or partly using, not commitments or benchmarked improvements.
 
 | Pattern | Status | Notes |
 |---------|--------|-------|
@@ -192,11 +192,11 @@ A short checklist that does not require reading our config:
 
 ---
 
-## How Teams Usually Get This Wrong
+## Risks to check during rollout
 
 **Truncating without an archive.** If operators cannot replay what the model saw, postmortems become arguments.
 
-**Summarizing away identifiers.** A generic summarizer treats a commit SHA like prose — it may truncate, round, or hallucinate trailing characters. Mechanical extraction and pinning (regex or structured parse for trace IDs, SHAs, error codes) is non-negotiable for SRE work; let the model summarize everything *around* the identifiers, not instead of them.
+**Summarizing away identifiers.** A generic summarizer treats a commit SHA like prose — it may truncate, round, or hallucinate trailing characters. For our incident workflows we pin such identifiers through regex or structured parsing; let the model summarize everything *around* the identifiers, not instead of them.
 
 **Session totals as the only metric.** The expensive tool hides inside an otherwise cheap session.
 
@@ -206,7 +206,7 @@ A short checklist that does not require reading our config:
 
 ---
 
-## Lessons Learned
+## Operating tradeoffs
 
 1. **Tokenomics is context engineering plus FinOps**, not a model dropdown.
 2. **Cheap cuts before expensive summarization** — relevance chunking and stripping beat another LLM call per tool.
@@ -230,4 +230,4 @@ A short checklist that does not require reading our config:
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> We build incident-triage agents at StackGen; the SRE offering is at [ai.stackgen.com](https://ai.stackgen.com).

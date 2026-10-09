@@ -17,11 +17,11 @@ faqs:
     answer: "Session id, elapsed seconds, token totals, tool call list with outcomes, final Theory text, and ideally a single zip that holds the conversation plus tool payloads. To see which OpenAI API and how much thinking ran, check whether response ids start with resp_ or chatcmpl_, and whether usage lists reasoning tokens."
 ---
 
-Here is the debug loop we use on multi-step agents in production — not a framework tour. Runtime notes from [Aiden](/blog/aiden-platform/) where useful; the steps are shape-agnostic.
+When a multi-step agent gives a plausible but unsupported incident diagnosis, start from the execution record rather than rewriting its prompt. This procedure uses [Aiden](/blog/aiden-platform/) traces as an example, but applies wherever model calls and tool observations can be exported.
 
 ---
 
-## TL;DR
+## What the evidence supports
 
 1. **One golden prompt** you can re-run cold.  
 2. **One debug zip / session export** ([one zip, one conversation](/blog/one-zip-one-conversation/)).  
@@ -29,15 +29,12 @@ Here is the debug loop we use on multi-step agents in production — not a frame
 4. Fix **host contracts** before prose.  
 5. Rematch the golden prompt and publish **absolute** wall/tokens/correctness.
 
-### Explain like I'm five
-
-When a Rube Goldberg machine fails, you do not rewrite the instruction manual first. You watch which gear stuck, replace that gear, then run the same marble again.
 
 ---
 
 ## Step 1 — Freeze the errand
 
-Dual-part jobs are ideal: alert triage + log anomaly ([our combo](/blog/six-model-mode-combos-alert-logs-bench/)). If the agent can fake Part A and skip Part B, your gate is soft.
+A two-part test—alert triage plus a log comparison, as in [our bench](/blog/six-model-mode-combos-alert-logs-bench/)—makes omissions visible. Freeze the request, expected evidence, time windows, and tool access; otherwise a rematch may test a different task. A single-part job can still work if its expected observations are explicit.
 
 Record: model, **orchestration shape** (**single-agent** ReAct vs **hierarchical** ReAcTree — [primer](/blog/what-is-reactree/) · [PDF](https://arxiv.org/pdf/2511.02424)), host flags, tool endpoint, session id.
 
@@ -53,13 +50,13 @@ Prefer a single artifact: transcript + tool results + stage timeline. If you onl
 - final Theory / Unknowns / Do-this-now  
 - per model call: model name, whether the response id starts with `resp_` (Responses API) or `chatcmpl_` (Chat Completions), and whether usage lists reasoning tokens ([Completions vs Responses](/blog/chat-completions-vs-responses-api/))
 
-For hierarchical runs, merge parent and child spans from session traces. Parent-only logs lie.
+For hierarchical runs, merge parent and child spans (timed records of model and tool calls) using the session id. A parent-only view can miss a child’s measurement or hide a child’s repeated failed query.
 
 ---
 
-## Step 3 — Grade the loop, not the vibes
+## Step 3 — Inspect observations and claims
 
-Ask four questions:
+Read the sequence from tool request to observation to final claim. For example, an HTTP 200 may carry a query envelope whose `outcome` is `failed`; transport success is not measurement success. Ask four questions:
 
 | Question | Fail looks like |
 |----------|-----------------|
@@ -74,7 +71,7 @@ Bring-up multi-stage workflows [like hardware](/blog/bring-up-agent-workflows-li
 
 ## Step 4 — Change the host
 
-Order of operations that saved us time:
+Change one variable at a time. For a repeated failed query, this order helps distinguish a broken tool contract from a model instruction problem:
 
 1. Typed failure / no-progress / fan-out ([stop retrying](/blog/stop-retrying-the-same-failed-query/))  
 2. Tool path contracts ([cursor paging for truncated tool output](/blog/cursor-paging-spilled-agent-tool-output/))  
@@ -85,8 +82,8 @@ Mid-run steer belongs here too ([steer agents mid-run](/blog/steer-ai-agents-mid
 
 ---
 
-## Step 5 — Rematch and refuse relative theater
+## Step 5 — Rematch with absolute measures
 
 If wall doubled, say wall doubled ([relative efficiency lies](/blog/relative-efficiency-scores-lie/)). If correctness jumped on one seat, show the Theory text.
 
-That is the whole craft: **same marble, one gear, honest stopwatch**.
+Keep both before-and-after traces. If correctness improved but the tool server was less contended, do not attribute the wall-time change to your code. If the new gate halts an agent early, require it to carry the partial evidence and blocked query into the final answer.

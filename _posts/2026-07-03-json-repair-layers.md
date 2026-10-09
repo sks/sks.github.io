@@ -9,13 +9,13 @@ image: /assets/images/og-why-go.png
 tags: [ai-agents, production, go, reliability, tool-calls]
 ---
 
-Your agent didn't crash. It just stopped mid-run with `invalid character after top-level value` — after spending real money on tokens and looking completely healthy until the tool handler tried to parse its arguments.
+A tool-calling agent can run normally until a handler parses its arguments and returns `invalid character after top-level value`. By then the run has already spent tokens, and the error may leave an investigation unfinished.
 
 If you build [production AI agents in Go](/topics/go-ai-agents/) — middleware pipelines, tool handlers, streaming model adapters — you've probably seen this. This post is for that crowd: AI backend and platform engineers shipping tool-calling agents to production, not prompt-engineering tutorials.
 
-The LLM *almost* produced valid JSON. Almost isn't good enough when strict parsing is your gatekeeper.
+A large language model (LLM) may produce almost-valid JavaScript Object Notation (JSON), the structured format many tool handlers expect. Strict parsing rejects it even when the intended arguments are apparent.
 
-We spent months building defense-in-depth for **security** ([layered governance](/blog/defense-in-depth/)). It turns out you need the same philosophy for **reliability**: one JSON repair pass is not enough when models stream, truncate, wrap output in markdown fences, and double-encode payloads.
+Our [layered governance](/blog/defense-in-depth/) work suggested a reliability analogue: different boundaries see different malformed payloads. Multiple repair points helped with streamed, truncated, fenced, or double-encoded arguments; none replaces validation.
 
 ---
 
@@ -31,7 +31,7 @@ Before layering fixes, name the ways tool JSON breaks in the wild:
 | Double-encoded strings | Model returns a JSON string containing JSON instead of a JSON object |
 | Semantic garbage that parses | Valid JSON, wrong shape — goal text leaked into a structured field |
 
-**Key insight:** These are not one bug. Streaming truncation needs different handling than fence stripping. A generic repair library won't fix domain-specific field bleed. That's why we ended up with multiple repair points instead of one heroic library import.
+These are different failure classes. Streaming truncation needs different handling than fence stripping. A generic repair library cannot decide whether text belongs in a domain-specific field. That is why we retained multiple repair points.
 
 ---
 
@@ -43,23 +43,23 @@ Think of repair happening at different **boundaries** in the stack, each catchin
 
 **At the agent boundary** — an opt-in repair step when agents and sub-agents are constructed, so broken args get fixed before they propagate through the system.
 
-**At the tool handler boundary** — the last line of defense before your application code sees bytes. If the model emitted a mostly-valid object with trailing garbage, this layer recovers the usable part instead of failing the whole run.
+**At the tool handler boundary** — the last line of defense before application code sees bytes. A handler may recover a complete object followed by extraneous text, but it must reject ambiguous or unsafe arguments rather than guessing.
 
-**In domain-specific middleware** — generic repair can't fix *meaning*. Sometimes the model puts a user's goal in the wrong field, or nests fields incorrectly for a tool that expects a specific envelope shape. That requires product logic, not a syntax repair library. Removing this layer because "the framework has jsonrepair now" would break tools silently.
+**In domain-specific middleware** — generic repair can't fix *meaning*. Sometimes the model puts a user's goal in the wrong field, or nests fields incorrectly for a tool that expects a specific envelope shape. That requires product logic, not a syntax repair library. Framework syntax repair alone cannot replace checks on the meaning and placement of fields.
 
-**In prose output parsers** — a different job entirely. [Aiden](/blog/aiden-platform/) parses free-text model responses — navigation payloads, UI schemas, quality rubrics. That's not tool-call JSON. It's LLM prose that *should* contain JSON somewhere. Different input shape, different call sites, different failure modes. Don't delete prose parsers just because tool-argument repair improved upstream.
+**In prose output parsers** — a different job entirely. [Aiden](/blog/aiden-platform/) parses free-text model responses — navigation payloads, UI schemas, quality rubrics. That's not tool-call JSON. It's LLM prose that *should* contain JSON somewhere. Different input shape, different call sites, different failure modes. Prose parsers remain a separate concern even if tool-argument repair improves upstream.
 
 ---
 
 ## The Bug Class: Repair After Validation
 
-Here's the mistake that cost us real incidents: **running strict validation before repair.**
+The ordering mistake we encountered was **running strict validation before repair** on paths intended to recover malformed syntax.
 
 A middleware stack that validates tool arguments with a plain parse, then a separate middleware that fixes semantic issues for specific tools, means generic malformed JSON hits validation first and dies — technically correct error, operationally useless.
 
 Meanwhile, earlier repair layers in the pipeline may have already fixed most problems. But anything that slips through — or any tool path that bypasses framework repair — still hits validation cold.
 
-**Fix:** Repair-then-validate. Either run a generic repair step before validation in the middleware chain, or change validation to attempt repair on parse failure for recoverable payloads.
+For recoverable syntax errors, attempt repair before schema validation: either add a generic step before the validator or let validation retry parsing after repair. Log the original and repaired forms for audit; reject payloads whose meaning cannot be recovered safely.
 
 Don't remove validation. It produces structured errors models can learn from. **Fix the order.**
 
@@ -83,15 +83,15 @@ Don't remove validation. It produces structured errors models can learn from. **
 
 Standard repair handles complete-but-messy JSON. **Streaming** is worse: a tool argument block can arrive truncated — valid prefix, no closing brace.
 
-The fix belongs at the lifecycle moment when the stream finalizes the block: attempt repair on the partial buffer, fall back to an empty object only when repair fails entirely. Repair closes unterminated strings, arrays, and objects so a truncated chunk becomes syntactically valid before parsing runs. Without this, agents using streaming models die mid-incident on long tool arguments — exactly when you need them most.
+The repair attempt belongs when the stream finalizes the argument block. An empty-object fallback when repair fails can preserve the run, but only if the tool schema permits empty arguments; otherwise fail explicitly. Repair closes unterminated strings, arrays, and objects so a truncated chunk becomes syntactically valid before parsing runs. Without this, agents using streaming models die mid-incident on long tool arguments — exactly when you need them most.
 
-The empty-object fallback is a last resort. It preserves the run but drops args. Repair-first recovers most truncated payloads.
+The empty-object fallback is a last resort. It preserves the run but drops args. Repair-first can recover some truncated payloads, depending on which fields were lost.
 
 ---
 
-## Defense-in-Depth for Probabilistic Output
+## Where each check belongs
 
-Security defense-in-depth assumes attackers are creative. JSON repair defense-in-depth assumes **models are sloppy**:
+These checks address different risks at different boundaries:
 
 1. **Repair early** so traces and logs show clean args
 2. **Repair at tool boundaries** so handlers stay simple
@@ -99,17 +99,17 @@ Security defense-in-depth assumes attackers are creative. JSON repair defense-in
 4. **Parse prose separately** where output isn't a tool call at all
 5. **Validate after repair** so models still get useful error feedback
 
-No single layer catches everything. That's the point.
+A syntax-valid payload can still have missing or wrong fields, so the final schema and policy checks remain necessary.
 
 ---
 
-## What We Learned
+## What we would check before removing a layer
 
 1. **One repair library is not a strategy.** It fixes syntax. It doesn't fix streaming truncation at the right lifecycle hook, semantic field bleed, or prose-embedded JSON.
 
 2. **Ordering matters as much as repair.** Validation before repair is a bug class. Audit your middleware chain.
 
-3. **Don't consolidate layers you haven't measured.** Overlap between layers is fine during a soak. Premature deletion brings back 3 AM pages.
+3. **Don't consolidate layers you haven't measured.** Overlap between layers is fine during a soak. Removing a layer without failure-rate data risks reintroducing the same parse failures.
 
 4. **Keep framework fixes in the framework.** Upstream generic repair so the community benefits and your fork shrinks. Product-specific semantic repair stays in the product.
 
@@ -132,4 +132,4 @@ No single layer catches everything. That's the point.
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> We build incident-triage agents at StackGen; the SRE offering is at [ai.stackgen.com](https://ai.stackgen.com).

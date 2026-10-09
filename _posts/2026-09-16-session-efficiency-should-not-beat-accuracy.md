@@ -37,11 +37,11 @@ If you have never scored an AI agent eval, these five terms are enough:
 | **Budget / allowance** | The token count and wall time we hoped not to exceed. |
 | **Efficiency score** | One headline that mixes “were you Correct?” with “did you stay near budget?” |
 
-A **combined score** (sometimes called a composite) collapses those into one number for a pass/fail check. That is useful. It is dangerous when the scale on the label does not match the math.
+A **combined score** (or composite) can be a convenient pass/fail gate, but its scale must agree with the formula. It also cannot replace the individual time and cost measurements.
 
 ---
 
-## TL;DR
+## What the evidence supports
 
 - We built a session efficiency score for agent evals: Correct-rate times a token factor times a wall-time factor.
 - Each factor could go up to **1.25** when the run beat the allowance (25% bonus for finishing early).
@@ -49,11 +49,6 @@ A **combined score** (sometimes called a composite) collapses those into one num
 - Cap each factor at **1.0**. Finishing early does not grade above “you were Correct.” Put the savings in tokens, wall seconds, and dollars per Correct.
 - Same idea as AgentSLABench’s efficiency-adjusted success: success times budget ratios, never above success.
 
-### Explain like I'm five
-
-If homework is due Friday and you finish Tuesday, you still get 100, not 125. Finishing early shows up as free time, not a grade above perfect.
-
-**Mapping that to agents:** Correct answers are the grade. Tokens and wall time are how much work and waiting you spent. Using less of those is good. It should not invent points above “you got them all right.”
 
 ---
 
@@ -69,7 +64,7 @@ score        = 100 × accuracy × √token_factor × √wall_factor
 
 `clip` just means “keep the number between these two ends.”
 
-Intent was fine: punish wasteful digs, keep one number for a pass/fail check. The upper end at **1.25** was the mistake. It turns “beat the budget” into **extra points for finishing early**. When both token and wall bonuses sit at 1.25, their square roots multiply to 1.25. Accuracy 1.0 × 1.25 × 100 = **125**.
+The intent was to penalize over-budget runs while retaining one pass/fail number. The upper end at **1.25** was inconsistent with a 0–100 label. It turns “beat the budget” into **extra points for finishing early**. When both token and wall bonuses sit at 1.25, their square roots multiply to 1.25. Accuracy 1.0 × 1.25 × 100 = **125**.
 
 Walk one real seat in sentences, then numbers.
 
@@ -91,9 +86,9 @@ Same Correct. Same thrift. Different story if your pass/fail check says “must 
 
 **[AgentSLABench](https://arxiv.org/abs/2608.00805)** publishes an efficiency-adjusted success rate: multiply success by how close you stayed to each budget, and never give more than full credit for finishing early. Under budget does not inflate the score. Over budget shrinks it. For you: the headline cannot exceed “how often were you Correct?”
 
-**Cost-of-Pass** is a separate dollar ledger: total spend divided by how many problems were Correct. That is where thrift belongs in money terms, not as a fake 125 on an accuracy-capped dial.
+**Cost-of-Pass** is total dollars divided by the number of Correct problems. Report the denominator and handle a zero-Correct suite explicitly: the ratio is undefined then. It is a spending metric, not a substitute for diagnosis quality.
 
-When people [benchmark agents](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/), they still need absolute wall, tools, and tokens on the page. A combined score is a headline for a pass/fail check, not the only number in a changelog. Keep evals [fair before you chase performance](/blog/fair-agent-evals-before-performance/), [start with canaries](/blog/canary-first-sre-investigate-consistency-evals/), and keep [RCA judge checklists](/blog/how-to-evaluate-ai-agent-root-cause-analysis/) readable next to the score.
+When people [benchmark agents](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/), they still need absolute wall, tools, and tokens on the page. A combined score is one possible gate, not the only number in a changelog. Keep absolute measurements beside it, and publish whether token totals include cached reads. Keep evals [fair before you chase performance](/blog/fair-agent-evals-before-performance/), [start with canaries](/blog/canary-first-sre-investigate-consistency-evals/), and keep [RCA judge checklists](/blog/how-to-evaluate-ai-agent-root-cause-analysis/) readable next to the score.
 
 ---
 
@@ -109,7 +104,7 @@ What changed:
 
 1. **Upper end at 1.0**, not 1.25. Beat the allowance → factor = 1. No extra points past Correct.
 2. **Multiply the factors directly.** No nested square roots that still let a 1.25 product through when the upper clip is above 1.
-3. **Floor at 0.25** still softens one wildly over-budget run so a single hung seat does not zero the whole headline.
+3. **Floor at 0.25** prevents an over-budget factor from approaching zero. That is a policy choice, not a mathematical necessity: if severe overruns should fail the suite outright, add a separate hard budget gate.
 
 On the same worked seat: accuracy 1, both factors clip to 1.0 → **score = 100**. Thrift still shows as fewer tokens, shorter wall, and lower Cost-of-Pass. The pass/fail check stops lying about the scale.
 
@@ -126,6 +121,6 @@ Rule for both:
 
 > Publish Correct-rate, wall seconds, tokens, and dollars first. Only then print a combined score. Never invent a scale that “all Correct + thrifty” can exceed by design.
 
-If your suite needs one number for a pass/fail check, cap it at accuracy times 100 and put the savings on the axes operators actually bill and wait on.
+For a suite that needs one pass/fail number, this capped formula cannot exceed accuracy × 100. Under-budget Correct runs tie at 100; use wall seconds, tokens, and priced cost to distinguish them. A different rubric may legitimately score speed as a separate objective, but should label its scale accordingly.
 
 Worked example: a frozen checkout-outage rematch where every Correct seat under budget printed the same 100, so we ranked on wall and new input tokens instead ([same incident, five models](/blog/same-problem-sre-model-bake-off/)).

@@ -19,11 +19,11 @@ faqs:
     answer: "Write-time spill manifest, completeness truncated on the originating tool, opaque cursor tokens, small pages that fit after JSON escaping, and inventory hints so the agent knows what exists before it finishes paging."
 ---
 
-An AI SRE agent batched twelve PromQL queries against Grafana. The platform spilled a 345KB JSON blob to disk and handed the model a short preview plus a `spill_id`.
+An incident-triage agent batched twelve PromQL queries (Prometheus metric queries) through Grafana. The resulting 345KB JSON exceeded the agent tool-result limit. The runtime stored the complete result on disk and returned only a preview and a `spill_id`, an identifier for retrieving the stored result.
 
-The agent tried to recover with pattern grep: search the spill for `"name": "cpu_usage"`. It got hits on metadata lines inside huge objects. It never saw the `series[]` values. It marked every pod in the acme checkout fleet **Unavailable** and closed the dig.
+The agent searched that stored result for `"name": "cpu_usage"`. The text search matched metadata but missed `series[]`, the arrays of timestamped measurements. It then marked every pod (Kubernetes workload instance) in the placeholder acme checkout fleet **Unavailable** and ended the investigation. In this case, "Unavailable" described what the agent had failed to retrieve, not the state of the pods.
 
-A human paged through the same spill and found healthy series for most pods. The metrics existed. The recovery strategy was wrong.
+A human retrieved subsequent pages and found healthy measurements for most pods. That comparison isolates the failure: the data was present, but the agent treated a partial retrieval as the whole result.
 
 This post is the sequel to [when truncated previews look like no data](/blog/no-data-is-often-truncated-data/). Same failure class, sharper fix: **opaque cursor paging** as the primary path, grep as a backup.
 
@@ -31,7 +31,7 @@ This post is the sequel to [when truncated previews look like no data](/blog/no-
 
 ---
 
-## TL;DR
+## What the evidence supports
 
 - Oversized observability JSON gets **preview + spill_id**, not the full payload in chat
 - **Grep-as-primary** on spilled JSON matches the wrong lines and invents empty planes
@@ -40,15 +40,12 @@ This post is the sequel to [when truncated previews look like no data](/blog/no-
 - Pattern grep and capped `return_full` remain escape hatches, not the default loop
 - Builders: write-time manifest, small pages, opaque tokens, budget-aware cursors
 
-### Explain like I'm five
-
-When the answer is too long for one message, do not keyword-search the file and hope. Get page one and a bookmark. Flip pages until the bookmark runs out.
 
 ---
 
 ## Problem
 
-[Model Context Protocol](https://modelcontextprotocol.io/) tools are honest about completeness until they are not. Integrations return complete JSON because that is what the upstream API gave them. The agent runtime has a hard ceiling on how much of that JSON can ride in one tool result after escaping.
+[Model Context Protocol](https://modelcontextprotocol.io/) (MCP) exposes external tools to an agent. Grafana may return complete JSON to an integration, but the agent runtime has a smaller limit on what it can put in a model-visible tool result. JSON escaping can enlarge that representation further. A complete upstream response can therefore become a partial agent observation.
 
 The compromise is spill:
 
@@ -78,7 +75,7 @@ Because JSON is not a flat log file.
 | Numeric points for a time range | Header lines at the start of each result block |
 | The pod that actually breached | Metadata `"name":` fields on unrelated keys |
 
-A 345KB blob can produce **dozens of false-positive lines** that look like success. The agent stops paging. It never pulls the slab where the arrays live.
+In this 345KB case, metadata produced **dozens of matches** without returning the measurement arrays. A grep hit proves that a string exists somewhere in the file; it does not prove that the relevant values were delivered to the model. Targeted search is useful once the agent knows the result layout, but it cannot establish completeness.
 
 Single-shot `return_full` with a byte cap fails the same way in practice: one window, still truncated, still interpreted as complete.
 
@@ -90,7 +87,7 @@ Single-shot `return_full` with a byte cap fails the same way in practice: one wi
 
 ## Cursor paging contract
 
-Industry APIs solved this decades ago with opaque cursors. Agent tool spills are the same shape: too much data, fixed page size, deterministic continuation.
+A cursor is a continuation token supplied by the server. The agent passes it back rather than guessing file offsets. This makes it possible to retrieve a large result in bounded chunks, provided the spill remains stable for the paging session.
 
 ```
   ┌─────────────────────┐
@@ -151,7 +148,7 @@ For SRE review: treat "Unavailable" on every series after a truncated tool retur
 
 ## Optional implementation notes for builders
 
-If you ship MCP observability tools or a shared spill layer, these patterns held up in production without turning the blog into a blueprint.
+If you ship MCP observability tools or a shared spill layer, these are implementation choices for this failure mode, not a guarantee that paging alone makes a diagnosis correct.
 
 **Write-time manifest.** When the spill file is created, record byte slabs for byte-perfect paging and a lightweight JSON scan for named result inventory. The read path stays O(page) instead of re-parsing 300KB on every agent turn.
 
@@ -159,13 +156,13 @@ If you ship MCP observability tools or a shared spill layer, these patterns held
 
 **Opaque cursor tokens.** Encode `{version}.{chunk}:{offset}` (or equivalent) server-side. Agents pass the token back unchanged. They do not need to know the encoding.
 
-**Budget shrink safety.** If the platform trims a page to satisfy a hard cap, advance the cursor so no bytes are skipped or replayed forever.
+**Budget shrink safety.** If the platform trims a page to satisfy a hard cap, compute the next cursor from the bytes actually delivered. Advancing past undelivered bytes skips evidence; failing to advance can repeat the same page forever.
 
 **Secondary paths.** Keep pattern grep and bounded `return_full` for narrow questions. Document them as escape hatches in the tool schema, not step one.
 
 **Completeness on the origin tool.** The batch query tool should say it truncated, name the spill id, and link to the paging tool in the hint text. Do not make the agent infer spill from a vague "output too large" string.
 
-Public concepts worth stealing: [cursor-based pagination](https://slack.engineering/evolving-api-pagination-at-slack/) (opaque tokens, stable iteration) and MCP's tool-result model (structured payloads, explicit follow-up tools).
+Related design references: [cursor-based pagination](https://slack.engineering/evolving-api-pagination-at-slack/) (opaque tokens, stable iteration) and MCP's tool-result model (structured payloads, explicit follow-up tools).
 
 ---
 
@@ -180,8 +177,8 @@ Public concepts worth stealing: [cursor-based pagination](https://slack.engineer
 
 **Acknowledgments.** Cursor paging for observability spills came out of shipping batched query tools in Aiden. Patterns are composite; thanks to teammates who debugged false "Unavailable" RCAs in the wild.
 
-*Building AI for incident triage without the demo theater? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+*For implementation discussion, find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports, check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> **StackGen** works on AI-assisted incident triage and diagnostic workflows. See [ai.stackgen.com](https://ai.stackgen.com) for the offering.

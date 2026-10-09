@@ -17,15 +17,15 @@ faqs:
     answer: "Not on absolute wall for a contended six-way Grafana rematch. They did coincide with a hierarchical ReAcTree Responses seat jumping from 0.69 to 1.0 correctness on the same prompt."
 ---
 
-Prompt poetry does not stop a high-thinking model from poking a dead PromQL with slightly different labels.
+An agent can receive a failed PromQL (Prometheus metric query), change its labels, and issue the same ineffective probe again. If the backend returns HTTP 200 with an application-level `failed` outcome, transport status alone will not tell the runtime to stop.
 
-We already had [loop detection](/blog/ai-agent-loop-detection-salvage/) and habits that prefer parent measurement before spawning children ([single vs multi](/blog/single-agent-vs-multi-agent/)). They were not enough. The missing piece is **observation identity**: if the world did not change, stop paying for another thought.
+We already had [loop detection](/blog/ai-agent-loop-detection-salvage/) and habits that prefer parent measurement before spawning children ([single vs multi](/blog/single-agent-vs-multi-agent/)). Those controls did not identify repeated terminal observations. We added an observation fingerprint for failed or empty results so the host could detect a repeated response even when the agent changed superficial query arguments. Identical errors can justify a different probe or an explicit Unknown, not an automatic conclusion that the incident signal is absent.
 
 Shapes in the rematch: **single-agent ReAct** vs **hierarchical ReAcTree** ([what is ReAcTree?](/blog/what-is-reactree/) · [PDF](https://arxiv.org/pdf/2511.02424)).
 
 ---
 
-## TL;DR
+## What the evidence supports
 
 - Typed query failures (`n` / `outcome: failed`, all-failed arrays) must count as **failures**, not transport success.
 - Hash **terminal failed/empty** observations; identical hashes → steer once → halt with partial findings.
@@ -33,9 +33,6 @@ Shapes in the rematch: **single-agent ReAct** vs **hierarchical ReAcTree** ([wha
 - Context-only tools (`search_tools`, `load_skill`, notes) must **not** satisfy “live evidence” gates.
 - On our rematch, the big product win was quality on a reasoning-preview **hierarchical** seat ([scorecard](/blog/six-model-mode-combos-alert-logs-bench/)), not a free latency cut.
 
-### Explain like I'm five
-
-If the smoke detector keeps saying “battery dead” the same way, write it down once, try another room, then stop pressing the same button.
 
 ---
 
@@ -47,9 +44,9 @@ On a dual-part alert+logs job, a Responses **hierarchical** seat finished “fas
 - both parts **Undetermined**
 - almost no measured Part B numbers
 
-Single-agent on the same model scored **1.0** and took longer. The planner was not “more careful.” It was **done pretending**.
+Single-agent on the same model scored **1.0** and took longer. The hierarchical close was not evidence of a resolved incident; it omitted the measurements needed by Part B. One run per configuration does not establish why the planner ended early.
 
-Meanwhile generate and xAI seats already closed full Theories. The failure mode is concentrated where thinking budget is large and host feedback is polite.
+In this wave, the generate and xAI seats met the checklist. That local pattern suggests inspecting the reasoning-preview seat’s feedback and completion condition; it does not mean high-thinking models inherently retry more on other workloads.
 
 ---
 
@@ -58,11 +55,11 @@ Meanwhile generate and xAI seats already closed full Theories. The failure mode 
 | Gate | Behavior |
 |------|----------|
 | Typed failure class | All-failed query envelope → upstream failure |
-| No-progress ledger | Same failed/empty observation hash twice → steer, then stop |
-| Fan-out cap | Nth parallel copy of the same tool → hard error |
+| No-progress ledger | Same failed/empty observation fingerprint twice → offer a different route once; if it recurs, stop the loop with partial findings |
+| Fan-out cap | Limit concurrent copies of a tool when they hit the same backend; permit justified independent queries within the capacity budget |
 | Tool classes | Catalog/skill/notes ≠ live measurement |
 
-Do **not** reuse “required completion tool names” for gain-exhausted tools. That field means something else; mixing it drops required gates when a plane is exhausted.
+Keep "required completion tool names" (the calls a workflow must make) separate from "gain-exhausted tools" (calls blocked after repeated non-progress). If the same field represents both, exhausting a query route can accidentally remove a required evidence check.
 
 ---
 
@@ -77,8 +74,8 @@ Do **not** reuse “required completion tool names” for gain-exhausted tools. 
 ## Monday checklist
 
 1. Log observation hashes for failed/empty query tools.  
-2. Alert when steer-then-halt fires more than N times per session.  
+2. Choose and record a threshold for repeated steer-then-halt events per session, then alert when it is crossed; `N` must reflect expected query volume and error rates.
 3. Re-run one golden dual-part prompt after every gate change.  
-4. Read the Theory — if it says Undetermined with no blocked query named, fail the build.
+4. Inspect the final Theory: an Undetermined answer should name the failed query and preserve any usable measurements. Fail the evaluation if it presents a gap as a measured negative.
 
 Related: [empty query is data](/blog/empty-query-not-absent-signal/), [deliver findings at the budget cap](/blog/deliver-findings-at-the-budget-cap/), [how models write Theories](/blog/what-reasoning-models-write-on-triage/).

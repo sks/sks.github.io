@@ -18,9 +18,9 @@ faqs:
     answer: "Not as the first milestone. Start with parallel context gathering and human-reviewable outputs. Remediations need fail-closed gates, receipts, and Judgment-style health checks — not demo confidence."
 ---
 
-An **SRE AI agent** is an AI agent whose job is reliability work: shrink an incident, gather context from observability and change systems, propose a hypothesis, and draft RCA-shaped output humans can trust or reject. It is not a general chatbot with PagerDuty pasted into the prompt. It is also not “autonomous remediation” as a first demo — that is how you buy a second outage.
+A **site reliability engineering (SRE) AI agent** uses a model and tools to support incident triage: gather observability and change evidence, propose a hypothesis, and draft root cause analysis (RCA) for human review. Unlike a question-answering chat alone, it runs a bounded sequence of tool calls. Automatic remediation is a separate, higher-risk capability, not a prerequisite for triage.
 
-Fast path: [SRE on-call starter pack](/start/sre-on-call/). The curated map is [AI agents for SRE](/topics/ai-agents-sre/). The triage landing page is [AI incident triage](/topics/ai-incident-triage/). The long essay on what helps versus demo theater lives on StackGen: [AI Incident Triage for SREs](https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call).
+Fast path: [SRE on-call starter pack](/start/sre-on-call/). A topic map is [AI agents for SRE](/topics/ai-agents-sre/). For triage, see [AI incident triage](/topics/ai-incident-triage/). A longer discussion of on-call use is on StackGen: [AI Incident Triage for SREs](https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call).
 
 ---
 
@@ -29,18 +29,18 @@ Fast path: [SRE on-call starter pack](/start/sre-on-call/). The curated map is [
 **Helps on-call**
 
 - Parallel context gathering with a budget (time, tools, tokens)
-- Evidence from systems of record — metrics, logs, deploys — not vibes
+- Evidence from systems of record — metrics, logs, deploys — with source and time range
 - Outputs a human can skim in under a minute: what was checked, what was not, what to do next
 - Hard stops when required digs are missing ([curiosity before confidence](/blog/curiosity-before-confidence/))
 
 **Sounds good in a demo**
 
-- One fluent hero narrative after three tool calls
+- A confident causal narrative without enough evidence
 - “Root cause: the deploy” before identity and onset are established ([hypothesis ladder](/blog/hypothesis-ladder/))
-- Unbounded remediation with a smile
+- Unbounded remediation without approval or rollback controls
 - Green HTTP while judgment quietly drifts ([SRE for agentic systems](/blog/sre-for-agentic-systems/))
 
-We keep saying the same thing because production keeps repeating it: **fluency is not evidence**.
+A fluent explanation is not evidence that the proposed cause is correct.
 
 ---
 
@@ -52,13 +52,13 @@ We keep saying the same thing because production keeps repeating it: **fluency i
 | **RCA** | Eliminate causes with evidence; narrate last | Approves the write-up |
 | **Remediation** | Propose or execute a bounded change | Approves mutations; needs receipts |
 
-Most teams should earn the right to move down that table. Skipping to remediation because the model is confident is how you get [demo-to-deploy failure modes](/blog/demo-to-deploy-receipts/).
+Triage can remain read-only. Remediation requires separate authorization, rollback planning, and evidence that a proposed action is appropriate; see [demo-to-deploy failure modes](/blog/demo-to-deploy-receipts/).
 
 ---
 
 ## Where the runtime fits
 
-An SRE agent still needs an [AI agent runtime](/topics/ai-agent-runtime/) — the loop that plans, calls tools, and stops. Enterprise packaging (tenancy, policy, many teams) is the [platform layer](/blog/aiden-platform/). Confusing those layers is how “AI SRE” becomes a slide with no place to put budgets or mid-run steer.
+An SRE agent still needs an [AI agent runtime](/topics/ai-agent-runtime/) — the loop that plans, calls tools, and stops. Enterprise packaging (tenancy, policy, many teams) is the [platform layer](/blog/aiden-platform/). Keeping those layers separate helps locate budget enforcement and mid-run steering.
 
 ---
 
@@ -78,4 +78,4 @@ An SRE agent still needs an [AI agent runtime](/topics/ai-agent-runtime/) — th
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

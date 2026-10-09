@@ -4,14 +4,14 @@ title: "TOML Over YAML and PKL — How We Stopped Fighting Config and Started Sh
 date: 2026-06-21 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 2
-description: "TOML vs YAML vs PKL for agent configuration: why we stopped fighting YAML, skipped PKL, and shipped on TOML."
+description: "Why we chose TOML for flat, typed agent configuration after considering YAML, PKL and CUE, and when those alternatives may fit better."
 image: /assets/images/og-iac.png
 tags: [config, toml, yaml, devops, ai-agents]
 ---
 
-Configuration is the least exciting topic in software engineering. It's also the one that causes the most production incidents.
+Configuration is an input to the runtime: a wrong type or misplaced setting can change what an agent is allowed to do. The format should make those errors visible before deployment.
 
-When we built our AI agent runtime at StackGen, we needed a config format for defining agents, tools, security policies, memory settings, and model routing. We tried YAML (like everyone else), evaluated PKL (Apple's new config language), and landed on TOML. Here's the decision process.
+When we built our AI agent runtime at StackGen, we needed a config format for defining agents, tools, security policies, memory settings, and model routing. We tried YAML, evaluated PKL (Apple’s programmable configuration language) and CUE, and chose TOML for this relatively flat, typed configuration. The decision would be different for configurations that need extensive reuse or validation rules.
 
 ---
 
@@ -23,7 +23,7 @@ An agent config defines who the agent is, what tools it can use, what security r
 
 ## Why YAML Failed Us
 
-YAML is the lingua franca of DevOps. Kubernetes, Docker Compose, GitHub Actions, Ansible — they all use it. So we started there.
+YAML is widely used in development operations (DevOps). Kubernetes, Docker Compose, GitHub Actions, Ansible — they all use it. So we started there.
 
 ### Problem 1: The implicit typing trap
 
@@ -34,17 +34,17 @@ country: NO
 version: 1.0
 ```
 
-In YAML, `yes` silently becomes the boolean `true`, and `NO` becomes `false` — the infamous [Norway problem](https://hitchdev.com/strictyaml/why/implicit-typing-removed/). In a security-relevant config — a deny-list, an allow-list, a boolean flag guarding a dangerous capability — that kind of silent coercion is exactly the class of bug you can't afford. A list entry that was meant to be the string `"yes"` becoming the boolean `true` is the kind of thing that turns a config typo into an incident.
+Under YAML 1.1 rules, `yes` can become the boolean `true`, and `NO` can become `false` — the [Norway problem](https://hitchdev.com/strictyaml/why/implicit-typing-removed/). In a security-relevant config — a deny-list, an allow-list, a boolean flag guarding a dangerous capability — that interpretation needs to be explicit and tested. A list entry that was meant to be the string `"yes"` becoming the boolean `true` is the kind of thing that turns a config typo into an incident.
 
-*(Yes, the YAML 1.2 spec theoretically fixed the Norway problem in 2009, but the DevOps ecosystem is fractured. Many widely used parsers — including popular Go and Python YAML libraries — still default to YAML 1.1 behavior. You never truly know how a generic parser will interpret your file in production.)*
+*(Yes, the YAML 1.2 spec theoretically fixed the Norway problem in 2009, but the DevOps ecosystem is fractured. Many widely used parsers — including popular Go and Python YAML libraries — still default to YAML 1.1 behavior. The actual parser and schema version determine what production reads; test with the parser you ship.)*
 
 ### Problem 2: Indentation is meaning
 
-A two-space misalignment is invisible to most editors but completely changes what a YAML file means — a key that should be nested under a section silently becomes a sibling instead. We caught this more than once in code review before deciding YAML wasn't worth the cognitive load for something as consequential as agent permissions.
+A misplaced indent can make a key a sibling rather than a child. Schema validation can catch some mistakes, but a syntactically valid file can still express the wrong hierarchy. We caught this more than once in code review before deciding YAML wasn't worth the cognitive load for something as consequential as agent permissions.
 
 ### Problem 3: Multi-line strings are a mess
 
-YAML has **nine** different ways to write multi-line strings. Our agent persona definitions include multi-paragraph system prompts. Every developer used a different style, and diffs were unreadable.
+YAML’s multi-line strings are sometimes counted as **nine** style-and-modifier combinations; the exact count depends on what you include. Our agent persona definitions include multi-paragraph system prompts; differing styles made reviews harder. That was a team convention problem as well as a format tradeoff.
 
 ---
 
@@ -56,25 +56,25 @@ But three things ruled it out for us:
 
 ### Problem 1: It requires a build step
 
-PKL files aren't directly readable by Go's standard library. You need the PKL runtime to evaluate them into JSON/YAML/Go structs. That adds a build dependency, a CI step, and a failure mode — a non-starter for a single-binary deployment story.
+PKL files aren't directly readable by Go's standard library. You need the PKL runtime to evaluate them into JSON/YAML/Go structs. That adds a build dependency, a CI step, and a failure mode — another dependency in our build and deployment path, though generated config could still be shipped with a binary.
 
 ### Problem 2: The ecosystem is thin
 
-In mid-2026, PKL's Go integration is still maturing. Community tooling and editor support lag behind TOML and YAML. Our engineers would be learning a new language just for config.
+At the time of our evaluation, PKL’s Go integration was still maturing. Community tooling and editor support lag behind TOML and YAML. Our engineers would be learning a new language just for config.
 
 ### Problem 3: Code-as-config adds complexity
 
-PKL's power — functions, conditionals, loops — is also its risk. Config should be **data**, not programs. When config can have bugs, you need tests for your config, and now you're maintaining two codebases.
+PKL's power — functions, conditionals, loops — is also its risk. Programmable config can reduce duplication, but expressions and shared modules need tests and review. Our config was simple enough that we did not need that flexibility.
 
 ### What about CUE?
 
-We also evaluated [CUE](https://cuelang.org/), created by Marcel van Lohuizen (who helped build Borg, Kubernetes' predecessor). CUE is natively written in Go — no JVM build step — with strict types and powerful constraint validation. But CUE's lattice-based type unification is unfamiliar to most engineers, and we needed product engineers writing a working agent config in fifteen minutes, not learning a constraint logic language. TOML wins on approachability.
+We also evaluated [CUE](https://cuelang.org/), created by Marcel van Lohuizen (who helped build Borg, Kubernetes' predecessor). CUE is implemented in Go and provides types and constraint validation. But CUE's lattice-based type unification is unfamiliar to most engineers, and we needed product engineers writing a working agent config in fifteen minutes, not learning a constraint logic language. For our small configs, TOML took less explanation.
 
 ---
 
 ## Why TOML Won
 
-[TOML](https://toml.io/) (Tom's Obvious, Minimal Language) hits the sweet spot:
+[TOML](https://toml.io/) (Tom's Obvious, Minimal Language) matched our constraints:
 
 ### 1. Explicit types — no surprises
 
@@ -85,7 +85,7 @@ version = "1.0"     # string — always quoted
 port    = 8080      # integer — unquoted numbers are numbers
 ```
 
-No implicit type coercion. Strings are always quoted. Booleans are `true`/`false`, never `yes`/`no`. We considered JSON too, but configuration files need comments, and failing a deployment because of a trailing comma is a miserable developer experience.
+TOML makes this distinction explicit in the file: strings are quoted. Booleans are `true`/`false`, never `yes`/`no`. We considered JSON too, but its lack of comments was inconvenient for our hand-edited files.
 
 ### 2. Flat structure, obvious nesting
 
@@ -93,15 +93,15 @@ Section headers make hierarchy explicit — you can't accidentally re-parent a k
 
 ### 3. Native Go support
 
-[`pelletier/go-toml/v2`](https://github.com/pelletier/go-toml/v2) decodes directly into typed Go structs with strict validation — misspelled keys, wrong types, missing required fields are all caught at parse time, not at 3am when a tool call hits a bad config path.
+[`pelletier/go-toml/v2`](https://github.com/pelletier/go-toml/v2) decodes into typed Go structs. We add validation for unknown or required fields and invalid values at load time; decoding alone cannot infer every required field or policy invariant.
 
 ### 4. A visual config builder became possible
 
-Because TOML is structured data (not code), we were able to build a visual config builder that generates valid TOML from a web form. That would be effectively impossible with PKL (you'd need to generate valid source code) and fragile with YAML (indentation has to be exact).
+Because TOML is structured data (not code), we were able to build a visual config builder that generates valid TOML from a web form. A builder could also emit YAML or evaluated PKL, but TOML’s data-only structure made our form-to-file path straightforward.
 
 ### 5. Diff-friendly
 
-TOML diffs cleanly in pull requests — no context collapse, no indentation shifts propagating through the file. Reviewers see exactly what changed.
+For our shallow sections, TOML diffs are usually easy to review. Large arrays of tables and long prompts can still produce awkward changes.
 
 ---
 
@@ -109,13 +109,13 @@ TOML diffs cleanly in pull requests — no context collapse, no indentation shif
 
 | Feature | YAML | PKL | TOML |
 |---------|------|-----|------|
-| Implicit typing | Yes — `yes`→`true`, `NO`→`false` | No — static types | No — explicit types |
+| Implicit typing | Parser/version-dependent (YAML 1.1 examples) | No — static types | No — explicit types |
 | Indentation sensitivity | High — whitespace is meaning | Low — braces | Low — section headers |
-| Multi-line strings | Nine different syntaxes | Clean | Clean, triple-quoted |
+| Multi-line strings | Several styles and modifiers | Clean | Clean, triple-quoted |
 | Build step required | None | Needs a runtime | None |
 | Go library support | Mature | Maturing | Mature |
-| Visual builder feasible | Fragile | Effectively no | Yes |
-| Learning curve | Everyone knows it | A new language | Roughly fifteen minutes |
+| Visual builder feasible | Yes, with careful generation | Possible via evaluation/generation | Yes |
+| Learning curve | Everyone knows it | A new language | Small syntax to learn |
 | Ecosystem size | Massive | Small | Medium |
 
 ---
@@ -130,13 +130,13 @@ A single-developer CLI tool and a platform managing many agents across many team
 
 1. **Config format is an API contract.** Once users adopt it, changing is expensive. Choose carefully upfront.
 
-2. **Implicit behavior is the enemy of production reliability.** YAML's implicit typing has caused more outages than we'd like to admit across the industry. Explicit is always better.
+2. **Check parser behavior in production.** YAML versions and implementations differ. Explicit values and schema tests matter more than assuming a format alone prevents errors.
 
-3. **Config should be data, not code.** When config can have bugs, you need tests for config. That's a complexity trap.
+3. **Use programmability when it pays for itself.** Reuse and constraints can justify PKL or CUE in a large configuration estate; they were unnecessary for ours.
 
-4. **Parse-time validation beats runtime validation.** Catching errors when the agent starts is dramatically cheaper than catching them when a tool call hits a bad config path in production.
+4. **Validate before accepting config.** Decode, check required fields and policy constraints, and reject a bad config before an agent uses it.
 
-5. **The "everyone uses it" argument is weak.** Everyone used XML before JSON. Everyone used JSON before YAML. Evaluate on merits.
+5. **Fit the data shape.** Existing ecosystem tooling is a real advantage; for our shallow, hand-edited agent files, explicit types mattered more.
 
 ---
 
@@ -153,4 +153,4 @@ In the next post, I'll cover how we went from a single "Hello World" commit to a
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+I work on AI-assisted incident investigation at StackGen; project information is at [ai.stackgen.com](https://ai.stackgen.com).

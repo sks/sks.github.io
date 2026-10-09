@@ -4,55 +4,48 @@ title: "Ungrounded Synthesis Must Read as Hypothesis"
 date: 2026-07-24 14:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 8
-description: "When grounding fails, the primary chat bubble must show hypothesis language — not a confirmed RCA with a quiet side note."
+description: "If a check finds unsupported details in an AI-written incident analysis, correct the primary message rather than hiding the warning in a note."
 image: /assets/images/og-default.png
 tags: [sre, ai-agents, service, incident-response, aiden, rca, verification]
 permalink: /blog/ungrounded-synthesis-as-hypothesis/
 faqs:
   - question: "What should happen when an AI RCA fails grounding?"
-    answer: "Deliver hypothesis language as the primary message with a clear grounding-failed banner. Do not leave the confident invented narrative as the main bubble with a quiet annotation."
+    answer: "Show a prominent notice and a corrected primary message distinguishing observations from hypotheses. Remove unsupported names rather than preserving a confident claim with a quiet annotation."
   - question: "Why is fail-closed delivery a service concern?"
-    answer: "On-call trusts the primary card. A verification pass that only lives in logs does not protect operators from acting on invented entity names."
+    answer: "Responders often act on the primary message. A failed check recorded only in logs leaves unsupported names visible in the main card."
   - question: "How does this relate to curiosity before confidence?"
-    answer: "Soft prompts do not stop bad RCA. Hard gates refuse confidence; fail-closed delivery is how that refusal shows up in Slack and chat."
+    answer: "Submission checks can reject unsupported confidence. Delivery should show that result in the main Slack or chat message rather than only in logs."
 ---
 
-AI-assisted RCA needs a fail-closed delivery layer, not just a verification pass in logs.
+An AI-written root-cause analysis (RCA) may sound certain even when its service names or claims cannot be traced to the data it used. A grounding check compares the answer with tool results; if it fails, the message shown to responders must change, not merely the internal log.
 
 *The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
-## TL;DR
+## Make the correction visible
 
-- Post-check grounding can reject a confident-sounding answer
-- Primary chat / Slack bubble must **downgrade to hypothesis**
-- Banner + corrected body as the main message — not a side annotation
-- Operators must never see “confirmed outage in checkout-svc” when the entity was invented
-
-### Explain like I'm five
-
-If the teacher finds you made up a character in your book report, the grade on the front of the paper should say “guess,” not “correct,” with a tiny note on the back.
+A failed grounding check should prevent the original confident wording from appearing as the main chat or Slack message. Show a prominent notice and a corrected body: what was observed, what remains a hypothesis, and which names could not be verified. The check itself can miss errors, so a pass is not proof of correctness.
 
 ---
 
 ## The failure mode
 
-The agent emits a fluent root cause. A grounding checker (`is_factual: false`) finds entity names absent from tool evidence. If the product only attaches a quiet correction, humans skim the confident headline and move on.
+For example, suppose the agent names `checkout-svc` as the failed service, but the returned records contain no such entity. A checker returns `is_factual: false`. If the original headline remains the main message and the correction is tucked into a note, a reader may still act on the invented name.
 
-Service craft means the **delivery** matches the verification result. Same spirit as [curiosity before confidence](/blog/curiosity-before-confidence/) and [be creative, don't invent](/blog/be-creative-do-not-invent/).
+The delivered message should reflect the verification result. This is related to [curiosity before confidence](/blog/curiosity-before-confidence/) and [be creative, don't invent](/blog/be-creative-do-not-invent/): unsupported details should remain uncertain or be removed.
 
 ---
 
 ## If you lead an SRE team
 
 - Reject any workflow where grounding failure is invisible in the primary UI
-- Train reviewers: hypothesis banners are success of the safety layer, not embarrassment
-- Prefer explicit Unknowns over false confidence every time
+- Tell reviewers what the hypothesis notice means: the checker found a gap, not necessarily that the entire investigation was useless
+- Keep unknowns visible, then use further checks or human review for decisions with consequences
 
 ## If you ship the agent platform
 
-- Primary delivery modes for grounding failure: hypothesis / corrected body
+- Render a corrected primary body with hypothesis language when grounding fails; if a safe rewrite is impossible, withhold the unsupported claim
 - Cache and chat history must store the downgraded form
 - Do not leave the invented narrative as the default render with a footnote humans miss
 

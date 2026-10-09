@@ -4,7 +4,7 @@ title: "Why AI SRE Feels Stuck Before the First Tool Call"
 date: 2026-08-14 10:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 11
-description: "On-call sees 'the bot is stuck' while vault re-checks and MCP catalog re-index burn cold start. Treat time-to-first-tool as an SLA."
+description: "On-call sees 'the bot is stuck' while vault re-checks and MCP catalog re-index burn cold start. Measure time to the first useful tool call."
 image: /assets/images/og-default.png
 tags: [ai-agents, sre, on-call, incident-response, observability, mcp]
 permalink: /blog/cut-dead-air-before-investigation/
@@ -17,32 +17,25 @@ faqs:
     answer: "Operators experience dead air as 'the bot is stuck.' Cutting vault and index tax moves the first useful PromQL earlier — not infra trivia."
 ---
 
-Page fires. Chat says “investigating.” Nothing useful happens. The model isn’t thinking — vault re-checks and MCP catalog re-index ate the cold start.
+An alert fires. Chat says “investigating,” but no diagnostic query appears yet. In these incident patterns, some of that wait came before the model could use a tool: the worker rechecked its secrets vault and rebuilt an unchanged catalog of available actions. Measure that wait separately from the model’s response time.
 
 *The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
-## TL;DR
+## What to measure first
 
-- Cold-start dead air is an **on-call SLA**, not infra trivia
-- Share vault readiness across MCP providers per worker
-- Skip unchanged tool-index upserts
-- One automatic retry on Grafana proxy 502/503 before treating the datasource as dead
-
-### Explain like I'm five
-
-If every time you ask for a flashlight someone re-alphabetizes the entire toolbox before handing it over, you will think the flashlight is broken. Keep the toolbox organized once; hand over the light.
+For an alert that needs a Grafana metric query, record the time from the operator’s request to the **first useful query**, not just the time until the chat says “investigating.” A repeat vault check (confirming access to secrets) or an unchanged MCP tool catalog (the list of actions available through Model Context Protocol) can consume that interval without advancing the investigation. Share readiness per worker and skip index writes when the catalog hash has not changed. These changes reduce setup work; they do not make a slow diagnostic query fast.
 
 ---
 
 ## Two efficient fixes
 
-**1. Catalog and secrets tax.** Re-checking vault and re-upserting an unchanged tool index delays first PromQL. Cache readiness; hash the catalog; skip no-op writes.
+**1. Catalog and secrets tax.** Re-checking vault and re-upserting an unchanged tool index delays first PromQL, Grafana’s query language for metrics. Cache readiness for the worker’s lifetime; hash the catalog and skip no-op writes. Invalidate the cache when credentials or tool definitions change, or stale access can become a security and correctness problem.
 
-**2. Gateway blip ≠ circuit open.** One transient 502 from the Grafana proxy used to mark a datasource dead for the rest of the run. A short single retry matches how humans already behave: try once more, then escalate.
+**2. Gateway blip ≠ circuit open.** A 502 or 503 is a gateway/server error, not proof that the Grafana data source will stay unavailable. One such response used to mark it dead for the rest of the run. Retry once with a short bound, then surface the failure; unlimited retries would hide a real outage and delay the operator.
 
-Long investigate runs also need long loop-detection windows — minutes-long legitimate tool latency is not a 30-second doom loop. That is another efficiency story: stop the true stuck retry without false-positive blocks.
+Long investigations also need a loop detector (a guard against repeating the same action) whose window accounts for legitimate tool calls that take minutes; a 30-second timeout can mistake waiting for a result for a stuck retry. That is another efficiency story: stop the true stuck retry without false-positive blocks.
 
 Tokenomics context: [maintaining tokenomics](/blog/maintaining-tokenomics-with-aiden/).
 

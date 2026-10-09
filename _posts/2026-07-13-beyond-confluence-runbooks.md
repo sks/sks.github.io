@@ -12,7 +12,7 @@ A checkout latency alert fires at 2 AM. The on-call engineer opens Confluence, f
 
 Both are following "the runbook." They are not following the same runbook.
 
-This post is not a manifesto to delete your wiki. It is a case study in **when GitOps-style triage artifacts beat wiki articles**, when they do not, and why the honest answer is probably "both, with a clear boundary." The scenario below is **composite and fictional** — it illustrates a pattern we have seen across several production rollouts, not a transcript of any one customer's playbook.
+This is an illustration of where GitOps-style triage artifacts—procedures reviewed and versioned in Git—can be easier to execute consistently than wiki prose, and where wiki articles remain useful. It is not a measured comparison of two products. The scenario below is **composite and fictional** — it illustrates a pattern we have seen across several production rollouts, not a transcript of any one customer's playbook.
 
 It pairs with [Your RCA Agent Doesn't Need Another Runbook — It Needs a Map](/blog/agents-need-a-map-not-a-script/): that post argues against runbook-as-only-navigation. This one argues for **executable** runbooks when the investigation graph itself must stay reviewable and gated.
 
@@ -20,13 +20,13 @@ It pairs with [Your RCA Agent Doesn't Need Another Runbook — It Needs a Map](/
 
 ## The Fictional Incident: Checkout Latency Spike
 
-**Alert:** P95 latency on `POST /v2/checkout` exceeded SLO for fifteen minutes in `prod`.
+**Alert:** 95th-percentile (P95) latency on `POST /v2/checkout` exceeded the service-level objective (SLO) for fifteen minutes in `prod`.
 
 **Symptoms operators care about:** slow confirmations, elevated cart abandonment, support tickets clustering on mobile web.
 
 **The investigation question:** Is this a traffic spike, a bad deploy, downstream payment latency, or database saturation?
 
-That is generic enough to be universal. How you *encode* the answer is not.
+These symptoms are illustrative, not measurements from a real incident. The important design question is how to encode the investigation steps without treating examples as live scope.
 
 ---
 
@@ -42,9 +42,9 @@ A mature team's Confluence article — the kind exported to PDF for auditors and
 * A sidebar link to a *different* article: "Connection pool exhaustion — read this if checkout is slow but CPU is fine."
 * Example values baked into the text: `prod-us`, `checkout-api`, a sample trace ID format, a phone number for the payments duty manager.
 
-**Why humans love it:** context, visuals, escalation culture, and the story of *when* to stop guessing and call for help.
+For humans, the page gives context, visuals, escalation contacts, and cues for when to call for help.
 
-**Why agents struggle:**
+An agent retrieving only parts of that page may miss important boundaries:
 
 | Wiki habit | What breaks with automation |
 | --- | --- |
@@ -60,7 +60,7 @@ None of this means the wiki article is bad. It means it was written for a **huma
 
 ## Version B — Git-Managed Triage (Same Incident Class)
 
-The same investigation lives in **version-controlled markdown** wired into an agent workflow through config-as-code. No parallel YAML DSL for operators to maintain — but also **not** "the LLM reads English and hopes."
+The same investigation lives in **version-controlled markdown** wired into an agent workflow through config-as-code. This avoids a separate YAML domain-specific language (DSL) for operators, while still giving the runtime a machine-readable contract instead of asking the large language model (LLM) to infer every rule from prose.
 
 That distinction matters. If execution were pure natural-language interpretation, Version B would inherit Version A's failure modes with a shorter retrieval window. We avoided that by splitting responsibilities across three layers:
 
@@ -82,7 +82,7 @@ These show up throughout the rest of the post — here is what they mean in prac
 | **Evidence line** | A structured note the agent writes after a tool-backed step; gates grep for it | `evidence:scope_summary=service=checkout-api region=prod-eu …` |
 | **Workflow gate** | Deterministic check before stage N+1 starts — no LLM vote | Stage 2 blocked until output contains `evidence:scope_summary=` |
 
-Gates are regex or parser checks on agent output, not model judgment calls. That is the line between "markdown authoring" and "deterministic execution." See also [evidence-gated multi-plane RCA](/blog/evidence-gated-multiplane-rca/).
+Gates are regular-expression or parser checks on structured agent output, not model judgment calls. A matching evidence line shows that a field was produced; it does not by itself prove the underlying tool data is correct. See also [evidence-gated multi-plane RCA](/blog/evidence-gated-multiplane-rca/).
 
 ### What operators actually write
 
@@ -108,7 +108,7 @@ An engineer who rephrases step 2 as "Check latency and errors for the alerted sl
 
 ### Under the hood (illustrative)
 
-CI walks the markdown AST, visits HTML comment nodes, parses key-value lines inside, and validates against a small registry — step IDs exist, `action` maps to an allowed tool family, `output` names a known evidence key. Sketch of the idea:
+Continuous integration (CI) walks the markdown abstract syntax tree (AST), visits HTML comment nodes, parses key-value lines inside, and validates against a small registry — step IDs exist, `action` maps to an allowed tool family, `output` names a known evidence key. Sketch of the idea:
 
 ```go
 // Illustrative: collect machine contracts from HTML comments only.
@@ -136,7 +136,7 @@ func collectStepMeta(comments []string) ([]stepMeta, []error) {
 
 `parseCommentKV` is mundane string splitting and required-key checks — not an NLP pipeline. If the comment block is malformed, the PR fails. If the prose is messy, nobody cares.
 
-At runtime, each `step` ID maps to a **bound skill** with a fixed tool allowlist. Stage 2 cannot start until stage 1 emitted an **evidence line** matching the gate pattern for `scope_summary`. That is how [evidence-based verification](/blog/evidence-based-verification/) plugs in: triage proposes inside the skill; gates promote or block deterministically.
+At runtime, each `step` ID maps to a **bound skill** with a fixed tool allowlist. Stage 2 cannot start until stage 1 emitted an **evidence line** matching the gate pattern for `scope_summary`. That is where [evidence-based verification](/blog/evidence-based-verification/) connects: triage proposes inside the skill; gates check required outputs before promotion. Tool results and the final claim need separate verification.
 
 ### Why not lint the bullets?
 
@@ -155,7 +155,7 @@ When a team outgrows comment blocks, the escape hatch is generating the skill re
 3. **Check saturation** — database wait, pool utilization, downstream payment client latency (parallel where safe).
 4. **Synthesize** — merge evidence into ranked hypotheses; no remediation without policy.
 
-Regression fixtures carry synthetic alert payloads through CI. If a gate stops matching, the pipeline fails before the next pager — not after a bad incident.
+Regression fixtures carry synthetic alert payloads through CI. A fixture can detect a broken gate before deployment, although a synthetic alert cannot cover all live data and integration changes.
 
 ---
 
@@ -169,11 +169,11 @@ If I were defending the wiki in an architecture review:
 
 **GitOps can create a priesthood.** Not every responder wants a PR to fix a typo in step 3. If only platform teams can edit executable runbooks, shadow knowledge returns in Slack pins and oral tradition.
 
-**RAG is good enough for narrowing.** Semantic search plus strict citation gets surprisingly far for read-only triage. The cliff edge is mutating steps and cross-system branches.
+**Retrieval-augmented generation (RAG) can help narrow a search.** Semantic search plus citations can support read-only triage, though retrieved fragments may omit a branch. The cliff edge is mutating steps and cross-system branches.
 
 **Screenshots orient humans in seconds.** A heatmap PNG beats a paragraph of axis labels for the bridge lead.
 
-**Verdict:** Confluence is not wrong. **Confluence as the only executable contract for agents** is wrong.
+Confluence can remain a useful human reference. Using its prose as the only execution contract for an agent leaves too much behavior implicit.
 
 ---
 
@@ -182,14 +182,14 @@ If I were defending the wiki in an architecture review:
 | Dimension | Wiki / PDF playbook | Git-managed triage + workflow binding |
 | --- | --- | --- |
 | **Authoring friction** | Low — edit page, done | Medium — PR, comment-block lint, smoke test |
-| **Staleness detection** | Periodic audits, angry pages | CI fails; gates stop matching |
+| **Staleness detection** | Periodic audits, angry pages | CI can catch invalid contracts; gates can detect missing evidence fields |
 | **How the agent runs it** | RAG chunks + LLM improvisation | Bound skill per step + deterministic gates |
-| **Execution determinism** | None — prose is ambiguous | Gates require evidence lines; tools are allowlisted |
+| **Execution determinism** | Depends on the executor; prose alone leaves steps ambiguous | Gates require evidence lines and tools are allowlisted, but claims still need review |
 | **Human onboarding** | Strong narrative | Needs companion "why we investigate this way" |
 | **Environment variance** | Often hardcoded examples | Parse from alert + discover-first probes |
 | **Dual reality risk** | Two humans, two docs | Human reads wiki; agent runs pinned Git revision |
 | **Postmortem loop** | Comment threads | Reviewed diff + execution cites revision |
-| **Remediation safety** | Policy in prose | Policy rules + HITL gates ([defense in depth](/blog/defense-in-depth/)) |
+| **Remediation safety** | Policy in prose | Policy rules + human-in-the-loop (HITL) approval gates ([defense in depth](/blog/defense-in-depth/)) |
 
 Procedures change faster than wiki culture: dashboards rename, metrics get prefixed, new regions use different labels. Wiki updates are voluntary; deploy pipelines are not. Agents do not get immunity from stale docs — they get **speed without verification** unless the execution contract is pinned and gated.
 
@@ -197,7 +197,7 @@ Procedures change faster than wiki culture: dashboards rename, metrics get prefi
 
 ## What Actually Works: Split the Corpus
 
-The pattern that survived production is **not** "delete Confluence." It is a deliberate split:
+The split we use is **not** "delete Confluence." It is a deliberate split:
 
 | Corpus | Lives in | Consumed by |
 | --- | --- | --- |
@@ -220,15 +220,15 @@ Think of it like infrastructure: you would not replace your architecture wiki wi
 5. **Pin revision on Sev-1** — high severity uses a bound version; lower severity can still search the wiki.
 6. **Tabletop the divergence** — same synthetic alert through human-with-wiki and agent-with-Git; fix the doc or the gate once.
 
-We are not optimizing for agents to sound smart. We are optimizing for **the same investigation to run twice and agree with itself** — a bar most wiki-only programs never needed until AI joined the bridge.
+The goal is to make steps reviewable and repeatable, not to guarantee identical model answers. Compare the evidence and decisions across runs, and investigate discrepancies.
 
 ---
 
-## Closing Thought
+## The boundary to maintain
 
-The uncomfortable truth for 2026: **RAG over messy, human-centric wikis is a recipe for operational chaos** if you treat retrieval as execution. Markdown in Git only helps when something other than the model decides whether step 3 actually finished — comment-block metadata for the contract, bound skills for tool scope, evidence lines for proof, gates for promotion.
+Retrieval from a human-oriented wiki can help an agent find context, but retrieved text should not silently become the execution contract for a high-stakes workflow. Markdown in Git only helps when something other than the model decides whether step 3 actually finished — comment-block metadata for the contract, bound skills for tool scope, evidence lines for proof, gates for promotion.
 
-Platform engineers feel this boundary first. You can build the comment linter, the skill registry, and the gate checks yourself — or you can adopt a platform that already separates human narrative from rigid execution. That separation — wiki for *why*, Git comments for *what must run*, workflows for *when it is allowed to advance* — is why we built Aiden at StackGen: platform teams should not have to invent a shadow YAML engine just to stop agents from improvising on Confluence crumbs.
+Platform teams can build or adopt the comment linter, skill registry, and gates. In Aiden at StackGen, we use that boundary to keep wiki context, Git-reviewed step contracts, and runtime promotion checks distinct. It adds authoring and maintenance work, but makes changes to executable triage easier to inspect.
 
 ---
 
@@ -246,4 +246,4 @@ Platform engineers feel this boundary first. You can build the comment linter, t
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> We build incident-triage agents at StackGen; the SRE offering is at [ai.stackgen.com](https://ai.stackgen.com).

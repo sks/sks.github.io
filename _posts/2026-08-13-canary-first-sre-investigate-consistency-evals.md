@@ -21,32 +21,30 @@ faqs:
     answer: "Correctness asks whether one RCA matches a rubric. Consistency asks whether three independent investigates on the same alert land on the same story — high scores that disagree still fail the product bar."
 ---
 
-Unit tests green does not mean the **Investigate** button still works on dogfood.
+Passing unit tests does not establish that the live **Investigate** workflow still works in the internal test environment.
 
-We learned that the hard way while wiring a nightly black-box check for [Aiden](/blog/aiden-platform/)'s SRE investigate path: pick any active alert, force a fresh investigation a few times, judge each structured RCA, and ask whether the stories **concur**. The first CI run was red for the wrong reasons. The second local full pass was green — but only after we stopped lying to ourselves about what “done” means.
+While wiring a nightly black-box check—one that exercises the product through its external interfaces—for [Aiden](/blog/aiden-platform/)'s site reliability engineering (SRE) investigation path, we selected an active alert, started fresh investigations, judged each structured root cause analysis (RCA), and checked whether the conclusions agreed. The first continuous integration (CI) run failed because the harness misread an intermediate status. A later local full pass succeeded after the poller was corrected; that does not establish nightly reliability across alerts.
 
 This sits next to [benchmarks for wall time and tool tax](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/) and [“is the task actually done?”](/blog/is-the-task-actually-done/). Different axis: not “how expensive was the dig,” but **“does the live product path still produce stable RCAs tonight?”**
 
 ---
 
-## TL;DR
+## What the trial showed
 
 - **Canary before full.** One live investigate + structural checks first. Spend judge tokens only after the path is honest.
 - **Draft is not done.** RCA text can appear while status is still in progress. Poll for a real terminal success state.
 - **Sync failure ≠ empty queue.** Prefer discover from existing alerts over blocking on a flaky sync.
 - **Correctness ≠ consistency.** Three high scores that tell different stories still fail.
-- **Quiet nights should warn, not page.** Empty alert queues are environment — make hard-fail opt-in.
-- **Unbuffered logs or you are flying blind.** Buffered stdout turns a fifteen-minute poll into a “hung” mystery.
+- **Quiet nights are untested, not green.** Warn when no active alert is available; make alert availability a hard requirement only if the test contract calls for it.
+- **Stream progress logs.** Buffered stdout can make a fifteen-minute poll appear stalled.
 
-### Explain like I'm five
-
-Before you grade three book reports with a fancy teacher, check that the printer still prints one page. And do not call the report finished just because someone scribbled the ending while the cover still says “draft.”
+Run one investigation to verify authentication, alert discovery, polling, and a terminal success state before paying for repeated model-judged trials. Text in a draft root cause analysis (RCA) is not a terminal state.
 
 ---
 
-## What we were trying to catch
+## What the test was intended to catch
 
-We wanted a **black-box** nightly that exercises the same path an operator uses:
+We wanted a nightly check through the same product interfaces an operator uses:
 
 1. Find an active alert (Grafana-backed preferred, any active alert acceptable).
 2. Start investigate with a forced new thread — **repeat**.
@@ -54,15 +52,15 @@ We wanted a **black-box** nightly that exercises the same path an operator uses:
 4. Score each write-up against a quality rubric (not a curated golden RCA for one famous incident).
 5. Require the root causes to **concur**.
 
-That is a product gate, not a model bake-off. Related: [demo → deploy receipts](/blog/demo-to-deploy-receipts/) — polite demos hide the failure modes that only show up when you hit the real button.
+This tests the live workflow rather than comparing model quality in isolation. Related: [demo → deploy receipts](/blog/demo-to-deploy-receipts/) — polite demos hide the failure modes that only show up when you hit the real button.
 
 ---
 
 ## Lesson 1 — Canary first, tokens second
 
-The full path is expensive in **two** currencies: live investigate wall clock, and LLM judge / concurrence calls.
+The full path uses both live investigation wall time and large language model (LLM) judge and concurrence calls.
 
-Our first instinct was “just run ×3.” That burned time and tokens before we had proven:
+Running three investigations immediately cost time and model calls before we had checked:
 
 - Auth headers actually reach the SRE app
 - Alerts exist tonight
@@ -76,7 +74,7 @@ Our first instinct was “just run ×3.” That burned time and tokens before we
 | **Canary** | One | No — structural score only | Skipped | Path smoke |
 | **Full** | Several | Yes | Hard checks + LLM yes/no | Nightly bar |
 
-Structural score means: completed successfully **and** root cause text is present. Ugly? Yes. Cheap? Also yes. It catches poller and auth bugs without paying a panel.
+The structural check requires a successful terminal status **and** root cause text. It catches some poller and authentication failures without paying for model judges, but it does not assess the root cause itself.
 
 **Finding.** Tokenomics for evals is the same discipline as [tokenomics for agents](/blog/maintaining-tokenomics-with-aiden/): do not spend the expensive pass until the cheap pass is green.
 
@@ -123,7 +121,7 @@ After the poller fix, a full local pass looked like this in spirit (qualitative)
 - Each scored well against the rubric
 - Concurrence said yes — same mechanism story, same locus class, honest about what was unverified
 
-That is the bar we care about for on-call assist. A single pretty RCA is a demo. Three agreeing RCAs are a product.
+That was the cross-run agreement check for this alert. Three agreeing RCAs on one alert support a narrow consistency claim; they do not prove correctness or stability across different alerts.
 
 **Finding.** High mean correctness with disagreeing roots is still a fail. Consistency is a **cross-run** property. Related: [curiosity before confidence](/blog/curiosity-before-confidence/) — fluent disagreement is still disagreement.
 
@@ -131,7 +129,7 @@ That is the bar we care about for on-call assist. A single pretty RCA is a demo.
 
 ## Lesson 5 — Quiet nights and config drift
 
-Two more footguns:
+Two more configuration risks:
 
 1. **No active alerts.** Default to warn-only. Require an alert only when someone is deliberately red-teaming the queue.
 2. **Integration name drift.** Config said one Grafana integration name; live alerts labeled another. Filter no-ops, then fall back to “any active.” Document the live name or you will debug ghosts.
@@ -140,7 +138,7 @@ Also: **unbuffered stdout**. A long poll with buffered logs looks hung. We kille
 
 ---
 
-## Practical checklist (steal this)
+## Practical checklist
 
 For any live “button path” eval on an agent product:
 
@@ -165,8 +163,8 @@ Then schedule the expensive full mode nightly. Keep canary for PR confidence and
 6. **Warn on quiet nights**; hard-fail only when operators ask.  
 7. **Unbuffered progress** is part of the harness, not a nice-to-have.
 
-We still have homework — alert diversity so we do not always pick the same Node Not Ready, cheaper hard concurrence before the LLM yes/no, and fixing the sync path so full mode does not waste wall clock. The important shift already landed: the nightly asks a product question, and the canary keeps that question affordable.
+Next steps are broader alert coverage, a cheaper deterministic agreement check before the LLM yes/no, and a more reliable sync path. The canary limits wasted judge calls, but a pass on one alert remains narrow evidence.
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

@@ -6,14 +6,14 @@ permalink: /series/enterprise-ai-agents-go/
 description: "Enterprise AI agents in Go: a practitioner series on production runtimes, workflows, SRE triage, and platform lessons from Aiden at StackGen."
 faqs:
   - question: "Why build an enterprise AI agent platform in Go?"
-    answer: "Go gives you static typing, simple deployment, and concurrency primitives that map cleanly to multi-stage agent workflows. This series covers when that trade-off beats Python-first AI frameworks in production."
+    answer: "We chose Go for its types, deployment model, and concurrency support. The series explains that choice alongside its costs, including access to Python-first AI libraries; it is not a general recommendation to switch languages."
   - question: "Where should I start reading?"
     answer: "Use a starter pack: Go agent runtime (definition, why Go, platform split) or SRE on-call (triage, RCA, observability). Then open the searchable series archive and follow series_order. Each post is self-contained but builds on prior lessons."
   - question: "Who is this series for?"
-    answer: "Staff engineers, platform teams, and SREs shipping agentic workflows to production — not tutorial readers looking for a hello-world chatbot."
+    answer: "Engineers interested in how agents run and fail in practice. The starter packs introduce the terms before the more detailed implementation posts."
 ---
 
-This series documents what we learned building a **production AI agent runtime** and **Aiden** — StackGen's multi-tenant orchestration platform for enterprise SRE and platform teams. Every post is grounded in shipped behavior and production failures, not demo polish.
+This series follows our work on an **AI agent runtime**—the software that manages a language model's tool calls, state, and retries—and **Aiden**, StackGen's platform for running agents across teams. Many examples involve site reliability engineering (SRE): investigating incidents and keeping services available. The posts mix implementation details, experiments, and lessons from things that went wrong. Results from our setup may not transfer directly to yours; the useful part is often the test or tradeoff, not our choice.
 
 ## Start with a pack
 

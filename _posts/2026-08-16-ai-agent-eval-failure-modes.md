@@ -21,27 +21,19 @@ faqs:
     answer: "Same contract: systems of record — here AppWorld's evaluate — vote before you trust narration. Self-report is a failure mode, not a tie-breaker."
 ---
 
-The transcript said pass. The judge said fail. **AI agent evaluation** on tool-using benchmarks fails in repeatable ways — and most of them are harness or policy bugs, not “the model is dumb.”
+One transcript claimed a pass even though no judge result confirmed it. In a tool-using benchmark, a readable account of work is not the same as the app state the benchmark checks. These runs exposed both test-harness problems and task errors; the sample is too small to assign a general share of blame to either.
 
 Parts [one](/blog/fair-agent-evals-before-performance/) and [two](/blog/agent-orchestration-tax-evals/) fixed tool fairness and measured **agent orchestration tax**. This post classifies **what blocked benchmark success** on a small AppWorld slice — harness issues (budget, spawn infra, redaction) mixed with task-hardness signals.
 
-Benchmark: [AppWorld](https://github.com/stonybrooknlp/appworld) ([paper](https://arxiv.org/abs/2407.18901)). Tools: MCP. Judge: AppWorld `/evaluate` — **`success: true`** is strict all-tests pass (TGC). Partial `pass_percentage` can look “close” while `success` stays false. We publish **aggregates only** — AppWorld data is license-protected; see their repo for terms.
+Benchmark: [AppWorld](https://github.com/stonybrooknlp/appworld) ([paper](https://arxiv.org/abs/2407.18901)). Tools: Model Context Protocol (MCP), which exposes actions the agent can call. Judge: AppWorld `/evaluate` — **`success: true`** is strict all-tests pass (TGC). Partial `pass_percentage` can look “close” while `success` stays false. We publish **aggregates only** — AppWorld data is license-protected; see their repo for terms.
 
 ![AI agent eval failure modes: budget, PII poison, wrong API, prose vs judge](/assets/images/og-appworld-failure-modes.jpg)
 
 ---
 
-## TL;DR
+## What a failed run tells you
 
-- **Head-to-head ties 5/5** on delegation-fit tasks — harness rule: both modes must clear strict TGC to win; neither did on this slice.
-- **Single-agent dominant mode:** `budget_no_eval` — burned iterations before `evaluate`.
-- **Planner dominant modes:** `pii_poison`, `wrong_method_422`, spawn infra hard-fails — more moving parts, more ways to die.
-- **Never trust prose PASS** without judge `success: true` — see [Is the task actually done?](/blog/is-the-task-actually-done/) and [evidence-based verification](/blog/evidence-based-verification/).
-- **Monday-morning rule:** log failure **class**, not just pass/fail — otherwise you will “optimize” the wrong layer.
-
-### Explain like I'm five
-
-The robot wrote “I finished homework” on the page but never handed it in. The teacher’s gradebook still says missing. You need the gradebook, not the robot’s diary.
+In this five-task paired sample, neither path passed AppWorld’s strict state checks, so the head-to-head rule recorded **5/5 ties**. That does not mean they failed for the same reason. A single-agent run could use up its turn budget before `/evaluate`; a planner worker could copy a redacted method name into a call and get HTTP **422** (the server rejected the request). Record both the failure class and whether the external judge ran. A transcript saying “PASS” without a judge result is not a pass; see [Is the task actually done?](/blog/is-the-task-actually-done/) and [evidence-based verification](/blog/evidence-based-verification/).
 
 ---
 
@@ -63,7 +55,9 @@ The robot wrote “I finished homework” on the page but never handed it in. Th
 
 Tasks chosen to reward delegate-then-synthesize: phone → notes → SMS, inbox + contacts + payments, workout note → playlist sizing, batch social payments, trip ledger → settle debts.
 
-### Aggregate failure mix
+### Observed failure signals
+
+These labels can overlap within one planner run (for example, a spawn failure can also leave no judge result). The columns are signal counts, **not** mutually exclusive partitions of five runs.
 
 | Failure class | Single-agent (of 5) | Planner (of 5) |
 |---------------|----------------------:|---------------:|
@@ -95,7 +89,7 @@ Use [From Vibes to Contracts](/blog/from-vibes-to-contracts-agent-evals/) vocabu
 
 ## PII placeholder poison (not unique to one runtime)
 
-When [PII redaction](/blog/pii-redaction-ai-agents/) replaces method names or tool tokens with `[HIDDEN:…]`, models sometimes **call the placeholder as if it were a real API**. AppWorld returns 422 — “no API named …”
+When [PII redaction](/blog/pii-redaction-ai-agents/) (masking personal or sensitive information) replaces method names or tool tokens with `[HIDDEN:…]`, the agent can **call the placeholder as if it were a real API**. AppWorld returns 422 — “no API named …”
 
 This is the same two-view tension as SRE evals: redaction for safety vs pass-through for evidence. For fair A/B, eval twins must document which redaction layers are on. See also [Microsoft Presidio](https://github.com/microsoft/presidio) for a public reference implementation of detect-and-replace redaction.
 
@@ -117,7 +111,7 @@ Checklist cross-link: [Is the agent task done?](/checklists/agent-done/)
 
 On **3/5** delegation-fit pairs, planner fairness failed with `create_agent_tools_unavailable` — optional infra names in spawn payload that were not registered in the eval config (notes tooling disabled). Hard-fail spawn wastes the whole subtree.
 
-Lesson: eval configs must match production AlwaysInclude semantics, or spawns become false negatives.
+Lesson: test configurations must provide the expected always-included tools, or spawns can fail for configuration reasons rather than task logic. Soft-dropping optional names is useful only when the omitted tools really are optional.
 
 ---
 

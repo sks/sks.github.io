@@ -12,7 +12,7 @@ faqs:
   - question: "Should AI agents ask clarifying questions in benchmark evals?"
     answer: "No in unattended evals. If nobody is at the keyboard, clarify tools stall the run until the wall clock expires. Deny ask_clarifying_question in harness config and fail the run if it still appears in logs."
   - question: "What is zero-tool delegation theater?"
-    answer: "A plan-mode worker that emits a success JSON plan but never calls domain MCP tools. The transcript looks green; AppWorld evaluate sees no mutations. Treat zero domain tool calls as a hard harness failure."
+    answer: "A plan-mode worker that reports success without calling the app tools. For a task requiring app changes, verify state and treat zero domain calls as a test failure; a read-only task needs a different check."
   - question: "Where should benchmark policy live — harness or agent framework?"
     answer: "In harness config (TOML, AGENTS.md) for benchmark-specific rules. Do not fork production runtime packages for one benchmark. Promote generic gates to the framework only when every customer needs them."
   - question: "Why can direct MCP score higher than multi-agent plan mode on the same task?"
@@ -21,22 +21,15 @@ faqs:
     answer: "Same task IDs, same stack rebuild, trace UI side-by-side (we use Langfuse): peak and total tokens, domain tool counts, failure class — not assistant prose or screenshots."
 ---
 
-If a human is not at the keyboard, **“ask a question”** and **“I finished with zero API calls”** are harness failures — not agent features. A direct MCP script can still reach the apps while your planner never leaves the hallway.
+In an unattended benchmark run, nobody is available to answer a clarifying question. A worker that reports completion without calling the simulated apps has not shown that it changed their state. Treat both as test-run failures here; in an interactive product, asking the user may be exactly the right behavior.
 
 This is part of our [AI agent evaluation series](/blog/fair-agent-evals-before-performance/) on [AppWorld](https://github.com/stonybrooknlp/appworld) ([paper](https://arxiv.org/abs/2407.18901)) through the **Aiden agent runtime**. Prerequisite: [running AppWorld locally](/blog/running-appworld-locally-genie-agent-eval/). **Next in the pair:** [multi-agent vs single-agent quality and token tax](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/). **Capstone:** [simple vs plan: when to use which](/blog/simple-vs-plan-when-to-use-which/).
 
 ---
 
-## TL;DR
+## An example of two different failures
 
-- **Unattended evals are not chat.** Clarify tools stall until the timer dies.
-- **Zero domain MCP calls = fake pass.** Prose-complete workers are delegation theater.
-- **MCP baseline vs plan mode** can fail on different layers — fix orchestration before you tune AppWorld APIs.
-- **Benchmark policy belongs in the harness** (TOML + `AGENTS.md`), not AppWorld-specific forks in production Go packages.
-
-### Explain like I'm five
-
-The take-home test has no teacher. Raising your hand wastes time. Saying “I cleaned my room” without opening the closet still fails the checklist.
+On a Spotify playlist task (`b0a8eae_3`), the coordinator waited roughly **3 minutes** for confirmation against a **4-minute** limit, so the judge never ran. In another path, a worker said the task was complete after **zero app-tool calls**; the simulated Spotify state remained unchanged. The first is a wait-policy failure, the second an execution failure. Deny the question tool in this unattended test and verify app calls and final state separately. Keep those benchmark-specific rules in the test runner (TOML and `AGENTS.md`), not a fork of the general agent runtime.
 
 ---
 
@@ -55,7 +48,7 @@ The **judge** is AppWorld’s `/evaluate` endpoint (`success: true` = strict all
 
 ## Ban clarifying questions in unattended evals
 
-On a four-task plan cohort, **3/4 passed** only after we treated `ask_clarifying_question` as an automatic harness failure — not a “maybe retry” signal.
+In a four-task plan cohort, **3/4** met the reported pass condition after the unattended harness rejected `ask_clarifying_question`. This small before/after observation does not isolate that policy from other fixes.
 
 **Spotify playlist from workout note** (`b0a8eae_3`): the coordinator burned ~3 minutes asking for playlist confirmation while the **4-minute wall clock** expired. The judge never ran.
 
@@ -87,7 +80,7 @@ What happened:
 - Lightweight plan steps defaulted to **structured planning JSON** instead of **tool_calling** when AppWorld tools were on the worker.
 - The stage router treated zero-tool prose as **early exit** — later stages never ran.
 
-**Monday-morning rule:** log **domain tool calls per worker** in handoff payloads. If spawn succeeded but MCP mutation count is zero, auto-retry or fail — do not accept coordinator prose as completion.
+**Monday-morning rule:** log **domain tool calls per worker** in handoff payloads. If a task requires app mutations and a spawned worker made no domain calls, retry within a bounded budget or fail — do not accept coordinator prose as completion. A legitimate read-only task needs a different check.
 
 **Fix (current harness):** force `task_type: tool_calling` in `appworld-plan.toml` + `AGENTS.md`. Fail the run when domain tool count is zero. Framework-level “require domain tools” knobs are the right *idea*; for this eval the enforcement that ships today is **harness policy**.
 
@@ -149,7 +142,7 @@ Pair with [Anthropic’s agent eval guide](https://www.anthropic.com/engineering
 ## Monday-morning checklist
 
 1. Deny clarify tools in benchmark TOML; fail if they appear in logs.
-2. Count **domain** MCP calls per worker — zero mutations = fail.
+2. Count **domain** MCP calls per worker; for a mutation task, zero calls cannot establish success.
 3. Classify failures (`clarifying_question`, `zero_tool_worker`, `pii_poison`, …) before comparing modes.
 4. Run MCP baseline **and** plan mode on regressions — different layers.
 5. Keep benchmark policy in harness config, not production forks.

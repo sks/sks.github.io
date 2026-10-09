@@ -17,56 +17,43 @@ faqs:
     answer: "Say PARTIAL or FAILED with what was retrieved. Never claim no signal when the preview was truncated."
 ---
 
-Your AI SRE agent skimmed a truncated Grafana preview, wrote “Unavailable,” and closed the dig. The full series was still on disk — truncated tool results, not missing metrics.
+An incident agent called a Grafana metric “Unavailable” after seeing only a preview of the tool response. The remaining series had been written to a spill file—a disk copy used when a tool result is too large for the model’s context window. In this composite case, incomplete retrieval was mistaken for missing metrics.
 
 *The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
-## TL;DR
-
-- Truncated previews ≠ empty datasources
-- Require **return_full** (then page) before grepping patterns
-- Expose **spill_path** for compact aggregates
-- Honesty vocabulary: **COMPLETE / PARTIAL / FAILED** — never fake “no signal”
-
-### Explain like I'm five
-
-If you only read the first page of a cookbook and say “there are no recipes for pasta,” you are wrong — the pasta chapter was on page forty. Ask for the whole book, or admit you only read the first page.
-
----
-
 ## The failure mode
 
-Large PromQL / LogQL / warehouse results hit context limits. The runtime shows a preview. The model treats the preview as the universe. RCA claims the plane has no data. A human re-runs the same query and gets series.
+PromQL (Prometheus metric queries), LogQL (log queries), and warehouse queries can return more bytes than the agent can read in one turn. The runtime presents a preview and stores the rest. If the agent treats that preview as the entire result, its root-cause analysis (RCA) can report no data even though a human rerunning the query sees series.
 
-That is not curiosity. That is **the product lied about completeness** — the service claimed no signal when it only saw a preview.
+The fault is a missing completeness contract, not evidence that the data source was empty. A genuine empty full result and an unread remainder require different conclusions.
 
 Related packing discipline: [claim-aware evidence packing](/blog/claim-aware-evidence-packing/).
 
 ---
 
-## What fixed it (product shape)
+## Retrieving and labeling the result
 
-- Shared spill model for large tool outputs
-- Mandatory full retrieve before pattern search
-- Paging when full retrieve hits byte caps
-- `spill_path` available for `jq`-style aggregates without stuffing the whole blob into the chat
-- Completeness labels the operator can trust
+- A shared spill model that marks large tool outputs as previews and retains the full result
+- A required `return_full` retrieval before searching the result for patterns
+- Paging when `return_full` hits byte caps; a single page is still only partial evidence
+- A `spill_path` pointer for `jq`-style aggregates over the stored result without stuffing the whole blob into chat
+- Completeness labels: **COMPLETE** only after the requested scope is read, **PARTIAL** when some pages remain, and **FAILED** when retrieval fails. These describe retrieval, not whether the underlying system is healthy
 
 ---
 
-## If you lead an SRE team
+## Reviewing an agent RCA
 
 - Treat “Unavailable” without a completeness tag as a defect
 - Ask “was this preview or full?” in review of agent RCAs
-- Prefer PARTIAL with a spill pointer over a confident empty narrative
+- Prefer PARTIAL with a spill pointer over a claim of no signal when retrieval is unfinished
 
-## If you ship the agent platform
+## Enforcing this in the platform
 
 - Do not let models grep truncated previews as if they were complete
 - Teach completeness vocabulary in the tool contract, not only in the system prompt
-- Keep operator-visible paths to the spill for post-hoc verification
+- Keep operator-visible, access-controlled paths to the spill for later verification
 
 ---
 

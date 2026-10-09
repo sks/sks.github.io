@@ -4,97 +4,56 @@ title: "Multi-Agent Handoff Testing: Catch Context Loss Before Production"
 date: 2026-10-07 12:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 76
-description: "Multi-agent handoff testing treats the brief as a contract: settled facts, open gaps, no transcript dump. Catch context loss before the parent overflows."
+description: "Test the brief passed from a worker to its parent: settled facts, open gaps, size limits, and a clear stop condition."
 image: /assets/images/og-default.png
 tags: [ai-agents, evaluation, multi-agent, testing, handoff, context-engineering, aiden]
 permalink: /blog/multi-agent-handoff-testing-context-loss/
 faqs:
   - question: "How do you test context loss between agents?"
-    answer: "Treat the handoff as a contract. Assert required fields survived, open gaps were not silently dropped, the receiver does not re-ask known facts, and hops stay bounded. Mutate one field at a time and expect a fail."
+    answer: "Check that the handoff preserves required fields and unresolved questions, stays within its size bound, and reaches the receiver. Test whether the receiver avoids re-asking settled facts and stops delegating when gaps are closed."
   - question: "What is multi-agent handoff testing?"
-    answer: "Tests aimed at the transfer boundary: payload completeness, provenance, permissions, hop budget, and a terminal state. Both agents can look fine while the seam drops context."
+    answer: "Testing the transfer from one agent to another: payload completeness, provenance, permissions where relevant, hop budget, and a clear terminal state. A good final answer alone may not reveal a faulty transfer."
   - question: "Should a worker return its full transcript?"
-    answer: "No. Return a short brief: what settled, what is still open. Replaying the child transcript is how parents blow the input cap."
+    answer: "Generally return a bounded brief with settled facts, evidence pointers, and open questions rather than replaying the full transcript. Preserve access to the original evidence when a later audit needs it."
   - question: "How does this relate to contract tests?"
-    answer: "Ham Vocke's consumer and provider tests apply: the parent consumes a brief, the worker provides it. Test the boundary, not the whole UI of either side."
+    answer: "The worker provides a brief and the parent consumes it. Specify and test what that boundary requires, including how the parent behaves if a field or piece of evidence is missing."
 ---
 
-The parent overflowed because the worker sent its diary. That is **context loss** wearing a tuxedo: nothing "missing," everything too present. **Multi-agent handoff testing** exists to catch that seam before production.
+In one run, a worker sent its entire transcript back to the parent agent. The parent exceeded its input limit before it could finish the user's task. The failure was not a missing fact; it was a handoff too large to use. A shorter handoff has the opposite risk: dropping an unresolved question and letting the parent claim the work is complete.
 
-Search results from [TestMu](https://www.testmuai.com/blog/agent-handoff-testing/) and [QASkills](https://qaskills.sh/blog/testing-multi-agent-handoff-context-loss) say the same thing we learned the hard way: both agents can behave correctly while the transfer drops or dumps information. Test the boundary.
-
----
-
-## TL;DR
-
-- A handoff is a short contract, not a transcript dump.
-- The brief states what settled and what is still open.
-- Once every gap is closed, stop spawning more workers.
-- If you trim the brief and drop an open gap, the work is not closed.
-- Match the eval to production settings. Slower trials beat grading a different agent.
-- Give each worker its own folder. The parent still writes the deliverable where the grader looks.
-
-### Explain like I'm five
-
-When you ask a friend to check the basement, you want "stairs creak, water heater fine, weird smell by the dryer." You do not want them to recite every step they took for twenty minutes while you forget why you asked.
+A *handoff* is the information passed from a worker agent to the parent that assigned it a subtask. A *brief* is the bounded summary the parent can act on. Discussions by [TestMu](https://www.testmuai.com/blog/agent-handoff-testing/) and [QASkills](https://qaskills.sh/blog/testing-multi-agent-handoff-context-loss) likewise focus on the transfer boundary: checking each agent separately can miss information lost or dumped between them.
 
 ---
 
-## Consumer and provider, parent and worker
+## Specify what crosses the boundary
 
-Vocke's contract tests map cleanly:
+| Participant | Responsibility |
+|-------------|----------------|
+| Worker (provider) | Return the goal, settled facts with evidence pointers, open gaps, and why it stopped, within a payload limit |
+| Parent (consumer) | Use those facts without re-asking unnecessarily, keep unresolved gaps visible, stop assigning work when they are closed, and write the user-facing deliverable |
 
-| Role | Obligation |
-|------|------------|
-| Worker (provider) | Return a bounded brief with settled facts and open gaps |
-| Parent (consumer) | Consume the brief, refuse more work when gaps are closed, write the user-facing deliverable |
+This is a *contract test*: it checks what the provider sends and what the consumer requires. A pointer to a note can stand in for its full body in the brief, provided the evidence remains retrievable. The payload and parent-rollup caps depend on the model window and product budget; there is no universal byte count here. [Stop Spawning Duplicate Workers](/blog/stop-duplicate-agent-workers-handoff-gate/) covers the related stop condition.
 
-The worker does not return its transcript. Pointers to notes (keys without full bodies) are enough. Caps on handoff payload size and parent rollup size are product choices; the principle is "bounded," not a magic number in this post.
+If shortening a brief would remove an open gap, mark the parent's summary unfinished rather than silently treating the gap as closed. A brief should save context space without converting uncertainty into certainty.
 
-If trimming the brief would drop an open gap, mark the parent summary unfinished. Silent omission is how you ship false confidence.
+## Input limits and production settings matter
 
-Related: [Stop Spawning Duplicate Workers](/blog/stop-duplicate-agent-workers-handoff-gate/).
+When a prompt exceeds the serving model's input window, shrink tool output once according to your compaction policy, then refuse if it still does not fit. Repeatedly feeding the worker's transcript back into the parent makes overflow likely. Test both the acceptable brief and the refusal path.
 
----
+Our trials slowed when we turned summaries off to match production. Increasing the trial time budget was preferable to grading a faster, summarized configuration we did not ship. This is a tradeoff: realistic settings cost more time, but different settings answer a different question.
 
-## Input caps are part of the contract
+## Test the transfer, one change at a time
 
-If the prompt does not fit the serving window, shrink tool output once and then refuse. Recursive overflow is usually a transcript dump wearing a handoff costume.
+1. Supply a brief with goal, settled facts, open gaps, and stop reason. Check that each field reaches the parent.
+2. Remove one open gap during trimming and assert that the parent cannot mark the task closed.
+3. Give the receiver an already settled fact and check it does not delegate simply to rediscover it.
+4. Exercise the hop budget—the limit on parent-to-worker transfers—and check that another spawn is refused when the budget is spent or the gaps are closed. Log when the cap fires.
+5. Confirm the parent writes its deliverable at the path the grader reads; keep worker files in isolated folders so they cannot overwrite it.
+6. Supply an oversize prompt and verify one compaction attempt followed by refusal if necessary.
+7. Run a live trial with production summary settings after the fast contract tests pass.
 
-Match the eval to production. Turning summaries off made trials slower. Raise the time budget. Do not grade a summarized twin that you never ship.
+These checks have different costs. A unit test can verify fields and bounds quickly; a live trial can show whether the parent actually uses the brief. The [testing pyramid](/blog/ai-agent-testing-pyramid/) helps keep the repeated structural checks out of the slow layer.
 
----
-
-## Handoff test checklist
-
-Use this as a Monday checklist. Mutate one item at a time and expect a fail.
-
-1. Required fields present in the brief (goal, settled facts, open gaps, stop reason).
-2. Open gaps cannot disappear during trim without marking unfinished.
-3. Receiver does not re-ask facts already in the brief.
-4. Hop count stays inside a budget.
-5. After gaps close, further spawn is refused.
-6. Parent deliverable lands where the grader looks.
-7. Worker files stay in an isolated folder so they cannot clobber the parent root.
-8. Oversize prompt: one compact attempt, then refuse.
-
-That is contract testing at the boundary. Replaying the child transcript is the ice-cream cone from the [testing pyramid](/blog/ai-agent-testing-pyramid/) post.
-
----
-
-## What to do Monday
-
-1. Write down the handoff schema in one page: required fields and forbidden dumps.
-2. Add a unit test that a transcript-sized payload is rejected or truncated to the brief shape.
-3. Add a mutation test that drops one open gap during trim and asserts "not closed."
-4. Cap hops. Log when the cap fires.
-5. Run one live trial with production summary settings, even if it is slower.
-6. Confirm the parent artifact path is the path the grader reads.
-
----
-
-## Takeaway
-
-**Multi-agent handoff testing** is not "did the final answer sound good?" It is "did the right short brief cross the seam without losing the open questions or drowning the parent?"
+The desired outcome is a brief the parent can use, not merely a short one. Size, preserved uncertainty, and correct downstream behavior all matter.
 
 Previous: [How to Test AI Agent Loops](/blog/test-ai-agent-loops-with-evidence/). Next: [AI Agent Evals in CI/CD](/blog/ai-agent-evals-cicd-flakes/).

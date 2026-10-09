@@ -18,128 +18,68 @@ faqs:
 
 > **Featured by CNCF.** An edited version of this article was published on the [Cloud Native Computing Foundation blog](https://www.cncf.io/blog/2026/08/04/you-cant-debug-what-you-cant-see-observability-for-ai-agents/).
 
-Traditional APM can't tell you why your agent spent far more than usual asking the same question three times.
+A service can return a successful response even when an agent has asked the same question repeatedly, spent far more than expected, or reported a result that its tools do not support. Standard application performance monitoring (APM) tells you whether requests were fast and error-free; it does not explain the sequence of decisions inside an agent session.
 
-We've been running [AI agents for SRE teams](/topics/ai-agents-sre/) in production for months. The hardest part isn't building them — it's understanding what they're doing when they go wrong. Agents don't crash with stack traces. They loop, hallucinate, burn tokens, and produce plausible-looking output that's subtly wrong.
-
-Here's what we learned about seeing inside.
+We have run [AI agents for site reliability engineering (SRE) teams](/topics/ai-agents-sre/) in production for months. The following signals helped us investigate their failures. They add to ordinary service monitoring rather than replacing it.
 
 ---
 
-## Why Standard Monitoring Falls Short
+## What We Need to Answer
 
-Standard application monitoring answers questions like:
-- Is the service up?
-- How fast are responses?
-- Are there errors?
+For an agent session—a task from start to finish—we want to know why its cost rose, whether tools repeated without progress, what evidence supports its final answer, and which dependency or model caused an error. Counters for HTTP latency and error rates cannot answer those questions alone. Prometheus metrics and Grafana dashboards still help with alerting and service health; detailed session timelines supply the missing context.
 
-Agent monitoring needs to answer different questions:
-- **Why did this task cost dramatically more than usual?**
-- **Why did the agent call the same tool repeatedly?**
-- **Did the agent actually do what it said it did?**
-- **Which model is best for this task type?**
-- **Is the agent learning, or is it making the same mistakes?**
+## 1. Traces Show the Sequence
 
-These are fundamentally different questions. Prometheus counters and Grafana dashboards alone won't answer them.
+A trace records the session's model calls, tool executions, and delegated sub-agent work, including their timing and costs. We send traces to [Langfuse](https://langfuse.com). Each operation is a span (one timed unit of work); child spans under a delegation make it possible to follow a sub-agent without losing the parent task.
 
----
+We batch and export spans without making a tool call wait for the trace service's HTTP response. On shutdown the exporter attempts to flush pending data. If the backend is unavailable, this design favors agent availability over complete telemetry. That tradeoff should be explicit: buffered spans can be lost on a crash, and an outage of the tracing service will leave gaps.
 
-## The Three Pillars for Agents
+## 2. Cost and Budgets Catch Runaway Work
 
-### 1. Traces — The Session Timeline
+A token is a unit of model input or output that providers use for usage and billing. We track usage and estimated cost per session, including which model handled each call, and per agent over time, including session counts and daily trends. This lets us distinguish one expensive investigation from a sustained increase.
 
-Every agent session should produce a trace — not a generic APM trace, but an **agent trace** that captures the full decision history: each model call, each tool invocation, each sub-agent delegation, with timing and cost attached.
+Repeated tool calls and growing context can increase cost quickly, especially when several agents work at once. We use hard iteration caps, per-tool call budgets, and detection of identical consecutive calls to stop some loops before an alert arrives. A cost alert for a session above a multiple of that agent's rolling average catches slower anomalies that those limits may miss. Cost spikes warrant investigation; they are not proof of a bug, since some incidents genuinely require more work.
 
-We use [Langfuse](https://langfuse.com) as our trace backend. Every LLM call, tool execution, and sub-agent delegation is a span. Traces nest — sub-agent work appears as children of the parent trace, so you can follow delegation without losing the thread.
+## 3. Audit Records Support Reconstruction
 
-Trace delivery must be non-blocking. Tool execution should never wait on a synchronous HTTP POST to a tracing backend. Use a batch exporter pipeline so spans buffer in memory and flush periodically. On shutdown, drain remaining spans gracefully. If the trace backend is temporarily unreachable, you lose telemetry — not availability.
+Tool calls, governance decisions, and memory operations are written to a structured, timestamped, append-only audit record. We sanitize sensitive tool output before logging it. Audit is for review after the fact; it cannot block an unsafe call and redaction can both miss sensitive material and obscure details an investigator needs.
 
-### 2. Costs — The Unit Economics Question
+## A Quick Dependency Check
 
-Token costs are the unit economics of agents. You need visibility at two levels:
+Our `doctor` command, named after utilities such as `brew doctor`, checks model connectivity, vector-store reachability, pending approvals, memory counts, trace-backend status, and integration health. It points an operator toward an unhealthy dependency without requiring an initial search across several dashboards. A passing check only reflects what was tested at that moment.
 
-- **Per session** — total cost, token breakdown, which model did what
-- **Per agent over time** — daily burn rate, session count, cost trends
+## Review Sessions Without Reading Every Trace
 
-**Why this matters:** An agent that loops — calling the same tool repeatedly because it can't make progress — burns tokens geometrically. Without cost monitoring, you discover this when the invoice arrives, not when the loop starts.
+We run automated reviews of completed traces for duration, cost, tool count, repeated calls, and token-efficiency flags. Sessions with anomalies such as loops, errors, or unusually high cost go to human review. This reduces manual triage volume, but threshold-based review can miss subtle wrong answers with normal-looking costs.
 
-**Proactive guardrails:** Reactive alerting alone isn't fast enough — a tight loop in a parallel agent can burn through budget in seconds before a webhook fires. Hard iteration caps, per-tool call budgets, and loop detection that blocks identical consecutive calls all act as **pre-flight circuit breakers**. Alerts are the second line of defense, not the first.
+## Metrics and Traces Have Different Jobs
 
-**Alerting:** Alert when a single session exceeds a multiple of the rolling average cost for that agent. This catches slower-burning anomalies — hallucination spirals, model routing errors, gradually accumulating context — that slip past hard limits.
+For real-time dashboards, we export bounded metrics such as success and failure rates by tool, agent-level cost, approval latency histograms, and classification counts. Traces and structured logs retain per-session detail.
 
-### 3. Audit — The Immutable Record
+Avoid unique session IDs as Prometheus labels: each new value creates another time series. Tool and agent names can be bounded labels if your deployment controls their number; even those labels need scrutiny when users can create arbitrary names. Thousands of unique session labels can overwhelm metric storage. Put the session ID in a trace instead.
 
-Every tool call, governance decision, and memory operation should log to an append-only record — structured, timestamped, searchable. Tool outputs that contain sensitive data get sanitized before logging. You need to reconstruct what happened without exposing credentials in the process.
+| Signal | Question it helps answer |
+|--------|--------------------------|
+| Session cost against a rolling average | Is this task using unexpectedly many model calls or tokens? |
+| Repeated identical tool calls | Is it stuck on an action? |
+| Approval latency | Is human review delaying the task? |
+| Model error rate | Is a provider failing? |
+| Vector store and integration health | Is a dependency silently unavailable? |
+| Daily token use against budget | Is spending approaching a limit? |
+| Audit log growth | Is execution unusually frequent? |
 
----
-
-## The Diagnostic Command
-
-We built a `doctor`-style diagnostic command (think `brew doctor`) that checks agent health in one shot: model connectivity, vector store reachability, pending approvals, memory counts, trace backend status, integration health.
-
-One command tells you if the agent's dependencies are healthy. No digging through five dashboards to find which dependency is down.
-
----
-
-## Automated Session Reviews
-
-Raw traces are useful for debugging individual sessions. But with many agents running hundreds of sessions daily, you can't review them all manually.
-
-We run automated analysis on completed traces: duration, cost, tool count, loop detection, token efficiency flags. Anomalous sessions — loops, high cost, tool errors — get flagged for human review. Humans review the flags, not every session.
-
----
-
-## Metrics vs Traces
-
-For real-time dashboards and alerting, export bounded metrics to Prometheus (or similar): tool success/failure rates by tool name, per-agent session costs, approval latency histograms, classification counts.
-
-These complement traces — they don't replace them.
-
-**A warning on cardinality:** Keep Prometheus labels low-cardinality. Tool names and agent names are safe — they have bounded values. Never put unique identifiers like session IDs into Prometheus labels. A production system running thousands of agent sessions daily will cause a cardinality explosion that crashes the metrics server. Leave per-session details to your tracing backend or structured logs.
-
----
-
-## What to Watch
-
-| Signal | Why it matters |
-|--------|----------------|
-| Session cost vs rolling average | Catches loops and runaway context early |
-| Identical consecutive tool calls | Loop detection before cost explodes |
-| Approval latency | Stale approvals mean blocked agents |
-| Model error rate | Provider issues vs agent bugs |
-| Vector store / integration health | Silent dependency failures |
-| Daily token burn vs budget | Invoice surprises |
-| Audit log growth rate | Potential runaway execution |
-
----
-
-## Lessons Learned
-
-1. **Cost is your canary.** Sudden cost spikes almost always indicate a bug — loops, model routing errors, or unbounded context accumulation. Alert on cost first, debug second.
-
-2. **Traces are for debugging, metrics are for alerting.** Don't try to alert on traces (too detailed) or debug with metrics (too aggregated). Use both.
-
-3. **Audit PII-redaction is non-negotiable.** Your audit trail will be queried during incident reviews. If it contains credentials or PII, your observability tool becomes a liability.
-
-4. **Build a diagnostic command.** One command, all dependencies, clear pass/fail — saves more time than any dashboard.
-
-5. **Automate trace analysis.** You can't review hundreds of sessions a day manually. Let the analyzer flag anomalies; humans review the flags.
-
----
+For our platform, traces are the starting point for debugging individual tasks, metrics are useful for alerting, and audit records explain what was allowed and executed. None alone tells us whether an answer was useful to an on-call engineer.
 
 ## Related reading
 
 - [LLM Tokenomics for Production Agents](/blog/maintaining-tokenomics-with-aiden/) — context budgets and cost attribution
-- [AI Incident Triage for SREs](/blog/ai-incident-triage-sre/) — what to gather once you can see sessions
+- [AI Incident Triage for SREs](/blog/ai-incident-triage-sre/) — what to gather once sessions are visible
 - More on [AI agents for SRE](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---
 
-
-*What observability tools do you use for your agent platform? I'm especially interested in cost monitoring and loop detection approaches. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
-
-
+*What signals help you investigate agent failures? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> **StackGen builds AI-assisted SRE tools.** Our offering at [ai.stackgen.com](https://ai.stackgen.com) supports incident triage, diagnostics, and draft root-cause analyses.

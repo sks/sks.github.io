@@ -9,13 +9,13 @@ tags: [cce, aws, iam, security, devops, ai-coding, go, github-actions]
 
 You asked the IDE for "sync Kubernetes services to Route 53." It wrote the Go code. Tests pass. The PR looks fine.
 
-Nobody listed the IAM permissions.
+The pull request still needs a review of Identity and Access Management (IAM) permissions: which AWS actions the code needs, on which resources.
 
 **CCE (Code Context Engine)** is a static-analysis CLI that reads your source tree and answers:
 
 > *Which cloud API operations does this code actually call?*
 
-This post is the **one-stop guide** — what CCE solves, how to run it locally and in CI, and how to read the output. Deeper reference lives at [appcd-dev.github.io/cce](https://appcd-dev.github.io/cce/).
+This guide covers what CCE can infer from source, how to run it locally and in continuous integration (CI), and how to read its output. Deeper reference lives at [appcd-dev.github.io/cce](https://appcd-dev.github.io/cce/).
 
 **On this page:** [What it solves](#what-cce-solves) · [What it is not](#what-cce-is-not) · [Concepts](#core-concepts) · [Install](#install) · [CLI cheat sheet](#cli-cheat-sheet) · [Personas](#who-its-for) · [Worked example](#worked-example-external-dns) · [Recipes & packs](#recipes-and-packs) · [Enterprise lenses](#enterprise-lenses-and-catalogs) · [GitHub Actions](#github-actions) · [Reading output](#reading-the-output) · [Resources](#resources)
 
@@ -23,23 +23,23 @@ This post is the **one-stop guide** — what CCE solves, how to run it locally a
 
 ## What CCE solves
 
-CCE is **read-only inventory**: it maps SDK and library call sites to structured tuples `(provider, resource, operation)` using tree-sitter. It does not rewrite code, execute your app, or parse Terraform.
+CCE is **read-only inventory**: it maps SDK and library call sites to structured tuples `(provider, resource, operation)` using tree-sitter, a parser for source-code syntax. It does not rewrite code, execute your app, or parse Terraform.
 
 | Problem | How CCE helps |
 |---------|----------------|
-| **IAM / least privilege** | Derive the `Action` list your code needs before opening a platform ticket |
+| **IAM / least privilege** | Produce candidate `Action` names for review before opening a platform ticket |
 | **AI-assisted cloud code** | Ground permission reviews in static facts, not guesswork or `route53:*` templates |
-| **PR drift** | `cce diff --fail-new` fails CI when a branch adds new cloud APIs |
+| **PR drift** | `cce diff --fail-new` fails CI when a branch adds mapped cloud API calls |
 | **SDK modernization** | `sdk-uplift` recipe labels legacy vs v2 SDK usage in one parse |
 | **Tech debt / forbidden libs** | Custom lenses flag deprecated packages (`TECH_DEBT`, `FORBIDDEN`) |
-| **CVE reachability** | Lenses tie CVE-affected packages to **call sites** in your repo (f-SBOM style) |
-| **Platform golden path** | Detect raw `boto3` / AWS SDK bypassing your internal platform SDK |
-| **Audit evidence** | JSON/SARIF reports with file, line, and method for each mapped call |
+| **CVE reachability** | Lenses tie packages associated with Common Vulnerabilities and Exposures (CVE) identifiers to **call sites** in your repo (a function-level software bill of materials, or f-SBOM, style of inventory; not proof that a vulnerable path executes) |
+| **Platform golden path** | Detect raw `boto3` / AWS software development kit (SDK) calls bypassing your internal platform SDK |
+| **Audit evidence** | JSON or Static Analysis Results Interchange Format (SARIF) reports with file, line, and method for each mapped call |
 | **Pre-deploy review** | Attach entitlement reports to change tickets the way you attach test coverage |
 
 CCE does **not** replace security sign-off. It gives reviewers and platform teams a **machine-readable baseline** — the same facts you'd reconstruct with `grep`, code review, and spreadsheets.
 
-In the AI-assisted development era, the IDE optimizes for code that compiles. Production still needs IAM that matches *actual* usage, audit evidence, and drift detection when someone (or an agent) adds a new AWS client. CCE is the guardrail for high-velocity teams.
+An AI-assisted editor can produce compilable cloud calls without settling their permission scope. CCE gives reviewers a source-based inventory to compare with IAM policy and to diff when new SDK calls appear. Dynamic dispatch and unmapped wrappers still require manual or runtime review.
 
 ---
 
@@ -54,7 +54,7 @@ Keep expectations aligned:
 | **Languages** | Go, Java, Python, JavaScript (`.go`, `.java`, `.py`, `.js`/`.jsx`/`.mjs`/`.cjs`) |
 | **Polyglot folders** | One language per scan; use `AUTO` or run per language |
 | **Facades** | Internal wrappers may hide underlying SDK calls unless you scan the SDK or add lens rules |
-| **Effective permissions** | Reports what code *calls*, not what AWS IAM eventually allows after SCPs and boundaries |
+| **Effective permissions** | Reports mapped call sites, not effective AWS permissions after service control policies (SCPs), permission boundaries, resource policies, and conditions |
 
 Full list: [Known limitations](https://appcd-dev.github.io/cce/reference/known-limitations/).
 
@@ -64,13 +64,13 @@ Full list: [Known limitations](https://appcd-dev.github.io/cce/reference/known-l
 
 | Term | What it is |
 |------|------------|
-| **Entitlement** | One row: `(provider, resource, operation)` plus file/line/method |
+| **Entitlement** | One mapped call row: `(provider, resource, operation)` plus file/line/method; here an entitlement is a candidate operation, not a granted permission |
 | **Lens** | YAML mapper (`*_lenses.yaml`) — rules that turn call sites into entitlements; passed via `-mapper-file` |
 | **Recipe** | Catalog entry (id, languages, `filter`) pointing at a lens — discover with `cce catalog` |
 | **Pack** | Named bundle of recipe ids (e.g. `modernization-pack`) — one parse, merged JSON |
 | **Diff** | Compare two JSON reports; `--fail-new` for CI gates |
 
-**Mapper precedence:** With `-mapper-file`, your lens runs **first**; built-in cloud rules fill gaps when the lens does not match.
+**Mapper precedence:** With `-mapper-file`, your lens runs **first**; built-in cloud rules fill gaps when the lens does not match. Review custom rules for coverage and false matches.
 
 **Filters:** `-filter cloud` keeps cloud-style rows only. Use `-filter all` for custom providers (`PLATFORM`, `TECH_DEBT`, `CVE`, …).
 
@@ -154,7 +154,7 @@ cce -folder provider/aws -language GO -filter cloud \
   -format json -output external-dns-aws.json
 ```
 
-CCE parses `provider/aws` with tree-sitter and emits `(provider, resource, operation)` tuples — Route 53 list/change operations and STS assume-role wiring.
+CCE parses `provider/aws` with tree-sitter and emits `(provider, resource, operation)` tuples for mapped calls, including Route 53 operations and Security Token Service (STS) assume-role wiring.
 
 ### Derive IAM actions
 
@@ -164,7 +164,7 @@ jq -r '.entitlements[]
   | "\(.resource):\(.operation)"' external-dns-aws.json | sort -u
 ```
 
-**CCE gives you the Action array from static analysis.** Resource ARNs and condition keys belong in Terraform/IRSA — never ship `Resource: "*"` because a template said so.
+CCE proposes action names from mapped static call sites; confirm them against the AWS action model and the actual deployment path. Resource Amazon Resource Names (ARNs) and condition keys need separate policy review in Terraform or IAM Roles for Service Accounts (IRSA). The following JSON is an illustrative starting point, not a deployable least-privilege policy: each action may need its own resource scope.
 
 ```json
 {
@@ -410,7 +410,7 @@ No drift:
 }
 ```
 
-New SDK usage appears in **`added`** — that is what `--fail-new` enforces. Review each row: new `resource`/`operation` = new IAM surface.
+Mapped new SDK usage appears in **`added`** — that is what `--fail-new` enforces. Review each added `resource`/`operation` as a potential new IAM surface; absence of added rows does not prove permissions have not changed elsewhere.
 
 ---
 
@@ -423,7 +423,7 @@ New SDK usage appears in **`added`** — that is what `--fail-new` enforces. Rev
 | **3. Actions** | Derive IAM action strings; scope ARNs in Terraform / IRSA |
 | **4. Gate** | `baseline` + `fail-on-new` blocks unreviewed cloud surface |
 
-**code → entitlements → policy conversation** — the static half of cloud governance while the IDE keeps shipping features.
+The workflow is code → candidate operations → policy review. Static inventory helps start the conversation; it does not establish effective least privilege alone.
 
 ---
 
@@ -445,11 +445,11 @@ New SDK usage appears in **`added`** — that is what `--fail-new` enforces. Rev
 
 ---
 
-## Closing thought
+## Where the scan ends
 
-AI-assisted development lowered the cost of **adding** cloud integrations. It did not lower the cost of **proving** you only requested the permissions you need. A five-minute CCE scan before merge is cheaper than a security review round-trip — and cheaper than prod discovering your Route 53 client can't assume the role you never updated.
+AI-assisted development lowered the cost of **adding** cloud integrations. It did not lower the cost of **proving** you only requested the permissions you need. A CCE scan before merge may catch a new mapped call early, but it is not a substitute for security review or testing the role in its deployment environment.
 
-The public CLI handles fast, local entitlement extraction. Scaling across an org — multi-cloud lens packs in corporate CI/CD, centralized governance, runtime alignment — is what [StackGen](https://cloud.stackgen.com) extends. Enterprise questions: **sales@stackgen.com**.
+The public CLI handles local source-based entitlement extraction. [StackGen](https://cloud.stackgen.com) extends this with multi-cloud lens packs in corporate CI/CD, centralized governance, and runtime alignment. Enterprise questions: **sales@stackgen.com**.
 
 ---
 
@@ -457,4 +457,4 @@ The public CLI handles fast, local entitlement extraction. Scaling across an org
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> We build incident-triage agents at StackGen; the SRE offering is at [ai.stackgen.com](https://ai.stackgen.com).

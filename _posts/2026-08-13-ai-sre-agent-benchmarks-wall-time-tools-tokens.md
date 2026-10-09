@@ -21,9 +21,9 @@ faqs:
     answer: "Every tool result re-enters the next model context unless middleware compresses or stubs it. Measuring tool response length (and truncation markers) predicts prompt-token growth better than counting tool names alone."
 ---
 
-If you only report “the agent finished,” you are not benchmarking an [AI SRE agent](/topics/ai-agents-sre/). You are narrating a demo.
+An [AI agent for site reliability engineering (SRE)](/topics/ai-agents-sre/) can finish a run without producing useful incident findings. A benchmark should measure both the result and the resources used.
 
-Production questions are uglier and more useful:
+For this incident-triage comparison, the useful questions were:
 
 - How long until a **closed Theory**?
 - How many **tool calls** burned the budget — and which families?
@@ -33,21 +33,19 @@ Production questions are uglier and more useful:
 
 We evaluated two distinct A/B test axes on the same class of incident-response job. One axis is **orchestration shape** — parent-first single agent vs a [ReAcTree](/blog/reactree-bugs/) planner ([full write-up](/blog/single-agent-vs-multi-agent/)). The other is **evidence middleware** — rewrite-friendly chat defaults vs evidence-preserving pass-through on a Grafana Node Not Ready paste. Same model family (`gpt-5.4` / mini), same persona discipline, matched budgets. Keeping those axes separate is essential for honest AI agent benchmarking.
 
-This post is the scorecard operators can steal.
+The scorecard below keeps the two axes separate; each pair is a small comparison, not a general performance distribution. Here **Theory** is the investigation’s proposed explanation, not an established cause.
 
 ---
 
-## TL;DR
+## The results in context
 
 - **Measure four numbers together:** wall time, tool-call starts, tool result bytes, model completion units — then ask whether Theory named real loci.
 - **ReAcTree tax is real on single-plane work:** ~**1.6×** wall (~95s vs ~58s) and ~**3.9×** tools (27 vs 7) for the **same** findings.
 - **Fair evidence middleware A/B (Node Not Ready):** both sides closed **probable** Theories on the same Ready=unknown locus. OFF finished in **~39s** vs ON **~46s**, tied at **10** tools, kept ~**584 KB** vs ~**199 KB** of tool-result text, and showed **0** `[HIDDEN:]` placeholders in the stream (ON had soft-caps + a few redacted tokens).
 - **Misconfigured OFF is not a middleware A/B:** rehydrate-off with BeforeModel PII still on → both undetermined, **0** fat Collect queries. Fix PII-off + exact tool allowlists before debating summarizers.
-- **Human-in-the-loop (HITL) is a silent wall-clock killer:** unattended benches that allow knowledge / notes-index tools can sit for **minutes** waiting for a human that will never come.
+- **Human-in-the-loop (HITL) waits affect wall time:** unattended benchmarks that allow knowledge / notes-index tools can sit for **minutes** waiting for approval.
 
-### Explain like I'm five
-
-Timing a detective only by “case closed” is silly. You also count how many doors they knocked on, how many pages they photocopied, how long the sergeant spent assigning partners, and whether the final report names the actual house. Partners help on a city-wide search. They slow you down when the muddy footprints are already behind one shed. And if you black out the house numbers on the pass-through twin’s map, you are not testing “keep more photocopies” — you are testing “can they still read the address.”
+The orchestration pair asks whether extra agent loops helped a single-plane task. The middleware pair asks what happened when tool output was rewritten or passed through. Neither result should be attributed to the other axis.
 
 ---
 
@@ -69,7 +67,7 @@ Job: read-only **cluster health triage** (one tool plane). The paths differ only
 - Paid: coordination hops, child spawn, adaptive gate retries until the **root** called the completion tool.
 - Did **not** pay for deeper kubectl: both sides ran the **same** three shell inspections and named the same NotReady node, stuck pod, and disk-pressure eviction.
 
-**Lesson:** ReAcTree is not “more accurate by default.” It is a **branching tax**. Charge it when the work itself branches (metrics + logs + change history in parallel). Skip it when one parent with tools already owns the checklist. Full decision framework: [single-agent vs multi-agent](/blog/single-agent-vs-multi-agent/).
+**Interpretation for this task:** ReAcTree did not improve the findings and added coordination work. Parallel metrics, logs, and change-history digs may justify that cost, but this pair did not test such a job. Full decision framework: [single-agent vs multi-agent](/blog/single-agent-vs-multi-agent/).
 
 ---
 
@@ -118,11 +116,11 @@ Both closed the same locus class (single-node Ready=unknown / unreachable around
 | Middleware ON | ~**199 KB** | ~**90 KB** | **2** results at **16k** soft-cap |
 | Middleware OFF | ~**584 KB** | ~**411 KB** | none in this pair |
 
-Byte volume is the discriminating metric **after** PromQL/LogQL returns multi-series dumps — the regime where summarize / context shaping / compaction were designed to fire ([evidence discarded](/blog/evidence-discarded/), [claim-aware packing](/blog/claim-aware-evidence-packing/)).
+Returned character volume distinguishes these paths **after** Prometheus Query Language (PromQL) or Loki query language (LogQL) calls return multi-series dumps — the regime where summarize / context shaping / compaction were designed to fire ([evidence discarded](/blog/evidence-discarded/), [claim-aware packing](/blog/claim-aware-evidence-packing/)).
 
 ### Token usage (why bytes matter)
 
-Every tool result re-enters the next model context unless middleware compresses or stubs it. This rematch did not need a separate `choice_count` headline to make the point: OFF carried ~**3×** more tool text into the stream while finishing **faster**. Tokenomics diverge hardest when OFF keeps multi-hundred-kilobyte bodies and ON soft-caps / summarizes them — or when ReAcTree multiplies root+child streams ([tokenomics notes](/blog/maintaining-tokenomics-with-aiden/)).
+Tool results can increase later model input unless middleware compresses or stubs them. Here OFF returned ~**3×** more tool-result text and finished **faster**, but streamed character counts do not establish actual billed prompt tokens. Record provider token usage alongside these bytes when assessing cost; ReAcTree can also multiply root and child streams ([tokenomics notes](/blog/maintaining-tokenomics-with-aiden/)).
 
 ---
 
@@ -180,7 +178,7 @@ For every A/B run, record:
 6. **PII / Collect contract** — redaction off on the pass-through twin? Exact tool pins? Zero `[HIDDEN:]` in the OFF stream?  
 7. **Outcome** — Theory present? Concrete loci? Same as human golden?
 
-Then label the axis you changed. Mixing ReAcTree spawn with middleware toggles in one PR produces pretty charts and useless conclusions.
+Then label the axis you changed. Changing ReAcTree spawning and middleware in one pull request (PR) makes attribution difficult.
 
 ---
 
@@ -191,8 +189,8 @@ Then label the axis you changed. Mixing ReAcTree spawn with middleware toggles i
 3. **Zero fat queries means your middleware A/B measured Collect unlock, not compression.** Rehydrate-off alone is Collect unlock failure dressed as “pass-through.”  
 4. **Fair OFF can finish faster while keeping more evidence.** On this paste OFF was ~1.2× quicker with ~3× tool-result volume — wall time is not a proxy for “kept the dump.”  
 5. **Wildcard tool allowlists do not pin Collect.** Use exact registry names.  
-6. **Pass-through OFF must disable PII redaction end-to-end** (boundary + notes + rehydrate). HITL hangs still dominate early digs — fix those before debating compaction defaults for Aiden-hosted agents.
+6. **In this test, pass-through OFF disabled personally identifiable information (PII) redaction end-to-end** (boundary + notes + rehydrate). That configuration is appropriate only in an authorized test environment with suitable data handling; human-in-the-loop (HITL) waits dominated early digs — fix those before debating compaction defaults for Aiden-hosted agents.
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

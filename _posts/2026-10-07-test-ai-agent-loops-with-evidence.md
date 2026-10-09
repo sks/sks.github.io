@@ -4,99 +4,60 @@ title: "How to Test AI Agent Loops Without Overfitting"
 date: 2026-10-07 08:30:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 75
-description: "AI agent loop detection that bans tool names overfits. Cap failures, score new evidence, and unit-test the gate without a live model."
+description: "Detect stalled agent loops from outcomes and evidence, not repeated tool names; test the stop rule with stubbed calls."
 image: /assets/images/og-default.png
 tags: [ai-agents, evaluation, testing, debugging, reliability, loops, aiden]
 permalink: /blog/test-ai-agent-loops-with-evidence/
 faqs:
   - question: "How do you do AI agent loop detection without overfitting?"
-    answer: "Do not ban repeated tool names. Cap failures, record what each call returned, and treat a repeated observation as non-progress. A new id on the same observation is still not progress."
+    answer: "Do not stop solely because a tool name repeats. Cap failures, record each call's outcome, and compare the information returned. Ignore transient IDs when deciding whether an observation is new."
   - question: "Is a successful HTTP response always evidence?"
-    answer: "No. If the body says the query failed, that is an upstream failure, not usable evidence for the next reasoning step."
+    answer: "No. HTTP 200 means the transport returned a response; if the body reports a failed query, classify it as an upstream failure rather than usable evidence."
   - question: "Should loop and evidence rules need a live LLM trial?"
-    answer: "No. Stub the model and unit-test the public result. If you feel you must test a private method, the unit is doing too much."
+    answer: "The classifications and stop rules can be unit-tested with stubbed model and tool results. Keep a few live trials for interactions those tests cannot cover."
   - question: "What if a later trace lacks the new loop behavior?"
-    answer: "Confirm the trial ran the new build. We once chased a logic miss that was an old binary."
+    answer: "Check which build the trial ran before changing the logic. In our case an old binary explained a trace missing the new fields."
 ---
 
-We added **AI agent loop detection** because a trace looked stuck. It punished repeated tool names even when the result was new. The agent was investigating. We called it a doom loop. The fix was worse than the bug until we threw the name-ban away.
+We initially treated a repeated tool name as a sign that an agent was stuck. It stopped an investigation that called the same tool again and received new information. The rule measured call repetition, not progress.
 
-This sits next to [Best Way to Debug a Multi-Step AI Agent](/blog/best-way-to-debug-multi-step-ai-agent/) and the older [loop salvage](/blog/ai-agent-loop-detection-salvage/) post. Those cover reading a zip and keeping the best answer. This one covers how to test the stop rule without overfitting.
-
----
-
-## TL;DR
-
-- Ban tool-name repetition and you punish valid investigation.
-- Keep a failure limit and a record of what each call returned.
-- A successful HTTP response whose body says the query failed is not evidence.
-- A new id on the same observation is not progress.
-- Product-specific metric rules do not belong in the shared runtime.
-- Those rules are fast tests. They do not need a live model.
-
-### Explain like I'm five
-
-If a kid looks in the same closet twice and finds a different shoe the second time, that is not "stuck." If they open the closet, see it is empty, and open it again with a new sticky note that says "closet #47," that is still stuck.
+Here a *loop* means the agent keeps acting without resolving the task or learning anything useful. That is harder to identify than a repeated call: the same tool can return a new result, and different calls can return the same unhelpful observation. [Best Way to Debug a Multi-Step AI Agent](/blog/best-way-to-debug-multi-step-ai-agent/) and [loop salvage](/blog/ai-agent-loop-detection-salvage/) discuss trace reading and preserving the best available answer; this post focuses on testing the stop rule.
 
 ---
 
-## What we kept and what we deleted
+## Record outcomes rather than names
 
-**Deleted:** middleware that treated same-tool-again as guilt.
+We removed the same-tool-again middleware. We kept a failure limit, a typed outcome for each call, and a bounded result summary. The outcome distinguishes success from validation, rejected, runtime, and upstream failures. A failure cap keeps a broken tool from being retried indefinitely; choose the cap for your cost and recovery needs rather than assuming every repeated call is wrong.
 
-**Kept:**
+We also compare *observation fingerprints*: compact representations of what a result says, with transient identifiers left out. For example, the same empty pod status with a new UUID is still an empty status; a new spill label alone is not new evidence. Fingerprinting can miss meaningful changes if it discards too much, so test examples where the second call really does add information.
 
-- A hard failure limit so a broken tool cannot spin forever.
-- A typed outcome per call: success vs failure, with a coarse failure class (validation, rejected, runtime, upstream).
-- A bounded summary of the result.
-- An observation fingerprint that ignores transient ids so a new spill label does not look like progress. Example: the same empty pod status with a new UUID still fingerprints as "empty," not as new evidence.
+The public gate then asks whether evidence is complete, whether feedback was addressed, and whether the latest calls added information. Test the gate's observable decision, not only a private helper. [Vocke's practical test pyramid](https://martinfowler.com/articles/practical-test-pyramid.html) motivates keeping these classifications in fast tests with stubbed collaborators.
 
-Gates then ask: is the evidence complete? Did the latest feedback get addressed? Is the agent gaining information? Those are public results you can test.
+## A successful request can contain a failed query
 
-[Vocke](https://martinfowler.com/articles/practical-test-pyramid.html) again: if you need to test a private method, the class is doing too much. Test the public result.
+HTTP 200 only says the server answered the request. If its payload says the datasource query failed, the agent has not obtained usable evidence. Classify that as an upstream failure so the next reasoning step cannot cite it as support. This is the distinction behind [evidence-based verification](/blog/evidence-based-verification/): transport success and the agent's own report do not establish the underlying fact.
 
----
+## Keep domain rules near their source
 
-## Upstream is not success
+We tried putting SRE-specific checks—metric family, cluster phase, inventory gap—into shared stop logic. That made a general runtime dependent on one investigation domain. The runtime now handles truncation markers, deduplication, failure limits, and evidence completeness. Tool producers or domain skills handle whether a specific panel or metric is necessary.
 
-An HTTP 200 whose payload says the datasource failed must not count as evidence for the reasoning loop. We call that upstream failure. Without that class, the agent "succeeds" at fetching a broken answer and then builds a story on it.
+Two useful test shapes follow:
 
-Same spirit as [evidence-based verification](/blog/evidence-based-verification/): self-report and transport success are not enough.
+| Test | Supply | Assert |
+|------|--------|--------|
+| Isolated classification | Stubbed model and tool outcomes | Failed payload is not success; repeated empty result is not progress; a changed observation can be progress |
+| Boundary test | Real nearby gate components, outer network stubbed | “Complete” is refused while required evidence is pending |
 
----
+A live trial can still expose unexpected model behavior, but it is a slower way to debug a deterministic classifier. If a trace after deployment lacks expected attributes, first confirm the trial ran the new binary. We once investigated the logic before discovering an old build; [evals in CI/CD](/blog/ai-agent-evals-cicd-flakes/) covers that reporting problem.
 
-## Keep the runtime general
+## Try this on an existing stop rule
 
-We tried embedding SRE point solutions into the shared stop logic: which metric family, which cluster phase, which inventory gap. Those belong with the tool producer or the domain skill. The shared runtime keeps truncation markers, dedup, failure limits, and evidence completeness. Domain rules leave.
+1. Identify rules that fire on repeated tool names alone. Replace them with outcome- and evidence-based checks where possible.
+2. Add the “transport okay, payload failed” case and a failure cap.
+3. Fingerprint results without ephemeral IDs, then test both duplicate and genuinely new observations.
+4. Unit-test classifications and the public gate with stubbed results; retain a few live trials for integration behavior.
+5. Verify the build identity in a live trace before attributing missing fields to a code regression.
 
-That is the solitary vs sociable split for tests too (solitary stubs every collaborator; sociable keeps real nearby ones):
-
-| Kind | What you stub | What you assert |
-|------|---------------|-----------------|
-| Solitary | Model and tools | Classification of a canned result |
-| Sociable | Outer network only | Gate refuses complete-with-pending-evidence |
-
----
-
-## The old-binary false alarm
-
-A later trace lacked the new attributes. We almost rewrote the logic again. The trial was still running the old build. Confirm the binary before you rewrite the theory. That is also a CI honesty problem, covered in the [evals in CI/CD](/blog/ai-agent-evals-cicd-flakes/) post.
-
----
-
-## What to do Monday
-
-1. Delete any stop rule that fires only because the same tool name appeared twice.
-2. Add a failure class for "transport ok, payload failed."
-3. Fingerprint observations without transient ids.
-4. Unit-test those classifiers with stubbed results. No live model.
-5. After a deploy, confirm one live trace shows the new fields before you debug further.
-6. Keep domain-specific "which panel did you forget" rules out of the shared loop.
-
----
-
-## Takeaway
-
-**Loop detection** that overfits tool names trains the agent to rename the same mistake. Score evidence. Cap failures. Unit-test the public gate.
+No classifier can infer progress perfectly from every tool response. Explicit outcomes and small tests at least make its decisions inspectable and adjustable without forcing the agent to avoid a useful tool call.
 
 Previous: [Deterministic Checks vs LLM-as-a-Judge](/blog/deterministic-checks-vs-llm-judge/). Next: [Multi-Agent Handoff Testing](/blog/multi-agent-handoff-testing-context-loss/).

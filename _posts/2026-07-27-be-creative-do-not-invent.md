@@ -4,50 +4,45 @@ title: "Be Creative. Don't Invent."
 date: 2026-07-27 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 27
-description: "When an AI SRE agent hits a dead end, be creative — don't invent. Search harder instead of hallucinating rule IDs, metrics, or a tidy RCA."
+description: "When an incident agent reaches an empty result, broaden searches using recorded identifiers instead of guessing rule IDs or measurements."
 image: /assets/images/og-evidence-rca.png
 tags: [ai-agents, sre, root-cause-analysis, incident-response, on-call, prompt-engineering, aiden, production, llm-hallucination]
 permalink: /blog/be-creative-do-not-invent/
 ---
 
-We had an AI SRE investigation that looked incredibly busy—and still completely failed.
+An AI agent helping with site reliability engineering (SRE)—keeping services available—can search broadly during an incident without inventing facts. In one investigation, the alert was real, but the agent supplied a rule identifier that did not exist, a metric family that was not collected, and a lead drawn from exporter warnings when it could not reproduce the reported symptom. Those details made the resulting explanation look stronger than the tool results allowed.
 
-The alert was real. The agent widened scopes, stitched context across fragmented tools, and wrote a highly confident story. But under the hood, it had **made things up**: a rule ID that never existed, a metric family nobody scraped, and a “lead” pulled from exporter noise simply because the real symptom never materialized. 
-
-In AI-driven incident response, models often deliver "confident wrong answers" when they lose the scent. Creativity is fine. Invention is a critical bug.
+The useful distinction is between changing how you search and filling a missing result with a plausible-sounding value.
 
 ---
 
-## The One-Liner
-
-**Be creative. Do not invent.**
+## Search beyond the first failed query
 
 | Creative (The Goal) | Invent (The Bug) |
 | --- | --- |
-| Retry the ID copied directly from the alert page | Slug a brand new ID derived from the title |
-| Discover series after an empty PromQL query | Guess a counter from an unrelated, past incident |
-| Widen labels strictly from what the alert carried | Paste tokens from an entirely unrelated playbook |
-| Call exporter warnings "pipeline noise" | Promote them to "Theory" because *something* had to be wrong |
+| Retry the identifier copied directly from the alert page | Create an unverified identifier from the title |
+| Discover available measurement series after an empty PromQL query | Guess a counter from an unrelated, past incident |
+| Broaden label filters using values in the alert or returned data | Paste tokens from an entirely unrelated playbook |
+| Treat exporter warnings as a possible collection problem, not proof of the incident cause | Promote them to "Theory" because *something* had to be wrong |
 | Close with *undetermined* and suggest next probes | Close with a tidy, fabricated mechanism you never reproduced |
 
-Creativity = search, widen, and recover using **evidence already anchored in the prompt, RAG retrieval, or tool results**.  
-Invention = filling gaps with plausible defaults hallucinated from memory.
+A defensible search can widen from identifiers in the alert, retrieved documentation, or tool results. Retrieval-augmented generation (RAG) means supplying retrieved documents to the model as context; those documents still need to be checked for relevance. Invention begins when a value is guessed because it resembles a value from another incident.
 
-This exact pattern showed up twice in one week: once inventing failure counters when PromQL returned `No data`, and once inventing alert forensics when the rule load failed. They were different forks in the logic, but the exact same epistemic shortcut.
+We saw two versions of the shortcut: guessed failure counters after a PromQL (Prometheus query language) search returned `No data`, and guessed alert details after loading the alert rule failed. Neither empty response establishes that a guessed value exists.
 
 ---
 
-## Why Soft “Don’t Guess” Prompts Never Stick
+## Why instructions alone are insufficient
 
-We already preach curiosity and build strict evidence gates for root cause analysis. But large language models (LLMs) still invent under uncertainty—especially when the context window is hungry and the narrative desperately wants a villain. 
+A large language model (LLM) can still fill gaps under uncertainty despite an instruction not to guess. A root-cause analysis (RCA) should therefore link names and measurements to their sources.
 
-We realized that simply adding another `FORBIDDEN` paragraph to the system prompt for every new hallucination failure mode doesn't work. True LLM grounding requires structural boundaries in your agent platform. 
+Adding another `FORBIDDEN` paragraph to a system prompt did not address these cases. A more testable control is to validate important identifiers and query inputs against the alert or recorded tool output before using them in a conclusion.
 
-So, we enforce one strict rule, applied precisely at the forks that actually hurt: metric IDs, queries, control plane health, log widen tokens, and how the agent closes when a symptom cannot be reproduced. 
+The proposed boundary applies at specific decision points: metric identifiers, queries, control-plane status (the systems managing infrastructure), terms used to broaden log searches, and the conclusion when a symptom cannot be reproduced. This narrows what can be checked mechanically; it does not guarantee the remaining interpretation is right.
 
-> **Honest undetermined beats a fluent fiction.**
+> **An unresolved result with next checks is more useful than a fabricated cause.**
 
-Human responders will readily forgive an AI agent that sets an explicit checkpoint to say, "We don't know yet, but here is what to probe next." However, they will immediately revoke access and mute agents that hallucinate keys and waste time during an active outage. In enterprise AI platforms, trust is built on verifiable telemetry, not just plausible answers.
+An unresolved finding with named next checks gives responders something to evaluate. A fabricated identifier, by contrast, can waste time in an active incident. Recorded monitoring data is a stronger basis for a claim than plausible prose, though it too can be incomplete.
 
 ---
 
@@ -65,4 +60,4 @@ Human responders will readily forgive an AI agent that sets an explicit checkpoi
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft grounded RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> **StackGen is building AI-assisted incident triage.** Our offering aims to help teams run diagnostics and draft RCA reports; operators should still verify consequential findings. See [ai.stackgen.com](https://ai.stackgen.com).
