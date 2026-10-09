@@ -19,7 +19,7 @@ faqs:
     answer: "On this job, hierarchical was a slight win for xAI (faster wall, similar tokens). For gpt-5.4, the hierarchical run used fewer total prompt tokens in the first wave. For the Responses reasoning preview, hierarchical once collapsed quality and later recovered only after host gates — never the cheap win."
 ---
 
-Vendors sell model cards. Operators need a **receipt**: same job, six seats, numbers you can argue about on Monday.
+A model-card score does not tell an operator how long an alert-and-logs investigation will take with a particular tool server. We ran the same task across six model-and-orchestration combinations and recorded the answer quality, wall time, tokens, and estimated or traced cost.
 
 We ran one dual-part observability job six ways:
 
@@ -29,11 +29,16 @@ We ran one dual-part observability job six ways:
 
 Same live Grafana/Loki plane. Same prompt. Same host settings. We ran this on our production agent runtime ([Aiden](/blog/aiden-platform/)). This is the scorecard. Qualitative close styles live in [how the models think](/blog/what-reasoning-models-write-on-triage/). Tool inventory lives in [the tool menu](/blog/observability-tools-agents-actually-call/).
 
-n = 1 per cell. Directional. Steal the method, not the marketing claim.
+There was one run per cell in each wave. The rankings below describe those runs only; repeat trials would be needed to estimate variability or select a production default.
 
 ---
 
 ## Shapes we compared
+
+![Fair comparison holds task and tool conditions steady while comparing outcomes](/assets/images/diagrams/sept/model-benchmark.svg)
+
+*The benchmark compares models and execution shapes under the same task and tool access.*
+
 
 Two orchestration shapes. First mention definitions (used everywhere below):
 
@@ -46,25 +51,22 @@ Background: [What is ReAcTree?](/blog/what-is-reactree/) · paper [PDF](https://
 
 ---
 
-## TL;DR
+## What the evidence supports
 
 - **Job:** triage a sustained goroutine-growth alert, then compare **24h vs 7d** logs in one Kubernetes namespace for anomalies and cross-links.
-- **Winner (wave 1):** xAI hierarchical — ~**141s**, ~**191k** tokens, corr **1.0**, efficiency **1.375**.
+- **Highest cohort-relative score (wave 1):** xAI hierarchical — ~**141s**, ~**191k** tokens, corr **1.0**, efficiency **1.375**.
 - **gpt-5.4 hierarchical** matched quality with ~**255k** tokens vs ~**373k** for single-agent (~**0.68×** tokens — smaller total context bill across the whole tree).
 - **Responses reasoning preview** burned **~475–516k** tokens; hierarchical once scored **0.69** correctness (thin Undetermined close).
 - **Efficiency without absolute wall is a trap** — see [relative scores](/blog/relative-efficiency-scores-lie/).
 
-### Explain like I'm five
-
-Six detectives get the same crime report and the same flashlight drawer. You time them, count the pages they photocopy, check whether the write-up names a real house, and only then argue about who is “efficient.”
 
 ---
 
 ## The job (obfuscated)
 
-**Part A.** Firing alert: sustained positive 24h derivative on `go_goroutines` for a control-plane service family, `for` window hours long. Measure the rule, rank loci, close Theory / Unknowns / Do-this-now.
+**Part A.** A firing alert reported sustained growth in `go_goroutines`, a Go runtime gauge of active goroutines. Its 24h derivative estimates the rate of change; the alert rule’s `for` duration requires the condition to persist for hours. The agent had to inspect the rule and affected service instances, then write a hypothesis (Theory), unresolved questions (Unknowns), and an immediate next action.
 
-**Part B.** Same session: Loki for namespace `ops-platform`. Summarize last **24h** and a **7d** baseline. Compare volume, errors, new signatures. Say whether Part A has a matching log story — or Unknown with what you could not query.
+**Part B.** In the same session, query Loki (the log backend) for Kubernetes namespace `ops-platform`. Compare the last **24h** with a **7d** baseline for message volume, errors, and new signatures. The agent should say whether the logs support Part A; a query failure must be named as an Unknown, not converted into evidence of absence.
 
 Correctness = 13-point checklist (Theory, Unknowns, next action, measured alert, numbers, namespace, both windows, compare language, logs/Loki, honesty, Part A/B labels).
 
@@ -74,7 +76,7 @@ Efficiency =
 correctness / (0.45·wall/median + 0.45·tokens/median + 0.10·cost/median)
 ```
 
-Cost: from session traces where present; otherwise estimated from the gpt-5.4 $/token blend for that wave.
+Cost: from session traces where present; otherwise estimated using the gpt-5.4 $/token blend for that wave. The estimates are not provider invoices, and their cross-model rank is less secure than the wall and token columns. The formula also divides by medians from the current cohort, so its score cannot be compared directly across waves.
 
 ---
 
@@ -114,15 +116,15 @@ Absolute changes matter more than efficiency deltas:
 | Responses hierarchical | **2.80×** | 1.26× | **0.69→1.00** |
 | Responses single-agent | 2.22× | 1.23× | 1→1 |
 
-Caveat: wave 2 kept six Grafana clients hot in parallel for the full run. Contended tools can inflate wall. The quality jump on Responses hierarchical (stub → full Part A/B) is still the headline worth shipping gates for.
+Wave 2 also kept six Grafana clients active in parallel for the full run. That makes the wall-time ratios unsuitable as isolated estimates of the gates’ effect. The Responses hierarchical run changed from a 0.69 stub to a full Part A/B close, but one rematch cannot attribute all of that improvement to the gates alone.
 
 ---
 
 ## Monday rules
 
-1. Publish **wall, tokens, cost, correctness** as four columns. Efficiency is a fifth, labeled relative.
+1. Publish **wall, tokens, cost, correctness** as four columns. Label estimated cost and cohort-relative efficiency separately.
 2. Never crown a model on one shape. Single-agent ReAct and hierarchical ReAcTree are different products.
-3. Treat “reasoning preview” seats as **expensive explorers** until they prove closes under your gate.
-4. When a harness change lands, re-run the **same prompt**. Narrative without a rematch is cosplay. Random one-incident eval reruns are the same trap with extra models ([same incident, five models](/blog/same-problem-sre-model-bake-off/)).
+3. Test reasoning-preview seats behind the same completion and budget gates; in these runs they consumed ~475–516k tokens in wave 1, but a different incident or effort setting may behave differently.
+4. When a harness change lands, re-run the **same prompt**. Without a rematch, a before/after story cannot separate the change from the task and tool conditions. Random one-incident eval reruns are the same trap with extra models ([same incident, five models](/blog/same-problem-sre-model-bake-off/)).
 
 Related: [What is ReAcTree?](/blog/what-is-reactree/), [hierarchical vs single-agent on this job](/blog/plan-mode-merits-demerits-observability/), [hybrid plan roster](/blog/hybrid-plan-smart-planner-generate-digs/), [AI SRE benchmarks](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/), [reasoning effort is not free](/blog/reasoning-effort-is-not-a-free-upgrade/).

@@ -10,7 +10,7 @@ tags: [ai-agents, prompt-caching, llm, tokenomics, context-management, aiden, pr
 permalink: /blog/prompt-caching-ai-agents/
 ---
 
-**Prompt caching for AI agents** looked like a provider setting. We enabled it and expected the token bill to improve — repeated turns that re-send the same context should have been both cheaper and faster.
+**Prompt caching** lets a model provider reuse eligible, unchanged prompt content across calls. We enabled it for agents—model-driven programs that choose tools and continue over multiple turns—and expected repeated context to cost less.
 
 The cache existed. The agent kept missing it.
 
@@ -18,7 +18,7 @@ The problem was not the provider. It was the shape of the conversation. Tool def
 
 Every request looked new because, structurally, it was new.
 
-**Prompt caching for AI agents is not a switch. It is an architecture constraint.**
+The provider setting alone was insufficient: the runtime also had to construct reusable prompt prefixes.
 
 ---
 
@@ -40,7 +40,11 @@ That is why a healthy cache strategy starts before the API call. You have to con
 
 ## Stability Beats Cleverness
 
-The first requirement is boring: deterministic ordering.
+![Stable ordered instructions and schemas feed a reusable prompt prefix while evidence references and utility calls stay outside it](/assets/images/diagrams/aug-runtime/cache-boundaries.svg)
+
+*Keep the reusable prefix stable and large observations out of repeated prompts.*
+
+Start with deterministic ordering.
 
 If the same tools appear in a different order on each turn, the shared prefix changes even when the capabilities are identical. If instructions are assembled from maps or registries without a stable order, logically equivalent prompts become different byte sequences.
 
@@ -81,7 +85,7 @@ This is the same discipline behind [memory compaction for long-running agents](/
 
 ---
 
-## Compact Before the Context Is on Fire
+## Compact Before the Context Limit
 
 Late compaction is expensive.
 
@@ -102,7 +106,7 @@ What matters is making compaction an operating policy, not a last-second rescue.
 
 ## Isolate One-Shot Utility Calls
 
-This was the most surprising source of waste.
+One easily missed source of waste was utility calls.
 
 Agent runtimes make many small model calls that are not part of the user conversation:
 
@@ -116,12 +120,7 @@ If those calls inherit the full conversation, a tiny classification request can 
 
 The fix is a boundary: one-shot work gets the minimum context it needs in an isolated request. It should not silently join the main session just because both operations use the same model client.
 
-Isolation improves:
-
-- cost,
-- cacheability,
-- correctness,
-- and audit clarity.
+Isolation can reduce unnecessary input tokens and make the helper easier to audit. Cache reuse may improve when the helper itself has a stable prefix; isolation alone does not guarantee a cache hit.
 
 It also forces an important design question: what inputs does this helper actually require? “The whole session” is often an accidental answer.
 
@@ -199,4 +198,4 @@ The cheapest prompt is not merely the shortest one. It is the one whose unchange
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

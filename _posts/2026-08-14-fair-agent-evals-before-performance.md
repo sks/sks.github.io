@@ -23,7 +23,7 @@ faqs:
 
 If you are trying to **evaluate AI agents** on a tool-using benchmark, the first question is not “which mode wins?” It is **whether both modes could use the same tools on the worker that does the work.**
 
-We ran paired evals on [AppWorld](https://github.com/stonybrooknlp/appworld) — a controllable multi-app benchmark ([paper](https://arxiv.org/abs/2407.18901)) — through our agent runtime in Aiden, with domain APIs exposed via [Model Context Protocol](https://modelcontextprotocol.io/) (MCP). The early numbers lied. The planner path looked cheaper until we realized workers often had **zero** domain API calls while the single-agent loop was doing the job.
+We ran paired evals on [AppWorld](https://github.com/stonybrooknlp/appworld) — a controllable multi-app benchmark ([paper](https://arxiv.org/abs/2407.18901)) — through our agent runtime in Aiden, with domain APIs exposed via [Model Context Protocol](https://modelcontextprotocol.io/) (MCP). The early cost comparison was misleading. The planner path looked cheaper until we found that its delegated workers often made **zero** calls to the app APIs, while the single-agent path actually attempted the task.
 
 This post is part one of the **AppWorld agent eval series**: fix tool parity, then measure orchestration tax, then classify failure modes. Later posts cover [handoff gates](/blog/stop-duplicate-agent-workers-handoff-gate/), [local setup](/blog/running-appworld-locally-genie-agent-eval/), [unattended harness rules](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/), [MCP tool tax + pass@k](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/), and [simple vs plan routing](/blog/simple-vs-plan-when-to-use-which/). Part two: [orchestration tax](/blog/agent-orchestration-tax-evals/). Part three: [failure modes](/blog/ai-agent-eval-failure-modes/).
 
@@ -47,16 +47,9 @@ On these small AppWorld slices, **strict TGC/SGC success** (`judge.success`) did
 
 ---
 
-## TL;DR
+## The comparison that failed first
 
-- **Unfair eval:** planner workers never received the domain MCP pack → “cheaper” planner, **0** domain calls, hallucinated success in transcripts.
-- **Fairness gate:** after handoff fix, **10/10** pairs passed tool-access checks on a mixed ten-task cohort; workers averaged **~20** domain calls vs **~14** on single-agent — both sides actually ran the benchmark.
-- **Benchmark bar:** strict AppWorld TGC did not clear on this slice (both modes); partial `pass_percentage` often **30–50%** — agents did real API work, harness still blocked full success.
-- **Monday-morning rule:** do not publish planner vs single-agent numbers until the worker registry shows the same domain tools you expect on the root in simple mode.
-
-### Explain like I'm five
-
-Comparing two cooks is unfair if one gets ingredients and the other only gets a phone to call a helper who was never given a kitchen key. The helper might write a beautiful note saying dinner is ready. You still have no food.
+In an early three-task check, a single agent averaged about 14 calls to the benchmark apps while the planner’s workers made none. The planner could still produce a convincing account of completion, but the app state had not changed. After tool-access wiring was fixed, all **10/10** pairs in a mixed ten-task cohort passed the access check; workers averaged **20.5** app calls versus **13.8** for single-agent. That is evidence that both paths could attempt the task, not that either passed it: neither cleared strict AppWorld task-goal completion on this slice. Before comparing cost, inspect the actual worker’s tool list and the judge result.
 
 ---
 
@@ -69,7 +62,7 @@ Two execution shapes on the same AppWorld tasks:
 | **Single-agent loop** | Root agent holds the full MCP tool pack | One plan → tool → context cycle |
 | **Planner + worker** | Meta root delegates; **worker** should hold the MCP pack | Spawn subcontractor with explicit `tool_names` |
 
-The benchmark judge is AppWorld’s own **evaluate** step (their TGC/SGC — task goal completion / scenario goal completion). We treat that as ground truth, not assistant prose. Telemetry came from [Langfuse](https://langfuse.com/) generation counts (aggregates only in this write-up).
+The benchmark judge is AppWorld’s own **evaluate** step (TGC/SGC mean task-goal completion and scenario-goal completion: checks of the resulting app state). We treat that as ground truth, not assistant prose. Telemetry came from [Langfuse](https://langfuse.com/) generation counts (aggregates only in this write-up).
 
 This is the eval sequel to [single-agent vs multi-agent orchestration](/blog/single-agent-vs-multi-agent/) — same “match the axes” discipline, applied to a public tool benchmark instead of a single-plane triage dig.
 
@@ -86,7 +79,7 @@ On an early three-task smoke, averages looked like this:
 
 The planner path burned tokens on `create_agent` / `search_tools` while never calling the apps under test. In at least one run the transcript claimed export success and evaluation pass with **no** tool receipts — classic self-report without a judge call.
 
-**Interpretation:** that is not “orchestration is cheaper.” That is **an invalid A/B**.
+**Interpretation:** this does not show that delegation saves resources. The two paths were not doing comparable work.
 
 ![Eval pipeline: fairness gate before comparing tokens or modes](/assets/images/appworld/eval-fairness-flow.svg)
 
@@ -136,7 +129,7 @@ If row 1 fails, stop. Fix wiring, then rerun. Tokens and “wins” before that 
 2. **Fairness is a gate, not a score.** Passing tool-access checks is prerequisite to comparing modes — it does not by itself clear a hard multi-app benchmark bar.
 3. **Handoff bugs look like mode failures.** “Planner has no APIs” was registry wiring, not a law of trees.
 4. **Self-report is not evaluate.** Fluent PASS lines without judge receipts are a failure class, not a tie-breaker.
-5. **The pattern generalizes.** Any planner-worker runtime needs the same checklist before you trust mode comparisons.
+5. **The method generalizes.** A planner-worker runtime needs an access check before you trust a comparison; the measured ratios here do not automatically transfer to another runtime.
 
 ---
 

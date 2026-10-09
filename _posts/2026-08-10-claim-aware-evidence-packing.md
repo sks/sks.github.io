@@ -19,15 +19,15 @@ faqs:
     answer: "In integrations or tool wrappers. The shared verifier should stay generic: string membership, budgets, and fail-open policy — not product-specific JSON layouts."
 ---
 
-A hallucination guard that false-flags **true** tool results is worse than no guard. People learn to mute it. Then fluent fiction walks through.
+A **grounding guard** checks whether an AI agent’s claims are supported by captured tool results. A false accusation of invention can make the guard less useful: reviewers may stop trusting its alerts.
 
 The trap is subtle: you built a verifier that compares the answer to “what tools returned,” but you only fed the verifier a **budgeted slice** of those returns. Truncate the wrong slice and honest citations look invented.
 
-This post stands alone. You do not need the rest of the series. It covers **why that failure happens**, a practical packing pattern, and the **ugly trade-offs** (fail-open loopholes, brittle string overlap) so you can adopt the right piece in the right layer.
+This post covers the truncation failure, a claim-aware way to select evidence within a size budget, and the trade-offs of incomplete evidence and brittle string overlap.
 
 ---
 
-## TL;DR
+## The practical distinction
 
 - Hallucination guards exist so agents cannot invent entities that never appeared in tool evidence.
 - Soft evidence budgets are necessary; **head-first truncation** is the common pitfall.
@@ -37,19 +37,17 @@ This post stands alone. You do not need the rest of the series. It covers **why 
 - Put **cheap membership checks** in code; leave paraphrase and soft id variants to a model or to wrappers that emit canonical forms.
 - Keep the **shared verifier domain-agnostic**; reshape payloads at the integration boundary.
 
-### Explain like I'm five
-
-You grade a book report, but someone ripped out the last pages. The kid quotes a sentence from page 40. You say “you made that up” because your leftover stack only goes to page 10. The fix is not an infinite stack — it is **keep scraps that match what they said**, and if you know pages are missing, **don’t accuse them of inventing**. Also: if pages go missing every day, fix the binder — do not stop grading forever.
+If the verifier did not receive a tool-result row because it was truncated, absence from the verifier input does not establish that the agent invented the row. Preserve relevant chunks where possible, mark incomplete capture, and investigate recurring truncation.
 
 ---
 
 ## Why a hallucination guard is worth the hassle
 
-Tool-using agents are persuasive. They return polished prose with ids, percentages, and “according to the lookup…” framing. Without a check against raw tool output, you ship confidence theater.
+Tool-using agents are persuasive. They return polished prose with ids, percentages, and “according to the lookup…” framing. Without a check against captured tool output, a polished answer can conceal unsupported entity claims.
 
-A useful guard answers one question:
+A useful guard asks:
 
-> Given what we actually captured from tools, is this answer grounded — or did we invent?
+> Do the claims appear in the evidence available to this check, and is that evidence complete enough to judge?
 
 That is narrower than “is the answer good?” or “did the agent dig enough?” In one sentence each:
 
@@ -81,7 +79,7 @@ What often sits later?
 
 - The large JSON / table / series that actually contains the id the answer cites.
 
-Head-first truncation keeps the sermon and drops the receipt. The judge sees a short “tool results” section, sees an identifier that is absent, and labels the answer a hallucination. The agent was right. The notebook was torn.
+Head-first truncation can keep procedural text and drop the relevant observation. The judge sees a short “tool results” section, sees an identifier that is absent, and labels the answer a hallucination. In this case, the verifier lacked the relevant row even though the tool returned it.
 
 **Adopt:** a soft ceiling is fine. **Do not** treat chronological head as the packing key.
 
@@ -98,6 +96,10 @@ Anything that teaches *how* to dig is not *what was observed*. If procedure blob
 ---
 
 ## Pattern: claim-aware packing
+
+![Answer claim tokens rank relevant tool observations under a budget; complete and truncated bags produce different verifier decisions](/assets/images/diagrams/aug-runtime/claim-aware-packing.svg)
+
+*If evidence was truncated, absence alone cannot prove an invented claim.*
 
 Once you accept a budget, packing becomes the product.
 
@@ -126,9 +128,9 @@ func packByClaims(results string, tokens []string, maxRunes int) (packed string,
 
 ## How claim tokens actually get extracted (and where it hurts)
 
-The packing idea is only as good as the token list. Skipping this step in a design doc is how blogs stay pretty and systems stay brittle.
+Packing quality depends on which claim tokens are extracted; document and test that step.
 
-A **good enough** code extractor for production agents usually looks like:
+A practical natural language processing (NLP) shortcut here is a code extractor that looks like:
 
 1. **Scan the answer** for distinctive shapes: quoted strings, UUIDs, hyphen/underscore ids, dotted names (`svc.api`), long alphanumeric runs.
 2. **Drop stopwords and JSON noise** (`the`, `status`, `null`, `true`, `result`, …) so English filler never becomes a “claim.”
@@ -154,7 +156,7 @@ func extractClaimTokens(answer string) []string {
 
 | Miss | Example | Why it hurts |
 | --- | --- | --- |
-| Format drift | Answer says `user-1234`, tool has `"id": "1234"` | Overlap fails → chunk dropped → torn notebook again |
+| Format drift | Answer says `user-1234`, tool has `"id": "1234"` | Overlap fails → relevant chunk dropped |
 | Soft paraphrase | Answer summarizes a log without repeating the id | Nothing to pack around |
 | Over-extraction | Common words slip past the deny-list | Packing prefers the wrong chunks |
 | Under-extraction | Exotic id shapes your regex never saw | Fallback to “recent chunks” only |
@@ -184,13 +186,13 @@ Verification has three honest outcomes:
 
 The torn-notebook bug is treating **unverifiable** as **invented**.
 
-**Adopt:** if capture or packing truncated evidence, skip fail-closed contradiction — or return an explicit “could not verify” signal.
+**Adopt:** if capture or packing truncated evidence, do not label a claim invented solely because it is absent from the retained bag. Return an explicit “could not verify” signal; independent contradictions in retained evidence still need review.
 
 **Do not adopt:** “always fail closed; better safe than sorry.” Operators will disable you after a week of false invented pages.
 
-### The ugly part of fail-open
+### The risk of fail-open
 
-Fail-open is correct for a **rare** incomplete bag. It is a **loophole** if tools routinely dump megabytes of unoptimized JSON and truncation becomes the steady state. Then every answer is “unverifiable,” the guard never fails closed, and fluent fiction walks through the side door.
+Returning “unverifiable” avoids a false accusation when the bag is incomplete, but repeated truncation leaves claims unchecked. If large JSON results routinely exceed the budget, the guard cannot reliably establish grounding.
 
 Treat chronic truncation as an **ops bug**, not a policy win:
 
@@ -261,7 +263,7 @@ Teaching the shared guard one observability dialect or one ticket schema couples
 
 Claim extraction needs a deny-list so “the”, “status”, and “null” do not become claims. Half of that list is English filler. Half is **JSON / tool noise**.
 
-A generic stopword package covers the first half. It does not know your tool envelope. Many popular Go options are unmaintained or pull cleaners you do not want on a hot path ([bbalet/stopwords](https://github.com/bbalet/stopwords) is the usual example).
+A generic stopword package covers the first half. It does not know your tool envelope. A dependency may add maintenance or hot-path costs that are not justified for a short deny-list; review options such as [bbalet/stopwords](https://github.com/bbalet/stopwords) against your needs.
 
 **Adopt:** a tiny local map you own and review; grow it from false packing hits.
 
@@ -295,7 +297,7 @@ Related reading if you want more of this series (optional, not required):
 - [Evidence-based verification](/blog/evidence-based-verification/)  
 - Hubs: [AI agent runtime](/topics/ai-agent-runtime/) · [Go AI agents](/topics/go-ai-agents/) · [AI agent workflows](/topics/ai-agent-workflows/)
 
-Torn notebooks make honest agents look like liars. Pack what they claimed, admit when pages are missing, alarm when the binder keeps tearing, and keep the shared guard ignorant of your favorite query language.
+Pack evidence relevant to the claims, expose incomplete capture as unverifiable, monitor truncation, and keep product-specific payload shaping in tool wrappers.
 
 ---
 
@@ -303,4 +305,4 @@ Torn notebooks make honest agents look like liars. Pack what they claimed, admit
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

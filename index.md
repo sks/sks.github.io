@@ -4,17 +4,17 @@ title: "Enterprise AI Agents in Go (Runtime & SRE)"
 description: "Production notes on enterprise AI agent runtimes, SRE agents, and durable workflows in Go — by StackGen Principal Engineer Sabith K S."
 ---
 
-# Production Notes on Enterprise AI Agents
+# Production Notes
 
-Principal Engineer at [StackGen](https://stackgen.com), building enterprise AI agent platforms in Go.
+I'm a Principal Engineer at [StackGen](https://stackgen.com). I write about the systems we build, the mistakes we make, and what we can actually learn from them.
 
-I write about the engineering decisions, production bugs, and hard-won lessons from building an **AI agent runtime** and **[Aiden](/blog/aiden-platform/)** — StackGen's multi-tenant agent orchestration platform for enterprise SRE and platform teams.
+Much of this site is about AI agents: software that uses a language model to choose and carry out steps, often by calling tools. A **[runtime](/blog/what-is-an-ai-agent-runtime/)** runs those steps and handles things like tool access and retries. **[Aiden](/blog/aiden-platform/)** is StackGen's platform for running agents for multiple teams. The examples often come from site reliability engineering (SRE): keeping services working and investigating incidents. These are engineering notes from a particular setting, not a claim that every team needs an agent—or needs to build one in Go.
 
 **Featured by CNCF:** [You Can't Debug What You Can't See — Observability for AI Agents](https://www.cncf.io/blog/2026/08/04/you-cant-debug-what-you-cant-see-observability-for-ai-agents/)
 
 ## Start here
 
-Pick a path — don't start from a 40-post wall:
+New to the subject? Start with a short reading path rather than the whole archive:
 
 | Path | Best for |
 |------|----------|

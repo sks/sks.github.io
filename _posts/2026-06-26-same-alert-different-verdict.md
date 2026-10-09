@@ -17,52 +17,33 @@ faqs:
     answer: "Not always. Entry-path loss and state change between runs explain many high-vs-low impact disagreements without inventing a model failure."
 ---
 
-Don't paste the alert in the UI and wonder why Slack gave a different impact score.
+The same alert text can lead to different impact assessments when an investigation starts from a Slack thread rather than a paste into a web interface. The text may be identical, but the available evidence is not.
 
 *The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
-## TL;DR
+## What Changes Between Sessions
 
-- **Entry path is context** — Slack thread signals ≠ UI paste
-- Rule UID, fingerprint, and thread history often never make it into a pasted blob
-- Hourly cycles can flip FIRING → RESOLVED between runs without the agent “lying”
-- Compare sessions via **watch links from Slack**, not re-pasted text
+In the Slack path, an alert arrives with bot metadata. An operator mentions the investigator in the thread. That session can include a rule UID (unique identifier), an alert fingerprint that links related events, and prior thread posts.
 
-### Explain like I'm five
+In the web-interface path, an operator pastes the title and description into a chat. The words look similar to a person, but the structured identity and thread history may be missing. In a third case, a later hourly run uses the same alert ID after its status changes from **FIRING** (still active) to **RESOLVED** (no longer firing). A lower current-impact assessment may then be appropriate even if an earlier one was high.
 
-If you tell two friends the same story, but one also saw the photo album and the other only heard a summary, they will write different book reports. That is not them being random — that is missing context.
+In production debug exports for a mid-size software-as-a-service (SaaS) customer, we repeatedly saw high-versus-low assessments associated with entry path and alert state. These observations do not establish the cause of every disagreement or rule out model error. They suggest checking the evidence and timestamps before treating two outputs as responses to the same inputs.
 
----
+This is distinct from [Evidence Discarded After the Lead](/blog/evidence-discarded/), where evidence reached the session but was not used. Here some evidence may never reach the investigation at all.
 
-## Two ingestion paths (composite)
+![Slack thread, UI paste, and later hourly run carry different alert identity, thread context, or current status into an assessment.](/assets/images/diagrams/june-operations/alert-entry-context.svg)
 
-**Path A — Slack thread.** Alert arrives with bot metadata. Operator @mentions. The investigator sees thread signals: rule identity, fingerprints, prior bot posts.
+The three paths illustrate why matching alert wording is not enough: compare structured context and the time of the alert state before comparing verdicts.
 
-**Path B — UI paste.** Operator copies title + description into chat. Looks similar to a human. Drops structured identity the thread had for free.
+## For On-Call Teams
 
-**Path C — state change.** Same alert ID, later hour: status is RESOLVED. Impact narrative correctly softens. Compared naively to an earlier FIRING run, it looks like “verdict drift.”
+Compare sessions through the watch links in the Slack thread when possible, rather than creating a new session by pasting alert text. Check the alert state and timing as well as the wording. A Slack connection does not itself mean every alert is investigated automatically: webhook and polling paths are separate. If the impact assessment differs, ask whether the entry paths and alert states matched before concluding the model was inconsistent.
 
-Production debug export analysis for a mid-size SaaS customer showed this pattern repeatedly: high vs low impact on the “same” alert often tracked **how the session started** and **whether the alert was still firing**, not model roulette.
+## For Platform Builders
 
-This sits next to [Evidence Discarded After the Lead](/blog/evidence-discarded/) — another failure mode where context that existed was not used. Here the context never arrived.
-
----
-
-## If you lead an SRE team
-
-- Train on-call: compare investigations from Slack watch links
-- Document that Slack-connected ≠ auto-investigate (webhook / poll paths are separate)
-- When impact disagrees, ask “same entry path?” before “model broken?”
-
-## If you ship the agent platform
-
-- Prefer structured alert objects over free-text paste for investigate launch
-- Preserve thread signals into the investigation context block
-- Surface alert state (FIRING / RESOLVED) prominently in the RCA header so humans do not misread time skew as inconsistency
-
----
+Prefer a structured alert object to free text when launching an investigation. Carry thread metadata into the session, and display **FIRING** or **RESOLVED** prominently in the root-cause analysis (RCA) header. That gives a reviewer a better chance of distinguishing changed evidence from an unexplained change in judgment. It does not guarantee a correct impact score.
 
 ## Related
 
@@ -74,4 +55,4 @@ This sits next to [Evidence Discarded After the Lead](/blog/evidence-discarded/)
 
 **Acknowledgments.** Entry-path lessons from customer readiness work and anonymized correlation analysis. Patterns composite.
 
-*Building AI for incident triage without the demo theater? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+*If you're working on incident triage, find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*

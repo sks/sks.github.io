@@ -4,32 +4,30 @@ title: "The Hypothesis Ladder — Ruling Things Out Before You Narrate"
 date: 2026-07-16 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 23
-description: "Hypothesis-driven AI SRE root cause analysis: climb identity and onset before deploy theories, keep parallel branches, prove first and narrate last."
+description: "A structured way to investigate service incidents: identify the affected system and onset, test competing explanations, and report uncertainty."
 image: /assets/images/og-evidence-rca.png
 tags: [sre, incident-response, root-cause-analysis, ai-agents, on-call, hypothesis-driven-debugging, production, aiden]
 permalink: /blog/hypothesis-ladder/
 faqs:
   - question: "What is the hypothesis ladder in AI RCA?"
-    answer: "Climb investigation in order — identity and onset before deploy theories — prune with cheap disproof, and forbid the narrative from getting ahead of telemetry."
+    answer: "Identify the affected system and onset, test competing explanations with available data, and keep conclusions within what the checks support."
   - question: "Why do agents latch onto the first plausible story?"
     answer: "Fluency is not evidence. Models often write an RCA-shaped paragraph around a recent deploy before elimination work finishes."
   - question: "Is a longer prompt the fix for early narrating?"
-    answer: "No. Treat investigation as ordered elimination with parallel branches and prove-first gates, not more soft instructions."
+    answer: "A longer prompt alone may not prevent early conclusions. Record competing explanations and check required evidence before accepting a strong claim."
 ---
 
-**Hypothesis-driven debugging** for AI **root cause analysis (RCA)** fails when the investigator narrates before eliminating. The demo version reads like a senior engineer on a good day. The on-call version often reads the same — polished, confident, and wrong — because fluency is not evidence.
+A root-cause analysis (RCA) explains why an incident happened. An AI investigator can write one before it has checked alternatives. In our work on [AI agents for site reliability engineering (SRE)](/topics/ai-agents-sre/)—software operations and incident response—we saw the model favor a recent deployment even when the available measurements did not yet support that explanation.
 
-We kept hitting the same failure in production while shipping [AI agents for SRE](/topics/ai-agents-sre/): the model latched onto the first plausible story (usually a recent deploy) and wrote an RCA-shaped paragraph before the boring elimination work finished. The fix was not a longer prompt. It was treating investigation as a **hypothesis ladder** — climb in order, prune with cheap disproof, and forbid the narrative from getting ahead of what telemetry actually supports.
+We used a **hypothesis ladder** to structure the search: identify the affected system and start time, test competing explanations, then write a conclusion no stronger than the evidence. It does not make every cause discoverable; it makes an unresolved cause easier to report honestly.
 
-This post is a sequel to [AI incident triage](/blog/ai-incident-triage-sre/) and [evidence-gated RCA](/blog/evidence-gated-multiplane-rca/). Same lesson from a different angle: **investigation is elimination**, not storytelling.
+This builds on [AI incident triage](/blog/ai-incident-triage-sre/) and [evidence-gated RCA](/blog/evidence-gated-multiplane-rca/): an investigation should test alternatives before presenting a causal story.
 
 ---
 
-## TL;DR — Mental Model
+## Start with the symptom
 
-The smoke alarm goes off. Before you blame the toaster, you check **which room** smells like smoke, **when** it started, and **what else** could cause it. You write down what you checked and what you could not reach. You do not announce "the toaster did it" while the fireplace is still a question mark.
-
-Production AI investigators need the same patience — and a supervisor that will not let them skip to the exciting ending.
+If a smoke alarm sounds, locate the smoke and establish when it appeared before naming the appliance. The equivalent for a service incident is to record the affected service, measurement, and onset. A workflow controller can require those fields before it accepts a causal claim; it cannot manufacture evidence that is missing.
 
 ---
 
@@ -37,17 +35,17 @@ Production AI investigators need the same patience — and a supervisor that wil
 
 Human on-call teams know the trap. Alert fires. Someone says "probably the deploy." Forty minutes later you are still arguing about that story while the real epicenter smolders — a shared dependency, a mis-scoped metric, a blast radius that does not match the ticket.
 
-LLMs amplify the trap. They never get tired, never pause to say "we do not know yet," and they are excellent at the **looks-right heuristic**: prose that names a service, a change, and a dependency **feels** like root cause analysis even when nothing was ruled in or out.
+A large language model (LLM) can amplify that trap: a sentence naming a service, a change, and a dependency *looks* like an RCA even when none of those links has been tested.
 
 > **The trap in action**
 >
 > **Alert:** `API 5xx spike on PaymentGateway`
 >
-> **The AI (and the tired engineer):** *"Likely caused by the v2.4.1 deploy ten minutes ago. Recommend rollback."*
+> **The hasty conclusion:** *"Likely caused by the v2.4.1 deploy ten minutes ago. Recommend rollback."*
 >
-> **The reality:** The deploy was a CSS fix. The actual failure was an expired database certificate — visible in connection logs if anyone had checked identity and onset before the change timeline.
+> **Illustrative alternative:** Suppose the deploy only changed CSS, while connection logs showed an expired database certificate. Checking identity and onset would distinguish the two; the alert alone would not.
 
-Practitioners of hypothesis-driven debugging describe the antidote the same way: **theory, prediction, disproof, repeat.** During a live incident the goal is not complete understanding. It is to **narrow until you have an actionable hypothesis** — something you can test, mitigate, or honestly defer with named next probes.
+A useful cycle is **theory, prediction, attempted disproof, repeat**. During a live incident, complete understanding may be out of reach. The immediate goal is a testable explanation or a clear statement of what remains unknown and what to check next.
 
 That discipline is old. Making an AI investigator **obey** it in production is the hard part.
 
@@ -57,12 +55,12 @@ That discipline is old. Making an AI investigator **obey** it in production is t
 
 SRE teams have sketched incident hypothesis trees for years: symptom at the root, broad categories branching out, leaves that must be **tested or marked unknown** — not skipped because someone already likes a story.
 
-A **ladder** is the same idea with ordering discipline:
+The **ladder** adds an order to those checks:
 
-1. **Frame** — what broke, for whom, on which signal, starting when?
+1. **Frame** — what broke, for whom, according to which measurement, and starting when?
 2. **Eliminate cheaply** — rule out obvious branches with the smallest queries that could falsify them.
 3. **Compete in parallel** — keep multiple mechanisms alive until evidence kills them; do not collapse to one narrative for comfort.
-4. **Grade the claim** — coincidence, correlation, and mechanism are different sentences; the write-up must match the evidence grade.
+4. **Grade the claim** — events occurring together, moving together over time, and having a causal mechanism support different levels of certainty; the write-up should reflect that distinction.
 5. **Stop or escalate honestly** — unknown with ranked next probes beats a confident wrong answer.
 
 The ladder is not a runbook replacement. Runbooks still teach *what* to query for Kafka lag or API error spikes. The ladder teaches *when* you are allowed to say "root cause" at all.
@@ -71,18 +69,18 @@ The ladder is not a runbook replacement. Runbooks still teach *what* to query fo
 
 ## Climb the Boring Steps First (Identity Before Depth)
 
-The recurring production bug was **depth before identity**. Investigators (human and AI) opened change timelines and deep telemetry fan-out before they could name the failing entity from the **same series that breached** or pin **when** the symptom actually started.
+The recurring mistake was investigating deeply before identifying the fault. A team might open change histories and many monitoring queries before checking which service or instance appears in the measurement that triggered the alert, and when the symptom began.
 
 We enforced a simple ordering rule, expressed in plain language:
 
-- **Who / what is actually failing?** If you cannot resolve a concrete entity after a short discovery pass, stop inventing names — say identity is insufficient and list what would resolve it.
+- **Who or what is actually failing?** If a short search cannot identify the service or instance, report that gap and say what would resolve it rather than guessing a name.
 - **When did it start?** A metric already bad at window open is not the same incident as a sharp step change mid-window.
-- **What else could explain it?** Competing branches get explicit status: supported, ruled out, or **blind** (we looked; telemetry could not answer).
-- **Only then** treat change as a falsifier — did something change *before* onset with a plausible mechanism, or merely correlate afterward?
+- **What else could explain it?** Label each competing explanation supported, ruled out, or **untestable with available data**. “Untestable” is not “ruled out.”
+- **Only then** examine recent changes: did one precede onset and offer a plausible mechanism, or does it merely coincide with the symptom?
 
 Leading with "what changed?" before those steps is how you get deploy-shaped root causes for problems that live in a shared queue, a mis-tagged pool, or a dependency one hop away.
 
-Think of it as the foyer of the house. You do not renovate the kitchen while you still cannot find the front door.
+The order matters because a detailed query about the wrong service can be precise but irrelevant.
 
 ---
 
@@ -100,18 +98,22 @@ Once framing is solid, the investigator should pursue **competing mechanisms** c
 Each branch should follow the same micro-loop:
 
 - **Probe** one mechanism.
-- **Falsify** with a planned disproof when telemetry can answer.
-- **Prune** when disproved or when the branch cannot be confirmed — do not keep spending budget on a dead story.
+- **Try to disprove it** with a planned check when monitoring data can answer.
+- **Set aside** a disproved explanation. Mark an untestable one as unknown rather than treating it as disproved.
 
-When two explanations remain plausible, keep both visible with the **cheapest test** that would split them. If the observability stack can run that test, run it. Handing the operator a homework assignment for data you could have fetched is how trust dies at 3 AM.
+When two explanations remain plausible, keep both visible and identify a low-cost test that could distinguish them. If the observability stack can run that test, run it. Handing the operator a homework assignment for data you could have fetched is how trust dies at 3 AM.
 
-This is standard incident hygiene. The AI-specific twist is harder: models are **completion engines trained to sound helpful**. An open branch reads like a failed answer, so the model **merges forks in prose** — sometimes inventing infrastructure to fill the gap — unless something outside the model keeps alternatives visible until evidence closes them. Prompts ask nicely; production needs a **strict supervisor** that treats an honest "unknown" as success, not a polite failure to finish the sentence.
+The AI-specific risk is that a model may combine unresolved alternatives into one tidy paragraph. Keeping a structured list of supported, rejected, and untested explanations outside the generated prose helps prevent that collapse. A controller should accept “unknown” when the necessary checks are unavailable.
+
+![Hypothesis ladder from symptom framing to competing probes, with untestable branches kept distinct from ruled-out causes.](/assets/images/diagrams/july-investigation/hypothesis-ladder.svg)
+
+*Diagram: The upper arrows follow framing, falsification, and competing explanations; the lower path keeps an untestable branch visible before wording a supported finding or an unknown with a next probe.*
 
 ---
 
 ## Prove First, Narrate Last
 
-The subtle bug in agentic RCA is **summary before proof**. The model emits a confident closing section; the human stops reading; the channel moves on with a story telemetry never supported.
+A summary written before the checks are complete can make an unsupported explanation look settled. “Telemetry” here means measurements and event records about the system, not a guarantee that all relevant data was captured.
 
 We already wrote about structural gates for multi-stage workflows in [Evidence-Gated RCA](/blog/evidence-gated-multiplane-rca/). The hypothesis ladder applies the same philosophy to **epistemic claims**:
 
@@ -119,9 +121,9 @@ We already wrote about structural gates for multi-stage workflows in [Evidence-G
 - The human-facing summary is **downstream** of what those receipts support.
 - Strong language in chat cannot outrun weak evidence in the underlying artifacts.
 
-If logs or traces that would confirm the initiating hop are unavailable, the write-up stays at **leading hypothesis** or **unknown** — not "confirmed root cause" with a hedge paragraph buried at the bottom.
+If event logs or request traces that would confirm the initiating step are unavailable, the write-up stays at **leading hypothesis** or **unknown** — not "confirmed root cause" with a hedge paragraph buried at the bottom.
 
-That is compound AI thinking applied to on-call tone: the runtime checks artifacts; the model narrates within the envelope.
+In practical terms, the software running the workflow checks the recorded results; the model writes within those limits.
 
 ---
 
@@ -132,9 +134,9 @@ Whether an investigation stops early or runs deep, the human should leave with a
 - **Graded certainty** — what we think happened, without one flat confident sentence.
 - **Identified blind spots** — retention gaps, missing identity, backends that returned nothing useful.
 - **Ranked next actions** — a short list; read-only checks before destructive steps when cause is still unverified.
-- **Expanded blast radius** — who else might be affected beyond the alert's narrow label.
+- **Possible wider impact** — which other users or services might be affected beyond the alert’s narrow label.
 
-Empty branches marked **looked, nothing found** are success. They beat invented names added to fill a template.
+A branch marked “checked, nothing found” is useful when it names the check and its limits. It should not be confused with a branch that was never tested.
 
 ---
 
@@ -142,13 +144,13 @@ Empty branches marked **looked, nothing found** are success. They beat invented 
 
 **1. Links are not evidence.** Pointing at a dashboard is for humans. If a log row would confirm or refute the mechanism, fetch it or say you could not.
 
-**2. Red-team your own story.** Before you publish: best counter-argument, and one test that would change your mind — run it when telemetry allows.
+**2. Challenge your leading explanation.** Name the strongest alternative and a check that would change your mind; run it when data is available.
 
-**3. Shape beats pattern.** Multiple services failing together is a signal to **split explanations**, not to pick the most familiar culprit and stop.
+**3. Check the pattern across services.** Simultaneous failures may indicate a shared dependency, but could have other causes; compare affected and unaffected services before settling on one explanation.
 
-**4. Honest stop is a feature.** "Unknown — here are the top next probes" preserves trust. A wrong root cause spends it.
+**4. Stop with a clear status.** If the available records do not distinguish explanations, say “unknown” and list the next diagnostic checks.
 
-**5. Prompts teach; enforcement learns.** Long procedure text in context gets skimmed. Production needs the same discipline humans enforce in war rooms — written down, visible, and checked before the channel sees a headline.
+**5. Make checks visible.** Instructions in a prompt can guide an investigation, but recorded checks and explicit stopping rules make it possible to inspect why a headline was allowed.
 
 ---
 
@@ -160,7 +162,7 @@ Empty branches marked **looked, nothing found** are success. They beat invented 
 - [From demo to deploy](/blog/demo-to-deploy-receipts/) — why fluent output without receipts fails in production
 - Topic hubs: [AI agents for SRE](/topics/ai-agents-sre/) · [AI agent workflows](/topics/ai-agent-workflows/)
 
-The hypothesis ladder is the **on-call behavior layer**: climb, prune, grade, stop — so humans get clarity instead of bedtime stories.
+The ladder orders the investigation and keeps remaining uncertainty visible. It is most useful when the team can inspect the evidence behind each step.
 
 ---
 
@@ -169,4 +171,4 @@ The hypothesis ladder is the **on-call behavior layer**: climb, prune, grade, st
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> **StackGen is building AI-assisted incident triage.** Our offering aims to help teams run diagnostics and draft RCA reports; operators should still verify consequential findings. See [ai.stackgen.com](https://ai.stackgen.com).

@@ -4,7 +4,7 @@ title: "Stop Spawning Duplicate Workers: What a Handoff Gate Changed in Agent Ev
 date: 2026-08-17 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 49
-description: "Stop duplicate agent workers: a handoff gate fixed fairness 5/5 and cut planner token tax on AppWorld evals — partial pass% rose while strict TGC remains a separate harness goal."
+description: "Stop duplicate agent workers: combined handoff and tool-registration fixes improved fairness to 5/5 and reduced measured planner tokens on one AppWorld slice — partial pass% rose while strict TGC remains a separate harness goal."
 image: /assets/images/og-appworld-handoff-gate.jpg
 tags: [ai-agents, evaluation, multi-agent, orchestration, workflows, handoff, subagent, aiden, production]
 permalink: /blog/stop-duplicate-agent-workers-handoff-gate/
@@ -12,7 +12,7 @@ faqs:
   - question: "What is an agent handoff gate in planner-worker evals?"
     answer: "A per-run guard that records the first successful worker handoff and returns that result when the planner tries to spawn again. It stops duplicate AppWorld runs after the subcontractor already finished — without it, orchestration tax and fairness metrics lie."
   - question: "Why did judge pass_percentage rise but strict success stay at zero?"
-    answer: "pass_percentage counts partial test passes inside AppWorld's evaluate harness. success is the strict TGC gate. We saw plan at 56% average pass% vs simple at 41.7% after fixes — real progress on task steps, while strict success remains a separate tuning target on this five-task slice."
+    answer: "pass_percentage counts partial test passes inside AppWorld's evaluate harness. success is the strict TGC gate. We saw plan at 56% average pass% vs simple at 41.7% after fixes — a partial diagnostic, while strict success still failed on this five-task slice; a missing judge result and a telemetry gap limit interpretation."
   - question: "Did the planner become cheaper than single-agent after the gate fix?"
     answer: "On average, yes on this five-task slice: planner tokens were about 0.86× single-agent (down from ~1.34× pre-gate). Per-task it still varies; three tasks were cheaper on single-agent. Do not treat average ratio as a universal routing rule."
   - question: "Why does create_agent count still show ~3 when only one worker ran?"
@@ -21,7 +21,7 @@ faqs:
     answer: "Fairness (tool-access parity) must pass before you compare cost or pass%. This sequel fixed fairness from 2/5 to 5/5 pairs OK, then re-measured. See the trilogy starting with fair agent evals before performance."
 ---
 
-**Rule:** the first successful worker handoff wins. Extra `create_agent` calls return that result — they do not launch another subcontractor. Without that gate, multi-agent evals double-count workers and lie about orchestration tax.
+**Rule for this benchmark run:** once a delegated worker returns successfully, later `create_agent` (launch-worker) attempts return that result instead of launching duplicate workers. This avoids repeating the same AppWorld work. It does not remove the planner turns spent *attempting* those launches, and a production system may need a way to start a genuinely different follow-up job.
 
 We fixed **fair agent evals** and cut **agent orchestration tax** on a five-task AppWorld slice — the wins were in **measurement and cost**, not in declaring a benchmark champion. **Strict judge pass stayed 0/5** on this slice; the gate did not “win AppWorld,” it stopped invalid comparisons.
 
@@ -33,22 +33,19 @@ Dataset unchanged. Judge unchanged (AppWorld `/evaluate`, strict `success` bit).
 
 ---
 
-## TL;DR
+## What changed in the five-task rerun
 
-- **Fairness:** **2/5** → **5/5** pairs OK after subcontractor fixes (infra tools registered, spawn soft-drop, handoff gate, one worker node cap).
-- **Orchestration tax:** planner/single token ratio **~1.34×** → **~0.86×**; iterations **38.4** → **27.8** on plan side.
-- **Partial progress:** avg `pass_percentage` **41.7%** (simple) → **56.0%** (plan) post-gate — task steps improved; **strict AppWorld TGC** on this slice remains a separate harness goal (see [part one context](/blog/fair-agent-evals-before-performance/)).
-- **Monday-morning rule:** gate duplicate workers **before** debating planner vs single-agent on tokens.
+With the worker tools registered, optional missing names handled, and duplicate launches blocked, **5/5** pairs passed tool-access checks versus **2/5** before. The planner-to-single-agent average token ratio moved from about **1.34×** to **0.86×**; the planner averaged **27.8** turns instead of **38.4**. Multiple changes happened together, and the single-agent token average changed too, so this is not an isolated estimate of the gate’s effect. Neither mode passed strict AppWorld task-goal completion on the rerun. The practical check is to count actual worker sessions as well as attempted launch calls.
 
-**Sequel:** [How to evaluate AI agents: clarify + zero-tool failures](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/) — workers that report success without domain MCP calls.
-
-### Explain like I'm five
-
-If you already sent one helper to do the chore, do not send a second helper with the same list. The second trip wastes time and makes your scorecard count two helpers even though only one actually worked.
+**Sequel:** [How to evaluate AI agents: clarify + zero-tool failures](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/) — workers that report success without app calls.
 
 ---
 
 ## What we fixed (behavior, not blueprint)
+
+![Coordinator sends one worker, records a successful return, rejects a duplicate spawn, then separates spawn attempts from actual workers and judge outcome](/assets/images/diagrams/aug-evals/handoff-worker-gate.svg)
+
+*Caption: The handoff gate avoids duplicate workers; spawn-attempt telemetry and external task success remain separate measures.*
 
 After [failure-mode](/blog/ai-agent-eval-failure-modes/) runs on the same `plan_fit_5` tasks, we addressed harness and runtime issues that made planner mode look worse than it was:
 
@@ -82,7 +79,7 @@ Same five delegation-fit tasks (phone → notes → SMS, inbox + contacts + Spli
 
 *Caption: `plan_fit_5` cohort, n=5 task pairs · fairness and token ratio improved post-gate.*
 
-**Interpretation:** the gate and fairness fixes **removed invalid comparisons** and **reduced coordination waste**. Strict AppWorld TGC on this small slice is still a **harness tuning track** (budget, discovery, eval redaction) — not a verdict on [production SRE agents](/blog/what-are-sre-ai-agents/).
+**Interpretation:** the combined changes improved tool-access parity and lowered measured cost on this slice. The rerun cannot attribute that difference to the gate alone. Strict AppWorld TGC still failed; budgets, tool discovery and redaction merit investigation, but task correctness may also be at issue. These numbers do not evaluate [production SRE agents](/blog/what-are-sre-ai-agents/).
 
 ---
 
@@ -96,7 +93,7 @@ Same five delegation-fit tasks (phone → notes → SMS, inbox + contacts + Spli
 | `afc0fce_2` | 50.0% / 105,322 | **100.0% ⚠️ / 0 tokens** | simple `fail_judge`; plan `budget_no_eval` | **telemetry bug** — 100% pass% with zero Langfuse tokens is not a victory |
 | `32616b5_1` | 30.0% / 198,455 | 30.0% / 206,495 | both `fail_judge` | tie; similar pass% |
 
-**Scoreboard on pass% alone:** plan higher on **2/5** tasks — meaningful diagnostic after harness fixes. **Scoreboard on strict TGC:** neither mode cleared the bar on this slice; compare modes on fairness and tax first.
+**Scoreboard on pass% alone:** plan higher on **2/5** tasks, though one of those rows has zero-token telemetry and no confirmed judge run; treat that row as an unresolved diagnostic rather than a measured quality gain. **Scoreboard on strict TGC:** neither mode cleared the bar on this slice; compare modes on fairness and tax first.
 
 ---
 
@@ -117,7 +114,7 @@ This is also why [from vibes to contracts](/blog/from-vibes-to-contracts-agent-e
 
 Post-gate logs verified **one real worker spawn per task** when the handoff gate returned the prior result on repeat `create_agent` calls (`stop_after_successful_handoff` behavior).
 
-SSE aggregates still showed **~3.0** `create_agent` events per plan run. Those are **blocked retries** — the planner burning orchestrator iterations on spawn attempts the gate rejected.
+SSE (server-sent event) aggregates still showed **~3.0** `create_agent` events per plan run. Those are **blocked retries** — the planner burning orchestrator iterations on spawn attempts the gate rejected.
 
 **Copy for your harness:**
 

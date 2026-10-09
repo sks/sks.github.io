@@ -10,7 +10,7 @@ tags: [ai-agents, pii, privacy, security, observability, audit, aiden, productio
 permalink: /blog/pii-redaction-ai-agents/
 ---
 
-**PII redaction for AI agents** is usually treated as one sanitized transcript. We redacted sensitive values from an agent’s working history.
+**Personally identifiable information (PII) redaction** replaces sensitive personal values before they enter an AI agent’s working history. We applied it to the context returned to the model, then found that the same protected form reached an operator’s debugging trace.
 
 The privacy control did its job. Identifiers became placeholders before the conversation returned to the model. The agent could reason about structure without repeatedly seeing the original value.
 
@@ -18,7 +18,7 @@ Then an operator opened the live trace to debug a failed tool call.
 
 The tool arguments contained placeholders too.
 
-The operator could see that a lookup failed, but not which account, email, or resource the agent actually tried to use. The trace was safe and nearly useless.
+The operator could see that a lookup failed, but not which account, email, or resource the agent actually tried to use. The trace withheld the sensitive values, but it did not show enough to distinguish an incorrect lookup argument from a tool failure.
 
 > **PII redaction for AI agents has two audiences with different needs: the model and the authorized human operator. Treating them as the same audience breaks either privacy or debuggability.**
 
@@ -47,6 +47,10 @@ One sanitized transcript cannot satisfy all three safely.
 
 ## The Two-View Principle
 
+![Trace redaction produces placeholders for model history and broad logs but permits audited late reveal to authorized operators](/assets/images/diagrams/aug-runtime/pii-two-views.svg)
+
+*The model and broad logs stay redacted; only an authorized viewer gets a late reveal.*
+
 The useful abstraction is not “redacted or unredacted.” It is **purpose-bound views**.
 
 | View | Audience | Data state |
@@ -61,7 +65,7 @@ The same underlying event can therefore render differently depending on who is a
 
 ## Rehydrate Late, Not Early
 
-The safest place to restore a protected value is as close as possible to the authorized viewer.
+A narrower place to restore a protected value is the authorized viewer’s presentation boundary, after access checks. This limits, but does not eliminate, exposure risks such as screenshots and exports.
 
 If rehydration happens before events are written back into session history, the next model turn may receive the sensitive value again. If it happens in a shared event bus, downstream consumers may see data they never requested. If it happens in permanent logs, a temporary debugging need becomes indefinite retention.
 
@@ -122,7 +126,7 @@ The answer is not blanket visibility. It is field-aware, role-aware presentation
 - preserve redaction for unauthorized viewers,
 - and record that a protected value was revealed.
 
-Operator visibility is a privileged action, not the absence of privacy.
+Operator visibility is a privileged action that needs explicit scope and audit, not a default unredacted trace.
 
 ---
 
@@ -136,7 +140,7 @@ That creates awkward failure modes:
 - the UI briefly displays a raw prefix before redaction catches up,
 - or the final assembled call differs from what the model history stores.
 
-The public lesson is simple: apply privacy rules to both incremental events and the completed event. Test what the operator sees during the stream, not only the final object.
+Apply privacy rules to both incremental events and the completed event; if fragments cannot be checked safely, buffer them before display. Test what the operator sees during the stream, not only the final object.
 
 [Observability for AI agents](/blog/observability/) is only trustworthy when the trace preserves both truth and policy throughout the event lifecycle.
 
@@ -202,4 +206,4 @@ Good agent privacy does not make the system impossible to debug. Good agent obse
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

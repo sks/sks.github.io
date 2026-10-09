@@ -4,120 +4,68 @@ title: "AI Agent Evals in CI/CD: Flakes, Retries, and Missing Results"
 date: 2026-10-07 16:30:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 77
-description: "AI agent evals in CI/CD only help if red means a real regression. Opt in, fail missing tasks, pin trial id to the trace, and separate flakes from agent bugs."
+description: "Keep live agent trials deliberate, report missing tasks and failed attempts, and match trial IDs to traces before trusting a CI result."
 image: /assets/images/og-default.png
 tags: [ai-agents, evaluation, ci-cd, testing, reliability, observability, aiden]
 permalink: /blog/ai-agent-evals-cicd-flakes/
 faqs:
   - question: "Should AI agent evals run on every pull request?"
-    answer: "Make live LLM suites opt-in. Keep fast deterministic checks on every push. Live trials burn tokens and flake if you force them on every synchronize."
+    answer: "In this setup live LLM suites are opt-in or scheduled; fast deterministic checks run on every push. Choose a different gate if your live trials are stable, affordable, and important enough to justify it."
   - question: "How should retries work for flaky AI evals?"
-    answer: "Retry for infra flakes. For the merge gate, pass if any attempt cleared a known-good regression task. Still publish per-attempt fail rates so intermittent agent bugs stay visible. Do not average attempts into a single boolean."
+    answer: "Classify infrastructure failures separately from agent misses and keep every attempt visible. For known-good regression tasks, this setup uses pass-if-any to absorb infrastructure flakes, while publishing per-attempt failures; do not use it to hide intermittent agent failures."
   - question: "What if a baseline task is missing from this run?"
-    answer: "Fail the report. A silent skip used to stay green and hide broken infrastructure."
+    answer: "Fail the report for a required baseline task. A skipped or absent result is not evidence that the task passed."
   - question: "Why must the trial id match the trace id?"
-    answer: "If they differ, you graded the wrong conversation. A root span that shows a worker assignment instead of the user ask is the same bug."
+    answer: "The matching ID links the graded trial to the conversation trace. If they differ, the trace may belong to a different run; a root span showing a worker assignment rather than the user's ask is another sign of mis-correlation."
 ---
 
-A green CI job once meant "we skipped the hard task and averaged the rest." That is not **agent regression testing**. That is optimism with a checkmark. **AI agent evals in CI/CD** only earn their keep when red means a real regression.
+We had a green CI result even though a difficult task was skipped and the remaining attempts were averaged. The color described the reporter's arithmetic, not whether the agent completed every required task. CI needs to distinguish an agent miss from an infrastructure problem and a missing result from a pass.
 
-[Ham Vocke](https://martinfowler.com/articles/practical-test-pyramid.html) put expensive tests in the pipeline on purpose. Agents make that advice sharper: a live trial can run about fifteen minutes and still lie if the report lies.
-
----
-
-## TL;DR
-
-- Opt in. Do not spend a live model on every push.
-- Build the image once. Reuse it across parallel jobs.
-- Do not cancel a run that already started. Cancel older runs still waiting.
-- Do not average attempts into a single pass/fail. Pass-if-any for infra flakes; publish fail rates so real intermittency stays visible.
-- If a baseline task is missing, fail. Silent skips used to stay green.
-- Pin the trial id to the trace id. Sleeping longer does not fix a mismatch.
-- A timeout with no file is a flake. A missing brief is a contract break.
-
-### Explain like I'm five
-
-If three kids take a spelling test and two spell the word right, you do not fail the class because the average score looks soft. And if one kid never got a pencil, you do not mark them present.
+A *live trial* runs the agent with its model and tools on a task. A *flake* is a run failure caused by unstable infrastructure or another condition unrelated to the agent behavior being evaluated; do not assume every inconsistent answer is a flake. [Ham Vocke's practical test pyramid](https://martinfowler.com/articles/practical-test-pyramid.html) places costly end-to-end tests sparingly. One of our live trials can take about fifteen minutes, so we keep them deliberate and inspectable.
 
 ---
 
-## Place the suite deliberately
+![CI evaluation records every attempt and the source of each failure](/assets/images/diagrams/oct/eval-ci.svg)
 
-Live LLM work is the top of the [testing pyramid](/blog/ai-agent-testing-pyramid/). Keep it opt-in on a pull request. A weekly run holds the baseline and the exploratory tip.
+*A single green rerun should not erase earlier agent, harness, or service failures.*
 
-Build the agent image once. Parallel jobs load that archive. One long job that does everything serially taught us nothing except how long twenty-five minutes feels.
+## Place and report the suite deliberately
 
-Do not cancel an in-progress run when a newer push arrives. Cancel older runs that are still queued. Update one pull-request comment instead of stacking a new novel every synchronize.
+Fast checks run on pushes; live trials sit at the top of the [testing pyramid](/blog/ai-agent-testing-pyramid/) and run by pull-request opt-in or weekly schedule. Build the image once and load its archive in parallel jobs. Avoid a single serial job when tasks can safely run independently.
 
-Fairness still applies: [do not compare modes until tools match](/blog/fair-agent-evals-before-performance/).
+For our pull-request workflow, an in-progress trial continues when another push arrives, while older queued runs can be cancelled. Updating one report comment keeps the current results easy to find. The gate should also retain build identity and comparable tool access: [fair agent evals](/blog/fair-agent-evals-before-performance/) explains why modes should not be compared until tools match.
 
----
+## Interpret attempts before choosing a gate
 
-## Retries without lying
+Retries help when a sidecar fails to start or a trial times out before producing a file. They do not establish that the agent is reliable. Averaging attempts into a single pass/fail value made a two-of-three pass fail even though retries were intended to absorb infrastructure noise. For known regression tasks in this setup, the merge gate uses pass-if-any for infrastructure-flake retries *and* publishes each attempt's result or a pass@k summary (the share of tasks solved within k attempts). An agent that fails intermittently can otherwise look green. If a task is new or an agent error caused the retries, investigate rather than granting it an infrastructure-flake exception.
 
-Several attempts exist to absorb infra flakes (timeouts, missing sidecars). Averaging attempts into one boolean is a bad gate: it fails a 2-of-3 pass that retries were meant to absorb.
+| Observation | What to investigate |
+|-------------|---------------------|
+| Timeout with no deliverable | Infrastructure or trial timeout; classify before retrying |
+| Success exit but no required deliverable | Contract failure: the expected artifact was not written |
+| Required baseline task absent from summary | Reporter/gate failure; mark the report unsuccessful |
+| Required-task skip marked as pass | Reporter bug; a skip is not a successful run |
+| Trial ID differs from trace ID | Correlation bug; waiting longer does not make two IDs equal |
 
-Best-of-N as a *merge gate* also has a cost. It can hide an agent that fails one in three times. Use pass-if-any only for tasks you already trust as regression coverage, and always publish per-attempt fail rates (or pass@k) so intermittent agent bugs stay visible. Averaging is a diagnostic metric, not a green/red switch.
+A required task blocked by a missing dependency should write a skip and fail the report. An optional token-spend explanation may fall back to a heuristic, provided the report says so and does not change a failed required task to green.
 
-| Signal | Treat as |
-|--------|----------|
-| Timeout, no deliverable file | Flake / infra |
-| Deliverable missing after success exit | Contract break |
-| Baseline task absent from this summary | Gate fail |
-| Required task skip written as pass | Bug in the reporter |
-| Trace id ≠ trial id | Correlation bug, not lag |
+## Link a result to the right conversation
 
-Decision rule: **if a missing trial disappears from the report, fail the report.**
+The trial ID should match the trace ID used by the exporter. Otherwise a grader can inspect the wrong conversation. Check that the root trace span describes the user's ask, not merely a worker assignment. An HTTP 501 (“API not implemented”) is not an eventual-consistency delay; retrying sleep will not create that endpoint.
 
-Split skip types. A required task that could not run (missing dependency) must fail the gate. An optional side job, such as a token-spend narrative, may degrade to a heuristic without greenwashing the suite.
+Keep keys in the secret store, but leave non-secret trace UI hosts as plain configuration. Our CI redacted a host stored as a secret and broke the link in the summary. Export traces into the run artifact so a result can be reviewed later. Import shared CI helpers as modules rather than relying on behavior that only works when a file runs as `__main__`.
 
----
+Weekly research tasks can mention the product under test without naming private tools in the persona. They explore *capability*—what the agent might do on unfamiliar work—rather than serving as the default *regression* gate for known work.
 
-## Traces are part of the receipt
+## A CI review checklist
 
-The id on the trial and the id on the trace must be the same id. If the runner stamps its own session and your exporter looks elsewhere, you grade the wrong conversation. The root span should show the user's ask, not a worker's assignment.
+1. Decide which live jobs merit an opt-in label, a schedule, or a merge gate; keep fast checks on every push.
+2. Build once and record the build identity, then reuse the image for parallel trials.
+3. Report each attempt and classify failures before applying a retry policy; reserve pass-if-any here for identified infrastructure flakes on known tasks.
+4. Fail on any absent required baseline task or required-task skip. Keep optional degradations explicit.
+5. Print trial and trace IDs side by side and spot-check a root span weekly; include the trace artifact and a working, non-secret UI host.
+6. Classify the last five red runs as infrastructure, contract, correlation, or agent misses. Fix a misleading reporter before treating its color as an agent diagnosis.
 
-Portable rules that keep showing up:
-
-- Do not treat "API not implemented" (for example HTTP 501) as eventual consistency. Sleeping longer does not fix a mismatched id.
-- Do not put non-secret UI origins into the secret store. CI redacts them and breaks links in the job summary. Keys stay secret. Public hosts stay plain strings.
-- Export traces into the artifact. Import shared CI helpers as modules, not as one-off scripts that only work when run as `__main__`.
-
----
-
-## Weekly tip stays exploratory
-
-A weekly research task may discuss the product under test. It still must not name private tools in the persona. Capability hunting lives here, not in the default merge gate. That is Anthropic's capability vs regression split applied to the calendar.
-
----
-
-## CI honesty checklist
-
-1. Live suite is label-gated or scheduled.
-2. Image built once, loaded many times.
-3. In-progress run kept; stale queued runs cancelled.
-4. One upserted report comment, not a stack.
-5. Merge gate uses pass-if-any only for infra-flake retries on known regression tasks; publish per-attempt rates.
-6. Missing baseline task fails the compare.
-7. Trial id equals trace id on a spot check every week.
-8. Trace UI host is not a secret.
-9. Required-task skip fails the gate; optional analyst jobs may degrade without greening the suite.
-
----
-
-## What to do Monday
-
-1. Move live LLM jobs behind an opt-in label or a weekly schedule.
-2. Stop averaging attempts into a boolean. Publish fail rates; use pass-if-any only for infra flakes.
-3. Fail when a baseline task is absent from the current summary.
-4. Print trial id and trace id side by side in the report. Diff them.
-5. Move public UI hosts out of the secret store.
-6. Classify the last five red runs as flake vs contract vs real agent miss. Fix the reporter before you fix the agent if the reporter lied.
-
----
-
-## Takeaway
-
-**AI agent evals in CI/CD** are useful only when a red build is a real regression and a green build is not a missing task. Everything else is expensive theater.
+A red build is useful when it points to a real, identifiable failure; a green one is useful when it accounts for every required task and does not conceal unstable attempts.
 
 Previous: [Multi-Agent Handoff Testing](/blog/multi-agent-handoff-testing-context-loss/). Series hub: [Enterprise AI Agents in Go](/series/enterprise-ai-agents-go/).

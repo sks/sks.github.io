@@ -9,29 +9,23 @@ image: /assets/images/og-evidence-rca.png
 tags: [ai-agents, sre, verification, observability, production, golang]
 ---
 
-The most dangerous sentence an agent can produce is: **"I've confirmed the issue is resolved."**
+An agent can say "I've confirmed the issue is resolved" after a remediation. That sentence is useful only if an operator can see what was checked, when, and against which system. A deployment request being accepted, for example, does not mean the new pods are serving traffic.
 
-Confirmed how? By re-reading its own summary? By noticing the user stopped complaining? By vibes?
-
-We built agents for SRE workflows where **self-report is worthless**. The only verification that matters pulls evidence from systems of record — monitoring, deployment pipelines, ticket state — before anyone closes an incident. This is the downstream gate for [evidence-gated agent workflows](/topics/ai-agent-workflows/).
-
-This sits next to [AI-augmented incident triage](/blog/ai-incident-triage-sre/): triage gathers hypotheses; verification refuses to promote a "resolved" claim until tools vote.
+For SRE (site reliability engineering) workflows, we use **evidence-based verification**: the agent can propose and explain checks, but monitoring, deployment, and configuration systems supply the observations used to decide whether a workflow is complete. This is a downstream gate for [evidence-gated agent workflows](/topics/ai-agent-workflows/). It complements [AI-augmented incident triage](/blog/ai-incident-triage-sre/): triage develops a hypothesis; verification tests the outcome of a change.
 
 ---
 
-## The Demo vs Production Gap
+## A plausible account is not a completion check
 
-Demos reward fluent narratives. Production rewards **falsifiable checks**.
+A demo may end when an agent writes a convincing account of a fix. In an incident, an operator needs a check that could also come back negative. After a rollout, for instance, the agent should read the continuous delivery (CD) system's rollout status rather than infer success from the manifest it submitted. If the check fails, the workflow stays open and the operator sees the underlying result.
 
-An agent that narrates a plausible root cause without querying metrics is performing theater. Operators learn to distrust the UI. Eventually they bypass the agent and open Grafana themselves — at which point the agent is expensive autocomplete.
-
-Evidence-based verification flips the contract: **the agent may not claim an outcome until tools return proof.**
+That does not mean prose is useless. The agent's summary helps a person understand the result; it should not be the authority for pass or fail.
 
 ---
 
-## What "Evidence" Means in Practice
+## What counts as evidence?
 
-For a typical remediation workflow, we require checks like:
+A remediation checklist connects each completion claim to a fresh observation:
 
 | Claim | Required evidence |
 |-------|-------------------|
@@ -40,25 +34,19 @@ For a typical remediation workflow, we require checks like:
 | Feature flag flipped | Fetch flag state from config service |
 | Ticket ready to close | Validate linked alerts cleared |
 
-The agent still explains *why* in prose. Prose is the summary. **Evidence is the gate.**
+A green alert alone may not prove that the service recovered: the alert could have been silenced or the metric window could be too short. The checklist should reflect the actual change and its failure modes, not just the easiest signal to query. Record the observation time and retain a link or payload so someone can inspect the result.
+
+Pasting monitoring links into a prompt is not the same as fetching them. The model can answer from earlier context without opening the link. Likewise, a staging check may not cover the production dependency that failed. Verification has to run against the relevant environment and window.
 
 ---
 
-## How Teams Usually Get This Wrong
+## Keep the decision boundary in Go
 
-Teams paste monitoring links into prompts and call it verification. The model may not fetch them; it may summarize from stale context.
+![Remediation claim moves through operator checklist, read-only system checks, timestamped evidence, Go pass-fail gate, then explanatory summary](/assets/images/diagrams/aug-evals/evidence-verification-gate.svg)
 
-Another pattern: verifying only the happy path in demos — alert cleared in staging — while production checks differ.
+*Caption: Read-only systems of record provide fresh evidence; the Go gate decides before the model explains.*
 
-Evidence without timestamps is gossip. Always record when the observation was true, not only what it said.
-
----
-
-## Architecture & Implementation in Go
-
-To keep pass/fail deterministic, we do not let the LLM stare at a raw log dump and guess "healthy." The model may **select** which checks to run; the Go runtime **executes** them and adjudicates.
-
-Illustrative boundary — not a copy of production types:
+We do not ask the language model to read a raw log dump and pronounce the system healthy. It may select checks; the Go runtime executes them and evaluates structured results. This sketch shows the boundary, not production types:
 
 ```go
 // Deterministic verification boundary — illustrative pattern.
@@ -93,59 +81,45 @@ func (p *Pipeline) Execute(ctx context.Context) ([]Evidence, bool) {
 }
 ```
 
-Go's `context` deadlines enforce **freshness**: a check that cannot return within the verification window fails closed instead of recycling a planning-phase metric. Strong typing keeps pass/fail on structured fields — not on whether the model "feels" the incident is over.
+A `context` deadline limits how long a check can wait; it does **not** by itself prove that returned data is fresh. Production checks also need to validate `ObservedAt` against the verification window and reject cached or missing observations. The sketch marks errors as failure, but real code must preserve the error alongside the evidence so an operator can distinguish "check failed" from "could not check." Structured fields make that distinction possible without asking a second model to judge the first model's prose.
 
-The model is a *worker* that proposes a checklist. The Go core is the *auditor*.
+The workflow is:
 
-High-level flow:
+1. Attach a completion checklist, written by an operator or template, to the remediation.
+2. Map each item to a **read-only** `VerificationCheck`.
+3. Run the checks and collect timestamped `Evidence` and errors.
+4. Decide pass/fail on the structured results, including freshness requirements.
+5. Optionally have the model explain the decision in operator language *after* adjudication.
 
-1. **Completion checklist** attached to the workflow (human-authored or templated)
-2. Each item maps to a **read-only** `VerificationCheck`
-3. Pipeline runs checks (often concurrently), collects `Evidence`
-4. Pass/fail is deterministic on structured data
-5. Optional model step translates evidence into operator language *after* adjudication
-
-That avoids the "judge model agrees with worker model" problem.
+Read-only checks avoid changing the state they are supposed to inspect. They also make retries safer, although a query timeout or an unavailable monitoring backend still means the workflow cannot claim success.
 
 ---
 
-## Failure Stories
+## Where the check changes the outcome
 
-**The green deploy that wasn't.** An agent reported success after pushing a manifest. Evidence check queried the CD system — rollout stuck at 50%, new pods crash-looping. Without the check, on-call would have moved on.
+**A green manifest, an incomplete rollout.** An agent reported success after pushing a manifest. The CD check found the rollout stuck at 50% with new pods crash-looping. Submitting a change was not the same as completing it.
 
-**The metric snapshot lie.** An agent quoted an error rate from a tool result cached ~10 minutes prior. A fresh query showed the spike had returned. Stale evidence is still lying.
+**An old metric snapshot.** The agent cited an error rate from a tool result cached about 10 minutes earlier; a fresh query showed the spike had returned. A timestamp turned an apparently reassuring number into a reason to keep investigating.
 
-**The partial fix.** Remediation addressed symptom A; checklist required symptom B clear too. Verification failed; agent continued instead of closing.
+**Only part of the symptom cleared.** Remediation addressed symptom A, while the checklist also required symptom B to clear. The workflow did not close on the first improvement.
 
----
-
-## The Verification Checklist for Production Agents
-
-If you are building remediation agents today, audit workflows against these rules:
-
-- [ ] **Separate narration from adjudication.** Let models write summaries; let typed tools vote on the outcome.
-- [ ] **Enforce strict freshness.** Evidence queries run at verification time — never reuse a planning-phase metric snapshot.
-- [ ] **Treat checklists as product artifacts.** SREs edit validation like runbooks (config or code), not buried prompt prose.
-- [ ] **Fail with raw artifacts.** On failure, show the system-of-record payload — not just "try again."
-- [ ] **Stick to read-only tools.** Verification must not mutate state while checking it.
-
-For each automated remediation workflow, list the external systems that must agree before closure. If the list is empty, you only have narrative verification — fine for drafts, unacceptable for production state changes.
-
-Train operators to click through to evidence artifacts, not only the summary paragraph. Trust compounds when skeptics can verify without reading raw traces.
+These examples illustrate why the checks should be chosen before the agent writes its closing summary. A checklist can still be wrong or incomplete; operators need to be able to review and change it.
 
 ---
 
-## Closing Perspective
+## A review checklist for remediation workflows
 
-**Production agent platforms rarely fail because the model is too small. They fail because ordinary distributed systems problems — retries, tenancy, approvals, routing, messaging — meet probabilistic components without the scaffolding SRE teams already know how to build.** The patterns in this post are not exotic research; they are discipline applied where demos cut corners.
+- [ ] **Separate narration from adjudication.** The model summarizes; typed checks determine the outcome.
+- [ ] **Set a freshness window.** Query at verification time and reject observations outside that window, rather than reusing a planning-phase snapshot.
+- [ ] **Keep the checklist reviewable.** SREs should be able to edit validation as they edit runbooks, in config or code, instead of hunting through prompt prose.
+- [ ] **Expose failed checks and raw artifacts.** Show the system response and any query error, not only "try again."
+- [ ] **Use read-only verification tools.** A check should not mutate the state it is measuring.
 
-When you adopt one of these ideas, measure one outcome operators care about: time to resume after crash, approval latency, cross-tenant leak tests passed, cost per successful workflow, or postmortem draft quality. Qualitative wins matter for trust; qualitative plus a trend line convinces leadership to fund the next increment.
+For each automated remediation, list the external systems that must agree before closure. Some workflows need only one check; a deploy plus a feature-flag change may need several. If none can be queried, say that verification is incomplete rather than presenting the agent's summary as proof.
 
-If you are early in your agent journey, implement the safety and isolation pieces before the clever routing pieces. Customers forgive slower answers more easily than wrong answers in another customer's environment, or duplicate production mutations because retries were naive.
+The tradeoff is extra queries and, sometimes, a longer path to closure. That cost is visible. An unverified closure can hide a still-failing service, which is why we keep the gate and give operators the artifacts to challenge it.
 
-Share what broke in your stack. The agent ecosystem is young enough that honest failure stories save the next team weeks — the same way early cloud outage postmortems taught us multi-AZ before marketing did.
-
-In [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/), we take the same philosophy upstream: structural evals and fixed DAGs so investigation stages cannot mark "done" on vibes either.
+In [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/), we apply the same idea earlier in an investigation: fixed stages and structural evaluations prevent a root-cause analysis (RCA) from being marked complete merely because its narrative sounds finished.
 
 ---
 
@@ -156,7 +130,6 @@ In [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-
 - More on [AI agent workflows](/topics/ai-agent-workflows/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---
-
 
 *How do your agents prove they did what they claim? I'd love to hear patterns from other domains. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 

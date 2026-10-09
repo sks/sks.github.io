@@ -17,45 +17,49 @@ faqs:
     answer: "Firing alerts and human symptom tickets across metrics, logs, traces, and analytics — inside fixed-stage pipelines rather than free-form chat."
 ---
 
-There's a moment in a great Rahman live set where the band stops replaying the film track and starts reading the room. Same score on paper. Completely different concert.
+A runbook can tell an incident agent which queries to try, but it cannot describe every dependency or data gap in a changing environment. We found that the agent also needed a map of the services and evidence it could check.
 
-I've spent the last few months in the gap between demo and production — teaching an AI SRE copilot to investigate real incidents. The work spanned **multiple observability planes** (metrics, logs, traces, and an analytics warehouse), **fixed-stage pipelines** (a directed graph of plan → gather → present — not a free-form chat loop), and two intake shapes: firing alerts and human symptom tickets.
+Our site reliability engineering (SRE) copilot investigated incidents across several data sources. The work spanned **multiple observability planes** (metrics, logs, traces, and an analytics warehouse), **fixed-stage pipelines** (a directed graph of plan → gather → present — not a free-form chat loop), and two intake shapes: firing alerts and human symptom tickets.
 
-Each path taught the same product lesson, louder every week:
+Both intake paths exposed a similar limit:
 
-> If your agent only works when you ship it a forty-page bespoke runbook, **the agent is not good yet.** The runbook became a crutch — not because runbooks are useless, but because the product had no map underneath.
+> If an agent needs a new, long runbook for every estate, it may lack reusable service topology, evidence checks, and a way to learn from corrected investigations.
 
-The runbook is a programmed track: linear, brittle, written for one scene. **The map** is what a good investigator carries when the room changes. This post names what that map is, when a runbook still earns its keep, and why scripts fail when they are the *only* layer.
+By “map” I mean those reusable inputs and checks, not a replacement for human procedures. This post describes where scripted steps helped, where they failed in our examples, and what still needs implementation.
 
 ---
 
 ## What the map is
 
-A map is not another markdown SOP. It is four things the platform injects **before** the model improvises:
+A map is not another markdown standard operating procedure (SOP). In our design it has four parts. Some are proposed or incomplete, as the open issues below make clear:
 
 ### 1. Topology at launch
 
-Discovery already knows which integrations exist (metrics, logs, warehouse, Git), which services and env tags appear in your estate, and which repos deploy to which workloads. **Inject that graph at investigate launch** so the agent navigates a pruned subgraph instead of inventing dependencies mid-run.
+Discovery already knows which integrations exist (metrics, logs, warehouse, Git), which services and env tags appear in your estate, and which repos deploy to which workloads. Inject the available graph at investigation launch so the agent starts with known connections rather than assuming dependencies. Discovery can be incomplete or stale, so the graph remains a starting hypothesis.
 
 Without it, every incident is a blind crawl. With it, "check deploy correlation" is a first-class probe, not folklore buried in a static PDF.
 
 ### 2. Verify-first probes
 
-Each investigation branch must write **structured evidence** — machine-checkable keys like `queue_depth_spike=true`, `readiness_pct=96.6`, or `warehouse_crosscheck=mismatch`. Fluent RCA prose comes *after* those fields exist.
+Each investigation branch must write **structured evidence** — machine-checkable keys like `queue_depth_spike=true`, `readiness_pct=96.6`, or `warehouse_crosscheck=mismatch`. Root-cause analysis (RCA) prose comes *after* those fields exist.
 
-A **hypothesis verifier** (deterministic code, not a second LLM) maps evidence keys to a root-cause class. The model drafts; code locks the taxonomy. That is how you avoid "vibe check from a judge wearing a hat."
+A proposed **hypothesis verifier** would map those keys to a root-cause class using deterministic code rather than a second model. Structured fields support checking but do not themselves establish causality; an operator must be able to challenge the class.
 
 ### 3. Cross-plane reconciliation
 
 Real incidents rarely live in one datastore. The map requires each plane to get a turn, then a mandatory **crosscheck** field that resolves to `match`, `mismatch`, or `single_plane` — not `pending` when gather declares complete.
 
-When metrics say "0.007% errors, issue inactive" but pods restarted once, the headline is **no active incident on scoped path**, not pod theater. Reconciliation is a presentation contract, not prompt flair.
+When metrics say "0.007% errors, issue inactive" but pods restarted once, the headline for that scoped path is **no active incident**, while the restart remains a fact to investigate if relevant. Reconciliation is a presentation contract, not prompt flair.
 
 ### 4. Verify-learn memory
 
 When an operator confirms or corrects a verdict, store the class, service fingerprint, and what was ruled out. On the next similar alert, surface that memory so the agent does not reopen solved dead ends.
 
-The map grows from production — not from shipping another notebook every time RabbitMQ redelivery spikes.
+Confirmed and corrected verdicts could make later searches more focused, provided the stored fingerprints and decisions are reviewable. This is a design direction, not evidence that memory already prevents repeat mistakes.
+
+![Comparison of a fixed query-check-write runbook with a topology-led investigation map that retries probes and reconciles evidence before verdict memory](/assets/images/diagrams/july-workflows/map-not-script.svg)
+
+*The map is a proposed navigation layer; stable runbook recipes remain useful overlays.*
 
 ```
 RUNBOOK (script)                 MAP (environment)
@@ -81,13 +85,13 @@ Step 3: write RCA                Rank hypothesis ◄─────────�
 | Operator corrects RCA in Slack | Verdict → memory → next run recalls prior |
 | Score workflow note tokens | Score **expected vs detected** root-cause class |
 
-**Bespoke investigation stacks** — per-tenant notebooks, stage-gate regex, spawn allowlists — are **symptoms** of a copilot that did not yet have the four layers above. When the map exists, those stacks should **shrink** — not disappear.
+**Bespoke investigation stacks** — per-tenant notebooks, stage-gate regex, spawn allowlists — are **symptoms** of a copilot that did not yet have the four layers above. If these layers prove useful, some tenant-specific notebooks and gates may shrink. Local procedures and exceptions will still remain.
 
 ---
 
 ## When runbooks still earn their keep
 
-The Rahman analogy cuts both ways. A live set still **starts from the score**. You are not throwing out sheet music — you are refusing to let the score be the *only* way the band reads the room.
+The map does not make runbooks obsolete. A known, stable incident class still benefits from a documented sequence, and humans need procedures for escalation and remediation.
 
 Runbooks stay valid when:
 
@@ -96,10 +100,10 @@ Runbooks stay valid when:
 | **Human SOP** | On-call engineers, auditors, and new hires need a readable ladder for rare events. The PDF is for *people*, not a substitute for injected topology. |
 | **Stable, bounded archetypes** | You've closed the same alert class fifty times; the probe sequence is known (queue depth → consumer tag → rebalance). Encode that as **recipes on the map**, not rediscovery every run. |
 | **Reference demo** | Greenfield estates need a worked example before discovery is rich. A reference notebook as an **optional demo** while the platform map matures is fine. |
-| **HITL remediation** | The map ends at evidence and class. The runbook documents who approves scale-down, which job to run, what lands in the ticket. Investigation vs blast-radius governance are different artifacts. |
+| **Human-in-the-loop (HITL) remediation** | The map ends at evidence and class. The runbook documents who approves scale-down, which job to run, what lands in the ticket. Investigation vs blast-radius governance are different artifacts. |
 | **Local overlay** | Env-specific dashboard IDs, tag quirks, "always widen to 7d on this monitor." **Templates on top of** topology + verifier — not the entire navigation layer. |
 
-The failure mode we kept hitting was not "someone wrote a runbook." It was **runbook as sole dependency** — forty pages shipped per estate because the agent could not navigate without them. Once topology, gates, and memory ship, healthy estates keep runbooks where they belong: human procedures, compliance trails, and overlays — while the agent walks the map.
+The failure mode was **runbook as sole navigation**: many estate-specific pages compensated for missing discovery and verification. Topology, gates, and memory are intended to supplement those pages; their effectiveness still has to be tested against live investigations.
 
 ---
 
@@ -159,7 +163,7 @@ No metric attached — so structure first: parse Environment / Module / Symptom 
 
 Even with a map, you need to **prove each pipeline stage** before you trust the whole run.
 
-**Bring-up** works like hardware bring-up: imagine a fixed pipeline — plan scope → gather evidence → present RCA. Deploy only stages **1 through N**, run one canary investigation, and pass an automated **gate** (a function over **tool outputs**, not LLM adjectives) before you wire up stage N+1. Green one stage until it is boring; then add the next. When stage 2 fails, stage 2 did it — not "the model felt creative today." ([Full hardware analogy here](/blog/bring-up-agent-workflows-like-hardware/).)
+**Bring-up** works like hardware bring-up: imagine a fixed pipeline — plan scope → gather evidence → present RCA. Deploy only stages **1 through N**, run one canary investigation, and pass an automated **gate** (a function over **tool outputs**, not LLM adjectives) before you wire up stage N+1. Green one stage until it is boring; then add the next. A failed stage-2 check narrows the search to stage 2 and its inherited inputs; it does not prove earlier stages were flawless. ([Full hardware analogy here](/blog/bring-up-agent-workflows-like-hardware/).)
 
 Gates are only as honest as their tests. We learned that the hard way:
 
@@ -167,7 +171,7 @@ Gates are only as honest as their tests. We learned that the hard way:
 - **The reality:** The agent correctly emitted a raw **`UUID`**.
 - **The result:** False failure — and shape-only gates that accepted **empty shells** while rejecting valid data.
 
-Worse: we once shipped a gate regex with **negative lookahead**. Go's RE2 engine does not support that syntax — the gate **crashed mid-run** after gather had already produced good evidence. That is not a plot twist. That is a **missing unit test**. We had golden pass fixtures; we did not have a golden **fail** fixture that would have caught unsupported regex in CI. Gates are code. Code ships with tests, or it ships lies.
+We also shipped a gate regular expression with **negative lookahead**. Go’s RE2 regular-expression engine does not support that syntax, so the gate crashed after gather had produced evidence. Both passing and failing fixtures, plus compilation of gate expressions in continuous integration (CI), would have caught this before a run.
 
 **Lesson:** treat gates like unit tests — pass *and* fail fixtures, run in CI, score tool effects not mood words.
 
@@ -198,11 +202,11 @@ No hero narrative. Current board:
 - **Chat path** loads orchestration skills but never runs tools — routing is not investigating.
 - **Mitigation homework** — "confirm latency in dashboard" instead of running the verification query.
 
-Each is a **gate or contract** bug, not an intelligence shortage. Fixable without waiting for the next foundation model.
+These open issues include gate, routing, and workflow-contract failures. Some may be fixable without changing models, but each fix needs to be checked against actual run behavior.
 
 ---
 
-## What to steal
+## Practical checks to try
 
 If you are building agentic RCA (or any multi-stage compound system):
 
@@ -216,7 +220,7 @@ If you are building agentic RCA (or any multi-stage compound system):
 
 The goal is not an agent that recites your runbook line by line. It is an agent that walks in with a **map** — optionally guided by runbook recipes you have already proven — and enough humility to run the boring ladders before calling the incident closed.
 
-Research directions worth betting on: hypothesize-then-verify, offline causal graphs pruned per alert, and process-centric evals that grade what happened — not how pretty the closing paragraph was.
+Possible next experiments include hypothesize-then-verify, causal graphs pruned per alert, and process-focused evaluations that check actions and evidence rather than the closing paragraph.
 
 ---
 
@@ -229,4 +233,4 @@ Research directions worth betting on: hypothesize-then-verify, offline causal gr
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> We build incident-triage agents at StackGen; the SRE offering is at [ai.stackgen.com](https://ai.stackgen.com).

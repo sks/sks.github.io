@@ -9,142 +9,70 @@ image: /assets/images/og-hitl.png
 tags: [hitl, ai-agents, ux, governance, production]
 ---
 
-Human-in-the-loop (HITL) is supposed to make agents safer. Put a human between the agent and the dangerous action. Simple.
+Human-in-the-loop (HITL) approval puts a person between an agent's proposed tool call and its execution. It is useful when an action could change production state. In our agent runtime, asking for approval on *every* call instead made requests so frequent that review became less meaningful.
 
-In practice, HITL has a paradox: **too much approval kills productivity, too little kills safety, and the wrong amount creates a false sense of security.**
-
-We deployed HITL for our agent runtime and watched three failure modes emerge. Here's what happened and how we fixed each one.
+We saw three problems while introducing approvals: fatigue, blanket opt-outs, and tasks stalled while waiting. The examples below describe our experience, not a universal approval policy.
 
 ---
 
-## Failure Mode 1: Approval Fatigue
+## 1. Too Many Requests to Review
 
-Our first HITL deployment required approval for every tool call. Shell commands, web searches, memory reads — everything needed a human click.
+Our first version asked operators to approve shell commands, web searches, memory reads, and every other tool call. Within two days, we observed operators approving without reading. In the first week, approval dwell times were several seconds; by the second week they had become reflexive clicks. These are observations from our deployment, not evidence that every short approval is careless.
 
-Within two days, operators were auto-approving everything without reading the details. The approval popup became muscle memory: see popup → click approve → continue.
+We replaced the single rule with three tiers:
 
-We tracked how long operators spent on each approval. In the first week, they were actually reading — several seconds per request. By the second week, that had collapsed to a reflexive click. They weren't reviewing — they were dismissing.
+- **Auto-approve:** read-only or internal operations without external side effects.
+- **Require approval:** operations that can change external state, including tools not explicitly allowed for automatic use.
+- **Hard deny:** tools blocked even if someone offers to approve them.
 
-**Why this is worse than no HITL:** Operators now believe they have a safety net. They don't. The safety net is a rubber stamp. But everyone — operators, managers, auditors — thinks the system is reviewed because "human approval is required."
+The gate acts on tool invocations, not substrings inside commands. Blocking a tool named `bash` blocks that tool; checking a command string for `rm` is not a reliable safety boundary because shell syntax can express an operation in many ways. A general shell tool therefore needs review as a whole, with the full proposed command shown. For finer access control, typed application programming interfaces (APIs) with role-based access control (RBAC) are safer than regex filters on shell text.
 
-### The Fix: Risk-Based Classification
+In our workflow this reduced approval volume to a handful of consequential requests per task. We observed more deliberate review, though lower volume alone cannot prove every approval was sound. A shell command that looks read-only may still contact external systems or expose secrets; classification should reflect the actual capability, not just a label.
 
-We classified tools into three tiers instead of treating them all the same:
+## 2. Teams Turned Approval Off
 
-- **Auto-approve** — safe, read-only, or internal operations that don't touch external systems
-- **Require approval** — anything that can modify external state (the default for tools not in the auto-approve list)
-- **Hard deny** — blocked entirely, regardless of whether someone would approve them
+After experiencing the noise, some teams configured blanket auto-approval. That could let an agent run production shell commands without a person checking them. We added conspicuous warnings for wildcard auto-approval. More importantly, a hard-deny list still applies even when the auto-approval rule is permissive. This limits the worst actions, but it does not make a broadly permissive setup low risk; teams still need to review which tools are available.
 
-An important subtlety: **governance operates at the tool boundary, not inside command strings.** Blocking a tool named `bash` prevents that tool from being invoked at all — it doesn't do substring matching against whatever command the model passes to a shell tool. String-level blocklisting on shell primitives (e.g., blocking "rm" as a substring) is fundamentally unsafe — any sufficiently creative model can bypass it via encoding tricks, variable interpolation, or aliasing. Instead, the approval gate sits at the **tool invocation boundary**: a shell tool as a whole requires human approval, and the human sees the full command in the approval request. If you need granular command-level control, the right approach is typed API clients with their own RBAC — not raw shell access with regex filters.
+## 3. Waiting Stopped the Whole Task
 
-Only state-modifying tools require approval. Read-only operations auto-approve. Destructive capabilities hard-block regardless of approval.
+Initially the agent waited synchronously for every approval. If an operator was in a meeting, a request could sit for nearly an hour, delaying the investigation. We changed the flow:
 
-**Result:** Approval volume dropped dramatically. Operators now see a handful of meaningful requests per task instead of a constant stream. Each request actually gets read.
+1. The agent records a pending tool request with an expiration time.
+2. It notifies an operator through Slack, the web interface, or another configured channel.
+3. It works on independent sub-tasks if there are any.
+4. On approval, the tool runs and the result returns to the agent; otherwise the request expires or is rejected.
 
----
+This is asynchronous approval, not an assurance that work always continues. If the next step depends on the approved call, the session shows "waiting for approval" and pauses that work.
 
-## Failure Mode 2: The "Approve Everything" Escape Hatch
+![Parent and delegated tool calls pass the same governance boundary, then auto-approve, wait for a human decision, or hard-deny.](/assets/images/diagrams/june-operations/hitl-tool-gates.svg)
 
-Some teams configured their agents to skip all approvals. They'd been burned by approval fatigue and decided HITL wasn't worth the friction.
+The middle branch is a pending request with an expiry, not permission to execute later without checking the decision.
 
-This defeats the entire purpose of governance. An agent with blanket auto-approval can execute any tool without review — including shell commands on production servers.
+A delayed decision creates **state drift**: production may have changed since the command was proposed. Short time-to-live limits (TTLs) expire old requests, and session-scoped caching avoids executing long-deferred approvals without re-evaluation. A short TTL reduces but cannot eliminate that risk.
 
-### The Fix: Guardrails on the Guardrails
+Operators can see pending requests grouped by tool and handle some in bulk. Bulk review is most suitable for read-only investigation commands. State-changing calls should be inspected individually, or batching simply moves the rubber stamp to a larger button. If a request is rejected, the agent receives a tool error and can plan again; feedback such as "use staging instead" can guide that replanning. This is related to [steering an AI agent mid-run](/blog/steer-ai-agents-mid-run/).
 
-We added loud warnings when someone configures wildcard auto-approval — making it obvious that state-modifying tools will bypass review.
+## A Delegation Bypass We Found
 
-The real safeguard is the hard-deny list: even when auto-approval is set to "everything," tools on the deny list are still blocked. Teams that want minimal friction can use permissive auto-approval while keeping the most dangerous tool categories permanently denied. Fast workflow, hard gates on the worst operations.
+Our sub-agent tool-binding code predated HITL. We wrapped parent-agent calls with approval checks but initially omitted that delegation route. A sub-agent could then run a shell tool without the approval required of its parent. We routed parent, sub-agent, plan-step, and fallback binding through the same governance middleware—the policy-checking code around tool execution. This was a real bypass in our implementation; the [ReAcTree bugs post](/blog/reactree-bugs/) gives more detail. Any new execution route should be tested for the same omission.
 
----
+## Choosing Where a Human Helps
 
-## Failure Mode 3: Blocking on Approval Halts Everything
+| Tool type in our setup | Typical handling | Caveat |
+|------------------------|------------------|--------|
+| Read-only or informational | Auto-approve | Read access can still disclose sensitive data |
+| State-modifying | Require approval | Review the concrete target and proposed change |
+| Destructive | Hard deny | Approved alternatives need separate design |
+| Internal memory write | No HITL prompt | Govern and audit internal changes separately |
 
-Early HITL was synchronous — the agent stopped working and waited for approval. If the operator was in a meeting, the agent sat idle for nearly an hour waiting for a click.
+Internal memory writes change the agent's own state, not production servers. Exempting them from operator popups kept the high-risk approvals visible, but these writes can still affect later decisions and warrant access controls and an audit record.
 
-For a single approval, this is annoying. For a task requiring several approvals across different tools, the total wait time could exceed the task's useful lifetime.
-
-### The Fix: Asynchronous Approval
-
-HITL approval is now asynchronous:
-
-1. Agent encounters a tool that requires approval
-2. Stores the pending request with a time limit after which it expires
-3. Sends a notification (Slack, web UI, or similar)
-4. **Continues working on other parts of the task**
-5. When approved, the tool executes and results flow back
-
-The agent doesn't block. If it has parallel sub-tasks, it works on those while waiting. If there's nothing else to do, it waits — but the user sees a clear "waiting for approval" status, not a mysteriously silent agent.
-
-**A note on state drift:** Asynchronous approval introduces a classic distributed systems risk — the environment may change between when the agent formulated the tool call and when a human approves it much later. We mitigate this with short approval TTLs (stale approvals auto-expire) and session-scoped caching that doesn't let long-deferred approvals execute against a drifted environment without the agent re-evaluating.
-
-**Batch operations:** Operators can view multiple pending requests at once, grouped by tool type, and approve or reject in bulk. One important guardrail: bulk approval works well for **read-only investigation commands**. For state-modifying operations, each approval should be reviewed individually — otherwise you recreate the rubber-stamp problem at a higher abstraction level.
-
-**What happens on rejection?** When a human rejects a tool call (with or without feedback), the agent receives the rejection as a tool error and can replan. If the human provided feedback (e.g., "use the staging cluster instead"), the agent sees it and can adjust. This gives operators a conversational override, not just a binary approve/deny gate. The same idea extends to [steering an AI agent mid-run](/blog/steer-ai-agents-mid-run/) without discarding valid work.
+Watch approval times, approval and rejection rates, and whether teams switch to blanket auto-approval. Very fast clicks or near-zero rejections can prompt investigation; neither metric alone proves review has failed. The goal is useful human judgment at the calls where it can change an outcome, with deterministic denial for actions that should never reach an approver.
 
 ---
 
-## The Hidden Bug: HITL Bypass on Sub-Agents
-
-This was a real security issue. When our agent delegated to sub-agents, the sub-agent's tools were bound without passing through the same approval layer the parent used.
-
-A sub-agent could run a shell command without approval, even though the parent agent required it.
-
-**Why it happened:** The sub-agent tool binding was written before HITL existed. When we added HITL, we wrapped the parent's tools but forgot the delegation path.
-
-**The fix:** All tool binding — parent, sub-agent, plan-step, fallback — goes through the same governance middleware chain. One path. One stack. No exceptions.
-
-**The lesson:** When you add a governance layer, you must audit every tool execution path. The path you forget is the one that gets exploited. (More detail in the [ReAcTree bugs post](/blog/reactree-bugs/).)
+*How do you decide which agent actions deserve review? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 
 ---
 
-## What Good HITL Looks Like
-
-After three iterations, here's the mental model:
-
-| Tool type | Behavior | Why |
-|-----------|----------|-----|
-| Read-only | Auto-approve | No external blast radius |
-| Informational | Auto-approve | Discovery and lookup only |
-| State-modifying | Require approval | Human judgment for writes |
-| Destructive | Hard deny | No approval can override |
-| Internal memory writes | Exempt | Modifies agent state, not external systems |
-
-**The exemption for memory writes** is important. Memory tools modify the agent's internal notes, not production servers. Requiring approval for every memory operation would trigger approval fatigue without adding safety — it's noise that drowns out real signals.
-
----
-
-## Signals That Tell You HITL Is Broken
-
-You don't need exact dashboards to know something's wrong. Watch for these patterns:
-
-1. **Approval latency collapsing** — if operators go from reading to clicking in under a second, they're not reading
-2. **Approval rate near 100%** — either the agent is perfect or nobody is paying attention
-3. **Rejection rate near zero** — same problem from the other direction
-4. **Time-to-abandon** — how long before someone configures blanket auto-approval out of frustration
-
-Healthy HITL has meaningful friction on the requests that matter and near-zero friction on everything else.
-
----
-
-## Lessons Learned
-
-1. **Less approval is more safety.** Fewer, higher-signal approval requests get more attention than constant popups.
-
-2. **Classify tools by risk, not by category.** Not all shell commands are dangerous. Reading pod status is not the same as deleting a namespace.
-
-3. **Make approval asynchronous.** Synchronous blocking kills agent productivity and operator patience.
-
-4. **Audit every tool path.** HITL that applies to most tool calls but misses one delegation route creates a false sense of security. The bypass path is where the risk lives.
-
-5. **Memory tools are not external state.** Don't require approval for internal memory operations — it's noise that drowns out real signals.
-
----
-
-
-*How does your team handle the approval fatigue problem? I'd love to hear about alternative approaches. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
-
-
-
----
-
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> **StackGen builds AI-assisted SRE (site reliability engineering) tools.** Our offering at [ai.stackgen.com](https://ai.stackgen.com) supports incident triage, diagnostics, and draft root-cause analyses.
