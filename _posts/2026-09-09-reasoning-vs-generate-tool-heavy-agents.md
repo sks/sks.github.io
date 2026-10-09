@@ -17,31 +17,28 @@ faqs:
     answer: "Higher elapsed time and tokens, hierarchical ReAcTree quality collapse without gates, and a habit of exploring catalogs before measuring."
 ---
 
-[Reasoning effort is not free](/blog/reasoning-effort-is-not-a-free-upgrade/). This is the cousin question: **reasoning model vs normal chat model** when the job is mostly tools. Which OpenAI API you call is a third choice ([Completions vs Responses](/blog/chat-completions-vs-responses-api/)). A slow dig whose ids start with `resp_` is usually hidden thinking or the wrong model on workers, not “Responses is slow.”
+[Reasoning effort is not free](/blog/reasoning-effort-is-not-a-free-upgrade/). This is the cousin question: **reasoning model vs normal chat model** when the job is mostly tools. Which OpenAI API you call is a third choice ([Completions vs Responses](/blog/chat-completions-vs-responses-api/)). A `resp_` id identifies the Responses endpoint, not the cause of a slow dig. Compare per-turn reasoning tokens, tool wait, and retries before attributing time to a model or API.
 
-Data: [six combos](/blog/six-model-mode-combos-alert-logs-bench/), voice: [what they write](/blog/what-reasoning-models-write-on-triage/). We A/B’d **single-agent ReAct** and **hierarchical ReAcTree** on each class ([what is ReAcTree?](/blog/what-is-reactree/) · [PDF](https://arxiv.org/pdf/2511.02424)).
+Data: [six combos](/blog/six-model-mode-combos-alert-logs-bench/), voice: [what they write](/blog/what-reasoning-models-write-on-triage/). We ran one **single-agent ReAct** and one **hierarchical ReAcTree** trial for each class ([what is ReAcTree?](/blog/what-is-reactree/) · [PDF](https://arxiv.org/pdf/2511.02424)).
 
 ---
 
-## TL;DR
+## What the evidence supports
 
 | Class | Merit | Demerit | Wave-1 ballpark |
 |-------|-------|---------|-----------------|
-| **Efficient reasoning (xAI-class)** | Best eff; full closes; hierarchical slightly faster | Still ~190k tokens | ~141–157s, corr 1.0 |
+| **xAI-class reasoning** | Highest relative efficiency in this wave; full closes; hierarchical slightly faster | Still ~190k tokens | ~141–157s, corr 1.0 |
 | **Generate (gpt-5.4)** | Solid falsifiers; hierarchical used fewer total tokens | Verbose; hierarchical can get expensive under load | ~148–154s, 255–373k tok |
-| **Heavy reasoning preview (Responses)** | Skeptical artifact Theories | Slow, costly; hierarchical can stub | ~200–285s, ~475–516k tok; hierarchical corr 0.69 once |
+| **Responses reasoning preview** | In this run, skeptical artifact Theories | Slow, costly; hierarchical can stub | ~200–285s, ~475–516k tok; hierarchical corr 0.69 once |
 
-### Explain like I'm five
-
-A deep thinker and a fast writer both visit the same leaky basement. The deep thinker may notice the gauge is sticky. The fast writer may finish the insurance form sooner. You need the form either way.
 
 ---
 
 ## Merits of reasoning seats
 
-1. **Disposition diversity** — artifact vs leak is a real prior, not noise.  
+1. **Alternative hypotheses** — the preview run considered a sparse metric series rather than assuming the goroutine-growth alert proved a leak. Check the sample density before accepting either explanation.
 2. **Numeric habit** on efficient reasoners (derivatives, windows, baselines).  
-3. **Room to use host steers** — when you halt dead queries, a thinking model can change rooms instead of looping.
+3. **Recovery options** — after a failed query, a host can supply a typed error and permit a different probe. Whether that helps depends on the model and the tool failure.
 
 ## Demerits of reasoning seats
 
@@ -59,15 +56,20 @@ A deep thinker and a fast writer both visit the same leaky basement. The deep th
 
 1. **Verbosity** — operators skim less.  
 2. Under contention, hierarchical may **inflate** tokens instead of compressing.  
-3. Less natural “sticky gauge” skepticism unless the persona demands it.
+3. In these closes, less emphasis on measurement-artifact hypotheses; a prompt or rubric can require an explicit alternative, but it cannot create missing evidence.
 
 ---
 
 ## Practical mix
+
+![Reasoning effort and tool calls both contribute to run time](/assets/images/diagrams/sept/reasoning-cost.svg)
+
+*Compare how much the model thinks and what the tool calls actually return on the same task.*
+
 
 - Default Collect: **efficient reasoning or generate**, measured.  
 - Synthesis-only high effort: still valid ([adaptive effort](/blog/reasoning-effort-is-not-a-free-upgrade/)).  
 - Preview reasoning: **canary** behind gates, never silent default.  
 - Hierarchical plan: **split the roster** — reasoning on `planning`, generate on dig `tool_calling` ([hybrid plan](/blog/hybrid-plan-smart-planner-generate-digs/)). Mapping high-effort reasoning onto every task is how digs burn eight minutes measuring one PromQL.
 
-Ship a mix. Bill the mix. Do not romanticize the dial.
+For this single alert-plus-logs task, the xAI-class seat had the best cohort-relative score; that is not a model-family ranking across incidents. Repeat the task and compare correctness before cost, including the full tree’s token use and the cost of failed tool calls.

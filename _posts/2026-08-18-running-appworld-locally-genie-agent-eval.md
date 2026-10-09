@@ -25,26 +25,23 @@ faqs:
 
 **Prerequisite for the AppWorld eval series** ([fair evals](/blog/fair-agent-evals-before-performance/) → [orchestration tax](/blog/agent-orchestration-tax-evals/) → [failure modes](/blog/ai-agent-eval-failure-modes/) → [handoff gate](/blog/stop-duplicate-agent-workers-handoff-gate/)): get the benchmark running on your machine before you argue about planner tax or failure modes.
 
-We wired the **Aiden agent runtime** to the official [AppWorld](https://github.com/stonybrooknlp/appworld) [MCP server](https://github.com/stonybrooknlp/appworld#electric_plug-introducing-appworld-mcp-server-and-client) ([paper](https://arxiv.org/abs/2407.18901)) for simple-vs-plan routing evals. This post is the **ops guide** we wanted on day one: Docker Compose, copy-paste snippets, and the traps that burned an afternoon.
+We wired the **Aiden agent runtime** to the official [AppWorld](https://github.com/stonybrooknlp/appworld) [MCP server](https://github.com/stonybrooknlp/appworld#electric_plug-introducing-appworld-mcp-server-and-client) ([paper](https://arxiv.org/abs/2407.18901)) to compare one agent with a planner and workers. AppWorld is a simulated set of apps; Model Context Protocol (MCP) supplies a standard way for the agent to discover and call their actions. This post is the **ops guide** we wanted on day one: Docker Compose, copy-paste snippets, and the traps that burned an afternoon.
 
 ![AppWorld local stack: environment, APIs, MCP HTTP](/assets/images/appworld/orchestration-stack.svg)
 
 ---
 
-## TL;DR
+## Before you start a task
 
-- **Three servers, three jobs:** environment (`:8000`) = task lifecycle; APIs (`:9000`) = mock apps; MCP HTTP (`:10000`) = tools the agent calls.
-- **Published Docker image is not enough:** [ghcr.io/stonybrooknlp/appworld:latest](https://github.com/StonyBrookNLP/appworld/pkgs/container/appworld) predates MCP — extend it like [GAGE does](https://github.com/HiThink-Research/GAGE/blob/83cc359dbb3056ea8f4090f4c398ba2f066231a0/docker/appworld/Dockerfile).
-- **Harness owns init/evaluate; agent owns MCP** — do not rebuild `load_task` / `evaluate` shims in your agent runtime.
-- **Health gate all three** before starting a cohort — env+apis up without MCP looks fine until every tool call fails.
-
-### Explain like I'm five
-
-AppWorld is a pretend city with fake apps. The **environment** desk hands you today's homework. The **API** buildings are where work happens. **MCP** is the phone book of actions you are allowed to dial. Your robot only uses the phone book — you still have to check homework in and turn it in at the environment desk.
+There are three services: the **environment** on port `8000` starts and grades tasks; the **APIs** on `9000` hold the simulated app data; the **MCP HTTP server** on `10000` lists actions for the agent. For example, the test runner (the “harness”) calls `/initialize` for task `29caf6f_1`, the agent might call `spotify__login` through MCP, and the runner calls `/save` and `/evaluate` afterward. If port `8000` responds but MCP lists no tools, the agent still cannot work. Check all three before a batch. The [published image](https://github.com/StonyBrookNLP/appworld/pkgs/container/appworld) used here lacked MCP; the [GAGE Dockerfile](https://github.com/HiThink-Research/GAGE/blob/83cc359dbb3056ea8f4090f4c398ba2f066231a0/docker/appworld/Dockerfile) shows the extend-and-reinstall approach. Check your installed version rather than assuming `latest` will retain that limitation.
 
 ---
 
 ## Architecture (one screen)
+
+![AppWorld local service architecture with eval harness, environment 8000, agent and MCP 10000, app APIs 9000, and external judge](/assets/images/diagrams/aug-evals/appworld-local-boundaries.svg)
+
+*Caption: The harness owns initialization and grading; the agent reaches simulated apps through MCP, with all three services checked first.*
 
 ```text
 eval harness                agent (Aiden runtime, etc.)
@@ -78,13 +75,13 @@ Upstream documents the full three-server flow for terminal agents in [`guides/ev
 
 ### 1. The official Docker image is a base layer, not the full stack
 
-`docker pull ghcr.io/stonybrooknlp/appworld:latest` gives you an older build with `serve environment|apis` only. **No `serve mcp`. No `serve multiple`.** PyPI `appworld` 0.1.3 matches that era.
+`docker pull ghcr.io/stonybrooknlp/appworld:latest` gives you an older build with `serve environment|apis` only. **In the image version we used, there was no `serve mcp` or `serve multiple`.** PyPI `appworld` 0.1.3 matched that era; inspect your version because upstream may change.
 
 **Fix:** Reinstall `appworld[mcp]` from current [`stonybrooknlp/appworld`](https://github.com/stonybrooknlp/appworld) main on top of the image — exactly what [GAGE's Dockerfile](https://github.com/HiThink-Research/GAGE/blob/83cc359dbb3056ea8f4090f4c398ba2f066231a0/docker/appworld/Dockerfile) does. The [`serve mcp`](https://github.com/stonybrooknlp/appworld/blob/main/src/appworld/cli.py) subcommand lives in current source, not the published image.
 
 ### 2. Git clone ≠ installable AppWorld
 
-[`src/appworld/.source/apps.bundle`](https://github.com/stonybrooknlp/appworld/tree/main/src/appworld/.source) and `tests.bundle` are **encrypted blobs**, often shipped via **Git LFS**. A shallow clone without LFS leaves pointer text files; `appworld install` then fails or unpacks incomplete apps.
+[`src/appworld/.source/apps.bundle`](https://github.com/stonybrooknlp/appworld/tree/main/src/appworld/.source) and `tests.bundle` are **encrypted blobs**, often shipped via **Git LFS**. A shallow clone without Git LFS (the extension used to fetch large files) can leave small pointer text files in place of the bundles; `appworld install` then fails or unpacks incomplete apps.
 
 ```bash
 cd /path/to/appworld
@@ -163,13 +160,13 @@ Point `APPWORLD_ROOT` at one upstream checkout. Task DBs and `api_docs` belong t
 
 ### 7. Apple Silicon: pin platform for the base image
 
-The published image is `linux/amd64`. On ARM Macs, set `platform: linux/amd64` in Compose or expect slow emulation — still easier than fighting pydantic/bundle mismatches on a half-installed editable checkout.
+The published image is `linux/amd64`. On ARM Macs, `platform: linux/amd64` runs this x86 image through emulation, which can be slow. That was a workable tradeoff here compared with dependency and bundle mismatches in an incomplete local install; native builds may suit other setups.
 
 ---
 
 ## Docker Compose (recommended path)
 
-Requires **Docker BuildKit** (`DOCKER_BUILDKIT=1`) for `additional_contexts`.
+Requires **Docker BuildKit** (`DOCKER_BUILDKIT=1`) for `additional_contexts` (the extra AppWorld source directory made available to the image build). The example also assumes the linked reference harness paths and downloaded AppWorld data; it is not a standalone Compose file.
 
 ### `docker-compose.yml`
 
@@ -291,7 +288,7 @@ Start scripts (simplified; matches [upstream MCP HTTP docs](https://github.com/s
 export APPWORLD_ROOT=/path/to/stonybrooknlp/appworld
 
 .venv-appworld-stack/bin/appworld serve apis --no-show-usage --port 9000 --root "$APPWORLD_ROOT" &
-sleep 2
+sleep 2 # example only; wait for an actual readiness response before a cohort
 .venv-appworld-stack/bin/appworld serve environment --no-show-usage --port 8000 --root "$APPWORLD_ROOT" &
 sleep 2
 .venv-appworld/bin/appworld serve mcp http \

@@ -21,15 +21,15 @@ faqs:
     answer: "Too many parallel workers, missing completion tools on the synthesis agent, parent-only tools delegated to children, and child completion receipts that the parent never counts."
 ---
 
-Providers keep shipping a new dial: **reasoning effort**. The marketing story is simple — turn it up and the model thinks harder.
+**Reasoning effort** is a model setting that allocates more or less internal computation to a response. It can change latency and behavior, but higher effort does not guarantee a better outcome for an AI agent that uses tools.
 
-We ran that story against a real [SRE triage](/topics/ai-incident-triage/) job: same alert class, same observability tools, same wall-clock ceiling. The lesson was not “high is smarter.” It was **effort is a scarce budget that competes with tool turns**, and **where you spend it matters more than the global knob**.
+We compared settings on a [site reliability engineering (SRE) triage](/topics/ai-incident-triage/) job: same alert class, same observability tools, same wall-clock ceiling. The lesson was not “high is smarter.” It was **effort is a scarce budget that competes with tool turns**, and **where you spend it matters more than the global knob**.
 
-This post stands alone. You do not need the rest of the series. It covers three live shapes — blanket high, blanket low, adaptive low→high — plus what broke when we removed the known alert schema and forced discovery.
+This post compares three live configurations — blanket high, blanket low, adaptive low→high — plus what broke when we removed the known alert schema and forced discovery.
 
 ---
 
-## TL;DR
+## What changed in the test
 
 - On a tool-heavy API-gateway error-rate dig, **blanket low finished**; **blanket high hit the wall clock** without a usable Summary or completion gate.
 - Letting the parent set effort **per child** worked: collectors got low, synthesis got high — and dug deeper than blanket low.
@@ -37,9 +37,7 @@ This post stands alone. You do not need the rest of the series. It covers three 
 - Newer models often refuse **tools + thinking** on Chat Completions; the runtime must call the **Responses API** (or try Completions, then Responses after an error), or you pay for failed requests. On hierarchical plan, still split models: thinking model for the planner, normal chat model for workers ([hybrid plan](/blog/hybrid-plan-smart-planner-generate-digs/) · [Completions vs Responses](/blog/chat-completions-vs-responses-api/)).
 - In unknown waters, discovery and negative evidence worked — but **correlated ≠ drain-the-cluster**, and child completion receipts must count for the parent.
 
-### Explain like I'm five
-
-Giving every worker a PhD-length think session sounds wise. If the fire drill has a timer, the deep thinkers never finish writing the report. Give scouts short think time, give the final storyteller more, and make sure someone still hits the “done” button.
+The time ceiling applies to the whole run. Spending more time on each collector turn leaves less time for tool calls and final synthesis. Reserve costly reasoning for decisions where it changes the conclusion, then verify that the run can still complete.
 
 ---
 
@@ -47,7 +45,7 @@ Giving every worker a PhD-length think session sounds wise. If the fire drill ha
 
 We used a fixed **API gateway high error-rate** card against a live Grafana/Loki plane: collect locus and shape, falsify tempting dependencies, then close with Theory / Unknowns / Do-this-now behind a completion gate.
 
-That is deliberately **tool-heavy**. Most of the wall clock is PromQL/LogQL and repair loops, not essay writing. If reasoning effort only made prose prettier, we would have wasted the A/B. We wanted to know whether the dial helped **finish the method**.
+That is deliberately **tool-heavy**: Prometheus Query Language (PromQL) and Loki query language (LogQL) calls, plus query repairs, consume much of the wall clock. If reasoning effort only made prose prettier, we would have wasted the A/B. We wanted to know whether the dial helped **finish the method**.
 
 ---
 
@@ -73,7 +71,7 @@ Same model family that still accepts tools plus effort on Chat Completions. Same
 - Never reached the gate or operator Summary
 - Looked busy; delivered almost nothing an on-call could act on
 
-**Finding 1.** For tool-heavy triage, **higher effort is not a free quality upgrade**. It taxes every model turn. If your product is latency-bounded assist, that tax can erase the dig.
+**Finding 1.** In this bounded triage comparison, **higher effort did not improve the delivered result**. It taxes every model turn. If your product is latency-bounded assist, that tax can erase the dig.
 
 **Finding 2.** Tool strategy shifted with effort. Low preferred focused observability queries and closed. High preferred broader exploration and never synthesized. The dial changed *how* the agent spent time, not just how carefully it wrote.
 
@@ -82,6 +80,10 @@ Related: [single-agent vs multi-agent](/blog/single-agent-vs-multi-agent/) — a
 ---
 
 ## Adaptive: low collectors, high synthesis
+
+![Fixed wall-clock budget moves from low-effort collection to high-effort synthesis and a completion gate, with failure branches for fan-out and missing tools](/assets/images/diagrams/aug-runtime/reasoning-budget.svg)
+
+*Spend expensive reasoning on synthesis, while reserving time and tools to finish.*
 
 Global knobs are blunt. The better product question is: **can the parent choose effort per delegated dig?**
 
@@ -106,7 +108,7 @@ On the same alert class, the parent actually toggled:
 - The synthesis child sometimes lacked the **completion gate tool**, so there was no receipt to close on
 - Redaction placeholders on trusted alert ids made rule-scoped digs thrash even while metric/log digs continued
 
-**Finding 3.** Per-child effort dials are real and useful. They are **not** a substitute for spawn budgets, tool allowlists, and completion contracts ([is the task actually done?](/blog/is-the-task-actually-done/)).
+**Finding 3.** Per-child effort changed what the run inspected, but this adaptive run still timed out. Effort selection is **not** a substitute for spawn budgets, tool allowlists, and completion contracts ([is the task actually done?](/blog/is-the-task-actually-done/)).
 
 ---
 
@@ -132,7 +134,7 @@ So the practical mix became two layers. First, **which API**: Responses (or Comp
 
 ## Unknown waters: discovery without a card
 
-We then removed the crutches: no alert UID, no metric name, no label schema, no named failing dependency. The agent had to learn the telemetry vocabulary and change strategy after no-data.
+We then removed the supplied alert unique identifier (UID), metric name, label schema, and named failing dependency. The agent had to learn the telemetry vocabulary and change strategy after no-data.
 
 **What went well**
 
@@ -151,7 +153,7 @@ We then removed the crutches: no alert UID, no metric name, no label schema, no 
 
 We tightened the prompt afterward: treat new targets as both hypotheses, require a read-only segmented check before change talk, and mark traffic moves as human authority until a causal split appears ([curiosity before confidence](/blog/curiosity-before-confidence/), [be creative — do not invent](/blog/be-creative-do-not-invent/)).
 
-**Finding 5.** Adaptive effort helps unknown waters only if **discovery discipline** and **authority boundaries** travel with it. Otherwise you get a smarter-sounding wrong action.
+**Finding 5.** Adaptive effort did not remove the need for disciplined discovery and authority boundaries. Correlation alone cannot authorize a production traffic change.
 
 ---
 
@@ -165,7 +167,7 @@ We tightened the prompt afterward: treat new targets as both hypotheses, require
 | Parent coordination on tool-hostile models | One bounded synthesis pass after evidence exists | Completion gate ownership |
 | Retries and repair | Causal claims that need careful language | Permission to change production |
 
-Or shorter: **effort is not IQ. It is a schedule.**
+Effort is a scheduling and cost choice, not an independent measure of answer quality.
 
 ---
 
@@ -196,7 +198,7 @@ Shareable cousins: [evidence-gated RCA checklist](/checklists/evidence-gated-rca
 - [Maintaining tokenomics with Aiden](/blog/maintaining-tokenomics-with-aiden/) — budgets as product  
 - Hubs: [AI agents for SRE](/topics/ai-agents-sre/) · [AI agent workflows](/topics/ai-agent-workflows/) · [AI incident triage](/topics/ai-incident-triage/)
 
-Turning the thinking dial to eleven feels productive. On a timer, the agents that finish are the ones that **saved the expensive turns for the argument that needed them**.
+These runs favor testing effort by role under the actual time ceiling, while measuring both investigation depth and whether an operator-facing answer was delivered.
 
 ---
 
@@ -204,4 +206,4 @@ Turning the thinking dial to eleven feels productive. On a timer, the agents tha
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

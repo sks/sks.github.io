@@ -10,13 +10,13 @@ tags: [ai-agents, loop-detection, reliability, orchestration, sre, aiden, produc
 permalink: /blog/ai-agent-loop-detection-salvage/
 ---
 
-**AI agent loop detection** is supposed to stop wasted work. In one incident run, it also threw away the answer.
+**AI agent loop detection**—stopping an agent when it repeats actions or responses without progress—can save time and model calls. In one incident investigation, our stop path also threw away a useful answer.
 
 The agent had already answered the incident question. It had gathered evidence, narrowed the likely cause, and written a useful summary. Then it entered a small closing loop: short variations of “done,” each one less informative than the answer before it. The repetition guard eventually stopped the run.
 
 What reached the operator was not the useful answer. It was a generic message asking them to try again.
 
-The safety mechanism worked — the loop stopped — but the product still failed. **AI agent loop detection protected the runtime and discarded the result.**
+The guard stopped repetition, but the final handoff lost the result. Stopping execution and choosing what to show the operator are separate decisions.
 
 That is the part most loop-detection designs miss. They focus on whether the agent should continue. Operators care about a second question:
 
@@ -38,13 +38,17 @@ A strong investigation can be followed by:
 
 If the runtime only remembers the most recent turn, the weakest output wins. The final “done” replaces the evidence-backed answer that appeared earlier.
 
-This creates a strange operator experience. The tool trace shows useful work. The final response claims nothing useful happened. The operator, mid-incident at 3 AM, now has to reconstruct the answer manually from the transcript.
+This creates a strange operator experience. The tool trace shows useful work. The final response claims nothing useful happened. The operator then has to reconstruct the answer manually from the transcript.
 
 We had already seen the sibling failure where an agent [finds evidence and discards the lead](/blog/evidence-discarded/). This was worse in a subtle way: the synthesis itself was good. The runtime discarded it after synthesis.
 
 ---
 
 ## Loop Health and Answer Quality Are Different Signals
+
+![Flow from a repetition halt through the saved answer and evidence gate to delivery or an incomplete status](/assets/images/diagrams/aug-runtime/loop-salvage.svg)
+
+*Stop repetition without discarding a good earlier answer; missing evidence still blocks delivery.*
 
 A stalled loop does not imply that every output produced during the loop is bad.
 
@@ -68,7 +72,7 @@ The first protects cost and latency. The second protects operator value.
 
 ## Preserve the Best Substantive Candidate
 
-The fix is conceptually simple: keep a best-so-far answer while the run evolves.
+One approach is to keep a best-so-far answer while the run evolves. Selecting that answer still requires checks against the task’s evidence and completion requirements.
 
 “Best” does not mean longest. It means the candidate that contains the strongest useful combination of:
 
@@ -136,7 +140,7 @@ The useful middle is transparent:
 - The finishing loop stalled.
 - This specific step remains incomplete.
 
-Operators can act on the findings and still understand the limitation. That builds more trust than either false confidence or needless amnesia.
+Operators can act on the findings and still understand the limitation. That lets an operator use the findings without mistaking a stalled run for a completed one.
 
 The same distinction helps observability. A run can be recorded as “stopped for repetition” while its delivery outcome says “substantive answer preserved.” Reliability metrics no longer have to pretend every halted loop produced zero value.
 
@@ -168,4 +172,4 @@ Loop detection should stop wasted work. It should not erase completed work on th
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

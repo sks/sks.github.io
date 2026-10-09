@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="500" viewBox="0 0 960 500" role="img" aria-labelledby="title desc">
+<title id="title">Test the interfaces and the composed workflow</title>
+<desc id="desc">Fast unit tests with generated fakes check components, while integration tests compile and run full workflows against a mock model. Manual acceptance covers a small set of user-facing scenarios.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#174a69"/></marker></defs>
+<rect width="960" height="500" fill="#fbfcfa"/>
+<text x="36" y="42" font-family="system-ui, sans-serif" font-size="24" font-weight="700" fill="#182b3a" text-anchor="start">Test the interfaces and the composed workflow</text>
+<rect x="34" y="137" width="255" height="132" rx="12" fill="#eef5f8" stroke="#174a69" stroke-width="2"/>
+<text x="161.5" y="184.0" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Unit tests</text>
+<text x="161.5" y="209.0" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">generated fakes</text>
+<text x="161.5" y="234.0" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">fast, isolated components</text>
+<rect x="351" y="137" width="255" height="132" rx="12" fill="#eaf5ed" stroke="#286443" stroke-width="2"/>
+<text x="478.5" y="184.0" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Integration tests</text>
+<text x="478.5" y="209.0" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">compiled full workflow</text>
+<text x="478.5" y="234.0" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">mock model; graph faults</text>
+<rect x="668" y="137" width="255" height="132" rx="12" fill="#fff3df" stroke="#926013" stroke-width="2"/>
+<text x="795.5" y="184.0" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Manual acceptance</text>
+<text x="795.5" y="209.0" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">real user-facing</text>
+<text x="795.5" y="234.0" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">scenarios</text>
+<polyline points="289,203 341,203" fill="none" stroke="#174a69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow)"/>
+<polyline points="606,203 658,203" fill="none" stroke="#174a69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow)"/>
+<text x="480" y="102" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Widen the scope beyond each node</text>
+<line x1="34" y1="316" x2="923" y2="316" stroke="#718593" stroke-width="2"/>
+<text x="40" y="359" font-family="system-ui, sans-serif" font-size="16" font-weight="400" fill="#182b3a" text-anchor="start">A fake can show an interface change fails to compile.</text>
+<text x="40" y="391" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#182b3a" text-anchor="start">It cannot prove that a parallel join, approval path, or timeout works in a complete plan.</text>
+<text x="40" y="436" font-family="system-ui, sans-serif" font-size="16" font-weight="400" fill="#182b3a" text-anchor="start">Lint and tests reduce regressions; neither alone proves production correctness.</text>
+</svg>

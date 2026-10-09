@@ -9,99 +9,59 @@ image: /assets/images/og-iac.png
 tags: [terraform, iac, gitops, ai-agents, governance]
 ---
 
-We use Terraform to configure our AI agents. Not YAML. Not a dashboard. Terraform.
+An agent's configuration determines which tools it can call, which model it uses, what it can spend, and which approvals it needs. In our platform, those settings became consequential enough that we moved them from a dashboard to Terraform, an infrastructure-as-code (IaC) tool that compares a declared desired state with the current one before applying changes.
 
-This sounds like overkill until you consider what "configuring an AI agent" actually involves in production: defining personas, attaching tools, binding governance policies, routing to specific models, setting cost budgets, configuring notification channels, and managing secrets. Across dozens of agents. Across multiple teams. With audit trails and rollback.
-
-That's not application config. That's infrastructure.
+This is a choice for our multi-team deployment, not an argument that every local agent needs a Terraform provider.
 
 ---
 
-## The Problem with Dashboards
+## Why the Dashboard Stopped Working for Us
 
-Most agent platforms offer a dashboard: click "Create Agent," fill in a form, hit save. This works for one agent. For an enterprise with many agents across many teams, dashboards create problems:
+A form was convenient when we had one agent. As teams and agents multiplied, our dashboard workflow made it hard to answer who changed a tool list, review changes before deployment, recover a known configuration, spot drift from intended settings, or test in staging. Those were shortcomings of our initial workflow, not inherent properties of every dashboard; a dashboard can have audit and review features too.
 
-1. **No audit trail** — Who changed an agent's tool list last Tuesday? The dashboard doesn't know.
-2. **No review process** — Config changes go live immediately. No PR, no review, no "are you sure?"
-3. **No rollback** — Something broke? Good luck remembering what the previous config looked like.
-4. **Drift** — The "source of truth" is a database somewhere. Nobody's sure if it matches what was intended.
-5. **No environments** — You can't test an agent config change in staging before it hits production.
+We built a custom Terraform provider to manage agent personas, tool attachments, governance policies, model routing, budgets, notification channels, and references to secrets. The provider maps those resources to the platform's configuration rather than asking operators to reproduce settings by hand.
 
-These aren't hypothetical. We hit every one of them before we changed approach.
+## What a Change Looks Like
 
----
+Agent configuration and its policies live in Git. An engineer opens a pull request (PR), continuous integration (CI) runs `terraform plan`, reviewers inspect the proposed changes, and merging triggers an apply. Git history and Terraform's state record help reconstruct what changed. This is a GitOps workflow: versioned configuration is proposed and reviewed in Git before deployment.
 
-## Why We Built a Terraform Provider Instead
+A plan is particularly valuable when adding a production tool or changing an approval policy: it shows the proposed diff before the update. It is not a guarantee that nothing else can change. Provider behavior, values not known until apply, concurrent updates, and differences between plan and apply environments still matter. Reviewers need to understand what the provider will do, not just read a reassuring summary.
 
-Terraform uses a declarative model: you describe the desired state, and the tool figures out how to get there. That model maps naturally onto agent configuration — an agent's persona, tool list, and governance bindings are exactly the kind of "desired state" Terraform is built for.
+If an agent is already working in a durable workflow, we keep the configuration it started with for that execution. A new configuration takes effect on the next invocation. Without that boundary, an active investigation could gain or lose a tool midway through its task.
 
-So we built a custom Terraform provider for our platform, and agent configuration became just another resource type alongside the rest of a team's infrastructure-as-code.
+![Git pull request goes through Terraform plan, review, and apply; a running task keeps its starting configuration while a new invocation uses the applied configuration.](/assets/images/diagrams/june-operations/terraform-config-flow.svg)
 
-### The GitOps Workflow
+The invocation boundary matters: an applied tool or policy change does not rewrite the configuration of a task already running.
 
-Agent configuration now lives in a Git repository, alongside the governance policies that apply to it. The workflow looks like any other infrastructure change:
+## References Between Resources
 
-1. An engineer opens a PR proposing a config change (e.g., "add a new tool to this agent")
-2. CI runs a plan step that shows exactly what will change — nothing more, nothing less
-3. The team reviews that plan in the PR, the same way they'd review a Kubernetes manifest change
-4. On merge, the change applies automatically
-5. The audit trail lives in Git history plus the tool's own state tracking
+Terraform's dependency graph lets an agent refer to a governance policy by its resource ID. The policy can be created before the agent that uses it. A plan can also expose a proposed deletion of a referenced policy before apply. That is useful, though the provider and platform still need to validate references and handle external changes; a graph alone does not prevent every orphaned reference.
 
-### "Plan Before Apply" Is the Killer Feature
+## Secrets Need Separate Care
 
-Before any change goes live, you see precisely what will happen — one tool added, one policy attached, nothing else touched. A reviewer can approve with confidence because they're looking at a diff, not trusting that a form was filled out correctly.
+Model-provider keys and integration tokens come from secret-management integrations rather than committed configuration files. Keeping them out of Git is only part of the job: Terraform state and plan output may still contain sensitive values depending on the provider and backend. We configure storage accordingly and avoid claiming that Terraform automatically keeps secrets out of persisted state.
 
-For a platform where a misconfigured agent can run shell commands against production systems, "see before you apply" isn't a nice-to-have. It's the whole point.
+## Compared with Other Approaches
 
-**One nuance worth knowing if you build something similar:** if a config change merges while an agent is mid-task in a durable workflow engine, the in-flight execution should keep running against the configuration it started with, not hot-swap mid-task. The updated config takes effect on the *next* invocation. Otherwise you risk a tool list changing out from under an agent halfway through an active investigation — which is a much stranger bug to debug than it sounds.
+| Concern | Our initial dashboard | Plain Git-managed config | Terraform provider |
+|---------|-----------------------|--------------------------|--------------------|
+| Review and history | Limited in our setup | PR and Git history | PR, Git history, and plan |
+| Preview | Form changes had no plan | Diff of files | Resource-level proposed changes |
+| Drift checks | Not built in | Requires separate comparison | Plan can expose managed-resource drift |
+| Dependencies | IDs managed manually | Usually manual references | Dependency graph and provider references |
+| Rollback | Manual | Revert a commit | Revert and apply, subject to current state |
+| Secrets | Depends on implementation | Requires care | Still requires careful provider and state configuration |
 
----
+Terraform did not remove operational responsibility. It made reviewable changes and dependencies practical for our agents across teams. A smaller deployment may reasonably choose validated config files or a dashboard with strong change controls instead.
 
-## Cross-Resource References Matter More Than You'd Think
+## What We Would Do Again
 
-Terraform's dependency graph turned out to be one of the more valuable parts of this, almost by accident. Governance policies are created first, agents reference them by ID. If someone tries to delete a policy that's still referenced by a live agent, the plan step catches it before anything breaks — no orphaned references, no silently misconfigured agents.
-
----
-
-## Secret Management
-
-Secrets — model provider API keys, integration tokens — flow through standard secret-management integrations rather than living in config files. They never appear in version control, and depending on backend configuration, never touch persisted state either.
+Treat tool and policy changes as production changes, preview them, and give reviewers a path to test and roll back. Separate local developer convenience from team-level governance. We migrated after dashboard-driven changes caused avoidable misconfigurations; earlier review could have helped, but we cannot know that it would have prevented every incident.
 
 ---
 
-## Why This Beats the Alternatives
-
-| Capability | Dashboard | Plain config files | Terraform |
-|-----------|-----------|---------------------|-----------|
-| Audit trail | Weak | Git history only | Git + state |
-| PR review | No | Yes | Yes |
-| Preview changes before applying | No | No | Yes |
-| Drift detection | No | No | Yes |
-| Rollback | Manual | Git revert | Apply previous state |
-| Cross-resource references | Manual IDs | Manual IDs | Automatic, validated |
-| Secret management | Varies | Weak | Strong |
+*How do you review changes to production agent tools and policies? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 
 ---
 
-## Lessons Learned
-
-1. **Agent config is infrastructure.** If your agents can run shell commands on production servers, their configuration deserves the same rigor as your Kubernetes manifests — not a form in a dashboard.
-
-2. **"Plan before apply" is non-negotiable for AI agents.** A misconfigured tool list or a missing governance rule is a security incident, not a bug ticket. Preview every change.
-
-3. **Separate concerns by scope, not by convenience.** A single developer working locally has very different config needs than an enterprise managing dozens of agents across teams. Don't force one format to serve both.
-
-4. **Governance policy belongs in version control.** Policies are code. They need review, testing, and versioning — not a database row edited through a UI.
-
-5. **Build the IaC layer earlier than feels necessary.** We didn't start here — we migrated once the pain of dashboard-driven config became obvious. In hindsight, the GitOps workflow would have prevented several early misconfigurations if we'd had it from month one.
-
----
-
-
-*Does your agent platform use IaC for configuration? I'd love to hear about alternative approaches. Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
-
-
-
----
-
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> **StackGen builds AI-assisted SRE (site reliability engineering) tools.** Our offering at [ai.stackgen.com](https://ai.stackgen.com) supports incident triage, diagnostics, and draft root-cause analyses.

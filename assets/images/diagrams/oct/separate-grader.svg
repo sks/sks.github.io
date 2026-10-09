@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+<title id="title">Agent work and independent grading use different inputs</title>
+<desc id="desc">A user task goes to the agent, which produces a deliverable and run evidence. A separate source of truth supplies records to the grader independently. The grader compares both branches and is calibrated against human-labeled examples before its grade is used.</desc>
+<defs>
+  <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 10 5 0 10Z" fill="#255d78"/></marker>
+</defs>
+<rect width="960" height="540" fill="#fffdf8"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+  <text x="480" y="47" text-anchor="middle" font-size="26" font-weight="700">Separate the work from its assessment</text>
+  <text x="48" y="88" font-size="18" font-weight="700">Agent branch</text>
+  <rect x="48" y="107" width="174" height="85" rx="12" fill="#e4efff" stroke="#456077" stroke-width="2"/>
+  <text x="135" y="142" text-anchor="middle" font-size="20" font-weight="700">User task</text>
+  <text x="135" y="170" text-anchor="middle" font-size="17">Expected deliverable</text>
+  <rect x="285" y="107" width="200" height="85" rx="12" fill="#e4efff" stroke="#456077" stroke-width="2"/>
+  <text x="385" y="142" text-anchor="middle" font-size="20" font-weight="700">Agent under test</text>
+  <text x="385" y="170" text-anchor="middle" font-size="17">Installed trial build</text>
+  <rect x="550" y="107" width="200" height="85" rx="12" fill="#e4efff" stroke="#456077" stroke-width="2"/>
+  <text x="650" y="142" text-anchor="middle" font-size="20" font-weight="700">Run record</text>
+  <text x="650" y="170" text-anchor="middle" font-size="17">Output + evidence</text>
+  <path d="M226 150H277 M489 150H542 M650 196V257H752" fill="none" stroke="#255d78" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="48" y="265" font-size="18" font-weight="700">Independent reference branch</text>
+  <rect x="48" y="280" width="300" height="105" rx="12" fill="#e0f2ea" stroke="#416657" stroke-width="2"/>
+  <text x="198" y="317" text-anchor="middle" font-size="20" font-weight="700">Source of truth</text>
+  <text x="198" y="345" text-anchor="middle" font-size="17">CI, Git, files, trace IDs</text>
+  <text x="198" y="369" text-anchor="middle" font-size="17">not the agent’s assertion</text>
+  <path d="M352 333H718V304H752" fill="none" stroke="#416657" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="760" y="231" width="164" height="121" rx="12" fill="#fff0d1" stroke="#80602f" stroke-width="2"/>
+  <text x="842" y="271" text-anchor="middle" font-size="21" font-weight="700">Grader</text>
+  <text x="842" y="299" text-anchor="middle" font-size="17">Code / separate</text>
+  <text x="842" y="323" text-anchor="middle" font-size="17">model / person</text>
+  <rect x="760" y="405" width="164" height="68" rx="12" fill="#e5f0ff" stroke="#456077" stroke-width="2"/>
+  <text x="842" y="446" text-anchor="middle" font-size="20" font-weight="700">Saved grade</text>
+  <path d="M842 356V397" fill="none" stroke="#255d78" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="391" y="410" width="308" height="76" rx="12" fill="#f6e9ed" stroke="#755162" stroke-width="2"/>
+  <text x="545" y="441" text-anchor="middle" font-size="19" font-weight="700">Calibrate judge decisions</text>
+  <text x="545" y="468" text-anchor="middle" font-size="17">against human-labeled examples</text>
+  <path d="M703 447H729V340H752" fill="none" stroke="#755162" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="48" y="521" font-size="17" fill="#344960">Distinct models prevent self-grading; separation alone does not prove a reliable score.</text>
+</g>
+</svg>

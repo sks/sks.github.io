@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 570" role="img" aria-labelledby="title desc">
+<title id="title">Loop decision uses tool outcome and new evidence, not tool name</title>
+<desc id="desc">A tool result is classified by its payload, not just HTTP status. After failure limits are checked, normalized observations are compared without transient IDs. New useful evidence permits continued investigation while a repeated or empty observation gives no progress and calls for stopping or reassessing. Completion still requires evidence and addressed feedback.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 10 5 0 10Z" fill="#255d78"/></marker></defs>
+<rect width="960" height="570" fill="#fffdf8"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+  <text x="480" y="45" text-anchor="middle" font-size="26" font-weight="700">A repeated call can still add evidence</text>
+  <rect x="40" y="99" width="225" height="92" rx="12" fill="#e4efff" stroke="#456077" stroke-width="2"/>
+  <text x="152" y="134" text-anchor="middle" font-size="20" font-weight="700">Tool result</text>
+  <text x="152" y="163" text-anchor="middle" font-size="17">same name is allowed</text>
+  <path d="M269 145H299" fill="none" stroke="#255d78" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="312" y="99" width="296" height="92" rx="12" fill="#fff0d1" stroke="#80602f" stroke-width="2"/>
+  <text x="460" y="132" text-anchor="middle" font-size="20" font-weight="700">Classify actual outcome</text>
+  <text x="460" y="160" text-anchor="middle" font-size="17">HTTP 200 ≠ query success</text>
+  <path d="M612 145H649" fill="none" stroke="#255d78" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="662" y="99" width="258" height="92" rx="12" fill="#f6e9ed" stroke="#755162" stroke-width="2"/>
+  <text x="791" y="133" text-anchor="middle" font-size="20" font-weight="700">Failure?</text>
+  <text x="791" y="161" text-anchor="middle" font-size="17">Cap retries; no evidence</text>
+  <path d="M460 196V216" fill="none" stroke="#255d78" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="475" y="210" font-size="16">usable</text>
+  <rect x="266" y="231" width="388" height="110" rx="13" fill="#dff0e8" stroke="#416657" stroke-width="2"/>
+  <text x="460" y="268" text-anchor="middle" font-size="21" font-weight="700">Compare observations</text>
+  <text x="460" y="298" text-anchor="middle" font-size="17">Ignore transient IDs, not meaning</text>
+  <text x="460" y="323" text-anchor="middle" font-size="17">Did this result add information?</text>
+  <path d="M345 346V376H238V394 M575 346V376H724V394" fill="none" stroke="#255d78" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="197" y="376" font-size="17" font-weight="700">YES · new</text>
+  <text x="703" y="376" font-size="17" font-weight="700">NO · repeated</text>
+  <rect x="40" y="409" width="395" height="104" rx="13" fill="#dff0e8" stroke="#416657" stroke-width="2"/>
+  <text x="237" y="446" text-anchor="middle" font-size="21" font-weight="700">Continue if needed</text>
+  <text x="237" y="477" text-anchor="middle" font-size="17">Check remaining evidence + feedback</text>
+  <rect x="524" y="409" width="396" height="104" rx="13" fill="#f6e9ed" stroke="#755162" stroke-width="2"/>
+  <text x="722" y="446" text-anchor="middle" font-size="21" font-weight="700">Stop or reassess</text>
+  <text x="722" y="477" text-anchor="middle" font-size="17">A new UUID is not progress</text>
+  <text x="480" y="550" text-anchor="middle" font-size="17" fill="#344960">Completion is a separate gate: required evidence and feedback must be addressed.</text>
+</g>
+</svg>

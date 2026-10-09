@@ -9,53 +9,57 @@ image: /assets/images/og-platform.png
 tags: [go, architecture, ddd, engineering, ai-agents]
 ---
 
-Our first commit was "Hello World." A few months and hundreds of commits later, we had a production-grade agent platform with a comprehensive test suite. Here's how we got there without drowning in complexity.
+Our first commit was “Hello World.” A few months and hundreds of commits later, the agent platform—the software that runs model calls, tools, and their surrounding services—had production integrations and a test suite. The useful question is which boundaries kept changes manageable, and where our early process fell short.
 
 ---
 
 ## The Growth Curve
 
-Development moved in clear, recognizable phases: a single agent running a single tool, then Kubernetes deployment, then multi-agent orchestration, then a hardening pass focused on production security, then enterprise integrations, then a stable platform. Each phase added real surface area without any single part of the codebase growing unmanageably large — because the boundaries between domains were clear from day one.
+Development moved in clear, recognizable phases: a single agent running a single tool, then deployment on Kubernetes (a container orchestration system), then multi-agent orchestration, then a hardening pass focused on production security, then enterprise integrations, then a stable platform. each phase added new interfaces and dependencies. We tried to keep responsibilities separated, although we documented those boundaries too late.
 
 ---
 
 ## The Rules That Scaled
 
-We adopted strict coding standards in week one, before the codebase was large enough to need them. This felt premature. It wasn't.
+We adopted coding conventions in week one. Some made later changes easier; others are preferences rather than universal rules.
 
 The specifics don't matter for this post — what mattered was **consistency at scale**:
 
-- **One way to call things** — same parameter patterns everywhere so engineers never guess interface shape.
-- **Test doubles you can trust** — generated fakes that break at compile time when contracts change, not hand-rolled mocks that drift.
-- **Methods over free functions** — dependency injection by default so production and tests share the same seams.
-- **Flat control flow** — guard clauses instead of nested branches; readability compounds as files grow.
-- **Small public APIs** — export only what other packages need; everything else stays private.
+- **Consistent call signatures** — similar operations take a `context` for cancellation and a request value, so callers know where to pass inputs.
+- **Generated test doubles** — fakes stand in for dependencies in unit tests and fail to compile when an interface changes. They do not replace tests of actual integrations.
+- **Explicit dependencies** — methods can hold injected clients, while free functions still work for stateless transformations. Both are testable.
+- **Readable control flow** — early returns help when they make error paths clear; they are not a substitute for small functions.
+- **Small public APIs** — export only what other packages need; this reduces the number of callers affected by a change.
 
-**Why this matters for agents:** agent platforms accrue integrations faster than typical CRUD apps. Without mechanical consistency, every new tool provider becomes a one-off. With it, a senior engineer can review a pull request in minutes because the shape is familiar even when the domain is new.
+**Why this matters for agents:** our agent runtime calls models and tools through several integrations. Consistent interfaces make new providers easier to inspect, but reviewers still need to examine each provider’s failure and permission behavior.
 
 ---
 
 ## Domain Boundaries, Not Layer Soup
 
-The codebase is organized around clear domain boundaries rather than technical layers — data access, application services, tool providers, identity, observability, and so on each live in their own space, with dependencies flowing in one direction only. Lower-level packages never import from higher-level orchestration code; the compiler's import-cycle detection enforces this automatically, which turns a design intention into something that's actually impossible to violate by accident.
+We separated packages for tool providers, identity, observability, orchestration, and data access. The intended direction is for orchestration to depend on narrower interfaces, not for a lower-level tool package to import orchestration. Go rejects import cycles, but it does not enforce the direction of an acyclic dependency graph; reviews and package tests still matter.
 
 ---
 
 ## The Test Pyramid
 
-Most of the test suite is fast, isolated unit tests built on generated fakes. A smaller slice is integration tests that compile and execute full, composed workflows against a mock model — these are disproportionately valuable, because they catch bugs that only exist at the level of the composed system (see the [ReAcTree bugs post](/blog/reactree-bugs/) for concrete examples). A final, small slice is manual acceptance testing against real user-facing scenarios.
+The test scopes show why fast isolated fakes were not enough to catch failures in compiled, composed workflows.
 
-Every change runs linting, formatting, and the full test suite before it can merge. No exceptions, no "we'll fix it later."
+![Unit tests with fakes lead to composed-workflow integration tests against a mock model and a smaller manual acceptance layer](/assets/images/diagrams/june-foundations/go-platform-test-scopes.svg)
+
+Most of the test suite is fast, isolated unit tests built on generated fakes (test implementations of dependencies). A smaller slice is integration tests that compile and execute full, composed workflows against a mock model — these caught faults that isolated tests missed at the composed-system level (see the [ReAcTree bugs post](/blog/reactree-bugs/) for concrete examples). A final, small slice is manual acceptance testing against real user-facing scenarios.
+
+Our merge checks run linting, formatting, and the test suite. Those checks reduce avoidable regressions but do not establish production correctness.
 
 ---
 
 ## Patterns That Emerged
 
-**A composable middleware chain** for tool execution — the same idea as HTTP middleware, applied to AI tool calls. Each concern (logging, safety checks, rate limiting, and so on) is its own small, independently testable unit that wraps the next one in the chain. Adding a new concern means writing one function and inserting it into the chain — no framework, no reflection, no magic.
+**A composable middleware chain** for tool execution — the same idea as HTTP middleware, applied to AI tool calls. Each concern (logging, safety checks, rate limiting, and so on) is its own small, independently testable unit that wraps the next one in the chain. Adding a concern means writing a wrapper and placing it at the right point in the chain. Order matters: an approval check must wrap every path that can execute a tool.
 
-**A provider pattern** for every external integration — model providers, vector stores, document parsers, messaging platforms all implement the same small interface and get registered by name. Swapping an implementation becomes a matter of changing configuration, not code.
+**A provider pattern** for every external integration — model providers, vector stores, document parsers, messaging platforms implement small interfaces and are registered by name. Configuration can choose an implementation, but provider-specific behavior still needs tests and operational review.
 
-**A standard pattern for parallel work** — every place we run independent operations concurrently uses the same structured-concurrency approach with proper error propagation and safe shared-state handling, rather than ad-hoc goroutine management. One pattern, everywhere, rather than a different flavor of concurrency bug in every package that needed to run things in parallel.
+**A standard pattern for parallel work** — we use a shared pattern for concurrent independent operations: start bounded work, collect errors, cancel related work when appropriate, and avoid sharing mutable session state. A common pattern makes mistakes easier to spot; it does not make race testing optional.
 
 ---
 
@@ -71,7 +75,7 @@ Every change runs linting, formatting, and the full test suite before it can mer
 
 ## The Result
 
-The codebase is still fast to work in months later. Adding a new tool provider takes about a day. Adding a new middleware layer takes about an hour. The architecture patterns we chose in week one are still holding, and lint issues are still at zero because the rules were never optional.
+Months later, in this codebase, a new tool provider takes about a day and a middleware layer about an hour. Those are our observed development estimates, not promises for other integrations. We still need integration tests and explicit package documentation alongside the conventions that kept lint issues at zero.
 
 ---
 
@@ -82,4 +86,4 @@ The codebase is still fast to work in months later. Adding a new tool provider t
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+I work on AI-assisted incident investigation at StackGen; project information is at [ai.stackgen.com](https://ai.stackgen.com).

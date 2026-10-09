@@ -4,43 +4,36 @@ title: "AI Agent Hit Max Turns? Deliver Partial RCA, Not Apology"
 date: 2026-07-17 10:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 7
-description: "When an AI SRE agent hits its LLM-call budget, synthesize Theory/Unknowns from gathered evidence. Zero output at the cap is the product failure."
+description: "When an incident agent reaches a model-call limit, preserve observed findings and label a partial analysis incomplete."
 image: /assets/images/og-default.png
 tags: [ai-agents, sre, token-cost, on-call, incident-response, rca]
 permalink: /blog/deliver-findings-at-the-budget-cap/
 faqs:
   - question: "What should happen when an AI SRE agent hits its LLM-call budget?"
-    answer: "The last allowed turn should synthesize Theory and Unknowns from evidence already gathered. Findings lead; budget caveats follow. Do not replace the answer with a canned budget_exhausted message."
+    answer: "If time and calls remain, reserve a final turn to summarize observations, tentative theory, and unknowns. Otherwise return saved notes labeled incomplete rather than only a budget_exhausted message."
   - question: "Is hitting the max LLM-call budget a failure for investigate agents?"
-    answer: "Hitting a ceiling is normal on long Grafana digs. Zero output at the ceiling — no partial RCA — is the product failure."
+    answer: "A ceiling can be reached during long investigations. Treat the loss of collected findings at that ceiling as a product failure; a partial RCA must be labeled incomplete."
   - question: "How does budget finalization relate to loop-detection salvage?"
-    answer: "Same idea: keep useful incident findings when the finishing loop stalls. Budget finalization is the cousin for execution ceilings."
+    answer: "Both preserve useful findings when an agent cannot finish normally. Budget finalization handles resource ceilings; loop-detection salvage handles repetitive execution."
 ---
 
-Your on-call AI SRE agent ran out of turns mid-Grafana dig. That should mean a partial RCA — Theory, Unknowns, what was checked — not a blank `budget_exhausted` apology.
+An AI agent investigating a service incident may reach its maximum number of model calls while querying Grafana, a monitoring dashboard. The site reliability engineering (SRE) responder still needs the findings collected so far. A partial root-cause analysis (RCA)—possible explanation, unknowns, and checks performed—is more useful than a bare `budget_exhausted` marker, provided it is labeled incomplete.
 
 *The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
-## TL;DR
+## Why the ceiling changes the output
 
-- Execution ceilings (max LLM calls, tool iterations, wall clock) are **normal** on long investigations
-- Last allowed call should **synthesize what was learned**
-- Findings first; budget caveat second
-- Preserve tool-call telemetry so postmortems show what was queried
-
-### Explain like I'm five
-
-If the school bell rings while you are writing a book report, turn in the pages you have with a note “I ran out of time.” Do not throw the pages away and hand in a slip that only says “time’s up.”
+An execution ceiling limits model calls, tool iterations, or elapsed time so an investigation cannot run indefinitely. If the agent is close to one, it should reserve room for a final account of what it observed. That account should distinguish a supported finding from an untested theory, state what it could not check, and retain the tool-call record for later review. A hard timeout may prevent even that final call, so the runtime should preserve notes incrementally.
 
 ---
 
 ## The wrong product behavior
 
-A twenty-minute Grafana / change dig hits the max LLM-call budget (`MaxLLMCalls`). The UI shows a canned exhaustion marker. Everything the agent already collected vanishes behind an apology.
+In this composite scenario, a twenty-minute Grafana and deployment-history search hits the maximum large-language-model (LLM) call count (`MaxLLMCalls`). The UI shows a canned exhaustion marker. Everything the agent already collected vanishes behind an apology.
 
-Operators experience that as: “the bot did nothing.” The logs know better. The service failed to **render**.
+Operators experience that as: “the bot did nothing.” The tool log may still contain useful observations. The product failed to deliver them to the responder.
 
 Cousin: [AI agent loop detection — don't throw away the answer](/blog/ai-agent-loop-detection-salvage/).
 
@@ -49,17 +42,21 @@ Cousin: [AI agent loop detection — don't throw away the answer](/blog/ai-agent
 ## The right product behavior
 
 - Detect approaching ceiling
-- Force a findings-first finalization turn
-- Structure: Theory / Unknowns / what was checked / budget caveat
-- Keep tool telemetry attached for humans grading the run
+- Reserve a final model call for findings when the remaining budget permits; otherwise return saved notes
+- Separate observed findings, tentative theory, unknowns, checks performed, and the budget caveat
+- Keep the record of tool calls and their outcomes attached for people reviewing the run
 
-Partial RCA beats silent failure on an incident timeline.
+A labeled partial RCA can help during an incident, but it is not a verified root cause.
+
+![Budget-cap flow from saved tool outcomes to a partial findings report, including hard-timeout fallback to notes.](/assets/images/diagrams/july-investigation/deliver-findings-at-the-budget-cap.svg)
+
+*Diagram: The arrows show tool results being saved before the cap, then assembled into a final account if a call remains; the lower path salvages incremental notes when a hard timeout blocks that call.*
 
 ---
 
 ## If you lead an SRE team
 
-- Treat zero-output-at-cap as a Sev for the investigation product
+- Treat zero-output-at-cap as a product reliability issue; assign severity according to operational impact
 - Review salvaged answers as real deliverables with explicit Unknowns
 - Size budgets for the dig shape you actually run — then still demand finalization
 
@@ -67,7 +64,7 @@ Partial RCA beats silent failure on an incident timeline.
 
 - Implement budget finalization in the agent loop, not as a UI apology
 - Prefer preserving observed answers over discarding the run
-- Log salvage length so you can measure how often ceilings still produced value
+- Record how often a budget-limited run delivered findings and whether responders found them useful; length alone is not value
 
 ---
 

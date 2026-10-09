@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="450" viewBox="0 0 960 450" role="img" aria-labelledby="diagram-title diagram-desc">
+<title id="diagram-title">Do not discard a collected lead</title>
+<desc id="diagram-desc">Match the alert card to its rule, query around the fire time, and carry a non-empty metric lead into the final account even if the fingerprint misses or logs lack a data source.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9 Z" fill="#315779"/></marker></defs>
+<rect width="960" height="450" fill="#ffffff"/>
+<text x="40" y="49" font-size="27" font-weight="bold" fill="#13243a">Do not discard a collected lead</text>
+<text x="40" y="79" font-size="16" font-weight="normal" fill="#40576e">Investigation path</text>
+<rect x="40" y="112" width="260" height="137" rx="14" fill="#f6f9fe" stroke="#38608c" stroke-width="2"/>
+<text x="57" y="143" font-size="18" font-weight="bold" fill="#13243a">Card and rule</text>
+<text x="57" y="176" font-size="16" font-weight="normal" fill="#13243a">Matching alert name</text>
+<text x="57" y="200" font-size="16" font-weight="normal" fill="#13243a">anchors the case</text>
+<rect x="350" y="112" width="260" height="137" rx="14" fill="#f6f9fe" stroke="#38608c" stroke-width="2"/>
+<text x="367" y="143" font-size="18" font-weight="bold" fill="#13243a">Query fire window</text>
+<text x="367" y="176" font-size="16" font-weight="normal" fill="#13243a">Broaden beyond “now”</text>
+<text x="367" y="200" font-size="16" font-weight="normal" fill="#13243a">when warranted</text>
+<rect x="660" y="112" width="260" height="137" rx="14" fill="#f6f9fe" stroke="#38608c" stroke-width="2"/>
+<text x="677" y="143" font-size="18" font-weight="bold" fill="#13243a">Lead in notes</text>
+<text x="677" y="176" font-size="16" font-weight="normal" fill="#13243a">Record metric locus</text>
+<text x="677" y="200" font-size="16" font-weight="normal" fill="#13243a">and its limits</text>
+<path d="M305 181 H338 M615 181 H648" stroke="#315779" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<path d="M480 253 V279 H247 V294" stroke="#315779" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<path d="M790 253 V279 H713 V294" stroke="#315779" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<rect x="40" y="305" width="414" height="112" rx="14" fill="#fff7ec" stroke="#8a550a" stroke-width="2"/>
+<text x="57" y="336" font-size="18" font-weight="bold" fill="#13243a">Fingerprint miss / blind logs</text>
+<text x="57" y="369" font-size="16" font-weight="normal" fill="#13243a">Check identity or retry with</text>
+<text x="57" y="393" font-size="16" font-weight="normal" fill="#13243a">an explicit data source</text>
+<rect x="506" y="305" width="414" height="112" rx="14" fill="#edf8f5" stroke="#17665b" stroke-width="2"/>
+<text x="523" y="336" font-size="18" font-weight="bold" fill="#13243a">Synthesis gate</text>
+<text x="523" y="369" font-size="16" font-weight="normal" fill="#13243a">Retain the lead as tentative;</text>
+<text x="523" y="393" font-size="16" font-weight="normal" fill="#13243a">do not paste only the checklist</text>
+<path d="M461 362 H494" stroke="#315779" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+</svg>

@@ -9,17 +9,21 @@ image: /assets/images/og-platform.png
 tags: [open-source, community, ai-agents, go, engineering]
 ---
 
-We built a proprietary product. We also merged 17 PRs into the agent framework we depend on. Here's how to navigate the tension between building commercially and contributing to the open-source ecosystem you rely on.
+We build a proprietary agent product on an open-source Go framework. We merged 17 pull requests (PRs) into that framework while keeping product-specific code private. The boundary is less about whether code is valuable than whether the change belongs in a reusable framework.
+
+![Framework interfaces and fixes flow upstream while product-specific policy stays private; a temporary fork bridges pending review](/assets/images/diagrams/july-workflows/upstream-private-boundary.svg)
+
+*Reusable fixes go upstream; the product uses those interfaces without publishing customer-specific behavior. A pending fix may require a temporary fork.*
 
 ---
 
 ## The Dependency Graph
 
-Our agent runtime is built on [trpc-agent-go](https://github.com/trpc-group/trpc-agent-go) — an open-source Go framework for building AI agents. It provides the core abstractions: tool interfaces, LLM wrappers, streaming, and memory primitives.
+Our agent runtime is built on [trpc-agent-go](https://github.com/trpc-group/trpc-agent-go) — an open-source Go framework for building AI agents. It provides the core abstractions: tool interfaces, wrappers around large language models (LLMs), streaming responses, and memory primitives.
 
 We extend it heavily — custom middleware, governance layers, memory management, multi-model orchestration — but the foundation is open source. Without it, we'd have spent months building plumbing instead of features.
 
-That creates an obligation: **if you build on open source, you contribute back.** Not because you have to. Because it makes your product better.
+Depending on that framework gives us a practical reason to contribute generic fixes upstream. Review and shared maintenance can reduce the cost of carrying a private patch, though contributions still take time and maintainers can decline them.
 
 ---
 
@@ -36,25 +40,25 @@ Our contributions fall into three categories:
 - Rate limiter edge cases with concurrent requests
 
 **Features we needed that benefit everyone:**
-- HTTP client override for SSE connections (needed for corporate proxies)
+- HTTP client override for server-sent event (SSE) connections (needed for corporate proxies)
 - Enhanced tool metadata for governance (needed for our middleware stack)
 - Memory search filtering by type (needed for our multi-type memory model)
 
 **Security patches:**
 - Input validation for tool arguments
-- PII redaction hooks in the logging layer
+- Personally identifiable information (PII) redaction hooks in the logging layer
 
-**Pattern:** We build features in our private codebase first. When a feature requires changes to the upstream framework, we isolate the framework change, make it generic, and submit it as a PR. Our private code then builds on the merged upstream change.
+Our pattern: We build features in our private codebase first. When a feature requires changes to the upstream framework, we isolate the framework change, make it generic, and submit it as a PR. Our private code then builds on the merged upstream change.
 
 ### To the Broader Ecosystem
 
 | Project | What We Contributed |
 |---------|-------------------|
-| [Docker MCP Registry](https://github.com/docker/mcp-registry) | Added StackGen to the official MCP server catalog |
-| [A2A JS SDK](https://github.com/a2aproject/a2a-js) | Registry fix for agent-to-agent protocol |
+| [Docker MCP Registry](https://github.com/docker/mcp-registry) | Added StackGen to the Model Context Protocol (MCP) server catalog |
+| [A2A JS SDK](https://github.com/a2aproject/a2a-js) | Registry fix for Agent-to-Agent (A2A) protocol |
 | [Kiro Powers](https://github.com/kirodotdev/powers) | Added StackGen IaC power for agent management |
 | [mcp-go](https://github.com/mark3labs/mcp-go) | HTTP client override for SSE transport |
-| [dex (OIDC)](https://github.com/dexidp/dex) | MCP authentication flow changes |
+| [dex (OpenID Connect, OIDC)](https://github.com/dexidp/dex) | MCP authentication flow changes |
 | [HashiCorp Terraform MCP Server](https://github.com/hashicorp/terraform-mcp-server) | Reviewed and tested early builds |
 
 ---
@@ -63,17 +67,17 @@ Our contributions fall into three categories:
 
 When you depend on an open-source project and contribute to it, you often need changes before your PR is merged. This creates a fork management challenge: your product depends on your fork, your fork has pending PRs, upstream merges other changes that conflict with yours, and now you're maintaining merge conflicts while trying to ship features.
 
-**Our approach:**
+We used a few rules to keep pending changes manageable:
 
 1. **Keep forks minimal.** Only fork when you have a pending PR. As soon as the PR merges, rebase back to upstream.
 
 2. **One PR per change.** Don't bundle. Bundled PRs take longer to review, have higher conflict risk, and block on the slowest-to-review change.
 
-3. **Match upstream style.** Read their contributing guide. Match their test patterns. Use their naming conventions. PRs that look like they belong get merged faster.
+3. **Match upstream style.** Read their contributing guide. Match their test patterns. Use their naming conventions. Matching upstream conventions makes review easier; it does not guarantee acceptance.
 
-4. **Be responsive.** When maintainers request changes, respond quickly. Stale PRs die.
+4. **Be responsive.** When maintainers request changes, respond quickly. A delayed response can leave a PR out of date.
 
-5. **Design for maintainer latency.** The bottleneck is often the upstream review queue, not your response time. When your roadmap requires a framework change, propose a generic interface or registration hook upstream — then deploy your specific implementation in your private codebase immediately. You ship on time; the upstream PR merges when it merges.
+5. **Design for maintainer latency.** The bottleneck is often the upstream review queue, not your response time. When your roadmap requires a framework change, propose a generic interface or registration hook upstream — then deploy your specific implementation in your private codebase immediately. This can keep a release moving, but you still own the private implementation and any fork until upstream review is complete.
 
 ### The Fork Dependency Trap
 
@@ -100,9 +104,9 @@ Not everything should be open-sourced. Here's our framework:
 - Specific customer integrations and configurations
 - Operational knowledge (deployment patterns, scaling recipes)
 
-**The litmus test:** "Would a competitor gain more from seeing this code than the community gains from using it?" If yes, keep it private. If no, contribute it.
+A useful review question is whether the community benefit of a generic change outweighs the reasons to keep it private, including customer confidentiality and product-specific implementation. It is a judgment call, not an automatic test.
 
-**In practice, the boundary is rarely a clean file split.** Our governance middleware is proprietary, but the tool metadata interfaces it depends on are upstream. Our multi-model orchestration is private, but the model provider abstraction is open. The pattern: **open-source the interface abstractions, keep the implementations proprietary.** This turns the dependency into a plugin architecture where your core IP stays behind public hooks.
+**In practice, the boundary is rarely a clean file split.** Our governance middleware is proprietary, but the tool metadata interfaces it depends on are upstream. Our multi-model orchestration is private, but the model provider abstraction is open. In those cases we contribute reusable interface abstractions while keeping our implementations private. The boundary still needs case-by-case review; an interface can expose assumptions about the product.
 
 ---
 
@@ -110,19 +114,19 @@ Not everything should be open-sourced. Here's our framework:
 
 ### 1. You fix bugs faster
 
-When you find a bug in the upstream framework, you can either work around it in your code (fragile, compounds over time) or fix it upstream, get it reviewed by maintainers who know the codebase better, and have it maintained by the community going forward. Option B is more work upfront. It's less work over the lifetime of your product.
+When you find a bug in the upstream framework, you can either work around it in your code (fragile, compounds over time) or fix it upstream, get it reviewed by maintainers who know the codebase better, and have it maintained by the community going forward. An upstream fix takes more work upfront but can reduce later maintenance if it is accepted.
 
 ### 2. Your changes stay compatible
 
-If you fix a bug in your fork but never upstream it, every upstream update requires you to re-apply your patch. After several months, you're maintaining a shadow fork with dozens of patches. Eventually, you stop updating and miss security fixes. By upstreaming, your changes become part of the official release.
+If you fix a bug in your fork but never upstream it, every upstream update requires you to re-apply your patch. After several months, you're maintaining a shadow fork with dozens of patches. A long-lived shadow fork makes updates and security patches harder to keep up with. By upstreaming, your changes become part of the official release.
 
 ### 3. Hiring signal
 
-Engineers evaluate companies by their open-source presence. A track record of quality upstream contributions tells a candidate more about engineering culture than any job listing.
+Some candidates examine a company’s open-source work. Reviewed upstream contributions can offer a concrete view of its engineering practices alongside interviews and other evidence.
 
 ### 4. Community relationships
 
-Maintainers remember contributors. When you need a feature merged urgently, or when you need help debugging a complex issue, having a track record of quality contributions buys goodwill.
+Consistent contributions can build useful relationships with maintainers. They do not entitle us to urgent review or support.
 
 ---
 
@@ -146,21 +150,21 @@ The AI agent ecosystem is young. Standards are emerging:
 
 - **MCP** (Model Context Protocol) — standardizing how agents connect to tools
 - **A2A** (Agent-to-Agent) — standardizing how agents communicate
-- **AG-UI** — standardizing how agents stream events to frontends
+- **AG-UI** (Agent User Interaction) — a protocol for streaming agent events to user interfaces
 
-Contributing to these standards early means your product is compatible by default. Waiting means you retrofit later.
+Adopting these protocols can reduce later integration work, although implementations and evolving standards still require compatibility testing.
 
 We adopted MCP for tool connections, A2A for inter-agent communication, and AG-UI for our chat interface. Each integration surfaced bugs and missing features that we contributed back.
 
 ---
 
-## Lessons Learned
+## Decisions we keep revisiting
 
 1. **Contribute upstream first, fork only when necessary.** Forks are a maintenance burden. Upstream PRs are maintained by the community.
 
-2. **Separate generic from specific.** Generic improvements go upstream. Business-specific logic stays private. The line is usually clear.
+2. **Separate generic from specific.** Generic improvements go upstream. Business-specific logic stays private. The line often takes negotiation between product, legal, and maintainer concerns.
 
-3. **Small, focused PRs get merged.** Large PRs sit in review for weeks. Split them.
+3. **Keep PRs focused.** Focused PRs are easier to review; split changes when each part can stand on its own.
 
 4. **Match their style, not yours.** Contributing is about fitting into their codebase, not reshaping it.
 
@@ -175,4 +179,4 @@ We adopted MCP for tool connections, A2A for inter-agent communication, and AG-U
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> We build incident-triage agents at StackGen; the SRE offering is at [ai.stackgen.com](https://ai.stackgen.com).

@@ -21,27 +21,22 @@ faqs:
     answer: "In the wiring: governance on child tools, parallel graph compile, per-step timeouts, session isolation. See our production bug notes after implementing ReAcTree."
 ---
 
-Most agent demos are a **single-agent ReAct loop**: one model reasons, calls a tool, reads the observation, repeats. That shape is honest and easy to debug.
+A **single-agent ReAct loop** uses one model trajectory: decide what to check, call a tool, read its result, and repeat. The entire sequence can be inspected in one trace. It can also accumulate a large prompt when a task requires many tool results.
 
-**ReAcTree** is the other shape that shows up once jobs get long and tool-heavy. A parent agent decomposes subgoals, may spawn **child agent nodes**, and coordinates them with explicit control flow (sequence, parallel, fallback). Each node still looks like ReAct locally. The *run* is a tree.
+**ReAcTree** organizes several such loops into a hierarchy. A parent can divide a goal into child tasks and specify whether they run in order, concurrently, or as fallbacks. The parent must then combine their reports. That structure can keep one noisy log search out of the parent prompt, but costs extra model calls and requires the runtime to preserve child evidence.
 
 Paper ([PDF](https://arxiv.org/pdf/2511.02424) · [abs](https://arxiv.org/abs/2511.02424)) · [reference code](https://github.com/Choi-JaeWoo/ReAcTree) · production scars: [ReAcTree bugs we hit](/blog/reactree-bugs/).
 
 ---
 
-## TL;DR
+## What the evidence supports
 
 - **Single-agent (ReAct):** one trajectory, one context, reason→act→observe until done.
 - **Hierarchical (ReAcTree):** parent plans subgoals; children dig; control flow stitches results.
-- Paper motivation (authors’ numbers, not ours): on WAH-NL with Qwen 2.5 72B, ReAcTree ~**61%** vs ReAct ~**31%**.
-- For SRE triage, trees help when the errand has **rooms** (alert + logs + change). They hurt when one plane owns the dig and you just paid a foreman to watch one plumber.
+- In the cited paper’s WAH-NL long-horizon household-task evaluation with Qwen 2.5 72B, the authors report ReAcTree ~**61%** vs ReAct ~**31%**. Those rates are task- and setup-specific, not incident-response results.
+- For incident triage, a tree may help separate alert, log, and change investigations when those subgoals are independent. If one backend and one short query chain suffice, coordination can add unnecessary calls.
 - Always A/B both shapes on the **same** frozen prompt. We did that here: [six model×orchestration combos](/blog/six-model-mode-combos-alert-logs-bench/).
 
-### Explain like I'm five
-
-One kid with a flashlight checks every room alone. That is ReAct.
-
-A team lead assigns “kitchen,” “basement,” and “attic,” waits for reports, then writes one story. That is ReAcTree. Sometimes the team finds the fire faster. Sometimes the lead stares at the clipboard and the basement still floods.
 
 ---
 
@@ -54,13 +49,18 @@ A team lead assigns “kitchen,” “basement,” and “attic,” waits for re
 3. Observe the result  
 4. Repeat  
 
-Great default for “query this alert rule, then LogQL, then write Theory / Unknowns / Do-this-now.” One context. One failure mode. You can read the stream top to bottom.
+For a bounded task such as reading an alert rule, then querying logs with LogQL (Loki’s query language), then writing a hypothesis and open questions, one loop may suffice. Its trace is linear; the tradeoff is that every tool result competes for the same model context.
 
 ---
 
 ## ReAcTree: tree + control flow
 
-From the paper: the parent does not only call leaf tools. It builds a **tree of agent nodes**. Children get scoped subgoals. Composition is not vibes — it is typed control flow:
+![A parent agent splits a task among child loops and verifies the returned evidence](/assets/images/diagrams/sept/reactree.svg)
+
+*A tree can isolate parallel investigations, but the parent still owns the final answer.*
+
+
+From the paper: the parent does not only call leaf tools. It builds a **tree of agent nodes**. Children get scoped subgoals. The paper specifies three control-flow arrangements:
 
 | Flow | Plain meaning |
 |------|----------------|
@@ -68,7 +68,7 @@ From the paper: the parent does not only call leaf tools. It builds a **tree of 
 | **Parallel** | Fan out A∥B, join |
 | **Fallback** | Try A; on failure try B |
 
-Shared working memory and episodic lessons show up in the paper design. In production you still have to wire timeouts, governance, and isolation yourself ([six bugs](/blog/reactree-bugs/)).
+The paper also describes shared working memory and stored lessons from previous episodes. A deployment still needs to enforce tool permissions, per-step timeouts, and session isolation across nodes ([six bugs](/blog/reactree-bugs/)); the control-flow diagram does not supply those safeguards.
 
 Short labels we use in benches:
 
@@ -81,7 +81,7 @@ Short labels we use in benches:
 
 ## Why ops / SRE people care
 
-Incident work is long-horizon and tool-heavy: metrics, logs, deployments, tickets. A single-agent loop can drown in catalog tools and megabyte tool dumps. A tree can:
+Some incident investigations span metrics, logs, deployments, and tickets. When independent queries can run concurrently, a tree may shorten elapsed time; when they depend on each other or all hit one contended server, parallel branches may add load instead. A single-agent loop can drown in catalog tools and megabyte tool dumps. A tree can:
 
 - **Isolate** noisy LogQL into a child context  
 - **Fan out** falsifiers in parallel  

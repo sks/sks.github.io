@@ -19,11 +19,11 @@ faqs:
     answer: "No. Opening a reviewable PR is enough for a first loop. Merge stays a human decision."
 ---
 
-GitHub Projects are great until the board fills with cards that say “make nav better” and absolutely nothing else.
+A GitHub Project card that says “make nav better” leaves the scope and acceptance criteria to its reviewers.
 
-Humans then have to do unpaid product work in the comments: turning the wish into acceptance criteria (**Specify**), looking at the repo to see what already exists (**Research**), writing a plan someone could actually implement (**Plan**), and maybe opening a PR (**Implement**).
+Someone still has to define acceptance criteria (**Specify**), inspect the repository (**Research**), write an implementable proposal (**Plan**), and perhaps open a pull request (PR) (**Implement**).
 
-I wanted a boring demo that still felt magical: open a **vague** GitHub issue, watch it land on a Project board, and let [Aiden](/blog/aiden-platform/) walk it through that entire lifecycle — ending with a **review PR**. No second orchestration product. No “trust me, the agent did homework” without a comment on the issue as evidence.
+I tested whether [Aiden](/blog/aiden-platform/) could take a vague GitHub issue through those stages and open a **review PR**. Issue comments provide a review trail; they do not replace human review of the proposed code.
 
 We dogfooded this on this blog’s repo and a personal GitHub Project. This post is **Aiden the Hard Way**: a flat root of `sg_*` resources with the [StackGen Terraform/OpenTofu provider](/blog/terraform-config/) — every layer you would otherwise hide inside a module. Prefer `module "…"` instead? Read the follow-up, [Aiden the Easy Way](/blog/aiden-the-easy-way/).
 
@@ -33,11 +33,15 @@ We dogfooded this on this blog’s repo and a personal GitHub Project. This post
 
 ## Best practices for AI kanban automation
 
+![GitHub event drives Specify, Research, Plan, and optional review PR, while merge remains a human decision](/assets/images/diagrams/aug-runtime/github-issue-to-pr.svg)
+
+*The workflow leaves issue receipts and a review PR; people decide whether to merge.*
+
 Before writing code, apply [bring-up discipline](/blog/bring-up-agent-workflows-like-hardware/) to the board.
 
 | Do | Don’t |
 | -- | ----- |
-| Process one issue per run | Boil the ocean across the whole board |
+| Process one issue per run | Process the whole board at once |
 | Comment evidence directly on the issue | Keep findings hidden only in chat |
 | Hop Status one column at a time | Jump from Specify to Done in silence |
 | Open a PR for humans to review and merge | Allow the AI to auto-merge |
@@ -46,9 +50,9 @@ Before writing code, apply [bring-up discipline](/blog/bring-up-agent-workflows-
 
 ## Step 0: Set up the StackGen OpenTofu provider
 
-**Prerequisite:** you need an **active StackGen / Aiden tenant** (URL + token + org/project id). Without that, `tofu apply` has nowhere to create resources — this is not a local-only sandbox.
+**Prerequisite:** you need an **active StackGen / Aiden tenant** (URL + token + organization/project identifier). Without that, `tofu apply` has nowhere to create resources — this is not a local-only sandbox.
 
-Aiden is not a platform where you just “paste a system prompt into a dashboard.” StackGen ships a native `provider "sg"`. Point it at your tenant, and every agent object becomes plan, apply, and drift — using the same muscle memory as the rest of your infrastructure.
+The StackGen `provider "sg"` lets this configuration be reviewed with `plan` and applied to a tenant. This example shows resource wiring rather than a local-only agent setup.
 
 ```hcl
 terraform {
@@ -90,7 +94,7 @@ variable "default_project_url" {
 }
 ```
 
-We use **OpenTofu** (`tofu`) interchangeably with Terraform for `fmt`, `init`, `plan`, and `apply`.
+This example uses **OpenTofu** (`tofu`) for `fmt`, `init`, `plan`, and `apply`; Terraform uses comparable commands.
 
 ---
 
@@ -126,7 +130,7 @@ resource "sg_guild_model" "primary" {
 
 ## Step 2: Integrate GitHub Issues and Projects
 
-Without Projects scopes, GraphQL Status reads fail in opaque ways. Budget time for token scopes before blaming the agent.
+A GitHub personal access token (PAT) needs Projects scopes for GraphQL Status reads; without them, those reads fail in opaque ways. Budget time for token scopes before blaming the agent.
 
 ```hcl
 resource "sg_secret" "github" {
@@ -157,7 +161,7 @@ resource "sg_guild_integration" "github" {
 
 ## Step 3: Define guardrails and human-in-the-loop (HITL) policies
 
-We want the agent to have autonomy to open a PR (`gh pr create`), but accountability to land it. Keep destructive actions and **merges** strictly behind HITL approval.
+We want the agent to have autonomy to open a PR (`gh pr create`), but accountability to land it. Keep destructive actions and **merges** behind HITL approval. The sample string-matching policy covers the listed command text, not every possible mutation path; review tool permissions separately.
 
 ```hcl
 resource "sg_policy" "guardrails" {
@@ -353,7 +357,7 @@ tofu output -raw webhook_ingress_payload_url
 tofu output -raw webhook_token
 ```
 
-Once applied, your agent leaves structured receipts on GitHub issues. A successful stage comment should look like this:
+Once applied and triggered, the workflow should leave structured comments on GitHub issues; inspect the actual comments and PR before treating a stage as complete. A successful stage comment should look like this:
 
 ```markdown
 ### Aiden project assist — Specify
@@ -378,7 +382,7 @@ Our dogfooding closed with [navigation polish PR #31](https://github.com/sks/sks
 * **Order of operations matters** — secrets → providers/models → integrations → agent → workflow → webhook/schedule.
 * **Receipts on GitHub** — issue comments beat chat transcripts.
 * **Issue opened ≠ card dragged ≠ PR merged** — wire the triggers you care about.
-* **Merge stays human** — always require human-in-the-loop for destructive actions.
+* **Merge stays human** in this workflow; also review other mutation paths beyond the example policy.
 
 **Where to look next:**
 
@@ -393,4 +397,4 @@ Our dogfooding closed with [navigation polish PR #31](https://github.com/sks/sks
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

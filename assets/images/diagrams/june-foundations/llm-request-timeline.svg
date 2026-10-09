@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="500" viewBox="0 0 960 500" role="img" aria-labelledby="title desc">
+<title id="title">Where an LLM request spends time</title>
+<desc id="desc">Request and routing, queue and prompt processing precede the first token. Decoding lasts until the last token; validation happens after generation before an action can safely use the answer.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#174a69"/></marker></defs>
+<rect width="960" height="500" fill="#fbfcfa"/>
+<text x="36" y="42" font-family="system-ui, sans-serif" font-size="24" font-weight="700" fill="#182b3a" text-anchor="start">Where an LLM request spends time</text>
+<text x="38" y="89" font-family="system-ui, sans-serif" font-size="16" font-weight="400" fill="#40586a" text-anchor="start">One model call · left to right in elapsed time</text>
+<rect x="35" y="130" width="150" height="90" rx="12" fill="#eef5f8" stroke="#174a69" stroke-width="2"/>
+<text x="110.0" y="168.5" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Request</text>
+<text x="110.0" y="193.5" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">sent</text>
+<rect x="227" y="130" width="185" height="90" rx="12" fill="#eef5f8" stroke="#174a69" stroke-width="2"/>
+<text x="319.5" y="168.5" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Routing + queue</text>
+<text x="319.5" y="193.5" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">wait for capacity</text>
+<rect x="454" y="130" width="185" height="90" rx="12" fill="#eef5f8" stroke="#174a69" stroke-width="2"/>
+<text x="546.5" y="168.5" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Pre-fill</text>
+<text x="546.5" y="193.5" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">process input</text>
+<rect x="681" y="130" width="125" height="90" rx="12" fill="#eef5f8" stroke="#174a69" stroke-width="2"/>
+<text x="743.5" y="168.5" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Decode</text>
+<text x="743.5" y="193.5" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">emit tokens</text>
+<rect x="848" y="130" width="92" height="90" rx="12" fill="#fff3df" stroke="#926013" stroke-width="2"/>
+<text x="894.0" y="168.5" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#182b3a" text-anchor="middle">Validate</text>
+<text x="894.0" y="193.5" font-family="system-ui, sans-serif" font-size="15" font-weight="400" fill="#182b3a" text-anchor="middle">before use</text>
+<polyline points="185,175 219,175" fill="none" stroke="#174a69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow)"/>
+<polyline points="412,175 446,175" fill="none" stroke="#174a69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow)"/>
+<polyline points="639,175 673,175" fill="none" stroke="#174a69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow)"/>
+<polyline points="806,175 840,175" fill="none" stroke="#174a69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow)"/>
+<text x="681" y="115" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#174a69" text-anchor="start">first token</text>
+<text x="805" y="247" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#174a69" text-anchor="end">last token</text>
+<line x1="35" y1="283" x2="681" y2="283" stroke="#718593" stroke-width="2"/>
+<line x1="35" y1="274" x2="35" y2="292" stroke="#718593" stroke-width="2"/>
+<line x1="681" y1="274" x2="681" y2="292" stroke="#718593" stroke-width="2"/>
+<text x="358" y="312" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">TTFT = request → first token</text>
+<line x1="35" y1="344" x2="806" y2="344" stroke="#718593" stroke-width="2"/>
+<line x1="35" y1="335" x2="35" y2="353" stroke="#718593" stroke-width="2"/>
+<line x1="806" y1="335" x2="806" y2="353" stroke="#718593" stroke-width="2"/>
+<text x="420" y="373" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Generation time = request → last token</text>
+<line x1="35" y1="405" x2="940" y2="405" stroke="#718593" stroke-width="2"/>
+<line x1="35" y1="396" x2="35" y2="414" stroke="#718593" stroke-width="2"/>
+<line x1="940" y1="396" x2="940" y2="414" stroke="#718593" stroke-width="2"/>
+<text x="490" y="438" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#182b3a" text-anchor="middle">Agent task completion can extend through validation, tools and retries</text>
+</svg>

@@ -4,37 +4,25 @@ title: "AI Agent Root Cause Analysis — Curiosity Before Confidence"
 date: 2026-07-23 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 26
-description: "AI agent root cause analysis for SRE: curiosity before confidence. Soft prompts don't stop bad RCAs — checklists, hard gates, and batched validation do."
+description: "For AI-assisted incident analysis, record required checks, return missing fields together, and limit confidence to what the evidence supports."
 image: /assets/images/og-evidence-rca.png
 tags: [ai-agents, root-cause-analysis, sre, incident-response, on-call, evaluation, prompt-engineering, production, aiden, compound-ai]
 permalink: /blog/curiosity-before-confidence/
 ---
 
-**AI agent root cause analysis (RCA)** fails the same way demos succeed: the model sounds sure before the investigation earned it. Soft prompts teach manners. They do not enforce curiosity.
+A root-cause analysis (RCA) should explain an incident using observations, not just a plausible story. While building [AI agents for site reliability engineering (SRE)](/topics/ai-agents-sre/)—software operations and incident response—we found that instructions to “check everything before claiming a cause” did not consistently prevent early conclusions.
 
-We kept adding instructions — longer investigator DNA, more “never claim root cause until…” paragraphs, another skill that explained claim grades in plain English. The [AI agents for SRE](/topics/ai-agents-sre/) stayed fluent. They still closed strong incidents with homework left on the table.
-
-The uncomfortable lesson: **soft prompts teach manners; they do not enforce curiosity.** Confidence without unfinished digs is not rigor — it is a well-written shrug.
-
-And shrugs at 3 AM are expensive. A premature, highly confident (but wrong) RCA does not merely waste tokens. It sends tired humans down the wrong rabbit hole while the real failure keeps burning. After one or two of those nights, operators stop arguing with the agent — they **disable it**. Trust is the product. Fluency without curiosity spends it.
+A wrong RCA can send responders toward the wrong service. The practical question is what checks must be recorded before a high-confidence claim reaches them, and how to report a gap without pretending it was filled.
 
 ---
 
-## TL;DR — Soft Prompts vs Hard Gates for AI RCA
+## Checks before a strong claim
 
-- **Prompt inflation is a coping mechanism.** Every bad RCA tempts another paragraph. The model skims it under load.
-- **Fail-closed at the tool boundary**, not in the essay. If a strong claim cannot pass a machine check, reject the claim — do not hope the next turn “remembers.”
-- **One gap per rejection is how agents thrash.** Return the whole homework list once so a retry can fix many mistakes in one shot.
-- **Co-occurrence is not cause.** Seeing two signals fire together is a weaker claim than proving a shared entity or a mechanism that survives time.
-- **Empty is not skip.** “We checked competing branches and found none open” is work. Skipping the checklist because the story feels obvious is not.
-
-### Explain like I'm five
-
-Before you get a gold-star sticker that says “we know what broke,” you have to finish your homework checklist: look in the rooms that matter, write down what you could not open, and do not invent a villain because the story felt done. The sticker is **confidence**. The checklist is **curiosity**. Soft reminders on the fridge (“remember your homework!”) help. A teacher who will not stamp the sticker until the checklist is done is what production needs.
+A prompt can request careful investigation, but the submission path can also check for recorded work. A **gate** is such a check: it refuses a “probable” or “confirmed” label if required evidence or attempted probes are missing. A gate cannot prove a cause merely because fields are populated. It can, however, expose skipped work, return all missing items at once, and distinguish “checked and empty” from “never checked.”
 
 ---
 
-## The Failure Mode: AI Investigators Closing RCA With Homework Left
+## The Failure Mode: Closing an RCA With Checks Unfinished
 
 Picture a familiar on-call night:
 
@@ -45,17 +33,17 @@ Picture a familiar on-call night:
 5. An operator opens the same dashboard and asks the question the agent never did.
 6. Next week, someone mutes the agent channel “until we trust it again.”
 
-We already knew the **looks-right heuristic**: report-shaped prose is not proof. What surprised us was how often the agent had *almost* done the right work — then skipped the boring last questions because the narrative felt done.
+A report that looks complete is not necessarily supported by evidence. What surprised us was how often the agent had *almost* done the right work — then skipped the boring last questions because the narrative felt done.
 
-Curiosity is not vibes. Curiosity is a **checklist of digs that must be attempted, blocked, or answered** before you are allowed to sound sure. If those digs stay undone — never tried — a “probable” headline is premature theater.
+Here, “curiosity” means a **list of checks that must be attempted, blocked, or answered** before a strong claim is submitted. If a required check was never tried, a “probable” headline needs to be withheld or qualified.
 
-Humans enforce this in good war rooms with peer pressure. Models need something colder.
+Human responders can question a conclusion in real time; an automated investigator also needs inspectable criteria before it publishes one.
 
-This sits next to [evidence-gated multi-plane RCA](/blog/evidence-gated-multiplane-rca/) and [hypothesis-driven debugging for AI SRE](/blog/hypothesis-ladder/). Those posts covered stages and elimination order. This one is about what happens when you try to *sermon* your way out of early closure — and what actually moved the needle.
+This builds on [evidence-gated RCA across several data sources](/blog/evidence-gated-multiplane-rca/) and [hypothesis-driven debugging](/blog/hypothesis-ladder/). Those posts cover stages and elimination order. Here the question is what a check at submission time can catch that instructions alone did not.
 
 ---
 
-## Soft Prompts Teach; Hard Gates Enforce AI RCA Discipline
+## Instructions and submission checks serve different purposes
 
 We tried the soft path first — because it is cheap and feels virtuous.
 
@@ -65,17 +53,17 @@ We tried the soft path first — because it is cheap and feels virtuous.
 | Restate claim grades in the persona | Recited, then ignored at submit time |
 | Hope the model “thinks on itself” | Excellent essays; uneven compliance |
 
-The durable move is the same pattern we keep returning to for **production AI agents**: **let the model propose; let the runtime adjudicate.**
+A more reliable division of labor is to let the model propose a finding and let the runtime—the software that runs the workflow—check whether required records exist.
 
-In plain English: before a strong confidence label (“probable,” “confirmed,” “root cause”) is allowed into the operator-facing summary, the submit path must **fail closed** on missing homework — reject the claim unless the checks pass. The prose can still be eloquent. Eloquence is no longer the pass condition.
+In plain English: before a strong confidence label (“probable,” “confirmed,” “root cause”) is allowed into the operator-facing summary, the submit path must **fail closed** on missing homework — reject the claim unless the checks pass. Passing the structural check still does not establish causality; reviewers must examine the evidence and its fit to the claim.
 
 Related: [production-ready AI agents need receipts, not fluent demos](/blog/demo-to-deploy-receipts/). Receipts are how you prove a prior step happened. Sermons are how you ask nicely.
 
 ---
 
-## Why One Validation Error at a Time Makes AI Agents Thrash
+## Return independent validation errors together
 
-Here is a second failure mode that looks like “the model is dumb” when it is really **your error UX** for tool-calling agents.
+A validator can cause avoidable retries when it reveals one missing field per submission.
 
 Gate returns: “missing field A.”
 
@@ -89,7 +77,7 @@ Gate returns: “temporal story conflicts with recovery.”
 
 Tokens burn. Latency climbs. The pager is still open. The investigator learns the wrong lesson: *compliance is a maze.*
 
-Independent gaps should arrive **in one rejection**. That is not a nicety — it is an orchestration tax cut. A single retry that lists every unfinished dig beats a polite drip of surprises.
+Independent gaps should arrive **in one rejection**. Returning all independent errors at once can reduce repeated model calls. Some later checks may still depend on fields fixed in an earlier round.
 
 Illustrative shape only — not a product schema:
 
@@ -105,7 +93,7 @@ Illustrative shape only — not a product schema:
 ]}
 ```
 
-This generalizes beyond incident RCA. Any tool-facing agent that validates multi-field payloads will thrash if your validators exit on the first smell. Batch the rejection. Steer once. Move on.
+This also applies to other tools that validate multi-field submissions: report independent missing fields together rather than one per attempt.
 
 ---
 
@@ -117,12 +105,12 @@ A practical ladder of belief — the *idea*, not a schema:
 
 1. **Observation** — we saw a signal in a window.
 2. **Candidate** — two things happened near each other; mechanism is still a guess.
-3. **Grounded** — we joined the story to a shared entity or a checkable causal receipt, not just a coincidence.
-4. **Ruled out** — we looked; this branch lost.
+3. **Grounded** — records connect the proposed explanation to the affected entity and time; a shared identifier alone may still not prove cause.
+4. **Ruled out** — a specific check contradicted this explanation within the data available.
 
-The production bug is promoting (2) with the language of (3). Co-occurrence is cheap. Mechanism is expensive. If your agent cannot tell those apart in the write-up, humans stop trusting the channel — and trust is what keeps the agent in the on-call loop.
+The mistake is describing (2) with the language of (3). Two events occurring together are not proof of a mechanism. Make that distinction explicit in the write-up so responders can decide what to test next.
 
-Time is a falsifier too. A mechanism that *should persist without remediation* cannot lead a confident RCA after the symptom self-clears — unless evidence explains why the mechanism ended. Stories that ignore recovery are fiction with timestamps.
+Time can challenge a theory. If the proposed mechanism would persist without intervention but the symptom cleared, the report needs an explanation for that mismatch. Recovery alone does not identify the cause.
 
 ---
 
@@ -132,12 +120,16 @@ Another trap: treating “no open branches” as a free pass to skip the discipl
 
 There are two different states:
 
-- **Affirmed empty** — we ran the competing-hypothesis checklist; none remain open; here is proof we did that work.
+- **Checked, none remaining** — the recorded competing-explanation checks found no open branches within their scope.
 - **Never asked** — we jumped to a favorite story and never opened the checklist.
 
 Those must not look the same to the runtime. Otherwise every confident agent invents a shortcut: omit the boring bookkeeping, claim the room was already clean.
 
 You can debate *how* to prove prior work. The product requirement is simpler: **strong RCA claims require evidence that the curiosity step ran**, including when the answer was “nothing left open.”
+
+![RCA submission flow showing required digs, batched validation gaps, and the difference between skipped and checked-empty curiosity.](/assets/images/diagrams/july-investigation/curiosity-before-confidence.svg)
+
+*Diagram: The arrows move a candidate claim through required digs and a submission gate; the lower path distinguishes a skipped checklist from an affirmatively checked-empty one before allowing stronger wording.*
 
 ---
 
@@ -173,15 +165,15 @@ We also left some engineering trade-offs for later — short-lived proofs of pri
 
 **2. Batch the rejection.** Multi-field tool contracts should return every independent gap once. Serial surprises train thrash.
 
-**3. Grade the sentence.** Observation, coincidence, and mechanism are different claims. Force the write-up to match the grade you earned.
+**3. Grade each claim.** An observation, two events occurring together, and a supported mechanism require different wording.
 
 **4. Let time veto bad stories.** Persistent mechanisms and self-clearing symptoms are in tension until evidence reconciles them.
 
-**5. Affirmed empty ≠ skipped.** “Nothing open” must be the *result* of a check, not the *absence* of one.
+**5. Checked and empty is not skipped.** “Nothing open” must follow recorded checks within their stated scope, not merely an omitted list.
 
-**6. Prompts scale poorly under incident load.** Put the hard stop at the boundary where promotion happens — before confidence reaches the human.
+**6. Do not rely only on instructions.** Check required records when a claim is submitted, before it is presented with a strong confidence label.
 
-**7. Operator trust is the SLO.** Wrong-but-confident RCA burns it faster than slow-but-honest unknown.
+**7. Review operator impact.** Track whether conclusions help responders, including false confidence and honest unresolved cases; no single score captures trust.
 
 ---
 
@@ -193,7 +185,7 @@ We also left some engineering trade-offs for later — short-lived proofs of pri
 - [AI incident triage for SREs — what actually helps on-call](/blog/ai-incident-triage-sre/)
 - Topic hubs: [AI agents for SRE](/topics/ai-agents-sre/) · [multi-stage AI agent workflows](/topics/ai-agent-workflows/)
 
-Confidence is cheap. Curiosity is the scarce resource. Ship the second first — or operators will ship the mute button.
+Before a confident RCA is published, make the attempted checks and remaining gaps visible. That gives a responder a basis to accept, challenge, or defer the conclusion.
 
 ---
 
@@ -202,4 +194,4 @@ Confidence is cheap. Curiosity is the scarce resource. Ship the second first —
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> **StackGen is building AI-assisted incident triage.** Our offering aims to help teams run diagnostics and draft RCA reports; operators should still verify consequential findings. See [ai.stackgen.com](https://ai.stackgen.com).

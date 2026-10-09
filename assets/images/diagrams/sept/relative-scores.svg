@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 560" role="img" aria-labelledby="title desc">
+<title id="title">A better relative score can be a slower run</title><desc id="desc">In the two benchmark waves the same xAI hierarchical seat improved its cohort-relative efficiency from 1.375 to 1.584, while elapsed time rose from 141 to 262 seconds. Each wave has its own median.</desc>
+<defs><marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 L10 5 L0 10 Z" fill="#345b76"/></marker></defs>
+<rect width="1100" height="560" fill="#fffdf9"/>
+<g fill="#15283c" font-family="Arial,Helvetica,sans-serif" text-anchor="middle"><text x="550" y="45" font-size="27" font-weight="700">A better relative score can be a slower run</text><text x="300" y="103" font-size="21" font-weight="700">Wave 1 • its own median</text><text x="800" y="103" font-size="21" font-weight="700">Wave 2 • new median</text></g>
+<rect x="75" y="132" width="450" height="285" rx="14" fill="#e8f1fb" stroke="#53697c" stroke-width="2"/>
+<rect x="575" y="132" width="450" height="285" rx="14" fill="#e2f4ec" stroke="#53697c" stroke-width="2"/>
+<g font-family="Arial,Helvetica,sans-serif" text-anchor="middle" fill="#253d53">
+<text x="300" y="183" font-size="19">xAI hierarchical seat</text><text x="800" y="183" font-size="19">same seat, slower cohort</text>
+<text x="300" y="244" font-size="26" font-weight="700">141s wall</text><text x="800" y="244" font-size="26" font-weight="700">262s wall</text>
+<text x="300" y="310" font-size="26" font-weight="700">1.375 relative eff</text><text x="800" y="310" font-size="26" font-weight="700">1.584 relative eff</text>
+<text x="300" y="375" font-size="18">ranked first within this wave</text><text x="800" y="375" font-size="18">ranked first within this wave</text>
+<text x="550" y="485" font-size="18" font-weight="700">Relative efficiency rose, but the operator waited 121s longer.</text>
+<text x="550" y="531" font-size="17">Publish the absolute wall and token use beside the cohort-normalized score.</text>
+</g><path d="M525 269 L569 269" fill="none" stroke="#345b76" stroke-width="2.5" marker-end="url(#arr)"/>
+</svg>

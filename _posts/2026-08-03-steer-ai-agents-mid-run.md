@@ -10,7 +10,7 @@ tags: [ai-agents, hitl, human-in-the-loop, feedback, orchestration, ux, aiden, p
 permalink: /blog/steer-ai-agents-mid-run/
 ---
 
-How do you **steer an AI agent mid-run** without restarting the whole investigation?
+**Mid-run steering** means adding an operator correction to an active AI agent—a model-driven process that can call tools—before it finishes. How can that correction affect the next step without discarding valid investigation work?
 
 An incident agent was investigating the wrong environment.
 
@@ -20,13 +20,13 @@ Nothing crashed. The correction was stored. The audit trail even showed that it 
 
 It simply reached the agent too late to matter.
 
-**Mid-run AI agent steering is not a messaging feature. It is a control-flow problem.** Getting it right means rethinking the easy answer first.
+Receiving feedback is not enough. The runtime must deliver it at a safe execution boundary and check that the final response addresses it.
 
 ---
 
 ## Why Restarting Is the Wrong Default
 
-The easy answer is to cancel the run and start again with a better prompt.
+One option is to cancel the run and start again with a corrected prompt.
 
 That wastes:
 
@@ -37,13 +37,17 @@ That wastes:
 
 It also forces the human to restate the task, copy useful findings, and explain which parts should survive.
 
-A good steer means: **keep the valid work, change the direction from here.**
+For a correction within the same task, the aim is to **keep valid work and change direction from here**. If the earlier work is no longer trustworthy, restart instead.
 
 That is different from both a new task and an approval decision. Approval asks whether a proposed action may proceed. Steering changes how the current task should proceed.
 
 ---
 
 ## The First Failure: Feedback Waiting at the Wrong Boundary
+
+![Operator feedback enters after an in-flight tool call and before the next reasoning turn; empty turns are rejected](/assets/images/diagrams/aug-runtime/mid-run-steering.svg)
+
+*Apply a correction at the next safe checkpoint, not after the run ends.*
 
 Long-running agents have natural checkpoints: after a model turn, after a tool result, before the next planning step, and before completion.
 
@@ -181,7 +185,7 @@ That distinction prevents one immortal conversation from accumulating unrelated 
 5. **Use two receipts.** Confirm receipt quickly, then show how the final result changed.
 6. **Keep policy in force.** Steering changes direction, not authority.
 
-Human-in-the-loop should mean more than approving a button at the end. Sometimes the safest and most useful human action is turning the wheel while the agent is still driving.
+Human-in-the-loop should mean more than approving a button at the end. A correction is useful only if the agent can apply it before completion and the policy checks still hold.
 
 ---
 
@@ -199,4 +203,4 @@ Human-in-the-loop should mean more than approving a button at the end. Sometimes
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

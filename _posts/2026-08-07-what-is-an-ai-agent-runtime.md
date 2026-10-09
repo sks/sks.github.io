@@ -18,11 +18,9 @@ faqs:
     answer: "Unbounded tool loops, invisible sessions, context that blows the bill, and no place to put mid-run human steer or fail-closed gates."
 ---
 
-An **AI agent runtime** is the process that owns the agent loop. It plans the next step, calls tools, adds useful results to context, and decides when to stop. Everything else sits around that loop. That includes the chat UI, control plane, agent configuration, and notification channels.
+An **AI agent runtime** is the software that owns an AI agent’s execution loop: the repeated model decision, optional tool call, and result-handling step. It plans the next step, calls tools, adds useful results to context, and decides when to stop. Everything else sits around that loop. That includes the chat UI, control plane, agent configuration, and notification channels.
 
-If you cannot point at the loop, you do not have a runtime. You have a wrapper around a model call.
-
-Searchers looking for an **agent runtime** or **AI agent runtime** usually want this distinction first: who owns the loop, and what sits around it.
+A one-call wrapper can still be useful; it does not need the controls required by a long-running tool loop. The distinction is about which component owns execution and its limits.
 
 This post gives the short definition and the practical boundaries. The longer engineering story explains [why we split runtime from platform](/blog/aiden-platform/) and [why we chose Go](/blog/why-go/). If you want a reading path, use the [Go agent runtime starter pack](/start/go-runtime/) or browse the [runtime topic hub](/topics/ai-agent-runtime/). Related SRE path: [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/).
 
@@ -30,7 +28,7 @@ This post gives the short definition and the practical boundaries. The longer en
 
 ## Why the distinction matters
 
-The word “agent” now covers almost anything that sends a prompt to a model. That loose usage is harmless in a demo. It becomes expensive in production.
+“Agent” can refer to a one-call wrapper or a long-running tool user. Those designs have different failure modes in production.
 
 A wrapper can send a request and print a response. A runtime must own what happens between the two. It needs to know which action is next, whether that action is allowed, and how much work remains. It also needs to preserve enough state for an operator to understand the run later.
 
@@ -56,6 +54,10 @@ Not a tool library. Tool definitions tell a model what it may call. They do not 
 
 ## What a runtime owns
 
+![Platform policy supplies a runtime that limits model and tool turns, manages context, and returns a trace or human intervention](/assets/images/diagrams/aug-runtime/agent-runtime-boundary.svg)
+
+*The runtime, not the model, owns tool execution and stopping rules.*
+
 A useful runtime has a small but demanding job. It turns an open-ended model conversation into bounded execution. At a high level, it owns:
 
 - The current run state and the next action.
@@ -73,15 +75,15 @@ This is why a runtime is more than an SDK callback loop. The difficult part is n
 
 ## What production forces you to care about
 
-When the loop runs for real on-call work, five failure modes show up fast:
+When the loop runs for real on-call work, five failure modes to check are:
 
 1. Unbounded tools — the agent keeps calling until the bill or the pager burns. Budgets and stop conditions belong in the runtime. Wishful prompting is not a control.
-2. Invisible sessions — traditional APM can show green while the agent digs the wrong well. You need session-level traces and tool attribution. See [observability for agents](/blog/observability/).
+2. Invisible sessions — application performance monitoring (APM) can show healthy service metrics while the agent queries the wrong source. You need session-level traces and tool attribution. See [observability for agents](/blog/observability/).
 3. Context collapse — every tool dump stays in the window until quality and cost fall over. Memory and compaction are runtime problems. The [tokenomics guide](/blog/maintaining-tokenomics-with-aiden/) explains why.
 4. No mid-run steer — operators need to add constraints without restarting from zero. A production loop must support [steering during a run](/blog/steer-ai-agents-mid-run/).
 5. Fluent wrong endings — the loop must refuse confidence when evidence is missing. This matters in SRE root cause analysis. The [hypothesis ladder](/blog/hypothesis-ladder/) and [evidence-first investigation guide](/blog/curiosity-before-confidence/) cover that failure mode.
 
-None of those are solved by renaming a chat wrapper an “agent runtime platform.”
+A product label alone does not provide those controls.
 
 ---
 
@@ -130,4 +132,4 @@ Acknowledgments. The StackGen [Aiden](/about/) team ships the platform layer aro
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

@@ -18,26 +18,18 @@ faqs:
   - question: "Does subagent tool history inflate the orchestrator prompt?"
     answer: "Not on our plan run. Worker peaked ~9k prompt tokens; create_agent returned a 292-byte JSON summary; coordinator next peak stayed ~9.4k — same order of magnitude, not stacked transcripts."
   - question: "When did planning beat reacting on AppWorld?"
-    answer: "On two directional tasks after harness fixes: movie SMS 87.5%→100% (answer filter on worker goal) and Venmo refund 0%→85.7% (mutations vs no mutations). n=2 — not a universal routing rule."
+    answer: "On two directional task pairs after harness fixes: movie SMS 87.5%→100% (strict pass only for plan) and Venmo refund 0%→85.7% (both fail strict). n=2 — not a universal routing rule."
 ---
 
-After the [harness stops lying](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/), **planning can beat one-shot react** on some errands — and still cost more total tokens. Measure **peak and total**; measure **pass@1 and pass@3**.
+After fixing [unattended-test failures](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/), we saw a planner help on some AppWorld tasks while using more total model input. A planner coordinates a worker with a narrower goal; a single agent keeps all available actions in one conversation. Measure both the largest prompt in any one model call and the sum across calls before choosing.
 
-Same [AppWorld](https://github.com/stonybrooknlp/appworld) stack rebuild (453 MCP tools) through the **Aiden agent runtime**. Part of the [AI agent evaluation series](/blog/fair-agent-evals-before-performance/). Earlier posts often showed plan **losing** to a direct MCP baseline when orchestration blocked before domain bugs mattered. Fresh series after fixes: **plan won quality** on the first two cohort tasks — with caveats below. A follow-up smoke cohort ([simple vs plan: when to use which](/blog/simple-vs-plan-when-to-use-which/)) shows plan is not universal: simple ties on hard action tasks and wins on speed/cost.
+Same [AppWorld](https://github.com/stonybrooknlp/appworld) stack rebuild (453 MCP tools) through the **Aiden agent runtime**. Part of the [AI agent evaluation series](/blog/fair-agent-evals-before-performance/). Earlier posts often showed plan **losing** to a direct MCP baseline when orchestration blocked before domain bugs mattered. In two task pairs after fixes, plan improved partial scores, but only one of those two passed the strict judge check. A follow-up smoke cohort ([simple vs plan: when to use which](/blog/simple-vs-plan-when-to-use-which/)) shows plan is not universal: simple ties on hard action tasks and wins on speed/cost.
 
 ---
 
-## TL;DR
+## What the two task pairs show
 
-- **Movie SMS:** single-agent **87.5%** (wrong answer string) → plan **100%** (Fincher filter on worker goal).
-- **Venmo refund:** single-agent **0%** (no DB writes) → plan **85.7%** (mutations OK, wording failed).
-- **MCP catalog tax:** simple peak **~17k** on one seat; plan coordinator **~9.4k**; plan **total ~2×** and **4 LLM calls**.
-- **Handoff is a summary boundary:** 9k worker transcript → **292-byte** JSON — not a memory leak.
-- **pass@3 ≠ pass@1:** 3/4 tasks passed within three attempts; teach pass@k vs pass^k — we report pass@1/pass@3 only.
-
-### Explain like I'm five
-
-One kid grabbed every toy and guessed the answer. The other got a sticky note: “only the Fincher movies.” Same room; better homework — but the whole crew still burned more paper.
+For the movie-list SMS, the single agent reached the apps but received **87.5%** because its answer included the wrong titles; the planner’s focused worker produced the David Fincher subset and passed at **100%**. For a Venmo refund, the single agent made no database writes (**0%**), while the planner made the changes but still failed the final answer check (**85.7%**). That is one strict pass across these two plan runs, not a broad “planner wins” result. On the movie task, the planner’s largest coordinator prompt was **9,398 tokens** against **17,268** for simple mode, but it used roughly **32,000 total prompt tokens** across four model calls against **17,268** in one. Narrower context per call can cost more overall.
 
 ---
 
@@ -59,7 +51,7 @@ Judge: AppWorld `/evaluate`. Numbers from series run 2026-08-24; **n = 2 tasks f
 | Movie list SMS to Christopher (`29caf6f_1`) | **87.5%** fail — `assert answers match` | **100%** pass | Worker goal filtered to David Fincher titles (`Fight Club`, `The Social Network`) |
 | Venmo refund (`60d0b5b_1`) | **0%** fail — no DB mutations | **85.7%** fail — `assert answers match` only | Plan moved failure from **no mutation** to **answer wording** |
 
-**Movie SMS:** simple reached tools and SMS but the final answer string missed the judge. Score **87.5%** vs **100%** — not “simple never tried.” Delegation was a **quality boundary**: a focused worker goal beat one-shot react.
+**Movie SMS:** simple reached tools and SMS but the final answer string missed the judge. Score **87.5%** vs **100%** — not “simple never tried.” In this run, the focused worker goal coincided with a correct answer; one pair cannot isolate the goal wording as the cause.
 
 **Venmo:** simple loop-trapped with **no** `venmo.Transaction` writes (**0%**). Plan’s worker performed Venmo ops (**85.7%**) — only wording failed. That is progress you can tune; 0% is not.
 
@@ -68,6 +60,10 @@ When comparing modes, record **failure class** next to pass% — an 85.7% with m
 ---
 
 ## MCP tool catalog tax: peak ≠ total
+
+![Comparison of one agent with a full MCP catalog versus a coordinator and focused worker, showing peak prompt and total prompts as separate measurements](/assets/images/diagrams/aug-evals/mcp-tool-tax-modes.svg)
+
+*Caption: Simple keeps the catalog in one seat; plan narrows each seat but can spend more across all calls.*
 
 With **453 MCP tools** after stack rebuild, simple mode pays the full catalog in one prompt. Plan’s coordinator sees meta-tools (`search_tools`, `create_agent`, …) plus compact handoffs.
 
@@ -107,11 +103,11 @@ On plan **movie SMS** (`29caf6f_1`), it held:
 
 Worker did phone login, note read, SMS send — full tool JSON stayed on the worker branch. Log shape: `sub-agent result stored in working memory` … `length:292`.
 
-**Verdict:** isolation held for tool transcripts. No access_token blobs or search pages stacked onto the orchestrator.
+**Observation in this trace:** the handoff was short, and the coordinator prompt did not grow by the size of the worker transcript. That does not prove every handoff excludes sensitive data; inspect and redact summaries as well.
 
 **Caveat:** structured notes in the handoff and episodic importance scoring (~4.9k prompt) are **orchestration tax**, not a leak. Separate them in traces.
 
-**Harness assert:** `handoff_bytes << worker_peak_prompt_tokens`. If coordinator peak jumps by roughly the worker transcript size, you have a leak — fix the boundary, not the model.
+**Harness check:** keep the handoff small and inspect its contents. Comparing handoff bytes with worker prompt tokens is only a rough warning sign because bytes and tokens are different units; a growing coordinator prompt calls for trace inspection, not an automatic leak verdict.
 
 Contrast with [zero-tool delegation theater](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/): a clean summary of *no work* is still a failure.
 
@@ -132,10 +128,10 @@ Four-task plan cohort: **3/4 pass@3**, not **3/4 pass@1**.
 
 | Metric | Question it answers | Behavior as k grows |
 |--------|---------------------|---------------------|
-| **pass@k** | Can the agent *ever* succeed within k tries? | Rises toward 1 |
-| **pass^k** | Does it succeed *every* time across k tries? | Falls toward 0 |
+| **pass@k** | Did at least one of k observed attempts pass? | Cannot decrease as attempts are added to the same set |
+| **pass^k** | Did all k observed attempts pass? | Cannot increase as attempts are added to the same set |
 
-**This cohort:** we report **pass@1** and **pass@3** only. We did **not** measure pass^k (all three attempts must pass). A single green trace is a flake detector, not a release badge.
+**This cohort:** we report **pass@1** and **pass@3** only. We did **not** measure pass^k (all three attempts must pass). A single successful trace is not a reliability estimate or a release gate.
 
 See [τ-bench on pass^k](https://qaskills.sh/blog/tau-bench-agent-evaluation-guide-2026) and [Anthropic on agent evals](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) for the general reliability framing.
 

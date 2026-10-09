@@ -17,31 +17,33 @@ faqs:
     answer: "The same prompt across six model×orchestration seats produced a 2× wall spread and a hierarchical correctness collapse on one reasoning preview. The runtime’s gates mattered as much as the model name."
 ---
 
-You already know the [definition of an AI agent runtime](/blog/what-is-an-ai-agent-runtime/). This page is the **buyer’s receipt**: what to demand on a golden prompt before you trust a demo.
+An [AI agent runtime](/blog/what-is-an-ai-agent-runtime/) is the software that routes model calls, executes tools, retains results, and decides when a run can finish. A vendor demo may show the final answer without exposing those controls. Before buying, test the runtime on a repeatable task using your tool permissions and data limits.
 
 ---
 
-## TL;DR
+## What the evidence supports
 
-A runtime is not “LLM + tools.” It is the **loop with teeth**: budgets, typed tool outcomes, completion gates, and an eval you can re-run.
+The model is only one component. Ask how the runtime classifies a failed tool call, limits repeated calls, handles truncated results, and blocks an answer that omits required evidence. A completion gate is a host-side check of those requirements; it is not proof that a hypothesis is true.
 
-Before you buy (or build), demand numbers on **your** golden prompt. Ours: six seats, one alert+logs job ([scorecard](/blog/six-model-mode-combos-alert-logs-bench/)). Wall ranged ~**141–285s** in wave 1; one **hierarchical ReAcTree** seat scored **0.69** correctness until host gates improved the close.
+Use a "golden prompt"—a fixed test request with a grading rubric—and run it against the same tool environment. In our six-seat alert-and-logs test ([scorecard](/blog/six-model-mode-combos-alert-logs-bench/)), elapsed time ranged ~**141–285s** in wave 1; one **hierarchical ReAcTree** run scored **0.69** on the checklist. A later run with host gates scored higher, but the single trials and changed tool contention do not isolate the gates’ effect.
 
 Shapes: **single-agent ReAct loop** vs **hierarchical ReAcTree planner** ([what is ReAcTree?](/blog/what-is-reactree/) · [PDF](https://arxiv.org/pdf/2511.02424)).
 
-### Explain like I'm five
-
-Buying a race car from a brochure is silly. Ask them to drive your driveway, time the lap, and show what happens when a tire is flat.
 
 ---
 
 ## Five questions for any runtime vendor
 
-1. **Show the loop.** Where do tool results re-enter context? What gets truncated and how do you page it back?  
-2. **Show failure classes.** Does empty PromQL look like success?  
-3. **Show the done button.** Completion gate, not “model said finished.”  
+![A runtime surrounds model tool use with bounds, policy and a trace](/assets/images/diagrams/sept/runtime-checklist.svg)
+
+*Ask a runtime vendor to show execution controls as well as a successful answer.*
+
+
+1. **Show the loop.** Inspect a trace from model request to tool call to returned observation. If a result is truncated, what identifier and paging method retrieve the missing bytes?
+2. **Show failure classes.** A PromQL metric query with no matching series differs from a backend error or a truncated result. Does the tool envelope distinguish all three?
+3. **Show the done condition.** Can the host reject a final answer that skipped the log comparison, while allowing an explicit Unknown when Loki is unavailable?
 4. **Show single-agent and hierarchical** on the same prompt ([merits](/blog/plan-mode-merits-demerits-observability/)).  
-5. **Show absolute wall/tokens/cost/correctness** — not a relative badge ([efficiency trap](/blog/relative-efficiency-scores-lie/)).
+5. **Show absolute elapsed seconds, tokens, priced cost where available, and correctness** beside any cohort-relative score ([efficiency trap](/blog/relative-efficiency-scores-lie/)).
 
 ---
 
@@ -61,4 +63,4 @@ Buying a race car from a brochure is silly. Ask them to drive your driveway, tim
 - Prompt-only “don’t retry” instructions  
 - Multi-agent diagrams with no orchestration tax numbers  
 
-If you are building in Go, start from [why Go](/blog/why-go/) and the [runtime definition](/blog/what-is-an-ai-agent-runtime/). If you are buying, bring this page to the sales call and ask them to drive your driveway.
+If you are building in Go, see [why Go](/blog/why-go/) and the [runtime definition](/blog/what-is-an-ai-agent-runtime/). If you are buying, ask for the raw trace and a rerun after one deliberately failed query. A runtime that handles normal results but silently treats tool failure as no data needs a different contract, not just a more fluent model.

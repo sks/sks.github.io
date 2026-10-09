@@ -23,24 +23,17 @@ faqs:
 
 Once **fair agent evals** prove both modes can reach the same domain tools ([part one](/blog/fair-agent-evals-before-performance/)), the next question is cost: what does the planner path charge for coordination?
 
-We call that **agent orchestration tax** — extra tokens, model iterations, and spawn overhead on top of the AppWorld APIs themselves. This is not a dunk on multi-agent systems. It is the invoice you should see on the receipt before you default to a tree.
+We call the added coordination **agent orchestration tax**: tokens (pieces of text processed by the model), model turns, and worker launches spent managing delegation in addition to calling the AppWorld apps. It can be worth paying when work branches, but it needs to be measured rather than assumed.
 
-Dataset: [AppWorld](https://github.com/stonybrooknlp/appworld) via MCP, judged by their evaluate harness. Observability: [Langfuse](https://langfuse.com/) aggregates. Runtime: Aiden.
+Dataset: [AppWorld](https://github.com/stonybrooknlp/appworld), a simulated-app benchmark, with tools exposed through Model Context Protocol (MCP) and judged by its own evaluate test runner. Observability: [Langfuse](https://langfuse.com/) aggregates. Runtime: Aiden.
 
 ![Agent orchestration tax: coordination layers stacked on domain work](/assets/images/og-appworld-orchestration-tax.jpg)
 
 ---
 
-## TL;DR
+## A concrete cost comparison
 
-- **Fair ten-task cohort** (tool-access parity **10/10**): planner **~1.6×** tokens, **~3.0×** iterations, **~1.5×** domain tool calls vs single-agent.
-- **Orchestration tax is the story here** — extra coordination cost is measurable once fairness holds; benchmark TGC on this slice is a separate tuning problem.
-- **Delegation-fit five-task cohort:** token ratio **~1.3×**, iterations **~2.6×**, head-to-head **ties 5/5** (both modes hit the same benchmark ceiling).
-- **Monday-morning rule:** pay the tax when branching is the job; refuse it when one loop already owns an ID-chained mutation chain.
-
-### Explain like I'm five
-
-Hiring a project manager for a one-person errand adds meetings. Sometimes you need the manager because three teams work at once. Sometimes you just needed one person to walk to the store.
+On ten paired tasks where both paths could reach the same app tools, the planner averaged **217,252 tokens** and **43.8 model turns**, versus **132,374 tokens** and **14.6 turns** for one agent. Both failed the strict AppWorld completion check on this small slice. More turns here show a coordination cost, not an improvement in finished tasks. If the job is “create a record, then use its new ID to update it,” one agent can keep that sequence together; parallel independent reads may justify separate workers. Test that tradeoff on your own tasks.
 
 ---
 
@@ -69,7 +62,7 @@ After the handoff fix, every pair passed tool-access fairness.
 | Avg worker spawns | **0** | **~3.2** | — |
 | Strict AppWorld TGC | not cleared (10/10) | not cleared (10/10) | tie on benchmark bar |
 
-**Outcomes texture:** single-agent often hit iteration budget **without** calling evaluate (`ran_without_judge` on 7/10). Planner paths reached evaluate more often — useful for diagnosing harness gaps, not a routing win by itself.
+**Outcomes texture:** single-agent often hit its maximum number of turns **without** reaching evaluate (`ran_without_judge` on 7/10). Planner paths reached evaluate more often — useful for diagnosing harness gaps, not a routing win by itself.
 
 Same findings class as our [SRE agent benchmarks](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/) post: coordination multiplies iterations; it does not automatically deepen inspection.
 
@@ -94,7 +87,7 @@ We then picked five tasks that *should* favor delegate-then-synthesize: cross-ap
 | Strict AppWorld TGC | not cleared (5/5) | not cleared (5/5) |
 | Fairness | — | **2 / 5** pairs OK (infra tool drop on spawn) |
 
-On “planner-shaped” work, **neither mode cleared strict TGC** on this five-task slice. Higher `pass_percentage` in logs (often **~50%**) did not imply `success: true` — a recurring theme for [part three](/blog/ai-agent-eval-failure-modes/).
+On “planner-shaped” work, **neither mode cleared strict TGC** on this five-task slice; only 2/5 pairs passed the tool-access check, so the ratios here are diagnostic, not a fair ranking. Higher `pass_percentage` in logs (often **~50%**) did not imply `success: true` — a recurring theme for [part three](/blog/ai-agent-eval-failure-modes/).
 
 ---
 
@@ -118,7 +111,7 @@ For **LLM token budget** discipline when tax is unavoidable, see [maintaining to
 - **Unequal caps:** planner runs allowed slightly higher iteration and worker node limits in this harness.
 - **Missing telemetry:** some planner rows showed **zero** Langfuse tokens while SSE showed tool activity — exclude or flag before averaging.
 - **Historical 168-task Grok pairing** from an earlier era is a **separate prior** — different model and harness; do not overlay these OpenAI-family runs.
-- **We did not benchmark LangGraph, CrewAI, or AutoGen** — we measured one runtime on AppWorld; the tax *shape* should transfer.
+- **We did not benchmark LangGraph, CrewAI, or AutoGen** — we measured one runtime on AppWorld. Other systems may also pay for coordination, but the size and even direction of the cost need their own measurements.
 
 ---
 

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 570" role="img" aria-labelledby="title desc">
+<title id="title">Bifurcate grading into code facts and prose judgment</title>
+<desc id="desc">The task and deliverable are assessed on two paths. Code compares exact facts to CI, Git, or files. A separate, human-calibrated model judge interprets usefulness, groundedness, and gaps using a rubric and evidence. Both findings are reconciled with an explicit unknown state for missing evidence.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 10 5 0 10Z" fill="#255d78"/></marker></defs>
+<rect width="960" height="570" fill="#fffdf8"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+  <text x="480" y="48" text-anchor="middle" font-size="26" font-weight="700">Split the rubric by what can be verified</text>
+  <rect x="330" y="82" width="300" height="81" rx="12" fill="#e4efff" stroke="#456077" stroke-width="2"/>
+  <text x="480" y="114" text-anchor="middle" font-size="20" font-weight="700">Task + deliverable</text>
+  <text x="480" y="141" text-anchor="middle" font-size="17">claims, files, logs, trace</text>
+  <path d="M480 166V189H247V211 M480 189H713V211" fill="none" stroke="#255d78" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="48" y="218" width="399" height="220" rx="14" fill="#dff0e8" stroke="#416657" stroke-width="2"/>
+  <text x="75" y="254" font-size="21" font-weight="700">CODE · exact facts</text>
+  <text x="75" y="291" font-size="18">Compare with source of record:</text>
+  <text x="75" y="323" font-size="18">• number ↔ CI coverage</text>
+  <text x="75" y="353" font-size="18">• path / SHA ↔ Git or files</text>
+  <text x="75" y="383" font-size="18">• delegation ↔ logs</text>
+  <text x="75" y="416" font-size="16" fill="#344960">Existence and matches do not prove quality.</text>
+  <rect x="513" y="218" width="399" height="220" rx="14" fill="#fff0d1" stroke="#80602f" stroke-width="2"/>
+  <text x="540" y="254" font-size="21" font-weight="700">JUDGE · interpreted prose</text>
+  <text x="540" y="291" font-size="18">Read task, rubric and evidence:</text>
+  <text x="540" y="323" font-size="18">• useful and grounded?</text>
+  <text x="540" y="353" font-size="18">• jargon explained in context?</text>
+  <text x="540" y="383" font-size="18">• gaps acknowledged?</text>
+  <text x="540" y="416" font-size="16" fill="#344960">Compare decisions with human examples.</text>
+  <path d="M247 442V458L321 478 M713 442V458L639 478" fill="none" stroke="#255d78" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="250" y="481" width="460" height="70" rx="12" fill="#f6e9ed" stroke="#755162" stroke-width="2"/>
+  <text x="480" y="509" text-anchor="middle" font-size="21" font-weight="700">Reconcile and save findings</text>
+  <text x="480" y="536" text-anchor="middle" font-size="17">Pass, fail, or unknown if evidence is missing</text>
+</g>
+</svg>

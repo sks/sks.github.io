@@ -19,9 +19,9 @@ faqs:
     answer: "Read Aiden the Hard Way for trigger semantics (issue opened vs card drag vs PR merge) and receipt/HITL lessons — then come back here for the module."
 ---
 
-Your GitHub Project board fills up with cards like “make nav better” and nothing else. Someone still has to turn that wish into acceptance criteria, look at the repo, write a plan, and maybe open a PR. That unpaid product work is exactly what [Aiden the Hard Way](/blog/from-vague-github-issue-to-pr-with-aiden/) taught an agent to do — by wiring every `sg_*` resource by hand.
+A GitHub Project card such as “make nav better” still needs acceptance criteria, repository research, a plan, and perhaps a pull request (PR). [Aiden the Hard Way](/blog/from-vague-github-issue-to-pr-with-aiden/) wires the `sg_*` resources for that workflow individually.
 
-This post is the **shortcut**. Same outcome, one OpenTofu module.
+This post uses an OpenTofu module to assemble the same workflow. The module reduces configuration work; it does not verify the resulting issue comments or PR for you.
 
 - **Hard Way** = understand every piece: provider, models, integration, agent, workflow, webhooks, schedule.
 - **Easy Way** = consume a public module that already assembled those pieces for you.
@@ -38,13 +38,17 @@ You’ll get the most out of this if:
 - You’re comfortable running `tofu apply` and pasting a webhook URL into GitHub settings.
 - You want an agent that leaves **evidence on the issue**, not a black box that says “trust me.”
 
-You do **not** need to write a system prompt, design a workflow, or understand webhook plumbing. The module ships all of that.
+The module supplies a persona, workflow, and webhook configuration. You still need to set credentials, verify event delivery, and review permissions.
 
 ---
 
 ## What to expect
 
-By the end of this post you will have applied one module and wired three GitHub gestures. Then, for **one** Project item per run, Aiden does this on its own:
+![One configured module routes GitHub gestures into Specify, Research, Plan, optional review PR, and a post-merge Done receipt](/assets/images/diagrams/aug-runtime/github-issue-to-pr.svg)
+
+*The module simplifies wiring, not the human review and merge boundary.*
+
+By the end of this post you will have applied one module and wired three GitHub gestures. For **one** Project item per run, the intended workflow is:
 
 1. Vague issue → **Specify** comment + Status hop  
 2. **Research** against the repo (via GitHub APIs)  
@@ -52,7 +56,7 @@ By the end of this post you will have applied one module and wired three GitHub 
 4. Optional **review PR** (the agent opens it; **you** merge)  
 5. **Done** — comment + Status hop after you merge
 
-Every step lands as a comment on the **issue**, so the board tells the whole story. Merge stays a human decision, on purpose.
+Stage comments on the **issue** provide a review trail; check the board status and PR independently. Merge stays a human decision, on purpose.
 
 Want to see it before you build it? We dogfooded this on this very blog: [navigation polish PR #31](https://github.com/sks/sks.github.io/pull/31).
 
@@ -63,7 +67,7 @@ The rest of this post walks you through it in order: **prerequisites → first d
 ## Prerequisites
 
 - An active **Aiden / StackGen** tenant (URL + token + org/project id)
-- GitHub PAT with `repo`, `read:project`, and `project`
+- GitHub personal access token (PAT) with `repo`, `read:project`, and `project`
 - OpenTofu ≥ 1.5 and StackGen provider `>= 0.1.33, != 0.1.35, < 0.2.0`
 - A Projects v2 board with columns that match Specify / Research / Plan / Done (names are configurable)
 
@@ -78,7 +82,7 @@ There are two ways to consume the module. Choose one:
 | Trying it for the first time, nothing shared yet | **First-time demo** (below) | Creates the OpenAI + GitHub vaults for you |
 | Already running Aiden with shared models + a GitHub integration | **Production** | Reuses what you have — no duplicate vaults |
 
-Start with the demo. Move to the production shape once it works.
+The demo creates additional vaults; the production variant reuses existing integrations. Choose based on your tenant configuration.
 
 ---
 
@@ -170,7 +174,7 @@ Board rules (same as Hard Way):
 
 | Do | Don’t |
 | -- | ----- |
-| One issue per run | Boil the ocean |
+| One issue per run | Process the whole board at once |
 | Comment evidence on the issue | Chat-only findings |
 | One Status hop per stage | Silent jumps to Done |
 | Human merge | Auto-merge |
@@ -185,7 +189,7 @@ Reach for [Aiden the Hard Way](/blog/from-vague-github-issue-to-pr-with-aiden/) 
 - A comment body is literally `@file.md` (`-F` vs `-f`)
 - You want to know *why* the module creates a schedule and two webhooks
 
-The module hides assembly. It does not hide product judgment.
+The module hides resource assembly, not the need to verify access, triggers, comments, and merge controls.
 
 ---
 
@@ -202,4 +206,4 @@ The module hides assembly. It does not hide product judgment.
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

@@ -19,17 +19,17 @@ faqs:
     answer: "No. A single run is a receipt you can argue about, not a reliability claim. Repeat the same incident, and treat missing registry models as skipped seats, not losses."
 ---
 
-We almost ranked models off a CI job that reran nine times.
+A continuous-integration (CI) evaluation reran nine times, but each attempt drew a different injected incident. Ranking those attempts by wall time would conflate model behavior with fault difficulty.
 
 Each attempt investigated a **different** injected fault. The cheap seat got a two-call image-tag miss. The expensive Correct seat got a long database-auth miss. The combined efficiency number printed **100** for four different Correct runs because they all finished under the token and wall allowances.
 
-That is not a model comparison. That is nine different exams with the model name taped on afterward.
+Those results are useful as canaries for whether the investigator can handle varied faults. They are not a controlled head-to-head model comparison.
 
-So we froze **one** incident, bound **one** registered model at a time onto the live investigator, and ran the same fault again. This post is that ranking, and why the first table lied.
+For a narrower comparison, we fixed the checkout incident and bound **one registered model at a time** to the investigator. The resulting table ranks single runs on that fault, not model reliability across outages.
 
 ---
 
-## TL;DR
+## What the evidence supports
 
 - Sampling a random incident per rerun mixes **fault difficulty** with **model skill**. Rank only after everyone sits the same case.
 - On a checkout outage caused by a payment feature flag set to fail every charge, **claude-fable-5** was the efficient Correct close (113s, 26k new input tokens, 6 model turns / 16 tools, judge 100).
@@ -37,9 +37,6 @@ So we froze **one** incident, bound **one** registered model at a time onto the 
 - A combined “session efficiency” score saturated at 100 for every Correct seat under about 1M billed tokens and 3 minutes. Do not use it to pick a model. See [session efficiency should not beat accuracy](/blog/session-efficiency-should-not-beat-accuracy/) and [relative efficiency scores lie](/blog/relative-efficiency-scores-lie/).
 - One model from the earlier random wave was not in the org registry that day. Skip the seat. Do not invent a substitute.
 
-### Explain like I'm five
-
-You cannot say who is the fastest reader if one kid gets a picture book and another gets a tax form. Give everyone the same page, then time them.
 
 ---
 
@@ -58,13 +55,18 @@ The pipeline drew **one random incident per attempt**. One of those attempts hap
 | 8 | claude-fable-5 | wrong container image | Correct, 2 model turns |
 | 4 / 9 | mixed / none | admission webhook / capacity | failed or blocked |
 
-If you sort that table by wall time or dollars, **Fable 5 wins because the exam was easy**, and **Opus 4.8 looks like the production pick** because it drew a short probe story. I said as much when we first ranked those attempts. The honest next step is a rematch on one prompt, the same rule I already used for [six model×orchestration combos](/blog/six-model-mode-combos-alert-logs-bench/).
+Sorting that table by wall time or dollars would favor the easy wrong-image case for **Fable 5** and the short probe case for **Opus 4.8**. We initially read those attempts as a ranking, but the incident varied along with the model. The next step is a rematch on one prompt, the same rule I already used for [six model×orchestration combos](/blog/six-model-mode-combos-alert-logs-bench/).
 
 A green pipeline still is not a Correct diagnosis. Same lesson as [canary-first investigate evals](/blog/canary-first-sre-investigate-consistency-evals/): the job can finish while the write-up is wrong.
 
 ---
 
 ## How we made the comparison fair
+
+![The same saved incident and conditions feed each candidate](/assets/images/diagrams/sept/model-benchmark.svg)
+
+*Compare quality, wall time and cost using the same incident rather than unrelated reruns.*
+
 
 Hold the **fault** constant. Change only the **model** on the investigator.
 
@@ -78,7 +80,7 @@ That is the same fairness instinct as [do not compare planner vs single-agent un
 
 We did **not** compare orchestration shapes here. This is a model-on-investigator comparison, not planner tax. Keep those axes separate ([wall / tools / tokens scorecard](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/)).
 
-One trial per model. Directional. Steal the method.
+One trial per model means these numbers are directional. The same fault reduces one source of variation, but live tools and model sampling can still vary; repeated runs and tool-condition logs are needed before changing a default.
 
 ---
 
@@ -98,7 +100,7 @@ Prompt-resend totals (the number many dashboards still call “billed”) follow
 
 Dollar totals were a **priced subset**. Fable 5.1 had no priced model-call cost at all. So dollars do not pick the winner. That is the same “publish absolutes, label the composite” rule as the [RCA eval checklist](/blog/how-to-evaluate-ai-agent-root-cause-analysis/).
 
-New input is the expensive read. Cached input is “we sent the prompt again and the provider credited cache.” Do not quote billed alone. I have watched 700k billed hide a 100k new-read session.
+"New input" counts prompt tokens not served from cache; "cached input" counts repeated prompt material eligible for provider cache treatment. Cache discounts and prices depend on the provider and contract, so token columns alone do not establish dollar cost. Prompt-resend totals can be much larger than new reads: I have seen a 700k sent-token session with only 100k new-read tokens. Report both; neither alone is a complete dollar figure.
 
 ---
 
@@ -124,9 +126,9 @@ score = 100 × Correct × clip(token_budget / tokens, floor, 1) × clip(time_bud
 
 On a single incident, Correct is 0 or 1. If both ratios **cap at 1**, every Correct run under budget prints **100**. Fable 5, Fable 5.1, and Opus 5 all sat there. Sonnet 5 dropped only because wall was 243s. Opus 4.8 printed 0 because it was wrong.
 
-That is the honest shape from [session efficiency should not beat accuracy](/blog/session-efficiency-should-not-beat-accuracy/) (no bonus above Correct). It still cannot rank four Correct seats against each other. Use wall, new input tokens, and tool churn for that. [AgentSLABench](https://arxiv.org/abs/2608.00805) makes the same point: efficiency-adjusted success cannot exceed success.
+That is the capped shape from [session efficiency should not beat accuracy](/blog/session-efficiency-should-not-beat-accuracy/) (no bonus above Correct). It still cannot rank four Correct seats against each other. Use wall, new input tokens, and tool churn for that. [AgentSLABench](https://arxiv.org/abs/2608.00805) makes the same point: efficiency-adjusted success cannot exceed success.
 
-Relative scores that normalize to the **cohort median** are a second lie ([relative efficiency scores lie](/blog/relative-efficiency-scores-lie/)). We did not use those here. Absolutes only.
+Scores normalized to the **cohort median** answer a different question and cannot compare runs across cohorts without a fixed baseline ([relative efficiency scores lie](/blog/relative-efficiency-scores-lie/)). This frozen-incident table therefore shows absolute resources and judge outcomes instead.
 
 ---
 
@@ -140,7 +142,7 @@ Relative scores that normalize to the **cohort median** are a second lie ([relat
 6. **Read the write-up.** Two Correct scores can still differ in honesty ([how we grade RCA](/blog/how-to-evaluate-ai-agent-root-cause-analysis/), [what reasoning models write](/blog/what-reasoning-models-write-on-triage/)).
 7. **One trial is a receipt, not a default.** Repeat the same incident before you change production bindings. Consistency is a different gate ([canary first](/blog/canary-first-sre-investigate-consistency-evals/)).
 
-If you only remember one thing from the random wave: **Fable 5 on a wrong-image case is not Fable 5 on a checkout outage.** We measured the second one. It still won. That is a stronger claim than the first table, and still a single trial.
+The random-wave wrong-image case and the frozen checkout outage are different tests. On the checkout case, Fable 5 was the fastest Correct seat in one trial. That supports a targeted follow-up evaluation, not an across-incident production default.
 
 ---
 
@@ -160,4 +162,4 @@ If you only remember one thing from the random wave: **Fable 5 on a wrong-image 
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> **StackGen** works on AI-assisted incident triage and diagnostic workflows. See [ai.stackgen.com](https://ai.stackgen.com) for the offering.

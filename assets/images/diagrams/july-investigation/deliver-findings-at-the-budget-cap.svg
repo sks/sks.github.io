@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="450" viewBox="0 0 960 450" role="img" aria-labelledby="diagram-title diagram-desc">
+<title id="diagram-title">Preserve findings at the execution ceiling</title>
+<desc id="diagram-desc">Tool outcomes accumulate as notes. Near a budget ceiling reserve a final account if possible; if a timeout prevents that call, return saved notes with a partial status.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9 Z" fill="#315779"/></marker></defs>
+<rect width="960" height="450" fill="#ffffff"/>
+<text x="40" y="49" font-size="27" font-weight="bold" fill="#13243a">Preserve findings at the execution ceiling</text>
+<text x="40" y="79" font-size="16" font-weight="normal" fill="#40576e">Investigation path</text>
+<rect x="40" y="112" width="260" height="137" rx="14" fill="#f6f9fe" stroke="#38608c" stroke-width="2"/>
+<text x="57" y="143" font-size="18" font-weight="bold" fill="#13243a">Collect outcomes</text>
+<text x="57" y="176" font-size="16" font-weight="normal" fill="#13243a">Save observations and</text>
+<text x="57" y="200" font-size="16" font-weight="normal" fill="#13243a">tool-call results</text>
+<rect x="350" y="112" width="260" height="137" rx="14" fill="#f6f9fe" stroke="#38608c" stroke-width="2"/>
+<text x="367" y="143" font-size="18" font-weight="bold" fill="#13243a">Approaching cap</text>
+<text x="367" y="176" font-size="16" font-weight="normal" fill="#13243a">Reserve a final call</text>
+<text x="367" y="200" font-size="16" font-weight="normal" fill="#13243a">when budget permits</text>
+<rect x="660" y="112" width="260" height="137" rx="14" fill="#f6f9fe" stroke="#38608c" stroke-width="2"/>
+<text x="677" y="143" font-size="18" font-weight="bold" fill="#13243a">Final account</text>
+<text x="677" y="176" font-size="16" font-weight="normal" fill="#13243a">Separate findings, theory,</text>
+<text x="677" y="200" font-size="16" font-weight="normal" fill="#13243a">unknowns and checks</text>
+<path d="M305 181 H338 M615 181 H648" stroke="#315779" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<path d="M480 253 V279 H247 V294" stroke="#315779" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<path d="M790 253 V279 H713 V294" stroke="#315779" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<rect x="40" y="305" width="414" height="112" rx="14" fill="#fff7ec" stroke="#8a550a" stroke-width="2"/>
+<text x="57" y="336" font-size="18" font-weight="bold" fill="#13243a">Hard timeout / no call</text>
+<text x="57" y="369" font-size="16" font-weight="normal" fill="#13243a">Recover incremental notes,</text>
+<text x="57" y="393" font-size="16" font-weight="normal" fill="#13243a">not a blank apology</text>
+<rect x="506" y="305" width="414" height="112" rx="14" fill="#edf8f5" stroke="#17665b" stroke-width="2"/>
+<text x="523" y="336" font-size="18" font-weight="bold" fill="#13243a">Partial deliverable</text>
+<text x="523" y="369" font-size="16" font-weight="normal" fill="#13243a">Attach tool record and caveat;</text>
+<text x="523" y="393" font-size="16" font-weight="normal" fill="#13243a">do not claim verified cause</text>
+<path d="M461 362 H494" stroke="#315779" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+</svg>

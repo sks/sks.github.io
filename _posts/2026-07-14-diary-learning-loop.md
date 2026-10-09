@@ -10,11 +10,11 @@ tags: [ai-agents, learning, governance, workflows, policy, hitl, aiden, producti
 permalink: /blog/diary-learning-loop/
 ---
 
-Most **AI agent learning** claims in production are really **retrieving** more text into the next prompt. That is recall. It is not improvement.
+Retrieving a past note can help an agent remember an incident, but it does not change the workflow that produced a recurring mistake. By “learning loop” here, I mean using reviewed operational history to propose a change to that workflow or its policy.
 
-Improvement looks different in production: the system notices that the same denial fires every Thursday, that your SRE team always runs the same three workflows in order, or that a cost spike always trails the same integration path — and then it **proposes a change** a human can approve, dismiss, or edit. Without that loop, your digital employees are scripts with better vocabularies.
+For example, repeated denials, a recurring sequence of site reliability engineering (SRE) steps, or an expensive integration could lead to a proposed change. These are patterns to investigate, not proof that a change will help. A human should be able to approve, edit, or dismiss the proposal.
 
-We built that loop into Aiden as a **diary → insight → human gate → materialize** path for [AI agent workflows](/topics/ai-agent-workflows/). This post is the problem narrative and the operating principles — not a blueprint. If you only remember one line: **learning without an approval gate is just unsupervised self-modification with better branding.**
+In Aiden, our agent platform, we use a **diary → insight → human gate → materialize** path for [agent workflows](/topics/ai-agent-workflows/). “Materialize” means creating a reviewable draft, not changing production automatically. This is an operating model rather than a measured claim that proposals have already reduced incidents.
 
 ---
 
@@ -24,13 +24,13 @@ Enterprise agent platforms generate history whether you want it or not: audits, 
 
 Then the digests sit unread.
 
-Three patterns show up over and over:
+Three patterns the loop is intended to surface:
 
-1. **Recurring failure with no owner.** Same error class every maintenance window. The diary records it. Nobody promotes a guardrail.
-2. **Repetitive human choreography.** Discovery → triage → root-cause analysis (RCA) always in that order. Humans already invented a composite playbook; the platform never proposes one.
+1. **Recurring failure with no owner.** The same error class appears every maintenance window. The diary records it. Nobody promotes a guardrail.
+2. **Repetitive human choreography.** Discovery → triage → root-cause analysis (RCA) often in that order. Humans already invented a composite playbook; the platform never proposes one.
 3. **Policy friction that looks like security.** Legitimate team requests bounce for weeks. Operators work around with tickets. The policy never gets a refinement proposal.
 
-If your “learning system” only appends memories for retrieval, you get better coloring books. You do not get fewer repeated incidents or cleaner policies.
+Adding memories may improve recall, but reducing repeated incidents or policy friction would require approved changes and outcome measurement.
 
 ---
 
@@ -67,7 +67,7 @@ Daily digests + feedback + cost signals
 
 ### What the human actually reviews
 
-Engineers think in payloads. A proposal on the gate should look closer to this than to a marketing paragraph (illustrative shape — not a product schema):
+A reviewer needs a concrete record. This is an illustrative proposal, not a product schema or an observed count:
 
 ```json
 {
@@ -82,17 +82,17 @@ Engineers think in payloads. A proposal on the gate should look closer to this t
 }
 ```
 
-If the artifact cannot be approved, edited, or rejected in one sitting, it is not a proposal — it is a homework assignment.
+A concise proposal makes review more feasible; complex policy changes may still need longer analysis.
 
-### The human gate: GitOps beats ClickOps theater
+### Reviewing changes through Git or a decision queue
 
 How you approve matters as much as *that* you approve.
 
-- **Prefer GitOps when the change is code.** Policies, workflow definitions, and persona prompts that already live in git should materialize as a **draft pull request** (or equivalent reviewable diff) against that repo. Same review bar as Rego, runbooks, or Terraform — AI does not get a side door.
-- **ClickOps is fine for triage, not for production policy.** A dashboard “Approve / Dismiss” queue works for WIP and noise control. Shipping deny-rule text with only a button click — and no reviewable artifact — is how you recreate shadow IT with nicer UX.
-- **Rubber-stamping a weekly firehose** recreates the [human-in-the-loop (HITL) paradox](/blog/hitl-paradox/). Cap WIP; shorter queues get real read time.
+- **Prefer GitOps—reviewed changes in Git—when the change is code.** Policies, workflow definitions, and persona prompts that already live in git should materialize as a **draft pull request** (or equivalent reviewable diff) against that repo. Same review bar as Rego, runbooks, or Terraform — AI does not get a side door.
+- **A dashboard approval can help triage proposals, but is not enough by itself for production policy.** A dashboard “Approve / Dismiss” queue works for WIP and noise control. Shipping deny-rule text with only a button click — and no reviewable artifact — is how you recreate shadow IT with nicer UX.
+- **A weekly queue too large to review carefully** recreates the [human-in-the-loop (HITL) paradox](/blog/hitl-paradox/). Cap WIP; shorter queues get real read time.
 
-Four hard rules we would not trade away:
+Four boundaries we use:
 
 1. **Proposals are not deployments.** An insight is a draft change with a rationale and evidence pointers — not a silent rewrite of production policy.
 2. **Humans stay on the gate.** Approve, dismiss, or send back — via PR review or an equivalent durable decision.
@@ -100,6 +100,10 @@ Four hard rules we would not trade away:
 4. **Materialization is typed.** “Create a composite workflow,” “refine a deny rule,” “adjust a persona,” “cache a missing fact” — vague “improve the agent” tickets do not count.
 
 This is the same spirit as [evidence-gated RCA](/blog/evidence-gated-multiplane-rca/): **prove with artifacts, then narrate.** Here the artifact is a reviewable proposal, not an investigation key.
+
+![Diary learning loop from bounded digest and evaluator proposals through a human approval decision to typed draft changes and normal review](/assets/images/diagrams/july-workflows/diary-human-approved-loop.svg)
+
+*The evaluator proposes only; approval and ordinary change review precede any production change.*
 
 ---
 
@@ -116,19 +120,19 @@ Keep the taxonomy small enough that operators recognize themselves:
 | Missing integration or skill | Capability request with examples — not a silent tool invent |
 | One path always over budget | Routing or stage simplification proposal with cost receipts |
 
-You do not need six micro-agents to emit these shapes. You need a summarizer that is honest about sampling limits, an evaluator that stays inside this taxonomy, and a materializer that creates **drafts humans can still reject**.
+These categories do not require a large agent hierarchy. A bounded summarizer, an evaluator restricted to the taxonomy, and a draft-producing materializer are enough to test the approach. Whether the proposals help still depends on review quality and measured outcomes.
 
 ---
 
-## Failure Modes (So You Do Not Trust the Loop Blindly)
+## Failure modes to monitor
 
 ### Confident nonsense proposals
 
-Models love inventing “obvious” workflows from thin diaries. Treat confidence as a UI hint, not a deployment switch. Prefer high-evidence, low-drama first.
+A sparse diary can support an overconfident workflow proposal. Treat confidence as a user-interface hint, not permission to deploy; inspect the cited runs and favor narrow, reversible changes first.
 
 ### Learning that bypasses governance
 
-Auto-merge of policy text is how you get a digital employee that rewrote its own job description. Tie materialization to the same review culture you use for Rego, runbooks, or Terraform.
+Automatically merging policy text would let the agent change its operating rules without normal review. Tie materialization to the same review culture you use for Rego, runbooks, or Terraform.
 
 ### Digest bloat that eats the week
 
@@ -136,29 +140,29 @@ If the offline path stuffs every audit event into the prompt, you will relearn [
 
 ### Queue theater
 
-A backlog of 200 “proposed” insights with zero reviews is worse than no loop — it creates the illusion of continuous improvement. Cap WIP. Prefer a short weekly review ritual.
+A backlog of 200 “proposed” insights with no reviews would create an appearance of improvement without any reviewed change. Cap WIP. Prefer a short weekly review ritual.
 
 ---
 
-## Why This Is a Human-Progress Story (Not Automation Cosplay)
+## What approval is meant to protect
 
-“AI for human progress” is easy to parody as vibe marketing. The operational version is simpler:
+The intended benefits depend on proposals being reviewed and adopted, not merely generated:
 
-- **Less burnout:** agents stop making the same Thursday mistake after a human approves a guardrail once.
-- **Fairer policies:** friction surfaces as proposals instead of tribal workarounds available only to people who know who to Slack.
+- **Less repeat work:** a reviewed guardrail may prevent the same mistake from recurring; check subsequent runs to see whether it did.
+- **More visible policy friction:** recurring denials become reviewable proposals instead of informal workarounds.
 - **Accountable learning:** operators own the accept/dismiss decision; the platform does not silently rewrite the org.
 
-Governed digital employees earn trust the same way human teammates do: they **propose**, they show receipts, and someone with skin in the game says yes.
+The approval record should show the evidence, the decision, and the resulting draft. That makes later corrections possible.
 
 ---
 
-## What to Build Monday (Any Stack)
+## A small pilot
 
 1. Write one honest weekly digest for your highest-traffic agent — even if it is a scripted rollup.
 2. Add a single human-reviewed queue (spreadsheet is fine) with columns: pattern, evidence, proposed change, decision.
 3. Materialize only approved rows — as draft policy, draft workflow, **or a draft PR** when those artifacts already live in git.
 4. Measure *reviewed* insights per week, not *generated* insights per week.
-5. Kill anything that auto-applies policy without the same review bar as your other prod changes.
+5. Disable automatic policy application unless it meets the same review bar as other production changes.
 
 Related: [Pensieve memory](/blog/pensieve-memory/) is about forgetting and curated recall. This post is about **organizational learning** — changing the system the agent runs in, not only the vectors it searches.
 
@@ -179,4 +183,4 @@ Related: [Pensieve memory](/blog/pensieve-memory/) is about forgetting and curat
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> We build incident-triage agents at StackGen; the SRE offering is at [ai.stackgen.com](https://ai.stackgen.com).

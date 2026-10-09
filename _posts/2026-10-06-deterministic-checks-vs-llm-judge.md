@@ -4,108 +4,63 @@ title: "Deterministic Checks vs LLM-as-a-Judge for Agent Evals"
 date: 2026-10-06 19:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 74
-description: "Use deterministic graders for facts a model must not invent. Use LLM-as-a-judge for tone and usefulness. Never plant tool scripts in the prompt."
+description: "Check verifiable facts with code and use a calibrated model judge for questions that require reading and interpretation."
 image: /assets/images/og-default.png
 tags: [ai-agents, evaluation, llm-as-judge, testing, reliability, verification, aiden]
 permalink: /blog/deterministic-checks-vs-llm-judge/
 faqs:
   - question: "What is the difference between deterministic and model-based graders?"
-    answer: "Deterministic graders are code: file exists, number matches, path is real. Model-based graders (LLM-as-a-judge) score meaning: was the write-up useful, honest, complete."
+    answer: "A deterministic grader runs a defined code check, such as comparing a number with CI. A model-based grader reads an answer and judges meaning, such as usefulness or whether gaps are explained. Code can be wrong too if its rule is wrong."
   - question: "When should you use an LLM-as-a-judge?"
-    answer: "When the check needs interpretation. Prefer code whenever the answer can be decided without reading for meaning. Calibrate the judge against humans before you trust it in a gate."
+    answer: "Use one when a criterion requires interpretation. Prefer code for checkable facts and compare the judge with human-labeled examples before using it as a gate."
   - question: "Should the prompt name the tools the agent must call?"
-    answer: "No. Write the task as a user job. Count delegated work from logs and artifacts, not from phrases you planted for a regex to find."
+    answer: "Not just to satisfy a grader. Describe the user task and inspect logs or artifacts for required behavior; name a tool when its use really is part of the task or policy."
   - question: "What if a jargon filter fails a good answer?"
-    answer: "Facts stay in the checker. Tone stays with the judge. Do not ban directory names that appear in a real diff. Do not add a second agent to scrub a path the first one got right."
+    answer: "Check whether it matched a legitimate citation, such as a directory in a diff. Keep verifiable facts in code and let a calibrated judge consider whether terminology is unexplained in context."
 ---
 
-A word filter banned an internal product name and then failed a good coverage note because that name was a directory in the diff. The note was correct. The grader was wrong. That is the whole argument for splitting **deterministic checks** from an **LLM-as-a-judge**.
+A filter intended to discourage unexplained internal terminology rejected a correct coverage note: the disallowed product name was also part of a directory path in the diff. The note cited the path accurately. The code check could not tell a citation from needless jargon.
 
-[Arize's guide](https://arize.com/blog/how-to-build-llm-as-a-judge-evaluators-that-hold-up-in-production/) draws the line cleanly: code when interpretation is unnecessary, a judge when meaning matters. We learned it the hard way.
-
----
-
-## TL;DR
-
-- Write the task the way a person asks for the work. Do not script tool order.
-- Code locks facts a model must not invent: marker, commit, percent, real path, brief size.
-- The judge scores whether the investigation write-up was useful and honest.
-- Do not assert the same thing in the prompt, a regex, and the judge.
-- An empty trace is an export gap when the logs already show the work.
-
-### Explain like I'm five
-
-The teacher checks whether you wrote the date and signed your name. A different teacher reads the essay and says if it makes sense. Do not make the essay grader also check whether you used the word "stapler."
+A *deterministic grader* is a program with an explicit rule; it gives the same result for the same inputs. An *LLM-as-a-judge* is a model asked to assess a response against a rubric. [Arize's guide](https://arize.com/blog/how-to-build-llm-as-a-judge-evaluators-that-hold-up-in-production/) explains why interpretation belongs in a judge and checkable facts are often better handled by code. Neither type is automatically correct: a faulty regex is repeatably wrong, and a model judge can be inconsistent.
 
 ---
 
-## Grade the deliverable, not the script
+![Route exact facts to code checks and open-ended qualities to a reviewer](/assets/images/diagrams/oct/deterministic-judge.svg)
 
-Outcome-first instructions. Tell the agent what to finish and what not to invent. Do not hand it a scripted checklist of private tool names.
+*A code check can match a number; judging whether prose helps a reader needs a rubric and review.*
 
-Recursive "at least two delegations" is checked from logs after the fact, never planted in the prompt as a string the model must print. Under truncated logs, presence of a proof artifact (a short handoff receipt in the log) can be enough for the existence check. The judge still reads the write-up.
+## Start with the deliverable
 
-That is [Ham Vocke's](https://martinfowler.com/articles/practical-test-pyramid.html) arrange / act / assert on **observable behavior**, not call order. Agents find valid paths you did not anticipate. [Anthropic](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) says the same: grade what the agent produced, not the route it took, unless the route itself is policy.
+Tell the agent what the user needs and which claims it must substantiate. Avoid listing private calls only so a grader can search for their names in the answer. If the requirement is “delegate at least twice,” count delegated work in logs after the run rather than requiring the agent to print a phrase. With truncated logs, a short handoff receipt in the log can establish that a delegation occurred, but it cannot prove the quality of the work; inspect the deliverable too.
 
----
+This is [Ham Vocke's](https://martinfowler.com/articles/practical-test-pyramid.html) arrange / act / assert applied to observable behavior. [Anthropic](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) similarly recommends evaluating outcomes rather than a particular route unless the route is a requirement. If policy really specifies a call or approval, test that route explicitly.
 
-## Checklist: what belongs where
+## Divide the rubric by what can be verified
 
-| Check | Deterministic | LLM-as-a-judge |
-|-------|---------------|----------------|
-| Deliverable file exists | Yes | No |
-| Coverage percent matches CI | Yes | No |
-| Head SHA is real | Yes | No |
-| Changed path appears in the diff | Yes | No |
-| Brief stayed under a size bound | Yes | No |
-| Write-up is useful and grounded | No | Yes |
-| Tone dumps unexplained jargon | Prefer judge | Yes |
-| Honesty about gaps | Soft regex optional | Yes |
+| Criterion | Check | Caveat |
+|-----------|-------|--------|
+| Deliverable file exists; brief fits a size limit | Code | Existence and length do not establish quality |
+| Coverage percentage, commit SHA, changed path | Code against CI, Git, or the diff | Use the appropriate source of record, not a value copied from the answer |
+| Delegation occurred | Logs or a handoff artifact | A missing or truncated log limits what can be concluded |
+| Write-up is useful and grounded | Model judge, with human review of samples | Give the judge the task and underlying evidence |
+| Jargon is unexplained; gaps are acknowledged | Model judge, possibly narrow code hints | A word's presence alone does not establish misuse or honesty |
 
-Decision rule: **if code can decide it, do not call a judge.**
+In the false failure above, the fix was to limit code to verifiable facts, exempt quoted paths in backticks from the jargon filter, and let the judge decide whether language outside citations needs explanation. Adding another agent to rewrite a correct path would have hidden the grader's mistake.
 
----
+## Give the judge enough context, and allow uncertainty
 
-## The false fail we hit
+Provide the original ask and files written, then logs and the trace export where relevant. The judge needs to distinguish a supported claim from a plausible one. For numbers, code should compare the answer with the system of record; the judge is not that system. This complements [evidence-based verification](/blog/evidence-based-verification/).
 
-A case-insensitive ban on an internal architecture name failed a coverage comment because the summary cited a real path that contained that substring. The fix was not a second scrubbing agent. The fix was:
+An empty trace does not automatically mean the agent did nothing. If logs show the work, the empty export may be a correlation or export problem. Conversely, if the rubric specifically requires a trace, missing it is a failure of that criterion. Make that distinction in the result rather than treating missing evidence as proof of success or failure on every dimension. Let a judge say “not enough evidence” when it cannot decide.
 
-1. Lock only facts a model must not invent.
-2. Mask citations in backticks so quoted paths can appear.
-3. Leave tone and "is this unexplained?" to the judge.
+## A small implementation plan
 
-Facts in the checker. Voice in the judge. That split also keeps you from duplicating assertions across three layers, which Vocke warns against.
+1. Mark each rubric item “code can verify” or “requires interpretation,” and identify its evidence source.
+2. Remove planted tool names from one task; check actual calls in logs if calls are a requirement.
+3. Compare the judge with a small set of human-labeled examples (for example, ten to start), including borderline answers. Expand and revise before making a consequential gate; ten are not a guarantee of reliability.
+4. Preserve an unknown outcome for missing evidence and inspect disagreements or regex false failures.
+5. Save the ask, artifact, evidence, and grade for later comparisons using [frozen exams](/blog/same-problem-sre-model-bake-off/).
 
----
-
-## What the judge should see
-
-In priority order:
-
-1. The ask (instruction)
-2. The files written
-3. The logs
-4. The trace export
-
-An empty trace is not an automatic fail when logs already prove the dig. Empty traces are correlation or export gaps. Fail on missing traces only when the rubric requires them.
-
-This pairs with [evidence-based verification](/blog/evidence-based-verification/): systems of record vote before narration. The judge is not the system of record for numbers. Code is.
-
----
-
-## What to do Monday
-
-1. Split your current rubric into "code can decide" and "needs interpretation."
-2. Delete planted tool names from one instruction. Put the count check in logs instead.
-3. Calibrate the judge on ten human-labeled examples before using it as a gate.
-4. Give the judge an "Unknown / not enough evidence" exit so it does not invent fails.
-5. When a regex false-fails, ask whether the check belonged in the judge all along.
-6. Store ask + artifact + grade together for rematches ([frozen exams](/blog/same-problem-sre-model-bake-off/)).
-
----
-
-## Takeaway
-
-**Deterministic graders** catch lies about numbers and files. An **LLM-as-a-judge** catches weak writing. Mixing them into one vibe score is how you punish a correct path citation and bless a fluent fiction.
+A precise code check can catch a wrong number quickly. A model judge can read whether a correct number was explained well. The useful split depends on the criterion and the available evidence, not on whether one kind of grader seems more sophisticated.
 
 Previous: [The AI Agent Testing Pyramid](/blog/ai-agent-testing-pyramid/). Next: [How to Test AI Agent Loops Without Overfitting](/blog/test-ai-agent-loops-with-evidence/).

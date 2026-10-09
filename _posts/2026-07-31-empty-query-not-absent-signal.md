@@ -4,62 +4,59 @@ title: "Empty PromQL ≠ Missing Data: Fix AI SRE Scope Blindness"
 date: 2026-07-31 10:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 9
-description: "Grafana no_data often means wrong labels, range, or system—not missing signal. Fallback digs AI SRE agents must run before declaring absent data."
+description: "A Grafana no_data result applies to one query and time range; check labels, time, data source, and tool failures before reporting missing evidence."
 image: /assets/images/og-default.png
 tags: [ai-agents, sre, observability, rca, incident-response, grafana]
 permalink: /blog/empty-query-not-absent-signal/
 faqs:
   - question: "Does an empty PromQL result mean the signal is absent?"
-    answer: "No. Empty or failed queries are often mis-scoped labels, wrong time range, wrong observability system, or a transient gateway fault. Exhaust fallback digs before declaring not_enough_information."
+    answer: "No. A query can miss data because of labels, time range, data source, or a tool failure. Check relevant alternatives before reporting not_enough_information, and record what remained unavailable."
   - question: "What is scope blindness in AI SRE agents?"
     answer: "Treating one failed or empty query on one observability system (metrics vs logs vs warehouse) as proof that data does not exist, then filling the gap with a fluent storm narrative."
   - question: "What fallback digs should AI SRE agents run after empty Grafana results?"
-    answer: "Label discovery, wider time ranges than instant-only, and try another observability system — plus tenant identity resolution chains senior SREs already run manually."
+    answer: "Discover available labels, check an appropriate time range, and consult another relevant data source or customer-identity mapping when available."
 ---
 
-When Grafana returns `no_data`, your AI SRE agent’s job is not over. One empty PromQL is usually wrong scope — not proof the signal is gone.
+Grafana, a monitoring interface, may return `no_data` for a PromQL (Prometheus query language) request. An empty result means the particular query found no matching time series (measurements tracked over time) in its requested window. It does not establish that the underlying signal is absent: labels, time range, data source, or query type may be wrong. An AI agent helping site reliability engineering (SRE) responders should check those possibilities before concluding that data is unavailable.
 
 *The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
-## TL;DR
+## What an empty result actually tests
 
-- Empty query ≠ absent data
-- Live evals: humans re-querying the same labels beat agents that declared metrics “unavailable”
-- Fallback digs: discover labels, widen the time range, try another observability system
-- Skills encode senior SRE craft — that is **Rendered**, not prompt magic
-
-### Explain like I'm five
-
-If you look in the fridge for juice and open only the door for leftovers, empty shelves do not mean there is no juice. Open the other door.
+An instant query samples one moment; a range query examines a period. A narrow label filter can miss the intended tenant or host, and a different system may hold the relevant logs or mapping. In evaluations described here, human re-queries found series after an agent had called metrics unavailable. The lesson is to record which query was empty, then try justified alternatives—not to assume every empty response conceals data.
 
 ---
 
-## Northstar Platform (composite)
+## Northstar Platform (composite example)
 
-Fictional multi-tenant B2B setup:
+Fictional setup serving multiple customer tenants:
 
 - Agent queries instant PromQL with narrow labels → empty
 - Declares metrics unavailable; invents a capacity-storm story
-- Human runs the same metric with discovered labels and a 7-day range → thousands of series
-- Another observability system has zero matching hosts — that emptiness is real for *that* system, not a license to stop
+- Human runs the same measurement with discovered labels and a 7-day range → thousands of series
+- Another monitoring system returns zero matching hosts; that result applies to that system and query, not all possible sources
 
-Another composite: Kafka lag partition → tenant GUID → customer impact. Instant `count(...)` at alert time returns 0; a week-long range has the mapping. Writing `UNRESOLVED` before the fallback digs is a common miss.
+Another composite follows Kafka lag—a backlog in a message-stream partition—through a tenant GUID (unique customer identifier) to customer impact. An instant `count(...)` at alert time returns 0, but a week-long range contains the mapping. The long range helps resolve identity; it does not by itself prove current impact. Writing `UNRESOLVED` before checking that range would lose a possible link.
+
+![Empty PromQL investigation flow distinguishing narrow zero results, wider queries, blocked tools, and scope-limited conclusions.](/assets/images/diagrams/july-investigation/empty-query-not-absent-signal.svg)
+
+*Diagram: The arrows widen the scope of an empty instant query by checking labels, range, and relevant sources; the lower path distinguishes a successful zero from a blocked request and limits any identity or impact claim to what was actually measured.*
 
 ---
 
 ## If you lead an SRE team
 
-- Reject “not enough information” that skipped label and range fallback digs
+- Ask whether label discovery and an appropriate time range were tried before accepting “not enough information”
 - Compare agent digs to a human re-query on the same identity before blaming the model
-- Invest in skills that document your tenant → impact resolution chain (genericized for your stack)
+- Document the tenant-to-impact lookup steps for your environment, including their limits
 
 ## If you ship the agent platform
 
-- Treat one empty PromQL as a scope miss until label/range/other-system digs ran
-- Distinguish circuit-open / OOM tool-server failures from true empty results
-- Keep storm narratives gated behind measured evidence ([hypothesis ladder](/blog/hypothesis-ladder/))
+- Treat one empty PromQL as inconclusive; check labels, time range, and relevant other systems before reporting absence
+- Distinguish a circuit-open request (temporarily blocked after repeated failures) or an out-of-memory (OOM) tool-server failure from a successful query returning zero series
+- Require measured evidence before proposing a capacity or traffic-storm explanation ([hypothesis ladder](/blog/hypothesis-ladder/))
 
 ---
 

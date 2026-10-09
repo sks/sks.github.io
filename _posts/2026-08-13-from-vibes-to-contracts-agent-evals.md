@@ -19,25 +19,21 @@ faqs:
     answer: "No. A high mean can hide one bad trial. If on-call assist has to be trusted at 3 AM, you gate on every-trial reliability, keep the mean as a diagnostic, and treat concurrence as a separate cross-run property."
 ---
 
-For a year our agent evaluation was, if I am honest, **vibes with a rubric**. Run the agent, ask a judge model, "Is this good?" read the number, and ship. It felt rigorous because there was a score. It was not.
+Our earlier agent evaluation used one run and a model-based judge: it scored an answer against a rubric, then compared the score with a threshold. That produced a number, but not a measure of variation across repeated runs.
 
-The tell came from a live [SRE investigation consistency evaluation](/blog/canary-first-sre-investigate-consistency-evals/): the same alert, investigated three times, produced three write-ups that *agreed on the cause* — yet I still could not answer the only question that matters for on-call assist: **"Can I trust this every time, not just this time?"** Our harness had no vocabulary for that question. So we rebuilt it around the contract the industry is quietly standardizing on.
-
-This is the story of that transformation — from a single number to a real evaluation contract.
+A live [site reliability engineering (SRE) investigation consistency evaluation](/blog/canary-first-sre-investigate-consistency-evals/) made the gap visible: three investigations of the same alert produced write-ups that agreed on the proposed cause, but the old harness did not check whether each run met the same quality bar. We separated case identity, rubric, gate criteria, and graders. This is an implementation pattern, not a claim that one industry standard governs every evaluation.
 
 ---
 
-## TL;DR
+## What to check
 
-- **Scoring one output is a demo, not an eval.** We were grading beauty contests.
-- **The industry has converged on a shape.** Eval sets and cases, rubrics separate from pass/fail criteria, a stack of graders, and reliability measured across repeated trials. Google's agent kit, the model labs' eval tooling, and the open-source eval frameworks all rhyme here.
-- **Reliability is `pass^k`, not mean score.** Clear the bar on *every* trial or you have not cleared it.
+- **A single score cannot measure run-to-run reliability.** It remains useful for diagnosing an individual output.
+- **Several evaluation frameworks use separable pieces:** cases, rubrics, pass/fail criteria, and graders. We adopted those distinctions without adopting a particular SDK.
+- **Here `pass^k` means all k sampled trials pass.** It is stricter than their mean score, but a pass on three trials does not guarantee every future run will pass.
 - **Correctness ≠ consistency ≠ reliability.** Three different gates. We used to collapse them into one.
-- **Dogfood proof:** three live RCAs concurred on the mechanism, but one trial dropped its evidence quality — so consistency passed and reliability failed. That is the whole point.
+- **In one internal run:** three root cause analyses (RCAs) concurred on the mechanism, but one missed the evidence-quality bar. Agreement passed; the all-trials gate failed.
 
-### Explain like I'm five
-
-Grading a robot once is like tasting one cookie and calling the whole batch good. The real test is whether *every* cookie is good, whether three bakers describe the same recipe, and whether you wrote down what "good" means *before* you tasted.
+A repeated-trial gate asks whether each sampled run meets a specified bar. A separate agreement check asks whether runs name the same mechanism. Neither alone establishes that mechanism is true.
 
 ---
 
@@ -55,9 +51,13 @@ None of this is exotic. It is just what happens when evals grow organically inst
 
 ---
 
-## What the industry actually converged on
+## Separating the parts of an evaluation contract
 
-When I stepped back and read how the serious players structure agent evals — Google's agent development kit, the model labs' eval harnesses, the open-source evaluation frameworks — the surface details differ but the **shape is the same**. Four ideas keep recurring:
+![Stable case and rubric flow through independent criteria and graders into distinct correctness, consistency, and every-trial reliability gates](/assets/images/diagrams/aug-runtime/eval-contract-gates.svg)
+
+*Correctness, agreement, and all-trials passing are different checks.*
+
+The frameworks we considered differ in implementation, but four useful concerns recur in evaluation design:
 
 | Concept | What it holds | Why it exists |
 |---|---|---|
@@ -102,7 +102,7 @@ criteria:                          # what actually gates
 graders: [structural, model_judge, cross_run_concurrence]
 ```
 
-The escalating grader stack pairs perfectly with the [canary-first discipline](/blog/canary-first-sre-investigate-consistency-evals/): the structural grader is your canary, and you only pay the expensive judges once the cheap grader is green. Same tokenomics lesson, now baked into the contract instead of bolted on.
+The grader sequence follows [canary-first discipline](/blog/canary-first-sre-investigate-consistency-evals/): run structural checks before paying for model judges. The same model-call budgeting principle is expressed in the contract.
 
 ---
 
@@ -110,16 +110,14 @@ The escalating grader stack pairs perfectly with the [canary-first discipline](/
 
 We pointed the new contract at a live "Node Not Ready" alert on our own environment: one canary, then two judged follow-ups, then a cross-run comparison. (Lessons on running these safely live in the [consistency-eval post](/blog/canary-first-sre-investigate-consistency-evals/); this post is about what the *contract* revealed.)
 
-The result is the best advertisement for the transformation I could have asked for:
+The result illustrated why the gates need separate names:
 
-- **All three investigates concurred.** Every one landed on the same causal mechanism — a node-local reachability loss — and each was honest about which deeper trigger it could not verify. Under the old world, "they agree and scored well" would have been a clean pass.
+- **All three investigates concurred.** Every one landed on the same causal mechanism — a node-local reachability loss — and each was honest about which deeper trigger it could not verify. A single mean score could have obscured the weaker trial.
 - **Reliability failed anyway.** Two of the three trials cleared the quality bar; the third told the *same story* but dropped its evidence detail and impact quantification below the line. Concurrence: pass. `pass^k`: fail.
 
-Sit with that. The mechanism was right every time. The team would have shipped. And the reliability gate — the thing we did not even *have* before — correctly said "not yet," because a version of this that thin at 3 AM erodes trust even when the headline cause is correct.
+All three write-ups named the same mechanism, but one did not meet the specified evidence and impact criteria. Under this contract, that is a failed all-trials gate. The result is limited to this alert and these three trials.
 
-When we sat with that gap, the core takeaway became undeniable:
-
-**Finding.** A high mean and a confident consensus can coexist with a trust problem. Only an every-trial gate surfaces it. That is not a nice-to-have; that is the difference between a demo and a product.
+**Finding.** Mean quality and agreement can hide a weak individual run. An all-trials gate exposes that sampled failure, while additional cases and independent review remain necessary for broader confidence.
 
 ---
 
@@ -137,17 +135,17 @@ They fail independently. You can be correct-on-average but unreliable (our dogfo
 
 ## Lessons learned
 
-1. **A score is not an eval.** Without a contract behind it, a number just launders vibes.
-2. **Steal the shape, not the SDK.** The industry's convergence on eval sets, rubric/criteria separation, grader stacks, and `pass^k` is portable. Adopt the ideas; keep your own runtime.
-3. **Separate what good means from what blocks the build.** Rubrics evolve; gates stay stable. Fusing them freezes both.
+1. **A score needs a defined contract.** Record the case, rubric, threshold, and grader so the number is interpretable.
+2. **Adopt the structure without requiring an SDK.** The industry's convergence on eval sets, rubric/criteria separation, grader stacks, and `pass^k` is portable. Adopt the ideas; keep your own runtime.
+3. **Separate what good means from what blocks the build.** Rubrics and gates can change independently, with versioned criteria.
 4. **Give cases an identity that outlives their prompt.** Otherwise you can never compare across time.
-5. **Reliability is `pass^k`, full stop.** Mean score hides the trial that would have burned an on-call engineer.
-6. **Correctness, consistency, reliability are three gates.** Name them separately or ship the wrong thing confidently.
+5. **Use `pass^k` for an all-trials gate in this harness.** Report sample size and case coverage; a mean can still help diagnose shifts.
+6. **Correctness, consistency, reliability are separate checks.** Keep their results visible rather than merging them into one score.
 
-The homework is honest: our reliability gap is real (one thin trial in three), and the fix is upstream — preserve richer evidence through the whole grader path so a correct mechanism never arrives underdressed. But the important shift already landed. Our evals stopped asking "is this one good?" and started asking "can I trust this every time?" — which is the only question a 3 AM operator actually cares about.
+One trial in three was below the specified bar. We need to determine whether evidence was lost during investigation, synthesis, or grading before choosing a fix. Repeating the test across more alerts and trials would better characterize reliability than this single case.
 
 For tool-using benchmarks, the same contract applies at the wiring layer first: [fair agent evals](/blog/fair-agent-evals-before-performance/) before you trust mode comparisons.
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

@@ -16,115 +16,64 @@ faqs:
     answer: "Enterprise SRE and platform teams that need multi-tenant agent orchestration with policies, models, budgets, and notification channels — not a personal chatbot demo."
 ---
 
-A CLI tool for one developer is fun. Making it work for dozens of teams with different policies, models, budgets, and notification channels is engineering.
+A command-line interface (CLI) agent on one developer's machine can assume one user, one set of credentials, and a short-lived task. Those assumptions did not hold when we needed agents for multiple teams, each with its own tools, policies, model choices, budgets, and notifications.
 
-Short definition first: [What Is an AI Agent Runtime?](/blog/what-is-an-ai-agent-runtime/) — then the split below. Hub: [AI agent runtime](/topics/ai-agent-runtime/).
-
-We built our AI agent runtime as a single-binary CLI tool. It worked beautifully — for one person. Then we needed to run it for an enterprise with many teams, many agents, and strict governance requirements. That's when we built **Aiden** — the [enterprise agent platform in Go](/topics/go-ai-agents/) layer on top of the runtime.
+We kept the Go agent runtime—the loop that chooses steps and calls tools—as an embeddable library. We built **Aiden** around it to handle shared operations. For a short introduction to the loop, see [What Is an AI Agent Runtime?](/blog/what-is-an-ai-agent-runtime/) and the [AI agent runtime hub](/topics/ai-agent-runtime/).
 
 ---
 
-## What is Aiden?
+## What Aiden Adds
 
-**Aiden** is [StackGen](https://stackgen.com)'s enterprise agent orchestration platform. It lets platform and SRE teams deploy AI agents that can triage incidents, query observability tools, run diagnostics, draft RCA reports, and execute approved remediation — with the governance, audit trails, and multi-tenancy that production requires.
+**Aiden** is [StackGen](https://stackgen.com)'s platform for deploying agents used by site reliability engineering (SRE) and platform teams. Those agents can investigate incidents, query monitoring systems, run diagnostics, draft root-cause analysis (RCA) reports, and perform approved remediation. The platform manages tenants (teams sharing infrastructure but requiring separate access), policies, audit records, knowledge, and cost limits. The SRE-focused offering is at [ai.stackgen.com](https://ai.stackgen.com); more on [Go agents](/topics/go-ai-agents/).
 
-If you've only used a chat wrapper or a local coding agent, Aiden is a different category: a **platform** for running many agents across many teams, each with its own tools, policies, knowledge base, and budget caps.
+A local runtime needs to execute a task. A shared platform must also recover interrupted tasks, apply permissions consistently, and prevent one team's data or spending from affecting another team. That is the boundary we chose; it does not imply every organization needs this architecture.
 
-You can try the SRE-focused offering at [ai.stackgen.com](https://ai.stackgen.com). This post is about a single decision that shaped everything else: how we grew a single-user tool into a multi-tenant platform without rewriting it from scratch.
+## Why We Embedded the Runtime
 
----
+We considered putting the runtime behind its own network service. Instead, Aiden imports it as a library in the same process: the runtime manages the agent loop while the platform manages persistence, policies, and orchestration. This avoids a network hop, serialization boundary, and separate service version for each call between those components.
 
-## The Gap Between "Works for Me" and "Works for the Company"
+![One Aiden process contains an imported runtime for agent execution and a platform for workflows, policy, tenant scope, budgets, and audit; durable workflows support resumption.](/assets/images/diagrams/june-operations/runtime-platform-split.svg)
 
-A CLI agent running on one developer's machine gets to assume a lot: one user, one set of credentials, one machine, implicit trust, and no need to remember anything between runs.
+The split is by responsibility rather than network service: the embedded runtime handles the loop, while platform workflows support waits and recovery.
 
-None of that holds at enterprise scale. You suddenly need teams with different permissions and budgets, centralized governance over who can deploy which agent with which tools, durable state that survives crashes and restarts, and the ability to run many agents concurrently without them stepping on each other.
+The tradeoff is weaker process isolation. A severe failure in one agent's execution can affect other agents sharing that process. We use checkpointed, resumable tasks and per-agent resource limits to reduce the effect, not to provide hardware isolation. At our scale of dozens of teams, we judged a separate service's operational complexity greater than its current benefit; stronger isolation requirements would change that decision.
 
-That gap — between a tool that trusts its one user and a platform that has to assume nothing — is the whole story of what Aiden had to become.
+## Long Tasks Need Resumption
 
----
+An investigation may run for minutes, make several tool calls, and pause for human approval. A stateless HTTP request does not fit that work well. We use a durable workflow engine to checkpoint progress and resume after a worker crash or approval wait. This avoids redoing some completed steps and paying for their model calls again, though individual external actions still need safe retry behavior; a checkpoint by itself cannot guarantee exactly-once effects. A suspended workflow does not keep a worker thread blocked throughout an approval wait.
 
-## The Decision: Keep the Runtime Embeddable
+## Two Speeds of Governance
 
-The obvious approach when you need to scale a single-user tool into a multi-tenant service is to wrap it in a microservice: put an API in front of it, add a database, call it over the network from everything else.
+Some decisions can be made quickly from a static rule: is this tool denied, or does it always need approval? Other decisions depend on team, request, and context. We place the fast check close to the runtime and use a more expressive platform policy layer for context-sensitive decisions. Both have to cover every path to tool execution. The split is an implementation tradeoff: a simpler system might use one policy mechanism without unacceptable overhead.
 
-We deliberately didn't do that. The agent runtime stays a **library** that the platform imports directly, in the same process, rather than a separate service the platform talks to over the network. The platform owns persistence, policy, and orchestration; the runtime owns the actual agent loop of reasoning and calling tools. Nothing crosses a network boundary just to run an agent.
+## Tenant Boundaries
 
-**Why this mattered:** every network hop you introduce between "the thing that decides what to do" and "the thing that governs whether it's allowed to" is a place where serialization bugs, version skew, and partial failures creep in. Keeping them in the same process and the same type system eliminates an entire category of bugs before they can exist — at the cost of losing the hardware-level isolation you'd get from separate processes. We accepted that trade-off deliberately: a shared-nothing microservice architecture would have cost us months of plumbing for a scale of problem (dozens of teams, not thousands) where the isolation benefit didn't yet justify the complexity.
+Each team's documents, conversations, memories, and learned procedures need appropriate access controls. We use separate logical partitions per tenant for knowledge and memory, enforce permissions when resources are used, and apply independent budgets with hard stops. Logical partitions and access checks reduce cross-team exposure; they must be tested, since a missing tenant filter could still disclose data. We designed this into storage access rather than trying to retrofit it after teams began sharing data.
 
-The honest trade-off: because everything runs in one process, a severe enough failure in one agent's execution can, in the worst case, affect others sharing that process. We mitigate this with checkpointed, resumable execution and per-agent resource limits rather than hardware isolation — good enough for our current scale, and a decision we'd revisit if the isolation requirements changed.
+## Reviewing Output Quality
 
----
+We run an automated review of completed tasks for relevance, tool use, and completion quality. The reviewer model differs from the one that did the work and checks the task record rather than relying solely on the agent's own claim. This provides another signal, not a definitive grade: a second model can share blind spots, and operators still need to check consequential outcomes against the real system.
 
-## Durable Execution Was Non-Negotiable
+## What the Split Taught Us
 
-Agent tasks can run for minutes, involve multiple tool calls, and sometimes need to pause and wait for a human to approve something before continuing. That combination — long-running, resumable, occasionally paused on a human — ruled out treating an agent task like a normal stateless HTTP request.
-
-We built on a durable workflow engine designed for exactly this shape of problem: if a worker crashes mid-task, execution resumes from where it left off rather than starting over and re-doing (and re-paying for) work that already happened. Waiting for human approval doesn't block a worker thread indefinitely — the workflow can suspend and resume cleanly whenever the human responds, whether that's in five seconds or five hours.
-
----
-
-## Governance Needed Two Different Speeds
-
-Not every governance decision is the same shape. Some decisions are fast and static — "is this specific tool ever allowed to run without a human looking at it first?" Others are contextual and depend on who's asking, what they're asking for, and the situation at the time — "is this specific action allowed right now, for this team, under this policy?"
-
-Trying to force both into a single mechanism led to either a system too slow for the simple case or too rigid for the complex one. We ended up with two deliberately different layers: a fast, static check close to the runtime for the common case, and a slower, more expressive, context-aware policy layer at the platform level for everything that needs real judgment. Neither layer tries to do the other's job.
-
----
-
-## Tenant Isolation Is a Data-Breach Problem, Not a UX Problem
-
-Once multiple teams share infrastructure, "isolation" stops being a nice architectural property and becomes a compliance requirement. If one team's data — documents, past conversations, learned procedures — leaks into another team's agent, that's not a bug report, it's an incident.
-
-We treat every storage layer as tenant-scoped from the ground up rather than bolting isolation on after the fact: separate logical partitions per tenant for knowledge and memory, permission scoping enforced at the point of use, and independent cost budgets with hard stops per tenant. Retrofitting isolation onto a system that wasn't built with it in mind is far more painful than starting with it.
-
----
-
-## Quality Needs an Outside Opinion
-
-Once you have many agents running many tasks unattended, you need some way to know whether they're actually doing a good job — not just whether they crashed. We run every completed task through an automated review step that grades it on relevance, tool usage, and completion quality.
-
-The one rule that made this useful rather than theater: **the model doing the grading is never the same model that did the work.** An agent evaluating its own output tends to be generous with itself. An independent reviewer is a meaningfully better signal.
-
----
-
-## What We Learned
-
-1. **Embed, don't orchestrate — until the isolation math changes.** Running the agent as a library inside the platform eliminated an entire class of serialization and deployment complexity, at a cost we accepted knowingly. That trade-off is scale-dependent, not universal.
-
-2. **Durable execution is worth the learning curve.** If your tasks can run for minutes and pause for a human, you need crash recovery and resumability as first-class properties, not an afterthought bolted onto a request/response model.
-
-3. **Governance needs different speeds for different questions.** A single mechanism trying to be both fast and context-aware ends up being neither. Split the layers on purpose.
-
-4. **Tenant isolation is non-negotiable from day one.** Retrofitting it later is a much bigger project than building it in from the start.
-
-5. **Self-grading produces inflated scores.** Always use an independent reviewer for quality assessment, not the system grading its own work.
-
-6. **Name the boundary between "framework" and "platform" early.** Teams that blur the two end up with governance logic in the wrong place, and untangling that later is expensive.
-
----
+Embedding saved service plumbing while accepting a shared-process risk. Durable workflows made approval waits and worker recovery manageable, provided we also considered retries. Static and contextual policy checks serve different needs, and tenant scoping has to be enforced where data is read or written. These lessons reflect our workload rather than a universal rule to embed or split services.
 
 ## Further Reading in This Series
 
-This post covers *why* the runtime and platform are split the way they are. The rest of the series digs into specific pieces of the runtime itself — language choice, configuration, memory, delegation, security, and observability — each as its own story with its own production lessons.
-
----
+The other posts cover language choice, configuration, memory, delegation, security, and observability in the runtime and platform.
 
 ## Related reading
 
-- [What Is an AI Agent Runtime?](/blog/what-is-an-ai-agent-runtime/) — the loop we split from the platform
-- [Go vs Python for AI Agents](/blog/why-go/) — the language bet under both layers
-- [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/) — the SRE work this platform is for
-- [Terraform for Agent Configuration](/blog/terraform-config/) — IaC for agent governance on the platform
+- [What Is an AI Agent Runtime?](/blog/what-is-an-ai-agent-runtime/) — the loop we separated from platform responsibilities
+- [Go vs Python for AI Agents](/blog/why-go/) — the language choice under both layers
+- [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/) — the operations work these agents support
+- [Terraform for Agent Configuration](/blog/terraform-config/) — infrastructure as code for agent governance
 - More on [Go AI agents](/topics/go-ai-agents/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---
 
-
-*Building a multi-tenant agent platform, or wrestling with a similar embed-vs-orchestrate decision? I'd love to hear what you're building — find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
-
-
+*How have you divided agent execution from shared governance? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> **StackGen builds AI-assisted SRE tools.** Our offering at [ai.stackgen.com](https://ai.stackgen.com) supports incident triage, diagnostics, and draft root-cause analyses.

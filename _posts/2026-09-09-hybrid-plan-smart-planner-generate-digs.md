@@ -17,22 +17,19 @@ faqs:
     answer: "Planning and synthesis stayed on a medium-thinking reasoning preview. Digs, efficiency helpers, and summarizers moved to normal chat models. Dig run times dropped from many minutes to tens of seconds or a couple of minutes."
 ---
 
-[Reasoning effort is not free](/blog/reasoning-effort-is-not-a-free-upgrade/). [Reasoning vs generate](/blog/reasoning-vs-generate-tool-heavy-agents/) asked which *model class* belongs on a tool-heavy job. This post is the next cut: **give the planner and the workers different models**, not another orchestration mode. Confirm workers actually used a normal chat model by checking response ids and reasoning token fields ([Completions vs Responses](/blog/chat-completions-vs-responses-api/)).
+[Reasoning effort is not free](/blog/reasoning-effort-is-not-a-free-upgrade/). [Reasoning vs generate](/blog/reasoning-vs-generate-tool-heavy-agents/) asked which *model class* belongs on a tool-heavy job. This post tests a configuration choice: **route planning and tool-query work to different models** within the existing hierarchical mode. A planner chooses subgoals; a dig worker executes queries and returns observations. Confirm workers actually used a normal chat model by checking response ids and reasoning token fields ([Completions vs Responses](/blog/chat-completions-vs-responses-api/)).
 
 Cousins: [hierarchical vs single-agent](/blog/plan-mode-merits-demerits-observability/) · [what is ReAcTree?](/blog/what-is-reactree/).
 
 ---
 
-## TL;DR
+## What the evidence supports
 
 - Hierarchical plan already separates roles: root = `planning`, digs default = `tool_calling`.
 - An all-reasoning roster ignored that split. Digs correctly requested tools and still ran on a high-effort Responses preview — first digs in the **~8–13 minute** class, multi-million dig tokens on a prior rematch.
 - Hybrid roster: reasoning (medium) for planning / scientific reasoning; generate for digs / efficiency / summarizer.
 - Same burn-rate alert, same Grafana MCP plane: hybrid plan finished in **~6 minutes** with a measured Theory. Dig Expert.Do times landed in the **~12s–2.5m** band. Routing logs showed plan → Responses, digs → generate.
 
-### Explain like I'm five
-
-The foreman should think about which rooms to open. The plumbers should measure the pipes. If you give every plumber a philosophy seminar before each wrench turn, the basement floods while they think.
 
 ---
 
@@ -47,7 +44,7 @@ User → plan root (task_type=planning)
          → Theory synthesis
 ```
 
-The burn happened in **config**. Every `good_for_task`, including `tool_calling`, pointed at the same Responses reasoning model with high effort. Digs asked for tools. The router obeyed and handed them the expensive seat.
+The cost came from the model map. Every `good_for_task` entry, including `tool_calling`, selected the same high-effort Responses reasoning model. Thus every dig worker paid for reasoning before its Grafana calls. The runtime correctly followed the configuration; the configuration failed to distinguish planning from measurement.
 
 That is not “reasoning is bad at SRE.” It is **reasoning spent on the wrong turn**.
 
@@ -55,15 +52,20 @@ That is not “reasoning is bad at SRE.” It is **reasoning spent on the wrong 
 
 ## The hybrid roster
 
+![A planning model coordinates narrower tool-using workers](/assets/images/diagrams/sept/planner-workers.svg)
+
+*Count worker costs and check their evidence before treating a cheaper roster as a win.*
+
+
 | Task class | Seat | Effort |
 |------------|------|--------|
 | `planning`, `scientific_reasoning`, `general_task` | Responses reasoning preview | medium (not high for the first pass) |
 | `tool_calling`, `terminal_calling`, `efficiency` | Generate (gpt-5.4-class) | none |
 | `summarizer`, `frontdesk` | Generate mini or full | none |
 
-Contract in one line: **planner thinks; digs measure.**
+This roster spends additional reasoning on selecting probes and uses a generate model for repeated tool calls. A worker may still need reasoning if a probe requires complex interpretation; measure its output quality rather than forbidding that model class outright.
 
-Keep the plan persona **delegation-only**. Do not revive parent-first root tools or soft-cap tricks for this win. The roster is enough when routing already splits task types.
+In this harness, planning and `tool_calling` were already separate task types, so no new execution mode was needed. If a different runtime requires the parent to measure before delegation, preserve that safety check; the model roster does not replace tool permissions or completion gates.
 
 ---
 
@@ -83,7 +85,7 @@ Hybrid log assertion (the part that matters more than wall):
 - Every dig `GetModel` → `tool_calling` → generate  
 - Dig tool credits actually fired (alert rule, firing instances, metric/log probes)
 
-We stopped a fresh all-reasoning rematch early once the first dig already selected Responses for `tool_calling`. The prior ~13m receipt was enough baseline.
+We stopped a fresh all-reasoning rematch after confirming that its first dig selected Responses for `tool_calling`. The ~13m number is from a **prior** run, not a simultaneous controlled comparison. The hybrid ~6m run also used four digs rather than two, so these wall times cannot isolate the effect of model routing.
 
 ---
 
@@ -100,7 +102,7 @@ We stopped a fresh all-reasoning rematch early once the first dig already select
 ## Blindspots
 
 - A dig that explicitly requests `planning` still pulls the reasoner. Policy must forbid that.
-- Hybrid wall is still slower than a lucky all-generate sprint when generate digs attach tools on the first try. The point is **not** beating generate on latency. It is **not paying reasoning dig tax** while keeping a thinking planner.
+- The all-generate control finished in ~0.5m but produced a thin Undetermined answer without real probes. It is not an acceptable faster close to the same task. The hybrid route is an attempt to retain planner reasoning while avoiding high effort on every dig; its benefit needs repeated quality-matched runs.
 - Quality still depends on dig tool allowlists. A fast undetermined close is not a win.
 
-Ship the mix. Bill the mix. Let the foreman think and the plumbers measure.
+Test this routing against all-generate and all-reasoning configurations on repeated identical incidents. Record per-role model, effort, tool outcome, total tokens, and diagnosis quality; a faster dig that never reaches a useful probe is not a savings.

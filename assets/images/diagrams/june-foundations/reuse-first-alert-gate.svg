@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="500" viewBox="0 0 960 500" role="img" aria-labelledby="title desc">
+<title id="title">Reuse-first alert follow-up</title>
+<desc id="desc">A follow-up checks whether a completed result for the same alert is recent and relevant. Changed symptoms, changed deployment, expiration or explicit override lead to a new investigation.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#174a69"/></marker></defs>
+<rect width="960" height="500" fill="#fbfcfa"/>
+<text x="36" y="42" font-family="system-ui, sans-serif" font-size="24" font-weight="700" fill="#182b3a" text-anchor="start">Reuse-first alert follow-up</text>
+<rect x="32" y="180" width="166" height="98" rx="12" fill="#eef5f8" stroke="#174a69" stroke-width="2"/>
+<text x="115.0" y="222.5" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Slack follow-up</text>
+<text x="115.0" y="247.5" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">or repeat alert</text>
+<rect x="252" y="180" width="188" height="98" rx="12" fill="#fff3df" stroke="#926013" stroke-width="2"/>
+<text x="346.0" y="222.5" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Same alert +</text>
+<text x="346.0" y="247.5" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">completed RCA?</text>
+<rect x="495" y="88" width="198" height="98" rx="12" fill="#fff3df" stroke="#926013" stroke-width="2"/>
+<text x="594.0" y="130.5" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Recent and</text>
+<text x="594.0" y="155.5" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">still relevant?</text>
+<rect x="746" y="88" width="184" height="98" rx="12" fill="#eaf5ed" stroke="#286443" stroke-width="2"/>
+<text x="838.0" y="130.5" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Reuse summary</text>
+<text x="838.0" y="155.5" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">+ watch link</text>
+<rect x="746" y="308" width="184" height="98" rx="12" fill="#eaf5ed" stroke="#286443" stroke-width="2"/>
+<text x="838.0" y="350.5" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#182b3a" text-anchor="middle">Launch fresh</text>
+<text x="838.0" y="375.5" font-family="system-ui, sans-serif" font-size="17" font-weight="400" fill="#182b3a" text-anchor="middle">investigation</text>
+<polyline points="198,229 242,229" fill="none" stroke="#174a69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow)"/>
+<polyline points="440,219 465,219 465,137 485,137" fill="none" stroke="#174a69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow)"/>
+<polyline points="693,137 736,137" fill="none" stroke="#174a69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow)"/>
+<text x="466" y="201" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#182b3a" text-anchor="start">yes</text>
+<text x="704" y="121" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#182b3a" text-anchor="start">yes</text>
+<polyline points="440,260 470,260 470,357 736,357" fill="none" stroke="#174a69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow)"/>
+<text x="494" y="343" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#182b3a" text-anchor="start">no prior result</text>
+<polyline points="594,186 594,272 710,272 710,335 736,335" fill="none" stroke="#174a69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#arrow)"/>
+<text x="599" y="252" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#182b3a" text-anchor="start">stale or changed</text>
+<polyline points="115,278 115,439 838,439 838,416" fill="none" stroke="#174a69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<text x="310" y="427" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#182b3a" text-anchor="start">explicit re-investigate request also bypasses reuse</text>
+</svg>

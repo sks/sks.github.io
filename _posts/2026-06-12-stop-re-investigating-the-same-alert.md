@@ -4,7 +4,7 @@ title: "Stop Re-Investigating the Same Alert"
 date: 2026-06-12 14:00:00 -0700
 series: "Service Rendered Efficiently"
 series_order: 2
-description: "Reuse-first SRE AI: stop burning tokens on every Slack follow-up when a completed RCA already exists for the alert."
+description: "Reuse recent incident findings for follow-ups on the same alert, with a clear way to investigate again when evidence changes."
 image: /assets/images/og-default.png
 tags: [sre, ai-agents, service, incident-response, aiden, on-call, tokenomics]
 permalink: /blog/stop-re-investigating-the-same-alert/
@@ -12,27 +12,14 @@ faqs:
   - question: "Why do AI SRE agents re-investigate the same alert?"
     answer: "Hourly alert cycles and Slack follow-ups often launch a full investigate workflow even when a completed RCA already exists. Without a reuse-first policy, every @mention looks like a new job."
   - question: "What should operators do instead of re-running investigate?"
-    answer: "Default to the prior summary and watch link within a cooldown window. Explicitly ask to re-investigate or start from scratch only when they need a fresh deep dive."
+    answer: "Check the age and relevance of the prior result; use its summary and watch link when it still applies. Request a fresh run when evidence or circumstances change."
   - question: "What metric should SRE leads track?"
-    answer: "Investigations per alert ID per week — not just model accuracy. Twenty full digs on one alert is usually a product failure, not a smarter-prompt opportunity."
+    answer: "Investigations per alert ID per week — not just model accuracy. Twenty full digs on one alert warrants a review of launch policy and whether new evidence justified those runs."
 ---
 
-Your AI SRE shouldn't burn tokens on every Slack follow-up.
+A Slack follow-up about an alert does not always require another full site reliability engineering (SRE) AI investigation. Reusing a recent result can save time and model usage, provided operators can request a fresh look when conditions change.
 
 *The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
-
----
-
-## TL;DR
-
-- Duplicate investigations on the same alert are expected when chat mentions do not reuse completed RCAs
-- In one anonymized week: ~100 investigations, ~15 alerts with multiples, **one alert with 20+ full digs**
-- Fix: reuse-first launch policy — answer from the prior summary unless the operator asks to re-investigate
-- Service metric: **investigations per alert per week**, not fluency of the latest write-up
-
-### Explain like I'm five
-
-If someone already wrote the book report, don't write it again every time a classmate asks “what was that book about?” Hand them the report. Only rewrite if they say “start over.”
 
 ---
 
@@ -44,38 +31,40 @@ Composite story, drawn from production debug export analysis:
 
 **Behavior:** The alert fired on an hourly cycle. On-call @mentioned the bot in `#incidents-prod` with “why is this still firing?” Each mention launched a **full** investigate workflow. Session after session rediscovered the same KeyError pattern and the same release candidate.
 
-**Outcome:** Roughly twenty completed investigations on one alert ID in a week. Token spend and wall time scaled with chatter, not with new evidence.
+**Outcome:** Roughly twenty completed investigations on one alert ID in a week. In the reviewed sessions, repeated mentions launched work that rediscovered the same pattern; token usage and waiting time grew with those reruns.
 
-The agent was not “wrong.” The **service** was. It treated every human message as a request for a new deep dive.
+The repeated diagnosis was not necessarily wrong. The entry path treated each human message as a request to investigate from scratch.
 
 ---
 
 ## What reuse-first looks like
 
-When a recent terminal RCA exists for the alert (default cooldown on the order of hours):
+The decision path shows when a follow-up can reuse a completed RCA and when changed evidence or an explicit request should start a fresh investigation.
 
-1. **Do not** launch a new investigate-alert workflow
-2. Answer from the prior investigation summary
-3. Include the watch / session link so the human can open the receipts
-4. Only start fresh when the operator explicitly asks — “re-investigate,” “from scratch,” “force new”
+![Reuse-first alert decision gate checking a completed RCA and relevance before choosing a summary with watch link or a fresh investigation](/assets/images/diagrams/june-foundations/reuse-first-alert-gate.svg)
 
-That is the difference between a chatbot that always digs and a **service** that remembers what it already rendered for this alert.
+When a recent completed root-cause analysis (RCA) exists for the alert (a default cooldown on the order of hours):
 
-Slash-style escapes (`/reinvestigate`) make intent obvious. Soft “please check again” language should still hit the reuse path unless the operator opts out.
+1. Check that the alert identity matches, the prior run is complete, and its evidence is still relevant.
+2. Answer from that investigation summary instead of launching `investigate-alert`.
+3. Include the watch / session link so the operator can inspect the evidence and its age.
+4. Start a new run when the operator asks — “re-investigate,” “from scratch,” “force new” — or when new symptoms, a changed deployment, or an expired result make reuse unsafe.
+
+A slash command such as `/reinvestigate` makes an explicit override easy to recognize. “Please check again” is ambiguous: show the earlier result and offer a fresh run, or use follow-up questions to distinguish a request for new evidence from a request for the existing answer. A simple intent regex cannot by itself detect changed conditions.
 
 ---
 
 ## If you lead an SRE team
 
-- Chart **investigations per alert ID** weekly. Spikes mean the product is redoing work, not that on-call is curious
+- Chart **investigations per alert ID** weekly. Spikes are a reason to review whether the product is redoing work or operators are responding to changed evidence
 - Train the channel: follow-ups get the prior summary; say “re-investigate” when you want a new dig
-- Count time-to-first-useful-answer on *first* investigate, then reuse latency on follow-ups — different SLAs
+- Count time-to-first-useful-answer on *first* investigate, then reuse latency on follow-ups — different service targets
 
 ## If you ship the agent platform
 
 - Short-circuit on recent terminal status before spawning collectors
-- Encode “fresh dig” as an explicit intent regex or slash command, not as ambient enthusiasm in the prompt
-- Stamp prior investigation id + finished time into the reuse prompt so the model cannot invent a new story from thread vibes alone
+- Support an explicit fresh-run command; if using an intent regex for natural-language requests, log and review ambiguous matches
+- Stamp prior investigation id + finished time into the reuse prompt and require it to distinguish the prior finding from any new observation
 
 ---
 
@@ -90,4 +79,4 @@ Slash-style escapes (`/reinvestigate`) make intent obvious. Soft “please check
 
 **Acknowledgments.** Reuse-first launch policy lessons from shipping Aiden SRE chat investigation. Customer details composite.
 
-*Building AI for incident triage without the demo theater? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+*If you are building AI for incident triage, Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*

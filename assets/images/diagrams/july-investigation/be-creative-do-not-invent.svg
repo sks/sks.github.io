@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="450" viewBox="0 0 960 450" role="img" aria-labelledby="diagram-title diagram-desc">
+<title id="diagram-title">Widen the search, not the facts</title>
+<desc id="diagram-desc">Start with alert or retrieved identifiers, vary a justified query after an empty result, and validate identifiers before a conclusion. Lack of support leads to unresolved next probes, never a guessed metric.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9 Z" fill="#315779"/></marker></defs>
+<rect width="960" height="450" fill="#ffffff"/>
+<text x="40" y="49" font-size="27" font-weight="bold" fill="#13243a">Widen the search, not the facts</text>
+<text x="40" y="79" font-size="16" font-weight="normal" fill="#40576e">Investigation path</text>
+<rect x="40" y="112" width="260" height="137" rx="14" fill="#f6f9fe" stroke="#38608c" stroke-width="2"/>
+<text x="57" y="143" font-size="18" font-weight="bold" fill="#13243a">Known identifiers</text>
+<text x="57" y="176" font-size="16" font-weight="normal" fill="#13243a">Alert, documentation</text>
+<text x="57" y="200" font-size="16" font-weight="normal" fill="#13243a">or returned records</text>
+<rect x="350" y="112" width="260" height="137" rx="14" fill="#f6f9fe" stroke="#38608c" stroke-width="2"/>
+<text x="367" y="143" font-size="18" font-weight="bold" fill="#13243a">Empty query</text>
+<text x="367" y="176" font-size="16" font-weight="normal" fill="#13243a">Discover series, labels</text>
+<text x="367" y="200" font-size="16" font-weight="normal" fill="#13243a">or a justified window</text>
+<rect x="660" y="112" width="260" height="137" rx="14" fill="#f6f9fe" stroke="#38608c" stroke-width="2"/>
+<text x="677" y="143" font-size="18" font-weight="bold" fill="#13243a">Validation boundary</text>
+<text x="677" y="176" font-size="16" font-weight="normal" fill="#13243a">Tie names and inputs</text>
+<text x="677" y="200" font-size="16" font-weight="normal" fill="#13243a">to recorded sources</text>
+<path d="M305 181 H338 M615 181 H648" stroke="#315779" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<path d="M480 253 V279 H247 V294" stroke="#315779" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<path d="M790 253 V279 H713 V294" stroke="#315779" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<rect x="40" y="305" width="414" height="112" rx="14" fill="#fff7ec" stroke="#8a550a" stroke-width="2"/>
+<text x="57" y="336" font-size="18" font-weight="bold" fill="#13243a">Still no support</text>
+<text x="57" y="369" font-size="16" font-weight="normal" fill="#13243a">Do not borrow a counter</text>
+<text x="57" y="393" font-size="16" font-weight="normal" fill="#13243a">from another incident</text>
+<rect x="506" y="305" width="414" height="112" rx="14" fill="#edf8f5" stroke="#17665b" stroke-width="2"/>
+<text x="523" y="336" font-size="18" font-weight="bold" fill="#13243a">Honest outcome</text>
+<text x="523" y="369" font-size="16" font-weight="normal" fill="#13243a">Undetermined plus next probes;</text>
+<text x="523" y="393" font-size="16" font-weight="normal" fill="#13243a">no invented mechanism</text>
+<path d="M461 362 H494" stroke="#315779" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+</svg>

@@ -16,27 +16,27 @@ faqs:
     answer: "Require committed evidence from observability planes before allowing a fluent root-cause narrative. Narration without proof is a demo pattern, not a production one."
 ---
 
-The demo version of agentic AI is an unconstrained ReAct loop: think, call a tool, think again, declare victory. The production version is uglier. Models are polite, sycophantic, and excellent at the **"looks-right" heuristic** — marking a stage complete because the *syntactic shape* of their own thought history satisfies a stop condition, not because the investigation earned it.
+In our incident investigations, a free-form reasoning-and-tool-use loop (often called ReAct) sometimes ended with a convincing report before the required checks had run. A report-shaped answer is not evidence that its underlying queries were completed.
 
-We hardened [multi-stage agent workflows](/topics/ai-agent-workflows/) in Aiden after watching fluent agents skip the boring work. The domain was SRE — metrics, logs, warehouses — but the engineering problem was general: **deterministic orchestration over non-deterministic models.**
+We hardened [multi-stage agent workflows](/topics/ai-agent-workflows/) in Aiden, an incident-investigation agent, after seeing that failure. Site reliability engineering (SRE) work here spans metrics, logs, and warehouse data. The aim was to put checkable control flow around model-generated work, not to make the model deterministic.
 
-We stopped trying to prompt-engineer reliability into a frontier model. We built a **compound AI system**: a fixed DAG where the LLM is a stateless execution engine for individual nodes, and Go-owned control flow owns state, validation, and promotion.
+We used a fixed directed acyclic graph (DAG): a workflow of dependent stages that does not loop back arbitrarily. The large language model (LLM) reasons within each stage; Go code manages state, validates outputs, and decides whether work can move to the next stage. This is a compound system—model plus ordinary software—not a claim that prompts have no role.
 
-This is a sequel to [AI-augmented incident triage](/blog/ai-incident-triage-sre/) and [evidence-based verification](/blog/evidence-based-verification/) — framed for AI engineers who care about cognitive architecture, not on-call folklore.
+This follows [AI-augmented incident triage](/blog/ai-incident-triage-sre/) and [evidence-based verification](/blog/evidence-based-verification/). The examples describe our workflow design, not a controlled comparison of every agent architecture.
 
 ---
 
-## The Failure Mode: Unconstrained Loops Lie Politely
+## What a fluent report can hide
 
-Left to an open ReAct loop, a capable agent will:
+In the runs we examined, a free-form loop could:
 
-- Succumb to **sycophancy** — skim a narrow window, find nothing, report that everything looks fine
-- Apply the **looks-right heuristic** — emit a report-shaped blob and treat structure as success
-- Suffer **context amnesia** — summarize from plan notes while ignoring the evidence stage that just finished
-- Invent **observability gaps** before exhausting time-window and alias ladders
-- Spawn a **sub-agent swarm** that inflates tokens and latency without improving recall
+- Stop at a narrow time window, find nothing, and report that everything looks fine
+- Emit a report-shaped answer that passes a superficial completion check
+- Summarize from plan notes without the evidence gathered later
+- Call data unavailable before widening the time window or checking alternate names
+- Spawn multiple helper agents, adding tokens and latency without clear evidence of better coverage
 
-Operators (and eval harnesses) don't need more prose. They need **falsifiable artifacts**: identities, KPIs, ruled-out branches, and next probes — receipts the runtime can check without another LLM call.
+Operators and automated evaluations need checkable artifacts: identities, key performance indicators (KPIs), ruled-out branches, and next probes. These can establish that required evidence was recorded, although they cannot prove causality on their own.
 
 ---
 
@@ -50,7 +50,7 @@ We chose a boring, reliable graph for several investigation families (streaming 
 | **Gather evidence** | Run diagnostic branches. Persist machine-checkable evidence tokens. |
 | **Present** | Merge state. Draft the human summary. Format for the UI. |
 
-**One investigator persona** across nodes beat a mesh of hyper-specialized micro-agents ("metrics agent" talking to "logs agent"). Specialist swarms recreate the coordination tax: cascading context loss, duplicated tool discovery, and token burn on handoff theater.
+In these workflows, **one investigator persona** across nodes was easier to manage than a mesh of hyper-specialized micro-agents ("metrics agent" talking to "logs agent"). More specialists add handoffs, duplicate tool discovery, and context overhead; they may still be useful where expertise or independent work justifies that cost.
 
 Mid-graph outputs must say **"node complete — handoff,"** not **"final answer."** Early nodes that emit a finished narrative poison the watch UI and train humans to distrust the system — the same failure mode as fabricated sub-agent reports (a topic for a future post).
 
@@ -68,7 +68,7 @@ Treat the model like an **untrusted third-party API**. Before promoting a payloa
 - Did presentation include a numeric KPI, not just a heading?
 - Did each required evidence key appear before the node claimed success?
 
-Loop-back retries are useful until the gate is wrong. A bad structural check re-runs expensive tool work for no new information — pure **token inflation**. Treat gate fixtures like unit tests: golden pass *and* fail cases.
+Retries help only when the gate tests the right requirement. A bad structural check re-runs expensive tool work for no new information — pure **token inflation**. Treat gate fixtures like unit tests: golden pass *and* fail cases.
 
 Related lesson from HalGuard: **don't trust self-report; check the artifact.**
 
@@ -80,9 +80,13 @@ Navigation nodes that only emit "FINISH / GO_BACK" are great for control flow an
 
 That is a **context-window / state-merging bug**, not an intelligence bug.
 
-**Fix the graph:** presentation fans in **gather output + gate**. The gate decides *whether* to proceed; gather carries *what* to say. Control-flow JSON is not an investigation transcript.
+We changed the graph so presentation receives **gather output + gate**. The gate decides *whether* to proceed; gather carries *what* to say. Control-flow JSON is not an investigation transcript.
 
-This is workflow composition applied to agent memory: contracts over vibes.
+The gate carries the decision; gathered evidence carries the facts the summary must use.
+
+![Fixed investigation graph where planning feeds evidence gathering, structural gate checks requirements, and presentation receives both decision and facts](/assets/images/diagrams/july-workflows/evidence-gated-rca.svg)
+
+*Presentation needs both the gate decision and the gathered evidence, not a navigation token alone.*
 
 ---
 
@@ -95,9 +99,9 @@ High-value investigations aren't one tool call. They are **branches** in a merge
 - Probe the dependency layer
 - Probe the runtime layer
 
-Run independent branches in parallel for **latency**. Serialize only when a later branch needs identities from an earlier one. We added an explicit **promotion** step: the coordinator copies plaintext candidates into canonical notes before spawning the dependency probe — so workers never paste redacted placeholders into query filters (a common failure when memory redaction meets tool arguments).
+Run independent branches in parallel when latency matters and tool limits permit it. Serialize only when a later branch needs identities from an earlier one. We added an explicit **promotion** step: the coordinator copies plaintext candidates into canonical notes before spawning the dependency probe — so workers never paste redacted placeholders into query filters (a common failure when memory redaction meets tool arguments).
 
-Also: forbid "none found" until the **full ladder** finishes. Sparse signals often appear only in wider ranges. Declaring absence after the first narrow window is how agents invent gaps — premature stopping dressed up as rigor.
+Do not label an identity "none found" until the planned search ladder finishes; if a tool fails, say so instead. Sparse signals often appear only in wider ranges. Declaring absence after the first narrow window is how agents invent gaps — premature stopping dressed up as rigor.
 
 In a Go runtime, this maps cleanly to bounded concurrency with cancellation: parallel lanes get timeouts so a runaway tool cannot hang the whole incident graph. The model proposes tool calls; the runtime owns fan-out and merge.
 
@@ -109,7 +113,7 @@ At high event volume, dumping raw warehouses or paginating noisy logs into the c
 
 Prefer **pre-aggregated** planes sized to the alert duration: fine grain for short windows, coarser rollups for days and weeks. Batch related queries when the tool supports it; on partial failure, retry **only** failed named queries.
 
-For logs: if page one is dominated by known noise, **rewrite the query** instead of paginating until the LLM budget dies. Query rewriting and grain selection belong in application policy — out of the model's control — so token economics aren't left to hope.
+For logs: if the first page is dominated by known noise, **rewrite the query** rather than paging through the same noise indefinitely. Application policy can bound query rewriting and sampling grain so a broad model request does not consume the whole context budget; operators still need access to uncompressed evidence.
 
 ---
 
@@ -149,7 +153,7 @@ This is classifier hygiene for compound systems: the router is cheap and determi
 
 ---
 
-## Lessons Learned
+## What this design buys—and does not
 
 1. **Compound beats clever prompts.** Put reliability in the graph and the evals; let the model do synthesis and tool routing inside a node.
 
@@ -165,7 +169,7 @@ This is classifier hygiene for compound systems: the router is cheap and determi
 
 7. **Prove, then narrate.** Narration is the last node — never the first.
 
-None of this requires a smarter model. It requires treating agent workflows like production software: fixed control flow, regression traces, and gates that fail closed when the model tries to skip the boring work.
+The graph makes skipped steps visible, but a structural gate cannot prove a causal explanation is correct. It needs regression traces, checked evidence, and an operator who can contest the verdict.
 
 ---
 
@@ -182,4 +186,4 @@ None of this requires a smarter model. It requires treating agent workflows like
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> We build incident-triage agents at StackGen; the SRE offering is at [ai.stackgen.com](https://ai.stackgen.com).
