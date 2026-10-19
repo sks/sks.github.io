@@ -5,7 +5,7 @@ date: 2026-10-13 14:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 79
 description: "Keep coverage discovery and failure RCA as separate E2E loops. Product changes need runnable asserts; observed failures need classify, fix, deploy, and re-assert."
-image: /assets/images/diagrams/oct/e2e-two-loops.svg
+image: /assets/images/diagrams/oct/e2e-coverage-vs-failure.svg
 tags: [ai-agents, evaluation, testing, ci-cd, reliability, aiden]
 permalink: /blog/e2e-coverage-and-failure-loops/
 faqs:
@@ -32,7 +32,7 @@ The [supervised loop](/blog/supervised-e2e-learning-loop/) from this morning nee
 
 ---
 
-![Loop A scans commits into coverage asserts; Loop B correlates failures into fixes and verification](/assets/images/diagrams/oct/e2e-two-loops.svg)
+![Loop A scans commits into coverage asserts; Loop B correlates failures into fixes and verification](/assets/images/diagrams/oct/e2e-coverage-vs-failure.svg)
 
 *Two paths share a human gate. Conflating them creates blind spots.*
 
