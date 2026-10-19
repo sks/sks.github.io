@@ -5,7 +5,7 @@ date: 2026-10-24 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 84
 description: "Policy as code for AI agent guardrails: create Rego with sg_policy, attach with sg_agent_policy_attachment, review with plan and apply."
-image: /assets/images/diagrams/oct/policy-as-code-attach.svg
+image: /assets/images/diagrams/oct/manage-policies-terraform.jpg
 tags: [ai-agents, terraform, opentofu, opa, policy-as-code, aiden, governance]
 permalink: /blog/manage-ai-agent-policies-terraform/
 faqs:
@@ -32,9 +32,9 @@ Manage AI agent policies as code the same way you manage infrastructure: Rego in
 
 ---
 
-![Rego file to sg_policy to attachment to agent](/assets/images/diagrams/oct/policy-as-code-attach.svg)
+![Managing AI agent policies as code with Terraform from Rego to StackGen enforcement](/assets/images/diagrams/oct/manage-policies-terraform.jpg)
 
-*Names stay stable. Attachments reference the policy UUID.*
+*`opa test` locally, declare `sg_policy` and `sg_agent_policy_attachment`, `tofu plan` / `apply`, then Aiden enforces allow or deny on tool calls.*
 
 ## Architecture: control plane vs enforce path
 

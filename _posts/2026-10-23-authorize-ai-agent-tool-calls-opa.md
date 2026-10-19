@@ -5,7 +5,7 @@ date: 2026-10-23 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 83
 description: "Open Policy Agent guardrails for AI agents: deny by default where it matters, enforce before tool execution, outside the model. Includes a gh secret set deny lab."
-image: /assets/images/diagrams/oct/opa-tool-boundary.svg
+image: /assets/images/diagrams/oct/authorize-tool-calls-opa.jpg
 tags: [ai-agents, opa, rego, guardrails, mcp, aiden, security]
 permalink: /blog/authorize-ai-agent-tool-calls-opa/
 faqs:
@@ -32,9 +32,9 @@ The agent can still *choose* `gh secret set`. Policy decides whether that call e
 
 ---
 
-![Agent to OPA to allow deny or ask before the tool runs](/assets/images/diagrams/oct/opa-tool-boundary.svg)
+![Authorize AI agent tool calls with OPA through Aiden runtime](/assets/images/diagrams/oct/authorize-tool-calls-opa.jpg)
 
-*Rephrasing the request does not skip this gate.*
+*Agent proposes a tool call. Aiden Runtime sends a factsheet to OPA. Allow reaches the tool boundary; deny never does.*
 
 ## Why prompts fail as ACLs
 

@@ -5,7 +5,7 @@ date: 2026-10-22 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 82
 description: "How OPA and Rego came about, why policy engines beat prompt rules, how Pydantic AI and other frameworks wire allow/ask/deny yourself, and what Aiden ships pre-equipped."
-image: /assets/images/diagrams/oct/diy-vs-aiden-policy.svg
+image: /assets/images/diagrams/oct/why-opa-agent-guardrails.jpg
 tags: [ai-agents, opa, rego, guardrails, governance, aiden, pydantic-ai]
 permalink: /blog/why-opa-for-ai-agent-guardrails/
 faqs:
@@ -34,11 +34,15 @@ When an agent can open PRs, run shell, or call MCP tools, something outside the 
 
 ---
 
+![DIY frameworks versus Aiden agent platform for OPA policy](/assets/images/diagrams/oct/why-opa-agent-guardrails.jpg)
+
+*DIY pause hooks and bridging code versus Aiden’s built-in enforcement point, OPA engine, Terraform/GitOps, HITL, and shared catalog.*
+
+## Architecture: PDP, PEP, and the factsheet
+
 ![Aiden control plane versus data plane OPA architecture](/assets/images/diagrams/oct/aiden-policy-architecture.svg)
 
 *Control plane stores and attaches Rego. Data plane evaluates it on every tool call before side effects.*
-
-## Architecture: PDP, PEP, and the factsheet
 
 Classical authorization splits into two roles:
 
@@ -54,10 +58,6 @@ The LLM is never the PDP. It proposes a tool call. The PEP refuses to execute un
 **Attachment.** Policies are stored as versioned Rego (`sg_policy`). `sg_agent_policy_attachment` binds a policy UUID to an agent name. At runtime the PEP loads attached policies for that agent and evaluates them. Manage happens out of band (Terraform, API, UI). Enforce happens on the hot path.
 
 **Layers.** Tool-call OPA sits above the model and below the tool. Sandbox products such as [OpenShell](https://developer.nvidia.com/blog/run-autonomous-self-evolving-agents-more-safely-with-nvidia-openshell/) add filesystem / network / process isolation. Same industry vocabulary (deny by default, out-of-process policy). Different layers. Stack them when blast radius demands it ([defense in depth](/blog/defense-in-depth/)).
-
-![DIY framework layers versus Aiden pre-built OPA policy path](/assets/images/diagrams/oct/diy-vs-aiden-policy.svg)
-
-*Same allow/ask/deny idea. Different amount of plumbing you own.*
 
 ## How did Open Policy Agent come about?
 
