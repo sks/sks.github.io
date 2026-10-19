@@ -22,6 +22,7 @@ This series follows our work on an **AI agent runtime**—the software that mana
 | [Go agent runtime](/start/go-runtime/) | Runtime definition, Go vs Python, platform split |
 | [SRE on-call](/start/sre-on-call/) | Triage, RCA, observability |
 | [SRE as service](/start/sre-as-service/) | Service Rendered Efficiently culture pack |
+| [AI agent guardrails with OPA](/start/opa-policies/) | Authorize tool calls, Terraform policy as code, time rules, HITL |
 | [Evidence-gated RCA checklist](/checklists/evidence-gated-rca/) | Operator review of agent write-ups |
 | [“Done” checklist](/checklists/agent-done/) | When not to trust agent completion |
 

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+<title id="title">OPA enforcement point before tool execution</title>
+<desc id="desc">Agent proposes a tool call. Policy engine returns allow, deny, or ask before the tool runs.</desc>
+<defs>
+  <marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0 0L10 5L0 10Z" fill="#255d78"/>
+  </marker>
+</defs>
+<rect width="960" height="540" fill="#fffdf8"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+  <text x="480" y="40" text-anchor="middle" font-size="22" font-weight="700">Enforce before execute</text>
+
+  <rect x="40" y="100" width="160" height="80" rx="10" fill="#e8f0f8" stroke="#255d78" stroke-width="2"/>
+  <text x="120" y="138" text-anchor="middle" font-size="16" font-weight="700">Agent</text>
+  <text x="120" y="160" text-anchor="middle" font-size="13">picks a tool</text>
+  <path d="M200 140H250" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow2)"/>
+
+  <rect x="250" y="90" width="200" height="100" rx="10" fill="#dff0e8" stroke="#416657" stroke-width="2"/>
+  <text x="350" y="128" text-anchor="middle" font-size="16" font-weight="700">OPA / Rego</text>
+  <text x="350" y="150" text-anchor="middle" font-size="13">factsheet in</text>
+  <text x="350" y="170" text-anchor="middle" font-size="13">decision out</text>
+  <path d="M450 140H500" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow2)"/>
+
+  <rect x="500" y="70" width="180" height="50" rx="8" fill="#cfe8dc" stroke="#416657" stroke-width="1.5"/>
+  <text x="590" y="100" text-anchor="middle" font-size="15" font-weight="700">allow</text>
+  <path d="M680 95H730" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow2)"/>
+
+  <rect x="500" y="140" width="180" height="50" rx="8" fill="#f5d4d4" stroke="#8a3a3a" stroke-width="1.5"/>
+  <text x="590" y="170" text-anchor="middle" font-size="15" font-weight="700">deny</text>
+
+  <rect x="500" y="210" width="180" height="50" rx="8" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+  <text x="590" y="240" text-anchor="middle" font-size="15" font-weight="700">ask (HITL)</text>
+  <path d="M590 260V300" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow2)"/>
+
+  <rect x="730" y="70" width="190" height="100" rx="10" fill="#e8f0f8" stroke="#255d78" stroke-width="2"/>
+  <text x="825" y="118" text-anchor="middle" font-size="16" font-weight="700">Tool runs</text>
+  <text x="825" y="140" text-anchor="middle" font-size="13">side effects only</text>
+  <text x="825" y="158" text-anchor="middle" font-size="13">after allow</text>
+
+  <rect x="430" y="310" width="320" height="80" rx="10" fill="#fff8ee" stroke="#80602f" stroke-width="2"/>
+  <text x="590" y="348" text-anchor="middle" font-size="15" font-weight="700">Human approves or rejects</text>
+  <text x="590" y="370" text-anchor="middle" font-size="13">then resume or stop</text>
+
+  <text x="480" y="460" text-anchor="middle" font-size="14">Prompts live inside the agent. The policy engine sits outside it.</text>
+  <text x="480" y="484" text-anchor="middle" font-size="14">Rephrasing the request cannot skip this gate.</text>
+</g>
+</svg>

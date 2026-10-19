@@ -1,0 +1,9 @@
+# Free account: https://app.stackgen.com/
+# Personal access token: https://app.stackgen.com/app/settings/personal-access-tokens
+# Provider docs: https://appcd-dev.github.io/terraform-provider-stackgen/
+# Provider version pinned in main.tf: 0.1.48
+stackgen_url          = "https://app.stackgen.com"
+stackgen_token        = "REPLACE_ME" # personal access token; never commit
+stackgen_workspace_id = "REPLACE_ME" # workspace / org UUID from the app
+agent_name            = "lab-opa-policy-agent"
+policy_name           = "lab-deny-secret-write"
