@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+<title id="title">Supervised E2E learning loop</title>
+<desc id="desc">Product changes and scheduled tests feed coverage proposals. Observed failures feed fix proposals. Humans review, merge, deploy, and re-assert. Draft PRs alone do not close the loop.</desc>
+<rect width="960" height="560" fill="#fffdf8"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+  <text x="480" y="42" text-anchor="middle" font-size="24" font-weight="700">Automation proposes. Humans close the loop.</text>
+
+  <rect x="40" y="70" width="200" height="70" rx="8" fill="#e3efff" stroke="#456077" stroke-width="2"/>
+  <text x="140" y="100" text-anchor="middle" font-size="15" font-weight="700">Product changes</text>
+  <text x="140" y="122" text-anchor="middle" font-size="13">commits and PRs</text>
+
+  <rect x="280" y="70" width="200" height="70" rx="8" fill="#dff0e8" stroke="#416657" stroke-width="2"/>
+  <text x="380" y="100" text-anchor="middle" font-size="15" font-weight="700">Scheduled E2E</text>
+  <text x="380" y="122" text-anchor="middle" font-size="13">merge · nightly · weekly</text>
+
+  <rect x="520" y="70" width="200" height="70" rx="8" fill="#fff0d1" stroke="#80602f" stroke-width="2"/>
+  <text x="620" y="100" text-anchor="middle" font-size="15" font-weight="700">Runtime evidence</text>
+  <text x="620" y="122" text-anchor="middle" font-size="13">CI · traces · logs</text>
+
+  <rect x="760" y="70" width="160" height="70" rx="8" fill="#f7e5e8" stroke="#6d5060" stroke-width="2"/>
+  <text x="840" y="100" text-anchor="middle" font-size="15" font-weight="700">Draft PRs</text>
+  <text x="840" y="122" text-anchor="middle" font-size="13">coverage or fix</text>
+
+  <path d="M140 140v40h700v-40" fill="none" stroke="#8a96a8" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M240 105h30" stroke="#8a96a8" stroke-width="2"/>
+  <path d="M480 105h30" stroke="#8a96a8" stroke-width="2"/>
+  <path d="M720 105h30" stroke="#8a96a8" stroke-width="2"/>
+
+  <rect x="200" y="210" width="560" height="90" rx="10" fill="#eef4fb" stroke="#456077" stroke-width="2"/>
+  <text x="480" y="248" text-anchor="middle" font-size="18" font-weight="700">Human review · implement · merge</text>
+  <text x="480" y="276" text-anchor="middle" font-size="14">Executable asserts · required checks that actually run</text>
+
+  <rect x="120" y="350" width="280" height="80" rx="8" fill="#dff0e8" stroke="#416657" stroke-width="2"/>
+  <text x="260" y="382" text-anchor="middle" font-size="16" font-weight="700">Merged tests re-enter cadence</text>
+  <text x="260" y="408" text-anchor="middle" font-size="13">next nightly proves execution</text>
+
+  <rect x="560" y="350" width="280" height="80" rx="8" fill="#fff0d1" stroke="#80602f" stroke-width="2"/>
+  <text x="700" y="382" text-anchor="middle" font-size="16" font-weight="700">Deploy exact revision</text>
+  <text x="700" y="408" text-anchor="middle" font-size="13">then re-assert on that build</text>
+
+  <path d="M340 300v40" stroke="#8a96a8" stroke-width="2"/>
+  <path d="M620 300v40" stroke="#8a96a8" stroke-width="2"/>
+  <path d="M260 430v40H700v-40" fill="none" stroke="#8a96a8" stroke-width="2" stroke-dasharray="6 4"/>
+
+  <text x="480" y="520" text-anchor="middle" font-size="16" fill="#344960">Open loop if draft-only, plan-only, skipped checks, or never deployed</text>
+</g>
+</svg>

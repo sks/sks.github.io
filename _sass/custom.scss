@@ -671,6 +671,19 @@ hr {
   margin: 0.4rem 0 0;
 }
 
+.post-content ul.key-takeaways {
+  margin: 0.75rem 0 1.5rem;
+  padding: 0.9rem 1rem 0.9rem 1.6rem;
+  border: 1px solid var(--pn-border);
+  border-left: 3px solid var(--pn-accent);
+  border-radius: 0.5rem;
+  background: var(--pn-bg-elevated);
+}
+
+.post-content ul.key-takeaways li {
+  margin: 0.35rem 0;
+}
+
 .pack-table {
   width: 100%;
 }

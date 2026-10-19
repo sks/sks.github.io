@@ -2,10 +2,11 @@
 layout: post
 title: "Best Way to Debug a Multi-Step AI Agent in Production"
 date: 2026-09-09 14:00:00 -0700
+last_modified_at: 2026-10-21 12:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 64
-description: "A practical debug loop for multi-step agents: one zip, one golden prompt, tool families, observation hashes, and Theory receipts — not more prompts."
-image: /assets/images/og-default.png
+description: "Best way to debug a multi-step AI agent: freeze one golden prompt, export one zip, grade each step’s observations, fix host gates before rewriting the system prompt."
+image: /assets/images/og-debug.png
 tags: [ai-agents, debugging, workflows, production, evaluation, observability, reactree, aiden]
 permalink: /blog/best-way-to-debug-multi-step-ai-agent/
 faqs:
@@ -15,9 +16,22 @@ faqs:
     answer: "No. Prompt changes hide harness bugs. Fix typed failures, fan-out, and completion gates first; use prompts for role and output shape only."
   - question: "What artifacts do I need?"
     answer: "Session id, elapsed seconds, token totals, tool call list with outcomes, final Theory text, and ideally a single zip that holds the conversation plus tool payloads. To see which OpenAI API and how much thinking ran, check whether response ids start with resp_ or chatcmpl_, and whether usage lists reasoning tokens."
+  - question: "What are the best practices for debugging complex agentic workflows?"
+    answer: "Bring up one stage at a time against a golden gate, score committed tool effects rather than raw transcripts, and keep a single export per conversation so nested chains stay inspectable."
 ---
 
-When a multi-step agent gives a plausible but unsupported incident diagnosis, start from the execution record rather than rewriting its prompt. This procedure uses [Aiden](/blog/aiden-platform/) traces as an example, but applies wherever model calls and tool observations can be exported.
+## What is the best way to debug a multi-step AI agent?
+
+Freeze one golden prompt you can rematch cold, export one execution bundle for that run, grade what the model saw on each step, separate tools that paid rent from waste, then change one host gate or tool contract. Rewrite the system prompt only after the harness is honest.
+
+**Key takeaways**
+
+- One prompt + one zip beats prompt thrash.
+- Grade observations and tool outcomes per step.
+- Fix host contracts before prose.
+{: .key-takeaways}
+
+When a multi-step agent gives a plausible but unsupported incident diagnosis, start from the execution record rather than rewriting its prompt. This procedure uses [Aiden](/blog/aiden-platform/) traces as an example, but applies wherever model calls and tool observations can be exported. For multi-stage bring-up, see [debug agent workflows like hardware](/blog/bring-up-agent-workflows-like-hardware/).
 
 ---
 
@@ -28,7 +42,6 @@ When a multi-step agent gives a plausible but unsupported incident diagnosis, st
 3. Grade **per step**: what the model saw, which tools paid rent, which were waste.  
 4. Fix **host contracts** before prose.  
 5. Rematch the golden prompt and publish **absolute** wall/tokens/correctness.
-
 
 ---
 

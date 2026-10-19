@@ -2,7 +2,7 @@
 layout: page
 title: AI Agent Runtime
 permalink: /topics/ai-agent-runtime/
-description: "What is an AI agent runtime? The production loop for planning, tools, and context — vs a GenAI platform — and how we run it in Go."
+description: "Start here for AI agent runtime: plain definition, Go vs platform split, mid-run steer, and how we test the loop in CI."
 hub: ai-agent-runtime
 faqs:
   - question: "What is an AI agent runtime?"
@@ -16,6 +16,8 @@ faqs:
 ---
 
 An **AI agent runtime** is the process that actually runs the agent: plan, call tools, manage context, finish or fail. Most “agent” marketing skips this layer and sells a platform, a chatbot, or a notebook demo instead.
+
+**Start here if you only have five minutes:** [What Is an AI Agent Runtime?](/blog/what-is-an-ai-agent-runtime/) → [Go vs Python](/blog/why-go/) → [Testing pyramid](/blog/ai-agent-testing-pyramid/).
 
 **Fast path:** [Go agent runtime starter pack](/start/go-runtime/) (five posts).
 
@@ -42,6 +44,10 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [How to Test AI Agent Loops Without Overfitting](/blog/test-ai-agent-loops-with-evidence/) | Evidence and failure limits over tool-name bans |
 | [Multi-Agent Handoff Testing](/blog/multi-agent-handoff-testing-context-loss/) | Brief as contract; catch context loss at the seam |
 | [AI Agent Evals in CI/CD](/blog/ai-agent-evals-cicd-flakes/) | Best-attempt gates, missing-task fails, trial id = trace id |
+| [Supervised E2E Learning Loop](/blog/supervised-e2e-learning-loop/) | Automation proposes; humans merge, deploy, and re-assert |
+| [Two E2E Feedback Loops](/blog/e2e-coverage-and-failure-loops/) | Coverage gaps vs failure fixes as separate cadences |
+| [When Is an E2E Finding Closed?](/blog/closing-e2e-findings/) | Evidence planes and closure checklist, not PR count |
+| [E2E Learning Loop Blind Spots](/blog/e2e-learning-loop-blind-spots/) | Skip-as-success, top-N absence, merge without deploy |
 
 ## Related on this site
 

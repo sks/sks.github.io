@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+<title id="title">When an E2E finding is closed</title>
+<desc id="desc">Evidence planes feed a finding record. Closure requires human disposition, runnable asserts, real execution, deploy when needed, and post-change verification.</desc>
+<rect width="960" height="540" fill="#fffdf8"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17283c" text-anchor="middle">
+  <text x="480" y="40" font-size="24" font-weight="700">A PR URL is not a closed finding</text>
+
+  <rect x="30" y="70" width="120" height="56" rx="6" fill="#e3efff" stroke="#456077" stroke-width="1.5"/>
+  <text x="90" y="104" font-size="13" font-weight="700">CI</text>
+  <rect x="165" y="70" width="120" height="56" rx="6" fill="#e3efff" stroke="#456077" stroke-width="1.5"/>
+  <text x="225" y="104" font-size="13" font-weight="700">Harness</text>
+  <rect x="300" y="70" width="120" height="56" rx="6" fill="#e3efff" stroke="#456077" stroke-width="1.5"/>
+  <text x="360" y="104" font-size="13" font-weight="700">Agent</text>
+  <rect x="435" y="70" width="120" height="56" rx="6" fill="#e3efff" stroke="#456077" stroke-width="1.5"/>
+  <text x="495" y="104" font-size="13" font-weight="700">Runner</text>
+  <rect x="570" y="70" width="120" height="56" rx="6" fill="#e3efff" stroke="#456077" stroke-width="1.5"/>
+  <text x="630" y="104" font-size="13" font-weight="700">Obs</text>
+  <rect x="705" y="70" width="120" height="56" rx="6" fill="#e3efff" stroke="#456077" stroke-width="1.5"/>
+  <text x="765" y="104" font-size="13" font-weight="700">PR</text>
+  <rect x="840" y="70" width="90" height="56" rx="6" fill="#f7e5e8" stroke="#6d5060" stroke-width="1.5"/>
+  <text x="885" y="104" font-size="13" font-weight="700">Human</text>
+
+  <path d="M480 126v34" stroke="#8a96a8" stroke-width="2"/>
+
+  <rect x="180" y="170" width="600" height="70" rx="8" fill="#eef4fb" stroke="#456077" stroke-width="2"/>
+  <text x="480" y="200" font-size="16" font-weight="700">Finding record</text>
+  <text x="480" y="224" font-size="13">window · run/attempt · SHA · limits · unknowns · disposition</text>
+
+  <rect x="80" y="290" width="180" height="64" rx="6" fill="#dff0e8" stroke="#416657" stroke-width="1.5"/>
+  <text x="170" y="318" font-size="14" font-weight="700">1. Scope recorded</text>
+  <text x="170" y="338" font-size="12">what was unread</text>
+
+  <rect x="290" y="290" width="180" height="64" rx="6" fill="#dff0e8" stroke="#416657" stroke-width="1.5"/>
+  <text x="380" y="318" font-size="14" font-weight="700">2. Human decision</text>
+  <text x="380" y="338" font-size="12">not just a draft URL</text>
+
+  <rect x="500" y="290" width="180" height="64" rx="6" fill="#dff0e8" stroke="#416657" stroke-width="1.5"/>
+  <text x="590" y="318" font-size="14" font-weight="700">3. Runnable asserts</text>
+  <text x="590" y="338" font-size="12">positive and negative</text>
+
+  <rect x="710" y="290" width="180" height="64" rx="6" fill="#dff0e8" stroke="#416657" stroke-width="1.5"/>
+  <text x="800" y="318" font-size="14" font-weight="700">4. Checks executed</text>
+  <text x="800" y="338" font-size="12">skip ` success</text>
+
+  <rect x="180" y="390" width="240" height="64" rx="6" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+  <text x="300" y="418" font-size="14" font-weight="700">5. Exact revision live</text>
+  <text x="300" y="438" font-size="12">when product changed</text>
+
+  <rect x="460" y="390" width="320" height="64" rx="6" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+  <text x="620" y="418" font-size="14" font-weight="700">67. Re-assert · durable status</text>
+  <text x="620" y="438" font-size="12">resolved · open · contradicted</text>
+
+  <text x="480" y="505" font-size="15" fill="#344960">Track implemented gaps and verification latency, not PR count</text>
+</g>
+</svg>

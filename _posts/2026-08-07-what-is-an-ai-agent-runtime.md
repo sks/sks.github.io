@@ -1,12 +1,12 @@
 ---
 layout: post
-title: "What Is an AI Agent Runtime?"
+title: "What Is an AI Agent Runtime? (Not a Chatbot or Platform)"
 date: 2026-08-07 10:00:00 -0700
-last_modified_at: 2026-08-11 23:30:00 -0700
+last_modified_at: 2026-10-21 12:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 36
-description: "What is an AI agent runtime? The production loop that plans, calls tools, and manages context — not a GenAI platform, chatbot, or notebook demo."
-image: /assets/images/og-default.png
+description: "An AI agent runtime owns the plan→tool→context loop in production. Not a GenAI platform, chatbot, or notebook. Bounds, traces, and mid-run steer live here."
+image: /assets/images/diagrams/aug-runtime/agent-runtime-boundary.svg
 tags: [ai-agents, runtime, golang, production, aiden]
 permalink: /blog/what-is-an-ai-agent-runtime/
 faqs:
@@ -16,13 +16,24 @@ faqs:
     answer: "No. A runtime runs one agent's turn-taking. A platform adds tenancy, policy, durable workflows, and budgets for many teams."
   - question: "What fails when teams skip a real runtime?"
     answer: "Unbounded tool loops, invisible sessions, context that blows the bill, and no place to put mid-run human steer or fail-closed gates."
+  - question: "How should you test an agent runtime?"
+    answer: "Use a testing pyramid: fast stubbed bounds and contracts on every push, few live trials by opt-in or schedule, and honest CI that fails missing required tasks."
 ---
 
-An **AI agent runtime** is the software that owns an AI agent’s execution loop: the repeated model decision, optional tool call, and result-handling step. It plans the next step, calls tools, adds useful results to context, and decides when to stop. Everything else sits around that loop. That includes the chat UI, control plane, agent configuration, and notification channels.
+## What is an AI agent runtime?
+
+An **AI agent runtime** is the software that owns an AI agent’s execution loop: the repeated model decision, optional tool call, and result-handling step. It plans the next step, calls tools, adds useful results to context, and decides when to stop. Chat UIs, control planes, and notebooks sit around that loop. They are not the loop.
+
+**Key takeaways**
+
+- Runtime owns one agent’s plan → tool → context cycle and its stop rules.
+- Platform, chatbot, and notebook are different layers with different failure modes.
+- Production needs bounds, session traces, mid-run steer, and fail-closed gates.
+{: .key-takeaways}
 
 A one-call wrapper can still be useful; it does not need the controls required by a long-running tool loop. The distinction is about which component owns execution and its limits.
 
-This post gives the short definition and the practical boundaries. The longer engineering story explains [why we split runtime from platform](/blog/aiden-platform/) and [why we chose Go](/blog/why-go/). If you want a reading path, use the [Go agent runtime starter pack](/start/go-runtime/) or browse the [runtime topic hub](/topics/ai-agent-runtime/). Related SRE path: [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/).
+This post gives the short definition and the practical boundaries. The longer engineering story explains [why we split runtime from platform](/blog/aiden-platform/) and [why we chose Go](/blog/why-go/). For how we place checks around that loop, see the [AI agent testing pyramid](/blog/ai-agent-testing-pyramid/) and the [supervised E2E learning loop](/blog/supervised-e2e-learning-loop/). Reading paths: [Go agent runtime starter pack](/start/go-runtime/), [runtime topic hub](/topics/ai-agent-runtime/). Related SRE path: [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/).
 
 ---
 
@@ -121,6 +132,7 @@ We wrote up the split in [AI Agent Runtime vs Platform](/blog/aiden-platform/). 
 
 - Definition and related posts: [AI runtime reading map](/topics/ai-agent-runtime/)
 - Language: [Go vs Python for AI agents](/blog/why-go/)
+- Testing the loop: [Testing pyramid](/blog/ai-agent-testing-pyramid/) · [Evals in CI/CD](/blog/ai-agent-evals-cicd-flakes/) · [Supervised E2E learning loop](/blog/supervised-e2e-learning-loop/)
 - On-call use: [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/) · [AI incident triage](/topics/ai-incident-triage/)
 - Multi-stage pipelines: [AI agent workflows](/topics/ai-agent-workflows/)
 

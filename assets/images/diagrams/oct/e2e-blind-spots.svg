@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+<title id="title">E2E learning loop blind spots</title>
+<desc id="desc">Eight common bookkeeping failures that leave a supervised learning loop open even when jobs look green.</desc>
+<rect width="960" height="540" fill="#fffdf8"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17283c" text-anchor="middle">
+  <text x="480" y="40" font-size="24" font-weight="700">Green jobs can still leave the loop open</text>
+
+  <rect x="40" y="70" width="210" height="100" rx="8" fill="#f7e5e8" stroke="#6d5060" stroke-width="1.5"/>
+  <text x="145" y="110" font-size="15" font-weight="700">Cadence mismatch</text>
+  <text x="145" y="135" font-size="13">feature scan `</text>
+  <text x="145" y="154" font-size="13">anomaly sweep</text>
+
+  <rect x="270" y="70" width="210" height="100" rx="8" fill="#f7e5e8" stroke="#6d5060" stroke-width="1.5"/>
+  <text x="375" y="110" font-size="15" font-weight="700">Top-N false absence</text>
+  <text x="375" y="135" font-size="13">unread pages `</text>
+  <text x="375" y="154" font-size="13">nothing failed</text>
+
+  <rect x="500" y="70" width="210" height="100" rx="8" fill="#f7e5e8" stroke="#6d5060" stroke-width="1.5"/>
+  <text x="605" y="110" font-size="15" font-weight="700">Skip as success</text>
+  <text x="605" y="135" font-size="13">green job with</text>
+  <text x="605" y="154" font-size="13">skipped suite</text>
+
+  <rect x="730" y="70" width="190" height="100" rx="8" fill="#f7e5e8" stroke="#6d5060" stroke-width="1.5"/>
+  <text x="825" y="110" font-size="15" font-weight="700">Fixture vs product</text>
+  <text x="825" y="135" font-size="13">missing creds</text>
+  <text x="825" y="154" font-size="13">labeled as bug</text>
+
+  <rect x="40" y="200" width="210" height="100" rx="8" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+  <text x="145" y="240" font-size="15" font-weight="700">Merge ` deploy</text>
+  <text x="145" y="265" font-size="13">SHA on main is</text>
+  <text x="145" y="284" font-size="13">not live yet</text>
+
+  <rect x="270" y="200" width="210" height="100" rx="8" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+  <text x="375" y="240" font-size="15" font-weight="700">Lost proposals</text>
+  <text x="375" y="265" font-size="13">plans never built</text>
+  <text x="375" y="284" font-size="13">or cleaned up</text>
+
+  <rect x="500" y="200" width="210" height="100" rx="8" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+  <text x="605" y="240" font-size="15" font-weight="700">Queue starvation</text>
+  <text x="605" y="265" font-size="13">non-FIFO cancel</text>
+  <text x="605" y="284" font-size="13">misses windows</text>
+
+  <rect x="730" y="200" width="190" height="100" rx="8" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+  <text x="825" y="240" font-size="15" font-weight="700">No re-verify</text>
+  <text x="825" y="265" font-size="13">merged without</text>
+  <text x="825" y="284" font-size="13">post-deploy run</text>
+
+  <rect x="120" y="350" width="720" height="100" rx="10" fill="#eef4fb" stroke="#456077" stroke-width="2"/>
+  <text x="480" y="390" font-size="17" font-weight="700">Operator fix</text>
+  <text x="480" y="420" font-size="14">Record windows and limits. Inspect scenario counts. Require disposition,</text>
+  <text x="480" y="442" font-size="14">exact-revision deploy, and a linked verification run before closing.</text>
+
+  <text x="480" y="505" font-size="15" fill="#344960">Most open loops are bookkeeping failures, not model failures</text>
+</g>
+</svg>

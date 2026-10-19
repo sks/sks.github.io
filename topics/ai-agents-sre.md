@@ -2,7 +2,7 @@
 layout: page
 title: AI Agents for SRE
 permalink: /topics/ai-agents-sre/
-description: "SRE AI agents for incident triage, diagnostics, and RCA — what actually helps on-call versus demo theater, plus observability and tokenomics."
+description: "SRE AI agents for incident triage, RCA, and on-call: what helps versus demo theater, plus observability, evals, and evidence gates."
 hub: ai-agents-sre
 faqs:
   - question: "What are SRE AI agents?"
@@ -20,6 +20,8 @@ faqs:
 ---
 
 **SRE AI agents** sit at the intersection of on-call pain and demo hype. Start with the **[SRE on-call starter pack](/start/sre-on-call/)** (five posts), or [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/) for the plain definition, then dig into triage, RCA, and observability below.
+
+**New here?** Definition → [incident triage hub](/topics/ai-incident-triage/) → [how we evaluate RCA](/blog/how-to-evaluate-ai-agent-root-cause-analysis/). For suite growth after live digs, see the [supervised E2E learning loop](/blog/supervised-e2e-learning-loop/).
 
 Also see [AI incident triage](/topics/ai-incident-triage/) for the on-call-specific landing page. Pocket checklists: [evidence-gated RCA](/checklists/evidence-gated-rca/) · [“done” checks](/checklists/agent-done/) · [SRE as service](/checklists/sre-as-service/).
 

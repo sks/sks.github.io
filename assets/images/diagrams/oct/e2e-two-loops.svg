@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" role="img" aria-labelledby="title desc">
+<title id="title">Two E2E feedback loops</title>
+<desc id="desc">Loop A turns product changes into coverage. Loop B turns observed failures into fixes and regression asserts. Keep them separate until a human joins the work.</desc>
+<rect width="960" height="520" fill="#fffdf8"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+  <text x="480" y="40" text-anchor="middle" font-size="24" font-weight="700">Two inputs. One human gate.</text>
+
+  <rect x="40" y="70" width="420" height="360" rx="12" fill="#eef8f3" stroke="#416657" stroke-width="2"/>
+  <text x="250" y="105" text-anchor="middle" font-size="20" font-weight="700">Loop A · coverage</text>
+  <text x="250" y="130" text-anchor="middle" font-size="14">product change ’ gap plan ’ asserts</text>
+
+  <rect x="70" y="155" width="360" height="48" rx="6" fill="#dff0e8" stroke="#416657" stroke-width="1.5"/>
+  <text x="250" y="185" text-anchor="middle" font-size="15">Scan recent user-visible commits</text>
+
+  <rect x="70" y="220" width="360" height="48" rx="6" fill="#dff0e8" stroke="#416657" stroke-width="1.5"/>
+  <text x="250" y="250" text-anchor="middle" font-size="15">Draft coverage plan or no-gap note</text>
+
+  <rect x="70" y="285" width="360" height="48" rx="6" fill="#dff0e8" stroke="#416657" stroke-width="1.5"/>
+  <text x="250" y="315" text-anchor="middle" font-size="15">Human ships runnable +/ asserts</text>
+
+  <rect x="70" y="350" width="360" height="48" rx="6" fill="#cfe8dc" stroke="#416657" stroke-width="1.5"/>
+  <text x="250" y="380" text-anchor="middle" font-size="15">Cadence run proves new coverage</text>
+
+  <rect x="500" y="70" width="420" height="360" rx="12" fill="#fff8ee" stroke="#80602f" stroke-width="2"/>
+  <text x="710" y="105" text-anchor="middle" font-size="20" font-weight="700">Loop B · failure</text>
+  <text x="710" y="130" text-anchor="middle" font-size="14">evidence ’ classify ’ fix ’ verify</text>
+
+  <rect x="530" y="155" width="360" height="48" rx="6" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+  <text x="710" y="185" text-anchor="middle" font-size="15">Inventory failures in a fixed window</text>
+
+  <rect x="530" y="220" width="360" height="48" rx="6" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+  <text x="710" y="250" text-anchor="middle" font-size="15">Correlate run, deploy, traces, logs</text>
+
+  <rect x="530" y="285" width="360" height="48" rx="6" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+  <text x="710" y="315" text-anchor="middle" font-size="15">Draft product or test fix (or none)</text>
+
+  <rect x="530" y="350" width="360" height="48" rx="6" fill="#f5e0b8" stroke="#80602f" stroke-width="1.5"/>
+  <text x="710" y="380" text-anchor="middle" font-size="15">Deploy exact SHA · re-assert</text>
+
+  <text x="480" y="480" text-anchor="middle" font-size="16" fill="#344960">Conflating the loops hides whether you missed a contract or a regression</text>
+</g>
+</svg>

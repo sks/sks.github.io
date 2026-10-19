@@ -2,7 +2,7 @@
 layout: page
 title: AI Incident Triage
 permalink: /topics/ai-incident-triage/
-description: "AI incident triage for SREs: what helps on-call gather context, form hypotheses, and draft RCA — without demo theater."
+description: "AI incident triage for SREs: gather context, form hypotheses, and judge trustworthy RCA without demo theater. Start with the hypothesis ladder."
 hub: ai-incident-triage
 faqs:
   - question: "What is AI incident triage?"
@@ -17,6 +17,8 @@ faqs:
 
 **AI for incident triage** is the easiest place to ship a demo that fails at 3 AM. These links separate what moved our response from what looked good in a slide deck.
 
+**Start here:** [Hypothesis ladder](/blog/hypothesis-ladder/) → [Evaluate AI RCA](/blog/how-to-evaluate-ai-agent-root-cause-analysis/) → [Curiosity before confidence](/blog/curiosity-before-confidence/).
+
 Part of the series [Building an Enterprise AI Agent Platform in Go](/series/enterprise-ai-agents-go/).
 
 ## Featured reading
@@ -24,6 +26,7 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | Piece | What you'll learn |
 |-------|-------------------|
 | [AI Incident Triage for SREs — What Actually Helps On-Call](https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call) | Practitioner take on on-call vs demo theater (canonical on StackGen) |
+| [How to Evaluate an AI Agent for Root Cause Analysis](/blog/how-to-evaluate-ai-agent-root-cause-analysis/) | Checklist so fluent RCA cannot hide hallucination |
 | [The Hypothesis Ladder](/blog/hypothesis-ladder/) | Identity and onset before deploy theories; prove then narrate |
 | [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/) | Structural gates so fluency cannot outrun evidence |
 | [AI Agent Root Cause Analysis — Curiosity Before Confidence](/blog/curiosity-before-confidence/) | Soft prompts do not stop bad RCA; hard gates do |
