@@ -17,6 +17,8 @@ faqs:
     answer: "They give you pause hooks (ToolGuardrail, interrupt, needsApproval). You still build the policy engine, shared store, attach path, GitOps, and tests yourself unless a platform already ships them."
   - question: "What does Aiden come pre-equipped with for policy?"
     answer: "Runtime Rego evaluation on tool calls, logic and intervention policy types, Terraform resources to create and attach policies, a dry-run evaluate API, and HITL approval."
+  - question: "What is the PDP vs PEP in Aiden?"
+    answer: "PDP is OPA evaluating Rego. PEP is the Guild runtime that builds the factsheet, calls OPA, and only then runs the tool or pauses for HITL."
 ---
 
 System prompts tell an agent to be careful. That is not how authorization works.
@@ -31,6 +33,27 @@ When an agent can open PRs, run shell, or call MCP tools, something outside the 
 {: .key-takeaways}
 
 ---
+
+![Aiden control plane versus data plane OPA architecture](/assets/images/diagrams/oct/aiden-policy-architecture.svg)
+
+*Control plane stores and attaches Rego. Data plane evaluates it on every tool call before side effects.*
+
+## Architecture: PDP, PEP, and the factsheet
+
+Classical authorization splits into two roles:
+
+| Role | Name | In Aiden |
+|------|------|----------|
+| **PDP** | Policy Decision Point | Embedded OPA evaluates Rego and returns allow / deny / ask |
+| **PEP** | Policy Enforcement Point | Guild runtime: build input, call OPA, then run the tool only on allow (or after HITL) |
+
+The LLM is never the PDP. It proposes a tool call. The PEP refuses to execute until the PDP answers.
+
+**Factsheet.** Before each tool run, the runtime builds a JSON `input` document (agent, timestamp, tool name and arguments, optional user / `policy_data` / skill). Rego reads that document only. No hidden prompt text. No trust in the model’s “I checked the rules.”
+
+**Attachment.** Policies are stored as versioned Rego (`sg_policy`). `sg_agent_policy_attachment` binds a policy UUID to an agent name. At runtime the PEP loads attached policies for that agent and evaluates them. Manage happens out of band (Terraform, API, UI). Enforce happens on the hot path.
+
+**Layers.** Tool-call OPA sits above the model and below the tool. Sandbox products such as [OpenShell](https://developer.nvidia.com/blog/run-autonomous-self-evolving-agents-more-safely-with-nvidia-openshell/) add filesystem / network / process isolation. Same industry vocabulary (deny by default, out-of-process policy). Different layers. Stack them when blast radius demands it ([defense in depth](/blog/defense-in-depth/)).
 
 ![DIY framework layers versus Aiden pre-built OPA policy path](/assets/images/diagrams/oct/diy-vs-aiden-policy.svg)
 

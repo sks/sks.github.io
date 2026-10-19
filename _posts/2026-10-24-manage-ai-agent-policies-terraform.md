@@ -12,7 +12,7 @@ faqs:
   - question: "How do you manage AI agent policies with Terraform?"
     answer: "Declare sg_policy with rego_source, then sg_agent_policy_attachment with agent_name and policy_id. Review with tofu plan before apply."
   - question: "What is the StackGen Terraform provider source?"
-    answer: "releases.stackgen.com/stackgen/stackgen. You need a tenant URL, token, and project id. Tokens never belong in git."
+    answer: "releases.stackgen.com/stackgen/stackgen at version 0.1.48. You need a tenant URL, personal access token, and workspace_id. Tokens never belong in git."
   - question: "Should policy type be tool_call or logic?"
     answer: "Use logic for allow/deny and intervention for approval_required. Older provider examples still show tool_call; solutions modules use logic and intervention."
   - question: "Does the Terraform attachment support priority?"
@@ -36,11 +36,25 @@ Manage AI agent policies as code the same way you manage infrastructure: Rego in
 
 *Names stay stable. Attachments reference the policy UUID.*
 
+## Architecture: control plane vs enforce path
+
+Terraform (and the Guild API) own the **control plane**:
+
+| Resource | Stores | Runtime effect |
+|----------|--------|----------------|
+| `sg_policy` | Rego text, type (`logic` / `intervention` / …), UUID | Available for evaluation |
+| `sg_agent` | Agent identity and config | Target for attachment |
+| `sg_agent_policy_attachment` | `(agent_name, policy_id, enabled)` | PEP includes that Rego for that agent |
+
+Nothing in this path runs the LLM. `tofu apply` only mutates stored policy and links. The **data plane** (factsheet → OPA → allow/deny/ask → tool) is unchanged until a live tool call happens. That split is why you can `opa test` offline, `tofu plan` the attach, and only then enable enforcement.
+
+Provider docs: [terraform-provider-stackgen](https://appcd-dev.github.io/terraform-provider-stackgen/) (pin **v0.1.48**). Prefer `workspace_id` on the provider; `org_id` / `project_id` are deprecated aliases.
+
 ## Why policy as code for agents?
 
 HashiCorp’s line for AI-driven infrastructure is “agent proposes, control plane governs.” Same split here: the model proposes a tool call; the platform policy decides. Putting Rego only in a UI click means the next incident has no PR to blame and no plan output to review.
 
-OpenShell and gateway products roll rules in **audit** then **enforce**. Aiden’s practical equivalent: prove the rule with `opa test`, create it disabled or on a non-prod agent first, then enable the attachment.
+OpenShell and gateway products roll rules in **audit** then **enforce**. Aiden’s practical equivalent: prove the rule with `opa test`, create it on a lab agent first, then enable the attachment on production agents.
 
 ## Provider setup
 

@@ -36,6 +36,23 @@ Time-based AI agent policies use OPA’s time builtins so tool permissions follo
 
 *Parse the factsheet clock. Do not invent a second time source in Rego if the platform already sent one.*
 
+## Architecture: time is an input field, not a prompt
+
+Time-based authorization is still the same PDP/PEP loop from [authorize](/blog/authorize-ai-agent-tool-calls-opa/). The only change is which factsheet fields Rego reads.
+
+| Source | Use |
+|--------|-----|
+| `input.timestamp` | Platform factsheet clock (RFC3339). Prefer this for business hours and freezes so `opa test` fixtures stay fixed. |
+| `time.parse_rfc3339_ns` | Turn that string into nanoseconds for `time.clock` / `time.weekday`. |
+| `time.now_ns` | Wall clock at evaluate time. Useful for skew or staleness checks; avoid as the only clock in unit tests. |
+
+Two postures share that architecture:
+
+1. **Allow-list hours** (`default allow := false`): every tool is denied unless the hour falls in a window.
+2. **Change freeze** (`default allow := true`): most tools pass; change actions fail during weekday business hours.
+
+Both are `logic` policies. Attach them like any other Rego. They do not need a special runtime mode.
+
 ## Why prompts fail at “only during business hours”
 
 A persona line that says “do not deploy after 5pm” is advice. An agent investigating an outage at 02:00 will still reach for `kubectl apply` if that tool is available. Time has to be a field on the enforcement input, not a hope in the system prompt.

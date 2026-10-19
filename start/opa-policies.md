@@ -16,8 +16,9 @@ faqs:
 
 A short path for engineers who want **AI agent guardrails** with Open Policy Agent: decisions outside the model, managed as policy as code.
 
-**Try it free.** [Create an account](https://app.stackgen.com/) at [app.stackgen.com](https://app.stackgen.com/), then mint a [personal access token](https://app.stackgen.com/app/settings/personal-access-tokens) to run Terraform labs that create agents and policies.
+Architecture in one line: the LLM proposes a tool call; a **PEP** builds a factsheet; **OPA (PDP)** returns allow / deny / ask; only then does the tool run. Terraform manages policies and attachments on the control plane. Details and diagrams start in [Why Open Policy Agent for AI agent guardrails](/blog/why-opa-for-ai-agent-guardrails/).
 
+**Try it free.** [Create an account](https://app.stackgen.com/) at [app.stackgen.com](https://app.stackgen.com/), then mint a [personal access token](https://app.stackgen.com/app/settings/personal-access-tokens) to run Terraform labs that create agents and policies.
 ## The five posts
 
 1. **[Why Open Policy Agent for AI agent guardrails](/blog/why-opa-for-ai-agent-guardrails/).** Origin, advantages, Pydantic AI and other frameworks DIY vs Aiden pre-equipped.  

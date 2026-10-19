@@ -44,24 +44,41 @@ You write: “Never set GitHub secrets.” The model still emits a tool call wit
 
 ## Where does the enforcement point sit?
 
-In Aiden, the runtime builds a compact **factsheet** and asks OPA before execution:
+Architecture in one sequence:
+
+1. Model emits a tool call (name + arguments).
+2. **PEP** (Guild runtime) loads policies attached to that agent.
+3. Runtime builds a **factsheet** JSON and sends it to **PDP** (OPA).
+4. Rego returns allow, deny, or ask (`approval_required`).
+5. Only on allow (or after human approve) does the tool execute.
+
+The agent cannot skip step 2–4 by rephrasing. That is the whole point of an out-of-process gate. See the control-plane / data-plane diagram in [Why OPA for AI agent guardrails](/blog/why-opa-for-ai-agent-guardrails/).
+
+### Factsheet fields
 
 | Field | Meaning |
 |-------|---------|
-| `agent` | Which agent is acting |
+| `agent` | Which agent is acting (id, name, optional tags) |
 | `timestamp` | When the check ran (UTC RFC3339) |
 | `tool.name` | Tool about to run |
 | `tool.arguments` | Structured parameters (always an object) |
 | `reason` | Optional short justification from the agent |
-| `user` / `policy_data` | Optional caller roles and your static config |
+| `user` / `current_project` | Optional caller identity and project role |
+| `policy_data` | Optional static JSON you store on the policy |
+| `skill` | Optional loaded skill metadata |
+| `approver` / `requester` | Present on HITL resolve for who may Approve |
 
-Policy types you will use most:
+Prefer `policy_data` for custom config. A top-level `context` key is legacy and not what current evaluators emit by default.
 
-- `logic`: set `allow` (and optional `deny_reason`)
-- `intervention`: set `approval_required` for human-in-the-loop
-- `approval_authorization`: who may click Approve
+### Policy types
 
-This post stays on `logic` deny.
+| Type | Decision surface | Use when |
+|------|------------------|----------|
+| `logic` | `allow` / `deny_reason` | Hard allow or deny for this tool call |
+| `intervention` | `approval_required` | Pause for a human (ask) |
+| `approval_authorization` | rules on `input.approver` | Who may click Approve |
+
+This post stays on `logic` deny. HITL comes in [Guardrails and human approval](/blog/ai-agent-guardrails-human-approval/).
 
 ## Minimal Rego: deny `gh secret set`
 

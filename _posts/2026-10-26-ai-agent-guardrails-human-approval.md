@@ -36,6 +36,19 @@ Guardrails and human approval are not the same control.
 
 *Asking a human about `gh secret set` is the wrong control. Blocking it is the right one.*
 
+## Architecture: ask is a third PDP outcome
+
+Deny and allow finish in one evaluate. **Ask** splits the path:
+
+1. Tool call hits the PEP. Attached `intervention` Rego sets `approval_required`.
+2. Runtime **does not** execute the tool. It records a pending approval (requester, tool, arguments).
+3. A human decides. On that resolve, `approval_authorization` policies may evaluate `input.approver` (who is allowed to Approve).
+4. On approve, the PEP runs the original tool call. On reject, the agent gets a denial, not a silent success.
+
+That is why ask is not “a softer deny.” It is a durable pause with a second policy type for who may unpause. The LLM never self-approves.
+
+Composition: attach several policies to one agent. Typical layout is one `logic` deny catalog, one `intervention` HITL file, optional time-window `logic`, optional `approval_authorization`. Keep each file one concern.
+
 ## Why “just HITL everything” fails
 
 If every shell command asks for approval, people click Approve to clear the queue. That is the [HITL paradox](/blog/hitl-paradox/) in miniature. Save ask for high-impact, sometimes-legitimate actions. Hard-deny the ones that should never run unattended.
@@ -48,8 +61,6 @@ If every shell command asks for approval, people click Approve to clear the queu
 | deny | `logic` | `allow` is false |
 | ask | `intervention` | `approval_required` is true |
 | who may Approve | `approval_authorization` | rules on `input.approver` |
-
-You can attach more than one policy. Keep each file focused: one deny catalog, one HITL shell gate, one freeze window.
 
 ## HITL for destructive shell
 

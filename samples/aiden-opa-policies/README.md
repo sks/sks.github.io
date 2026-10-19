@@ -2,6 +2,8 @@
 
 Authorize AI agent tool calls with [Open Policy Agent](https://www.openpolicyagent.org/) (OPA) Rego, then manage those policies as code with the StackGen Terraform/OpenTofu provider.
 
+Architecture: the LLM proposes a tool; Aiden’s PEP builds a factsheet; OPA (PDP) returns allow / deny / ask; Terraform manages `sg_policy` + attachment on the control plane. Series opener: [Why Open Policy Agent for AI agent guardrails](/blog/why-opa-for-ai-agent-guardrails/).
+
 These folders are **teaching shapes**: short Rego, local `opa test`, and a minimal Terraform attach. They mirror patterns from [appcd-dev/solutions](https://github.com/appcd-dev/solutions) and Aiden e2e guardrails, shortened for learning.
 
 Companion posts:
