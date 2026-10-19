@@ -5,7 +5,7 @@ date: 2026-10-14 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 80
 description: "Close an E2E finding only after scope, human disposition, runnable asserts, real execution, and post-change verification. Track loop health, not PR volume."
-image: /assets/images/diagrams/oct/e2e-closing-findings.svg
+image: /assets/images/diagrams/oct/e2e-finding-closed.svg
 tags: [ai-agents, evaluation, testing, ci-cd, reliability, observability, aiden]
 permalink: /blog/closing-e2e-findings/
 faqs:
@@ -34,7 +34,7 @@ In this setup a *finding* is a durable record of a coverage gap or an observed f
 
 ---
 
-![Evidence planes feed a finding record; closure needs disposition, asserts, execution, deploy, and re-verification](/assets/images/diagrams/oct/e2e-closing-findings.svg)
+![Evidence planes feed a finding record; closure needs disposition, asserts, execution, deploy, and re-verification](/assets/images/diagrams/oct/e2e-finding-closed.svg)
 
 *Authority boundaries stop a draft URL from pretending to be remediation.*
 
