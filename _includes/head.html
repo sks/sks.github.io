@@ -7,6 +7,12 @@
   <script>
     (function () {
       try {
+        if (location.pathname.indexOf("//") !== -1) {
+          location.replace(location.pathname.replace(/\/{2,}/g, "/") + location.search + location.hash);
+          return;
+        }
+      } catch (e) {}
+      try {
         var stored = localStorage.getItem("pn-theme");
         var theme = stored;
         if (theme !== "light" && theme !== "dark") {

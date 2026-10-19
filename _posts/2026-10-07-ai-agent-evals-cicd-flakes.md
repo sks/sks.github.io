@@ -68,4 +68,4 @@ Weekly research tasks can mention the product under test without naming private 
 
 A red build is useful when it points to a real, identifiable failure; a green one is useful when it accounts for every required task and does not conceal unstable attempts.
 
-Previous: [Multi-Agent Handoff Testing](/blog/multi-agent-handoff-testing-context-loss/). Series hub: [Enterprise AI Agents in Go](/series/enterprise-ai-agents-go/).
+Previous: [Multi-Agent Handoff Testing](/blog/multi-agent-handoff-testing-context-loss/). Next: [Supervised E2E Learning Loop](/blog/supervised-e2e-learning-loop/).

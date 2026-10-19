@@ -1,14 +1,33 @@
 ---
 layout: post
-title: "How to Steer an AI Agent Mid-Run Without Starting Over"
+title: "How to Interrupt or Redirect an AI Agent Mid-Response"
 date: 2026-08-03 10:00:00 -0700
+last_modified_at: 2026-10-21 12:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 31
-description: "Can you interrupt or redirect an AI agent mid-response? Yes. How to send steer or cancel signals mid-stream and change the active task without restarting."
+description: "How to let users interrupt, redirect, or cancel an AI agent mid-stream without restarting. Apply steer at a safe boundary and verify the final answer addresses it."
 image: /assets/images/og-hitl.png
 tags: [ai-agents, hitl, human-in-the-loop, feedback, orchestration, ux, aiden, production]
 permalink: /blog/steer-ai-agents-mid-run/
+faqs:
+  - question: "How do I let users interrupt or redirect an AI agent mid-response?"
+    answer: "Accept the correction in the UI, deliver it at the next safe execution boundary between tool calls, and require the run to address that feedback before claiming done. Storing feedback without applying it is not steering."
+  - question: "How do I send cancel or steer signals to an AI agent mid-stream?"
+    answer: "Treat cancel and steer as distinct signals. Cancel stops work. Steer adds or replaces goal constraints at a checkpoint, keeps valid evidence when possible, and leaves policy and budgets in force."
+  - question: "Why does mid-run feedback sometimes have no effect?"
+    answer: "The runtime applied it too late, after the answer was already formed, or treated receipt as completion. Feedback must create completion debt the agent has to pay before finishing."
 ---
+
+## How do I let users interrupt or redirect an AI agent mid-response?
+
+Deliver the correction at the next safe checkpoint between tool calls, keep trusted evidence when the task is still the same, and refuse to mark the run done until the final answer addresses that feedback. A stored comment that never reaches the loop is not mid-run steering.
+
+**Key takeaways**
+
+- Interrupt and redirect need a safe boundary, not end-of-run delivery.
+- Cancel stops; steer changes direction under the same policy.
+- Receipt alone is not enough; the final result must show the change.
+{: .key-takeaways}
 
 **Mid-run steering** means adding an operator correction to an active AI agent—a model-driven process that can call tools—before it finishes. How can that correction affect the next step without discarding valid investigation work?
 
@@ -23,6 +42,10 @@ It simply reached the agent too late to matter.
 Receiving feedback is not enough. The runtime must deliver it at a safe execution boundary and check that the final response addresses it.
 
 ---
+
+## How do I send cancel or steer signals mid-stream?
+
+Cancel ends the active work. Steer injects additive (or explicit replace) constraints so the next reasoning turn uses them. Both signals should be visible in the audit trail. Only steer should keep prior tool results that still match the corrected goal.
 
 ## Why Restarting Is the Wrong Default
 
