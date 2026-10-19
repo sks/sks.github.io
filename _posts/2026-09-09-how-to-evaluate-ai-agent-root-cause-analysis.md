@@ -2,20 +2,34 @@
 layout: post
 title: "How to Evaluate an AI Agent for Root Cause Analysis"
 date: 2026-09-09 18:00:00 -0700
+last_modified_at: 2026-10-21 12:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 66
-description: "A checklist-first RCA eval: Theory, Unknowns, next action, measured signal, honesty about gaps — plus wall, tokens, and cost. Built from a live alert+logs bench."
-image: /assets/images/og-default.png
+description: "Know if an AI agent's RCA is trustworthy or hallucinating: checklist Theory, Unknowns, measured signals, and honesty about gaps before wall time or tokens."
+image: /assets/images/diagrams/sept/rca-eval.svg
 tags: [ai-agents, evaluation, sre, incident-response, rca, benchmarking, reactree, aiden]
 permalink: /blog/how-to-evaluate-ai-agent-root-cause-analysis/
 faqs:
   - question: "How do you evaluate an AI agent for root cause analysis?"
     answer: "Score the close against an explicit checklist (Theory disposition, Unknowns, next action, measured alert or query, numbers, honesty), then record wall time, tokens, and cost on a frozen prompt with live tools."
+  - question: "How do you know if an AI agent's root cause analysis is trustworthy or hallucinating?"
+    answer: "Require measured signals and named Unknowns. Reject fluent closes that invent series or skip required digs. Undetermined with a blocked query beats confident fiction on this rubric."
   - question: "Is pass/fail enough?"
     answer: "Binary pass hides partial honesty. Use a weighted checklist so ‘Undetermined with named blocked query’ beats ‘confident fiction’."
   - question: "What prompt shape works for RCA evals?"
     answer: "A dual-part job: one firing alert to triage, one related log or change plane to compare. Forces measurement and cross-linking instead of a single-paragraph vibe. Run both single-agent ReAct and hierarchical ReAcTree if your runtime supports both."
 ---
+
+## How do you know if an AI agent's RCA is trustworthy or hallucinating?
+
+Score the close against an explicit checklist before you look at latency or prose quality. Require a Theory disposition, named Unknowns, a next action, and measured alert or query evidence. Reward honest gaps. Reject confident fiction that invents series or skips required digs.
+
+**Key takeaways**
+
+- Trustworthiness is checklist coverage and honesty, not fluency.
+- Undetermined with a named blocked query beats a tidy wrong cause.
+- Rematch the frozen prompt after every harness change.
+{: .key-takeaways}
 
 Root cause analysis (RCA) is an explanation of what caused an incident, supported by measurements and a mechanism. An agent can produce a fluent explanation without having checked the relevant system. A frozen prompt and explicit rubric make that difference inspectable.
 
@@ -28,7 +42,6 @@ Root cause analysis (RCA) is an explanation of what caused an incident, supporte
 - Then record wall, tokens, USD.  
 - Reject confident closes that invent series. Reward honest Unknowns with named gaps.  
 - Rematch after every harness change — and across orchestration shapes if you ship both.
-
 
 ---
 

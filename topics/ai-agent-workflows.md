@@ -2,7 +2,7 @@
 layout: page
 title: AI Agent Workflows
 permalink: /topics/ai-agent-workflows/
-description: "How to debug multi-stage AI agent workflows: bring up one stage at a time, evidence-gated orchestration, and verification for enterprise pipelines."
+description: "Debug and verify multi-stage AI agent workflows: stage bring-up, evidence gates, evals, and a supervised E2E learning loop that grows coverage."
 hub: ai-agent-workflows
 faqs:
   - question: "What are AI agent workflows?"
@@ -59,5 +59,9 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 | [How to Test AI Agent Loops Without Overfitting](/blog/test-ai-agent-loops-with-evidence/) | Evidence completeness over name-ban loop detection |
 | [Multi-Agent Handoff Testing](/blog/multi-agent-handoff-testing-context-loss/) | Short brief contracts; mutation tests for context loss |
 | [AI Agent Evals in CI/CD](/blog/ai-agent-evals-cicd-flakes/) | Opt-in suites, best attempt, fail missing baseline tasks |
+| [Supervised E2E Learning Loop](/blog/supervised-e2e-learning-loop/) | Draft PRs are proposals; humans close with deploy and re-assert |
+| [Two E2E Feedback Loops](/blog/e2e-coverage-and-failure-loops/) | Product-change coverage vs failure RCA as separate loops |
+| [When Is an E2E Finding Closed?](/blog/closing-e2e-findings/) | Authority boundaries and a seven-point closure checklist |
+| [E2E Learning Loop Blind Spots](/blog/e2e-learning-loop-blind-spots/) | Skip-as-success and other bookkeeping failures |
 
 {% include subscribe.html %}
