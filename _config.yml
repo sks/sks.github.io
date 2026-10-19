@@ -43,6 +43,15 @@ defaults:
     values:
       layout: "post"
       author: "Sabith K S"
+  # Keep thin / non-content paths out of jekyll-sitemap if they are ever published.
+  - scope:
+      path: "samples"
+    values:
+      sitemap: false
+  - scope:
+      path: "terraform"
+    values:
+      sitemap: false
 
 header_pages:
   - series/enterprise-ai-agents-go.md
@@ -51,8 +60,14 @@ header_pages:
 # Talk source packs (Marp decks, transcripts, demo YAML) stay in git for
 # GitHub browsing. Only talks/index.md is a published page — unlisted
 # (not in header_pages or post cross-links). Direct URL: /talks/
+#
+# samples/ and terraform/ stay in git for clone/ops, but are not site pages.
+# Publishing their README.md files inflated sitemap.xml with non-canonical
+# teaching/infra URLs (Google: include only URLs you want in search results).
 exclude:
   - talks/conf42-observability-2026/
+  - samples/
+  - terraform/
 markdown: kramdown
 highlighter: rouge
 permalink: /blog/:title/

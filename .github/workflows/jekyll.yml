@@ -65,7 +65,22 @@ jobs:
 
           sitemap_path = Path("sitemap.xml")
           urls = re.findall(r"<loc>([^<]+)</loc>", sitemap_path.read_text(encoding="utf-8"))
-          urls = sorted({url.strip() for url in urls if url.strip()})
+          # Index content URLs only (match Google sitemap guidance: pages you want discovered).
+          skip_prefixes = (
+              "/samples/",
+              "/terraform/",
+              "/assets/",
+          )
+          cleaned = []
+          for url in urls:
+              url = url.strip()
+              if not url:
+                  continue
+              path = url.split("https://productionnotes.dev", 1)[-1] or "/"
+              if any(path.startswith(p) for p in skip_prefixes):
+                  continue
+              cleaned.append(url)
+          urls = sorted(set(cleaned))
           if not urls:
               print("no URLs found in sitemap.xml", file=sys.stderr)
               sys.exit(1)

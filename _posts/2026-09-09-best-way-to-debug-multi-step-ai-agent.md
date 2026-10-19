@@ -2,7 +2,7 @@
 layout: post
 title: "Best Way to Debug a Multi-Step AI Agent in Production"
 date: 2026-09-09 14:00:00 -0700
-last_modified_at: 2026-10-21 12:00:00 -0700
+last_modified_at: 2026-10-18 12:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 64
 description: "Best way to debug a multi-step AI agent: freeze one golden prompt, export one zip, grade each step’s observations, fix host gates before rewriting the system prompt."
