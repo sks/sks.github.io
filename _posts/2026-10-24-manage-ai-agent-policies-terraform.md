@@ -2,6 +2,7 @@
 layout: post
 title: "Manage AI agent policies as code with Terraform"
 date: 2026-10-24 10:00:00 -0700
+last_modified_at: 2026-10-19 12:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 84
 description: "Policy as code for AI agent guardrails: create Rego with sg_policy, attach with sg_agent_policy_attachment, review with plan and apply."

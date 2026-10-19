@@ -2,6 +2,7 @@
 layout: post
 title: "Authorize AI agent tool calls with OPA"
 date: 2026-10-23 10:00:00 -0700
+last_modified_at: 2026-10-19 12:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 83
 description: "Open Policy Agent guardrails for AI agents: deny by default where it matters, enforce before tool execution, outside the model. Includes a gh secret set deny lab."

@@ -4,25 +4,34 @@ sitemap: false
 ---
 # Production Notes
 
-> Enterprise AI agent engineering in Go — production runtimes, workflows, and SRE automation. By Sabith K S, Principal Engineer at StackGen.
+> Practitioner notes on production AI agents: evals, guardrails, SRE investigation, and Go runtimes. By Sabith K S, Principal Engineer at StackGen.
 
-Written by a practitioner shipping agent infrastructure in production. Prefer the Start here and Topics sections first; Recent posts and All posts follow.
+Prefer Start here and Featured arcs first. Topics, Recent posts, and All posts follow.
 
 ## Start here
 
+- [Agent evals starter pack]({{ "/start/agent-evals/" | absolute_url }}): Testing pyramid, separate grader, and a supervised E2E learning loop humans close with deploy and re-assert.
+- [AI agent guardrails with OPA starter pack]({{ "/start/opa-policies/" | absolute_url }}): Authorize tool calls with Open Policy Agent, manage policies as code, time windows, and human approval.
+- [SRE as service starter pack]({{ "/start/sre-as-service/" | absolute_url }}): Five posts on AI investigation as a service product for on-call, not an engineering credibility project.
 - [SRE on-call starter pack]({{ "/start/sre-on-call/" | absolute_url }}): Five posts on triage, RCA, and observability for on-call.
 - [Go agent runtime starter pack]({{ "/start/go-runtime/" | absolute_url }}): Five posts on runtime definition, Go vs Python, and platform split.
-- [Building an Enterprise AI Agent Platform in Go]({{ "/series/enterprise-ai-agents-go/" | absolute_url }}): Practitioner series on production AI agents in Go — runtime design, workflows, SRE triage, and platform lessons.
+- [Building an Enterprise AI Agent Platform in Go]({{ "/series/enterprise-ai-agents-go/" | absolute_url }}): Practitioner series on production AI agents in Go: runtime design, workflows, SRE triage, and platform lessons.
+- [Service Rendered Efficiently]({{ "/series/service-rendered-efficiently/" | absolute_url }}): Sibling series on service culture, investigation product decisions, and operator outcomes.
 - [What Is an AI Agent Runtime?]({{ "/blog/what-is-an-ai-agent-runtime/" | absolute_url }}): Plain definition of the production agent loop vs platform, chatbot, or notebook demo.
-- [What Are SRE AI Agents?]({{ "/blog/what-are-sre-ai-agents/" | absolute_url }}): SRE AI agents for triage, RCA, and bounded autonomy — not demo theater.
-- [Python vs Go for AI Agents — Why We Chose Go]({{ "/blog/why-go/" | absolute_url }}): Go vs Python for production agent runtimes — concurrency, deployment, and when Python still wins.
-- [How to Debug Multi-Step AI Agent Workflows]({{ "/blog/bring-up-agent-workflows-like-hardware/" | absolute_url }}): Bring up multi-stage agent pipelines one stage at a time against a golden gate.
-- [AI Incident Triage for SREs — What Actually Helps On-Call](https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call): What helps on-call versus demo theater (canonical copy on StackGen).
+- [What Are SRE AI Agents?]({{ "/blog/what-are-sre-ai-agents/" | absolute_url }}): SRE AI agents for triage, RCA, and bounded autonomy, not demo theater.
+- [Python vs Go for AI Agents — Why We Chose Go]({{ "/blog/why-go/" | absolute_url }}): Go vs Python for production agent runtimes: concurrency, deployment, and when Python still wins.
+
+## Featured arcs
+
+- [Agent evals and supervised E2E]({{ "/start/agent-evals/" | absolute_url }}): What belongs in CI, why the grader stays separate, and how coverage grows with human-gated merge, deploy, and re-assert.
+- [AI agent guardrails with OPA]({{ "/start/opa-policies/" | absolute_url }}): Policy engine outside the model: allow, deny, ask, Terraform attach, time rules.
+- [Service Rendered Efficiently]({{ "/series/service-rendered-efficiently/" | absolute_url }}): Treat AI investigation as a service product for the teams you support.
 
 ## Checklists
 
 - [Evidence-gated RCA checklist]({{ "/checklists/evidence-gated-rca/" | absolute_url }}): Prove with receipts before narrating.
 - [“Is the agent task done?” checklist]({{ "/checklists/agent-done/" | absolute_url }}): Completion checks that do not self-grade.
+- [SRE as service checklist]({{ "/checklists/sre-as-service/" | absolute_url }}): Ten yes/no questions for service-shaped AI investigation.
 
 ## Topics
 
@@ -33,7 +42,7 @@ Written by a practitioner shipping agent infrastructure in production. Prefer th
 
 ## Recent posts
 
-{% assign recent_posts = site.posts | slice: 0, 8 %}
+{% assign recent_posts = site.posts | slice: 0, 12 %}
 {% for post in recent_posts %}
 {% unless post.sitemap == false %}
 - [{{ post.title }}]({{ post.url | absolute_url }}): {{ post.description }}

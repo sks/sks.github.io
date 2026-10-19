@@ -2,7 +2,7 @@
 layout: post
 title: "How to Evaluate an AI Agent for Root Cause Analysis"
 date: 2026-09-09 18:00:00 -0700
-last_modified_at: 2026-10-21 12:00:00 -0700
+last_modified_at: 2026-10-18 12:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 66
 description: "Know if an AI agent's RCA is trustworthy or hallucinating: checklist Theory, Unknowns, measured signals, and honesty about gaps before wall time or tokens."
