@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+<title id="title">Framework pause hook versus Aiden pre-built policy</title>
+<desc id="desc">Left: DIY stacks assemble guardrails, OPA, attach, and GitOps. Right: Aiden ships the policy engine, attachment, Terraform, and HITL path.</desc>
+<defs>
+  <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0 0L10 5L0 10Z" fill="#255d78"/>
+  </marker>
+</defs>
+<rect width="960" height="540" fill="#fffdf8"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+  <text x="480" y="38" text-anchor="middle" font-size="22" font-weight="700">Pause hook vs policy platform</text>
+
+  <rect x="36" y="66" width="430" height="420" rx="14" fill="#fff8ee" stroke="#80602f" stroke-width="2"/>
+  <text x="251" y="98" text-anchor="middle" font-size="18" font-weight="700">DIY (Pydantic AI, LangGraph, &)</text>
+  <text x="251" y="122" text-anchor="middle" font-size="13">you wire each layer</text>
+
+  <rect x="66" y="148" width="370" height="44" rx="8" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+  <text x="251" y="176" text-anchor="middle" font-size="14">1. Framework ToolGuardrail / interrupt</text>
+  <path d="M251 192V208" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="66" y="212" width="370" height="44" rx="8" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+  <text x="251" y="240" text-anchor="middle" font-size="14">2. Bolt on OPA or hand-rolled rules</text>
+  <path d="M251 256V272" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="66" y="276" width="370" height="44" rx="8" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+  <text x="251" y="304" text-anchor="middle" font-size="14">3. Shared store, attach, evaluate API</text>
+  <path d="M251 320V336" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="66" y="340" width="370" height="44" rx="8" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+  <text x="251" y="368" text-anchor="middle" font-size="14">4. GitOps + opa test in your CI</text>
+  <path d="M251 384V400" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="66" y="404" width="370" height="52" rx="8" fill="#f5e0b8" stroke="#80602f" stroke-width="1.5"/>
+  <text x="251" y="435" text-anchor="middle" font-size="14" font-weight="700">5. Still your control plane</text>
+
+  <rect x="494" y="66" width="430" height="420" rx="14" fill="#eef8f3" stroke="#416657" stroke-width="2"/>
+  <text x="709" y="98" text-anchor="middle" font-size="18" font-weight="700">Aiden pre-equipped</text>
+  <text x="709" y="122" text-anchor="middle" font-size="13">platform owns the decision path</text>
+
+  <rect x="524" y="148" width="370" height="44" rx="8" fill="#dff0e8" stroke="#416657" stroke-width="1.5"/>
+  <text x="709" y="176" text-anchor="middle" font-size="14">1. Tool call builds a factsheet</text>
+  <path d="M709 192V208" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="524" y="212" width="370" height="44" rx="8" fill="#dff0e8" stroke="#416657" stroke-width="1.5"/>
+  <text x="709" y="240" text-anchor="middle" font-size="14">2. Embedded OPA evaluates Rego</text>
+  <path d="M709 256V272" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="524" y="276" width="370" height="44" rx="8" fill="#dff0e8" stroke="#416657" stroke-width="1.5"/>
+  <text x="709" y="304" text-anchor="middle" font-size="14">3. allow / deny / ask (HITL)</text>
+  <path d="M709 320V336" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="524" y="340" width="370" height="44" rx="8" fill="#dff0e8" stroke="#416657" stroke-width="1.5"/>
+  <text x="709" y="368" text-anchor="middle" font-size="14">4. sg_policy + attachment in Terraform</text>
+  <path d="M709 384V400" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="524" y="404" width="370" height="52" rx="8" fill="#cfe8dc" stroke="#416657" stroke-width="1.5"/>
+  <text x="709" y="435" text-anchor="middle" font-size="14" font-weight="700">5. Catalogs, evaluate API, audit</text>
+</g>
+</svg>

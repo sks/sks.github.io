@@ -1,0 +1,12 @@
+{
+  "agent": {
+    "id": "demo-agent",
+    "name": "demo-agent"
+  },
+  "timestamp": "2026-07-16T12:30:00Z",
+  "tool": {
+    "name": "any_integration_any_tool",
+    "arguments": {}
+  },
+  "reason": "teaching fixture: lunch window should deny under tool-hours allowlist"
+}

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+<title id="title">Allow ask deny decision tree for agent tools</title>
+<desc id="desc">Hard deny for secrets and exfil. Ask humans for destructive but reversible actions. Allow routine reads.</desc>
+<defs>
+  <marker id="arrow4" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0 0L10 5L0 10Z" fill="#255d78"/>
+  </marker>
+</defs>
+<rect width="960" height="540" fill="#fffdf8"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+  <text x="480" y="40" text-anchor="middle" font-size="22" font-weight="700">Allow · ask · deny</text>
+
+  <rect x="340" y="70" width="280" height="60" rx="10" fill="#e8f0f8" stroke="#255d78" stroke-width="2"/>
+  <text x="480" y="108" text-anchor="middle" font-size="15" font-weight="700">Incoming tool call</text>
+  <path d="M480 130V155" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow4)"/>
+
+  <rect x="300" y="160" width="360" height="55" rx="10" fill="#fff8ee" stroke="#80602f" stroke-width="2"/>
+  <text x="480" y="194" text-anchor="middle" font-size="14">Secret write or clear exfil?</text>
+
+  <path d="M300 188H140" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow4)"/>
+  <path d="M660 188H820" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow4)"/>
+
+  <rect x="40" y="220" width="200" height="90" rx="10" fill="#f5d4d4" stroke="#8a3a3a" stroke-width="2"/>
+  <text x="140" y="258" text-anchor="middle" font-size="16" font-weight="700">deny</text>
+  <text x="140" y="282" text-anchor="middle" font-size="13">gh secret set,</text>
+  <text x="140" y="300" text-anchor="middle" font-size="13">raw dumps</text>
+
+  <rect x="720" y="220" width="200" height="90" rx="10" fill="#fff0d1" stroke="#80602f" stroke-width="2"/>
+  <text x="820" y="250" text-anchor="middle" font-size="14">No ’ destructive</text>
+  <text x="820" y="272" text-anchor="middle" font-size="14">but reversible?</text>
+  <text x="820" y="294" text-anchor="middle" font-size="13">rm -rf, merge, destroy</text>
+  <path d="M820 310V340" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow4)"/>
+
+  <rect x="720" y="345" width="200" height="70" rx="10" fill="#fff0d1" stroke="#80602f" stroke-width="2"/>
+  <text x="820" y="378" text-anchor="middle" font-size="16" font-weight="700">ask (HITL)</text>
+  <text x="820" y="400" text-anchor="middle" font-size="13">approval_required</text>
+
+  <path d="M480 215V340" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow4)"/>
+  <rect x="340" y="345" width="280" height="70" rx="10" fill="#cfe8dc" stroke="#416657" stroke-width="2"/>
+  <text x="480" y="378" text-anchor="middle" font-size="16" font-weight="700">allow</text>
+  <text x="480" y="400" text-anchor="middle" font-size="13">reads, status, safe lists</text>
+
+  <text x="480" y="470" text-anchor="middle" font-size="14">logic policies set allow. intervention policies set approval_required.</text>
+  <text x="480" y="494" text-anchor="middle" font-size="14">Map: allow ’ run · ask ’ pause · deny ’ block.</text>
+</g>
+</svg>

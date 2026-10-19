@@ -29,6 +29,14 @@ terraform/*_override.tf
 terraform/*_override.tf.json
 # Commit terraform/.terraform.lock.hcl after tofu init
 
+# Sample labs under samples/** (local secrets / state)
+samples/**/.terraform/
+samples/**/terraform.tfstate
+samples/**/terraform.tfstate.*
+samples/**/terraform.tfvars
+samples/**/*.auto.tfvars
+samples/**/.terraform.lock.hcl
+
 # Local secrets / noise (never commit)
 nohup.out
 **/.env
