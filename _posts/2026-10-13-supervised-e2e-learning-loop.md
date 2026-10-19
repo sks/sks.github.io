@@ -5,7 +5,7 @@ date: 2026-10-13 10:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 78
 description: "A supervised E2E learning loop makes agent suites stronger over time. Automation drafts coverage and fixes; humans merge, deploy, and re-assert. A draft PR is not closure."
-image: /assets/images/diagrams/oct/e2e-learning-loop.svg
+image: /assets/images/diagrams/oct/supervised-e2e-loop.svg
 tags: [ai-agents, evaluation, testing, ci-cd, reliability, aiden]
 permalink: /blog/supervised-e2e-learning-loop/
 faqs:
@@ -34,7 +34,7 @@ A *supervised E2E learning loop* turns two inputs into better coverage: product 
 
 ---
 
-![Product changes and runtime evidence feed draft PRs; humans merge tests and deploy fixes so the next cadence can prove them](/assets/images/diagrams/oct/e2e-learning-loop.svg)
+![Product changes and runtime evidence feed draft PRs; humans merge tests and deploy fixes so the next cadence can prove them](/assets/images/diagrams/oct/supervised-e2e-loop.svg)
 
 *Solid path: propose → review → merge → prove. Dashed return edges are what make it a loop.*
 

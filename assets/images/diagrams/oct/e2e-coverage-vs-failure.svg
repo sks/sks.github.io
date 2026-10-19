@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+  <title id="title">Two E2E feedback loops</title>
+  <desc id="desc">Loop A turns product changes into coverage. Loop B turns observed failures into fixes and regression asserts.</desc>
+  <rect width="960" height="560" fill="#fffdf8"/>
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="480" y="42" text-anchor="middle" font-size="26" font-weight="700">Two inputs. One human gate.</text>
+
+    <!-- Loop A -->
+    <rect x="30" y="70" width="440" height="400" rx="16" fill="#eef8f3" stroke="#416657" stroke-width="2"/>
+    <text x="250" y="108" text-anchor="middle" font-size="22" font-weight="700">Loop A: coverage</text>
+    <text x="250" y="134" text-anchor="middle" font-size="14">product change to gap plan to asserts</text>
+
+    <rect x="60" y="158" width="380" height="52" rx="10" fill="#dff0e8" stroke="#416657" stroke-width="1.5"/>
+    <text x="250" y="190" text-anchor="middle" font-size="16">1. Scan recent user-visible commits</text>
+    <polygon points="240,218 260,218 250,234" fill="#255d78"/>
+
+    <rect x="60" y="240" width="380" height="52" rx="10" fill="#dff0e8" stroke="#416657" stroke-width="1.5"/>
+    <text x="250" y="272" text-anchor="middle" font-size="16">2. Draft coverage plan or no-gap note</text>
+    <polygon points="240,300 260,300 250,316" fill="#255d78"/>
+
+    <rect x="60" y="322" width="380" height="52" rx="10" fill="#dff0e8" stroke="#416657" stroke-width="1.5"/>
+    <text x="250" y="354" text-anchor="middle" font-size="16">3. Human ships runnable + / - asserts</text>
+    <polygon points="240,382 260,382 250,398" fill="#255d78"/>
+
+    <rect x="60" y="404" width="380" height="48" rx="10" fill="#cfe8dc" stroke="#416657" stroke-width="2"/>
+    <text x="250" y="434" text-anchor="middle" font-size="16" font-weight="700">4. Cadence run proves coverage</text>
+
+    <!-- Loop B -->
+    <rect x="490" y="70" width="440" height="400" rx="16" fill="#fff8ee" stroke="#80602f" stroke-width="2"/>
+    <text x="710" y="108" text-anchor="middle" font-size="22" font-weight="700">Loop B: failure</text>
+    <text x="710" y="134" text-anchor="middle" font-size="14">evidence to classify to fix to verify</text>
+
+    <rect x="520" y="158" width="380" height="52" rx="10" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+    <text x="710" y="190" text-anchor="middle" font-size="16">1. Inventory failures in a fixed window</text>
+    <polygon points="700,218 720,218 710,234" fill="#255d78"/>
+
+    <rect x="520" y="240" width="380" height="52" rx="10" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+    <text x="710" y="272" text-anchor="middle" font-size="16">2. Correlate run, deploy, traces, logs</text>
+    <polygon points="700,300 720,300 710,316" fill="#255d78"/>
+
+    <rect x="520" y="322" width="380" height="52" rx="10" fill="#fff0d1" stroke="#80602f" stroke-width="1.5"/>
+    <text x="710" y="354" text-anchor="middle" font-size="16">3. Draft product or test fix (or none)</text>
+    <polygon points="700,382 720,382 710,398" fill="#255d78"/>
+
+    <rect x="520" y="404" width="380" height="48" rx="10" fill="#f5e0b8" stroke="#80602f" stroke-width="2"/>
+    <text x="710" y="434" text-anchor="middle" font-size="16" font-weight="700">4. Deploy exact SHA, then re-assert</text>
+
+    <text x="480" y="520" text-anchor="middle" font-size="16" fill="#344960">Conflating the loops hides whether you missed a contract or a regression</text>
+  </g>
+</svg>

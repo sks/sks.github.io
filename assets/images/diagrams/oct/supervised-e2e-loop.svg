@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" role="img" aria-labelledby="title desc">
+  <title id="title">Supervised E2E learning loop</title>
+  <desc id="desc">Product changes and scheduled tests feed draft PRs. Humans review and merge. Merged tests re-enter cadence. Product fixes deploy and re-assert.</desc>
+  <rect width="960" height="600" fill="#fffdf8"/>
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="480" y="44" text-anchor="middle" font-size="26" font-weight="700">Automation proposes. Humans close the loop.</text>
+
+    <!-- row 1 -->
+    <rect x="40" y="78" width="190" height="86" rx="12" fill="#e3efff" stroke="#456077" stroke-width="2"/>
+    <text x="135" y="114" text-anchor="middle" font-size="17" font-weight="700">Product changes</text>
+    <text x="135" y="140" text-anchor="middle" font-size="14">commits and PRs</text>
+
+    <line x1="230" y1="121" x2="248" y2="121" stroke="#255d78" stroke-width="3"/>
+    <polygon points="262,121 242,111 242,131" fill="#255d78"/>
+
+    <rect x="270" y="78" width="190" height="86" rx="12" fill="#dff0e8" stroke="#416657" stroke-width="2"/>
+    <text x="365" y="114" text-anchor="middle" font-size="17" font-weight="700">Scheduled E2E</text>
+    <text x="365" y="140" text-anchor="middle" font-size="14">merge / nightly / weekly</text>
+
+    <line x1="460" y1="121" x2="478" y2="121" stroke="#255d78" stroke-width="3"/>
+    <polygon points="492,121 472,111 472,131" fill="#255d78"/>
+
+    <rect x="500" y="78" width="190" height="86" rx="12" fill="#fff0d1" stroke="#80602f" stroke-width="2"/>
+    <text x="595" y="114" text-anchor="middle" font-size="17" font-weight="700">Runtime evidence</text>
+    <text x="595" y="140" text-anchor="middle" font-size="14">CI / traces / logs</text>
+
+    <line x1="690" y1="121" x2="708" y2="121" stroke="#255d78" stroke-width="3"/>
+    <polygon points="722,121 702,111 702,131" fill="#255d78"/>
+
+    <rect x="730" y="78" width="190" height="86" rx="12" fill="#f7e5e8" stroke="#6d5060" stroke-width="2"/>
+    <text x="825" y="114" text-anchor="middle" font-size="17" font-weight="700">Draft PRs</text>
+    <text x="825" y="140" text-anchor="middle" font-size="14">coverage or fix</text>
+
+    <!-- down from draft PRs into human gate -->
+    <line x1="825" y1="164" x2="825" y2="200" stroke="#255d78" stroke-width="3"/>
+    <line x1="825" y1="200" x2="480" y2="200" stroke="#255d78" stroke-width="3"/>
+    <line x1="480" y1="200" x2="480" y2="228" stroke="#255d78" stroke-width="3"/>
+    <polygon points="470,228 490,228 480,246" fill="#255d78"/>
+
+    <rect x="150" y="254" width="660" height="90" rx="14" fill="#eef4fb" stroke="#456077" stroke-width="2"/>
+    <text x="480" y="294" text-anchor="middle" font-size="22" font-weight="700">Human review, implement, merge</text>
+    <text x="480" y="322" text-anchor="middle" font-size="15">Executable asserts and checks that actually run</text>
+
+    <!-- split down -->
+    <line x1="300" y1="344" x2="300" y2="376" stroke="#255d78" stroke-width="3"/>
+    <polygon points="290,376 310,376 300,394" fill="#255d78"/>
+    <line x1="660" y1="344" x2="660" y2="376" stroke="#255d78" stroke-width="3"/>
+    <polygon points="650,376 670,376 660,394" fill="#255d78"/>
+
+    <rect x="110" y="402" width="280" height="86" rx="12" fill="#dff0e8" stroke="#416657" stroke-width="2"/>
+    <text x="250" y="438" text-anchor="middle" font-size="16" font-weight="700">Merged tests re-enter cadence</text>
+    <text x="250" y="464" text-anchor="middle" font-size="14">next nightly proves execution</text>
+
+    <rect x="570" y="402" width="280" height="86" rx="12" fill="#fff0d1" stroke="#80602f" stroke-width="2"/>
+    <text x="710" y="438" text-anchor="middle" font-size="16" font-weight="700">Deploy exact revision</text>
+    <text x="710" y="464" text-anchor="middle" font-size="14">then re-assert on that build</text>
+
+    <line x1="250" y1="504" x2="710" y2="504" stroke="#255d78" stroke-width="2.5" stroke-dasharray="8 6"/>
+    <text x="480" y="532" text-anchor="middle" font-size="14" fill="#344960">dashed return: verified change feeds the next run</text>
+    <text x="480" y="568" text-anchor="middle" font-size="16" fill="#344960">Open loop if draft-only, plan-only, skipped checks, or never deployed</text>
+  </g>
+</svg>
