@@ -52,7 +52,7 @@ Architecture in one sequence:
 4. Rego returns allow, deny, or ask (`approval_required`).
 5. Only on allow (or after human approve) does the tool execute.
 
-The agent cannot skip step 2–4 by rephrasing. That is the whole point of an out-of-process gate. See the control-plane / data-plane diagram in [Why OPA for AI agent guardrails](/blog/why-opa-for-ai-agent-guardrails/).
+The agent cannot skip steps 2 through 4 by rephrasing. That is the whole point of an out-of-process gate. See the control-plane / data-plane diagram in [Why OPA for AI agent guardrails](/blog/why-opa-for-ai-agent-guardrails/).
 
 ### Factsheet fields
 
