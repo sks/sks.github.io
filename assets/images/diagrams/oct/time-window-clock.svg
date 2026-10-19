@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+<title id="title">Time-based AI agent policy windows</title>
+<desc id="desc">UTC day split into allow morning, deny lunch, allow afternoon, and deny off-hours. Freeze windows deny change actions on weekdays.</desc>
+<rect width="960" height="540" fill="#fffdf8"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+  <text x="480" y="40" text-anchor="middle" font-size="22" font-weight="700">Time-based tool permissions (UTC)</text>
+
+  <rect x="60" y="90" width="200" height="140" rx="12" fill="#cfe8dc" stroke="#416657" stroke-width="2"/>
+  <text x="160" y="145" text-anchor="middle" font-size="16" font-weight="700">Allow</text>
+  <text x="160" y="172" text-anchor="middle" font-size="14">09:0012:00</text>
+  <text x="160" y="196" text-anchor="middle" font-size="13">morning window</text>
+
+  <rect x="280" y="90" width="200" height="140" rx="12" fill="#f5d4d4" stroke="#8a3a3a" stroke-width="2"/>
+  <text x="380" y="145" text-anchor="middle" font-size="16" font-weight="700">Deny</text>
+  <text x="380" y="172" text-anchor="middle" font-size="14">12:0014:00</text>
+  <text x="380" y="196" text-anchor="middle" font-size="13">lunch block</text>
+
+  <rect x="500" y="90" width="200" height="140" rx="12" fill="#cfe8dc" stroke="#416657" stroke-width="2"/>
+  <text x="600" y="145" text-anchor="middle" font-size="16" font-weight="700">Allow</text>
+  <text x="600" y="172" text-anchor="middle" font-size="14">14:0017:00</text>
+  <text x="600" y="196" text-anchor="middle" font-size="13">afternoon window</text>
+
+  <rect x="720" y="90" width="180" height="140" rx="12" fill="#f5d4d4" stroke="#8a3a3a" stroke-width="2"/>
+  <text x="810" y="145" text-anchor="middle" font-size="16" font-weight="700">Deny</text>
+  <text x="810" y="172" text-anchor="middle" font-size="14">off-hours</text>
+  <text x="810" y="196" text-anchor="middle" font-size="13">everything else</text>
+
+  <rect x="60" y="280" width="840" height="180" rx="12" fill="#e8f0f8" stroke="#255d78" stroke-width="2"/>
+  <text x="480" y="325" text-anchor="middle" font-size="17" font-weight="700">Change freeze (separate policy)</text>
+  <text x="480" y="360" text-anchor="middle" font-size="14">MonFri 09:0017:59 UTC: deny deploy / apply / helm upgrade / kubectl apply</text>
+  <text x="480" y="390" text-anchor="middle" font-size="14">Reads and status can still pass. Parse input.timestamp with time.parse_rfc3339_ns.</text>
+  <text x="480" y="420" text-anchor="middle" font-size="14">Fixture timestamps in opa test so CI does not depend on wall clock.</text>
+</g>
+</svg>

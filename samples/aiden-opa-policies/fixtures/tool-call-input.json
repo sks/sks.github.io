@@ -1,0 +1,16 @@
+{
+  "agent": {
+    "id": "demo-agent",
+    "name": "demo-agent"
+  },
+  "timestamp": "2026-07-16T10:30:00Z",
+  "tool": {
+    "name": "github_execute_parallel",
+    "arguments": {
+      "commands": [
+        { "command": "gh issue list --limit 5" }
+      ]
+    }
+  },
+  "reason": "teaching fixture: safe read"
+}

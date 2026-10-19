@@ -77,4 +77,4 @@ The [pyramid](/blog/ai-agent-testing-pyramid/) still places checks at the cheape
 - [Applause functional testing 2026](https://www.applause.com/state-of-digital-quality-2026/functional-testing-report/) on self-healing that changes the rules
 - [Practical Test Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html) for the non-agent baseline that still applies
 
-Previous: [When Is an E2E Finding Actually Closed?](/blog/closing-e2e-findings/). Series hub: [Enterprise AI Agents in Go](/series/enterprise-ai-agents-go/).
+Previous: [When Is an E2E Finding Actually Closed?](/blog/closing-e2e-findings/). Next: [Why Open Policy Agent for AI agent guardrails](/blog/why-opa-for-ai-agent-guardrails/).

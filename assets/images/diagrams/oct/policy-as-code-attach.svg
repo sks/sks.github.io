@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+<title id="title">Policy as code create and attach flow</title>
+<desc id="desc">Rego file becomes sg_policy, then sg_agent_policy_attachment binds the policy UUID to an agent name.</desc>
+<defs>
+  <marker id="arrow3" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0 0L10 5L0 10Z" fill="#255d78"/>
+  </marker>
+</defs>
+<rect width="960" height="540" fill="#fffdf8"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+  <text x="480" y="42" text-anchor="middle" font-size="22" font-weight="700">Policy as code: create, then attach</text>
+
+  <rect x="50" y="100" width="180" height="100" rx="10" fill="#e8f0f8" stroke="#255d78" stroke-width="2"/>
+  <text x="140" y="140" text-anchor="middle" font-size="15" font-weight="700">policy.rego</text>
+  <text x="140" y="164" text-anchor="middle" font-size="13">on disk / in git</text>
+  <path d="M230 150H280" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow3)"/>
+
+  <rect x="280" y="100" width="180" height="100" rx="10" fill="#dff0e8" stroke="#416657" stroke-width="2"/>
+  <text x="370" y="140" text-anchor="middle" font-size="15" font-weight="700">sg_policy</text>
+  <text x="370" y="164" text-anchor="middle" font-size="13">UUID assigned</text>
+  <path d="M460 150H510" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow3)"/>
+
+  <rect x="510" y="100" width="200" height="100" rx="10" fill="#dff0e8" stroke="#416657" stroke-width="2"/>
+  <text x="610" y="132" text-anchor="middle" font-size="14" font-weight="700">sg_agent_policy</text>
+  <text x="610" y="154" text-anchor="middle" font-size="14" font-weight="700">_attachment</text>
+  <text x="610" y="178" text-anchor="middle" font-size="13">agent_name + policy_id</text>
+  <path d="M710 150H760" fill="none" stroke="#255d78" stroke-width="2" marker-end="url(#arrow3)"/>
+
+  <rect x="760" y="100" width="150" height="100" rx="10" fill="#cfe8dc" stroke="#416657" stroke-width="2"/>
+  <text x="835" y="148" text-anchor="middle" font-size="15" font-weight="700">Agent</text>
+  <text x="835" y="170" text-anchor="middle" font-size="13">enforced live</text>
+
+  <rect x="120" y="280" width="720" height="160" rx="12" fill="#fff8ee" stroke="#80602f" stroke-width="2"/>
+  <text x="480" y="320" text-anchor="middle" font-size="16" font-weight="700">Review path</text>
+  <text x="480" y="352" text-anchor="middle" font-size="14">1. opa test locally  ·  2. tofu plan  ·  3. tofu apply</text>
+  <text x="480" y="384" text-anchor="middle" font-size="14">Keep names stable. Attachments reference policy UUID, not name.</text>
+  <text x="480" y="416" text-anchor="middle" font-size="14">Test before enable. Never commit tokens.</text>
+</g>
+</svg>
