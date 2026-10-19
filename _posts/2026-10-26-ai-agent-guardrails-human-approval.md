@@ -2,6 +2,7 @@
 layout: post
 title: "Guardrails and human approval for AI agent tool calls"
 date: 2026-10-26 10:00:00 -0700
+last_modified_at: 2026-10-19 12:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 86
 description: "Allow, deny, or ask: OPA HITL for destructive shell, secret writes, and data exfiltration. Test with opa test before you ship."

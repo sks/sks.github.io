@@ -2,6 +2,7 @@
 layout: post
 title: "Time-based AI agent policies with OPA"
 date: 2026-10-25 10:00:00 -0700
+last_modified_at: 2026-10-19 12:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 85
 description: "Business hours and freeze-window Rego for AI agent tool permissions using input.timestamp and OPA time builtins."

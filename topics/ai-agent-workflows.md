@@ -21,6 +21,8 @@ faqs:
 
 These posts cover how we **bring up**, **orchestrate**, and **verify** production agent pipelines.
 
+Short path for evals and the supervised E2E loop: [Agent evals starter pack](/start/agent-evals/).
+
 A company-site version of the bring-up write-up also lives on StackGen: [How We Debug Multi-Stage AI Agent Workflows](https://stackgen.com/blog/how-we-debug-multi-stage-ai-agent-workflows). Primary deep-link on this site: [How We Debug Multi-Stage AI Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/).
 
 Part of the series [Building an Enterprise AI Agent Platform in Go](/series/enterprise-ai-agents-go/).

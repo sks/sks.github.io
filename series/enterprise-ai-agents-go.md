@@ -8,7 +8,7 @@ faqs:
   - question: "Why build an enterprise AI agent platform in Go?"
     answer: "We chose Go for its types, deployment model, and concurrency support. The series explains that choice alongside its costs, including access to Python-first AI libraries; it is not a general recommendation to switch languages."
   - question: "Where should I start reading?"
-    answer: "Use a starter pack: Go agent runtime (definition, why Go, platform split) or SRE on-call (triage, RCA, observability). Then open the searchable series archive and follow series_order. Each post is self-contained but builds on prior lessons."
+    answer: "Use a starter pack: agent evals (pyramid and supervised E2E), Go agent runtime (definition, why Go, platform split), or SRE on-call (triage, RCA, observability). Then open the searchable series archive and follow series_order. Each post is self-contained but builds on prior lessons."
   - question: "Who is this series for?"
     answer: "Engineers interested in how agents run and fail in practice. The starter packs introduce the terms before the more detailed implementation posts."
 ---
@@ -19,6 +19,7 @@ This series follows our work on an **AI agent runtime**—the software that mana
 
 | Pack | For |
 |------|-----|
+| [Agent evals](/start/agent-evals/) | Testing pyramid, separate grader, supervised E2E loop |
 | [Go agent runtime](/start/go-runtime/) | Runtime definition, Go vs Python, platform split |
 | [SRE on-call](/start/sre-on-call/) | Triage, RCA, observability |
 | [SRE as service](/start/sre-as-service/) | Service Rendered Efficiently culture pack |

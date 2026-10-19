@@ -2,6 +2,7 @@
 layout: post
 title: "Why Open Policy Agent for AI agent guardrails"
 date: 2026-10-22 10:00:00 -0700
+last_modified_at: 2026-10-19 12:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 82
 description: "How OPA and Rego came about, why policy engines beat prompt rules, how Pydantic AI and other frameworks wire allow/ask/deny yourself, and what Aiden ships pre-equipped."

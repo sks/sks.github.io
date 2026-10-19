@@ -2,7 +2,7 @@
 layout: post
 title: "How to Interrupt or Redirect an AI Agent Mid-Response"
 date: 2026-08-03 10:00:00 -0700
-last_modified_at: 2026-10-21 12:00:00 -0700
+last_modified_at: 2026-10-18 12:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 31
 description: "How to let users interrupt, redirect, or cancel an AI agent mid-stream without restarting. Apply steer at a safe boundary and verify the final answer addresses it."

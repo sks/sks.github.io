@@ -2,7 +2,7 @@
 layout: post
 title: "What Is an AI Agent Runtime? (Not a Chatbot or Platform)"
 date: 2026-08-07 10:00:00 -0700
-last_modified_at: 2026-10-21 12:00:00 -0700
+last_modified_at: 2026-10-18 12:00:00 -0700
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 36
 description: "An AI agent runtime owns the plan→tool→context loop in production. Not a GenAI platform, chatbot, or notebook. Bounds, traces, and mid-run steer live here."
