@@ -302,6 +302,34 @@ code,
   background: #fff;
 }
 
+// Mermaid diagrams (posts with mermaid: true) render as SVG in a bordered
+// figure, matching the diagram canvas above. Dark mode keeps the light
+// canvas because mermaid's default palette is tuned for it.
+.post-content .mermaid-figure {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 1.5rem auto 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--pn-border);
+  border-radius: 0.5rem;
+  background: #fff;
+  overflow-x: auto;
+}
+
+.post-content .mermaid-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.post-content .mermaid-figure pre {
+  margin: 0;
+  padding: 0.75rem;
+  background: #fff;
+  color: #24292f;
+}
+
 .highlight,
 .highlighter-rouge .highlight,
 pre.highlight {

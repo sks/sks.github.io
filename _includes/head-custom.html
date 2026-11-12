@@ -109,3 +109,63 @@
 }
 </script>
 {%- endif -%}
+
+{%- if page.mermaid -%}
+<script type="module">
+  // Mermaid diagrams: the post ships ```mermaid fenced blocks; kramdown
+  // leaves them as <pre><code class="language-mermaid">. This loader
+  // (only on pages with `mermaid: true` frontmatter) swaps those for
+  // rendered SVG. Client-side only — GitHub Pages needs no build plugin.
+  (function () {
+    var pending = 0;
+    function render(blocks) {
+      if (!blocks.length) return;
+      window.mermaid.initialize({
+        startOnLoad: false,
+        theme: "default",
+        flowchart: { curve: "basis", useMaxWidth: true },
+        sequence: { useMaxWidth: true, wrap: true },
+      });
+      Array.prototype.forEach.call(blocks, function (block, i) {
+        var source = block.textContent;
+        var div = document.createElement("div");
+        div.className = "mermaid-figure";
+        var id = "mermaid-diagram-" + i;
+        block.parentNode.replaceChild(div, block);
+        pending += 1;
+        window.mermaid
+          .render(id, source)
+          .then(function (result) {
+            div.innerHTML = result.svg;
+          })
+          .catch(function (err) {
+            // Never blank the page: fall back to the raw source.
+            var pre = document.createElement("pre");
+            pre.textContent = source;
+            div.appendChild(pre);
+            console.warn("mermaid render failed:", err);
+          })
+          .finally(function () {
+            pending -= 1;
+          });
+      });
+    }
+    function boot(attempt) {
+      if (window.mermaid) {
+        render(
+          document.querySelectorAll("pre > code.language-mermaid")
+        );
+      } else if (attempt < 100) {
+        setTimeout(function () { boot(attempt + 1); }, 50);
+      }
+    }
+    boot(0);
+  })();
+</script>
+<script
+  type="module"
+  src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+></script>
+{%- endif -%}
