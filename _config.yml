@@ -54,7 +54,7 @@ defaults:
       sitemap: false
 
 header_pages:
-  - series/enterprise-ai-agents-go.md
+  - series/index.md
   - about.md
 
 # Talk source packs (Marp decks, transcripts, demo YAML) stay in git for
