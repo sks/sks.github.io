@@ -1,11 +1,11 @@
 ---
 layout: post
-title: "Best Way to Debug a Multi-Step AI Agent in Production"
+title: "Best Way to Debug a Multi-Step AI Agent: A Trace-First Checklist"
 date: 2026-09-09 14:00:00 -0700
-last_modified_at: 2026-10-18 12:00:00 -0700
+last_modified_at: 2026-11-13 14:20:00 -0800
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 64
-description: "Best way to debug a multi-step AI agent: freeze one golden prompt, export one zip, grade each step’s observations, fix host gates before rewriting the system prompt."
+description: "Debug a multi-step AI agent with a reproducible prompt, complete trace, step-level evidence checks, and controlled replay. Fix host failures before prompts."
 image: /assets/images/og-debug.png
 tags: [ai-agents, debugging, workflows, production, evaluation, observability, reactree, aiden]
 permalink: /blog/best-way-to-debug-multi-step-ai-agent/
@@ -32,6 +32,8 @@ Freeze one golden prompt you can rematch cold, export one execution bundle for t
 {: .key-takeaways}
 
 When a multi-step agent gives a plausible but unsupported incident diagnosis, start from the execution record rather than rewriting its prompt. This procedure uses [Aiden](/blog/aiden-platform/) traces as an example, but applies wherever model calls and tool observations can be exported. For multi-stage bring-up, see [debug agent workflows like hardware](/blog/bring-up-agent-workflows-like-hardware/).
+
+> **Working on a failed run now?** Open the [multi-step AI agent debugging checklist](/checklists/agent-debug/) beside the trace. It turns this article into a reproducible review with fields for the frozen task, step outcomes, one controlled change, and the replay.
 
 ---
 
@@ -105,3 +107,14 @@ Mid-run steer belongs here too ([steer agents mid-run](/blog/steer-ai-agents-mid
 If wall doubled, say wall doubled ([relative efficiency lies](/blog/relative-efficiency-scores-lie/)). If correctness jumped on one seat, show the Theory text.
 
 Keep both before-and-after traces. If correctness improved but the tool server was less contended, do not attribute the wall-time change to your code. If the new gate halts an agent early, require it to carry the partial evidence and blocked query into the final answer.
+
+---
+
+## Use this on the next failed run
+
+- **[Reusable debugging checklist](/checklists/agent-debug/)** — freeze, export, inspect, change, replay
+- **[RCA evaluation scorecard](/blog/how-to-evaluate-ai-agent-root-cause-analysis/)** — test whether final claims are supported by evidence
+- **[Evidence-gated RCA checklist](/checklists/evidence-gated-rca/)** — review the incident narrative with an operator
+- **[Agent observability](/blog/observability/)** — make model calls, tool outcomes, and budgets visible
+
+A useful debugging session ends with more than a better answer: it leaves a reproducible task, two comparable traces, and a host or tool change that can be reviewed.

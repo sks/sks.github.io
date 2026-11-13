@@ -1,11 +1,11 @@
 ---
 layout: post
-title: "How to Interrupt or Redirect an AI Agent Mid-Response"
+title: "How to Interrupt, Redirect, or Contain an AI Agent Mid-Run"
 date: 2026-08-03 10:00:00 -0700
-last_modified_at: 2026-10-18 12:00:00 -0700
+last_modified_at: 2026-11-13 14:20:00 -0800
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 31
-description: "How to let users interrupt, redirect, or cancel an AI agent mid-stream without restarting. Apply steer at a safe boundary and verify the final answer addresses it."
+description: "Interrupt, redirect, cancel, or contain an AI agent mid-run. Apply feedback at safe boundaries, preserve evidence, and keep tool policy in force."
 image: /assets/images/og-hitl.png
 tags: [ai-agents, hitl, human-in-the-loop, feedback, orchestration, ux, aiden, production]
 permalink: /blog/steer-ai-agents-mid-run/
@@ -16,6 +16,8 @@ faqs:
     answer: "Treat cancel and steer as distinct signals. Cancel stops work. Steer adds or replaces goal constraints at a checkpoint, keeps valid evidence when possible, and leaves policy and budgets in force."
   - question: "Why does mid-run feedback sometimes have no effect?"
     answer: "The runtime applied it too late, after the answer was already formed, or treated receipt as completion. Feedback must create completion debt the agent has to pay before finishing."
+  - question: "How do you contain an AI agent mid-incident?"
+    answer: "Stop new side effects at a safe boundary, preserve the execution record, keep authorization and approval checks in force, and resume only with a narrow target, allowed tools, budget, and completion check."
 ---
 
 ## How do I let users interrupt or redirect an artificial intelligence (AI) agent mid-response?
@@ -46,6 +48,28 @@ Receiving feedback is not enough. The runtime must deliver it at a safe executio
 ## How do I send cancel or steer signals mid-stream?
 
 Cancel ends the active work. Steer injects additive (or explicit replace) constraints so the next reasoning turn uses them. Both signals should be visible in the audit trail. Only steer should keep prior tool results that still match the corrected goal.
+
+## How do you contain an AI agent mid-incident?
+
+**Containment limits further effects while preserving enough evidence to understand what happened.** It is not merely hiding the chat response, and it is not always safe to kill a process in the middle of a write.
+
+Use this order when an active run targets the wrong environment, exceeds its scope, or proposes an unsafe action:
+
+1. **Stop new side effects.** Cancel pending write tools or move the run to a read-only boundary. Let an in-flight operation reach its safest supported stopping point rather than assuming abrupt termination is harmless.
+2. **Keep authorization unchanged.** A steer such as “switch to production” must still pass identity, policy, and approval checks. The operator’s message changes intent; it does not grant new privileges.
+3. **Preserve the execution record.** Save the task, operator messages, model decisions, tool arguments, typed outcomes, and any mutation identifiers before restart or context compaction.
+4. **Separate investigation from remediation.** Evidence gathering can continue only when its reads are known to be safe. Do not let a diagnostic loop automatically turn into a restart, rollback, or configuration change.
+5. **Make the disposition explicit.** Report what was stopped, what completed, which evidence remains valid, and whether any action needs reconciliation.
+6. **Resume with a narrow contract.** Require an explicit target, allowed tools, budget, and completion check. If the goal or trust boundary changed, start a new run instead of carrying forward stale context.
+
+| Signal | Preferred response | Evidence to retain |
+|--------|--------------------|--------------------|
+| Wrong namespace or environment, no unsafe write in flight | Steer at the next boundary and narrow the target | Original scope, correction, and prior observations still valid for the corrected task |
+| Unsafe write proposed but not started | Deny or pause the action; require the appropriate approval | Proposed arguments, policy decision, and operator disposition |
+| Uncertain blast radius or conflicting operator instructions | Pause new effects and ask for clarification | Conflicting messages, active tool state, and pending actions |
+| Tool write may have partially completed | Stop blind retries and reconcile its actual state | Idempotency or mutation identifier, result or error, and reconciliation outcome |
+
+Containment composes with [defense in depth](/blog/defense-in-depth/), [human approval guardrails](/blog/ai-agent-guardrails-human-approval/), and [completion checks](/blog/is-the-task-actually-done/); a chat interrupt alone is not a safety boundary.
 
 ## Why Restarting Is the Wrong Default
 
