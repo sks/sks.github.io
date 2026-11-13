@@ -19,6 +19,13 @@ layout: default
       {%- endif -%}
       <span class="post-reading-meta" aria-label="Estimated reading time"> · {{ reading_minutes }} min read</span>
     </p>
+    {% if page.series and page.series_order %}
+      {% assign current_series_page = site.pages | where: "nav_title", "Series" | where: "title", page.series | first %}
+      <p class="post-series-context">
+        {% if current_series_page %}<a href="{{ current_series_page.url | relative_url }}#series-browser">{{ page.series }}</a>{% else %}{{ page.series }}{% endif %}
+        <span> · Part {{ page.series_order }}</span>
+      </p>
+    {% endif %}
     {% include author-bio.html %}
   </header>
 

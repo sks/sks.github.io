@@ -3,7 +3,7 @@ layout: post
 title: "Dead Projections and Useless FINAL: Tuning ClickHouse Tenant Databases by Reading the Source"
 date: 2026-11-15 08:00:00 -0800
 series: "ClickHouse on AWS: Self-Managed from First Principles"
-series_order: 13
+series_order: 14
 mermaid: true
 description: "A fresh-install optimization pass on a multi-tenant ClickHouse cluster — a projection that doubled storage but could never run, a FINAL that forced 20-second merge-on-read, and the Keeper path that blocks per-database tenancy. Every fix verified in the 26.8 source before it shipped."
 image: /assets/images/og-default.png
