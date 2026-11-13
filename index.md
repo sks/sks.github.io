@@ -4,57 +4,90 @@ title: "Enterprise AI Agents in Go (Runtime & SRE)"
 description: "Production notes on enterprise AI agent runtimes, SRE agents, and durable workflows in Go — by StackGen Principal Engineer Sabith K S."
 ---
 
-# Production Notes
+<section class="home-hero" aria-labelledby="home-title">
+  <p class="home-eyebrow">Production engineering · AI agents · SRE</p>
+  <h1 id="home-title">Production Notes</h1>
+  <p class="home-hero__tagline">Build AI agents you can debug, evaluate, and operate.</p>
+  <p class="home-hero__lead">Practical notes on runtimes, tool calls, incident investigations, and the unglamorous controls that make agent systems useful after the demo.</p>
+  <div class="home-actions">
+    <a class="button button--primary" href="/blog/best-way-to-debug-multi-step-ai-agent/">Debug an agent</a>
+    <a class="button" href="/start/go-runtime/">Explore the runtime path</a>
+  </div>
+  <p class="home-proof"><strong>Featured by CNCF:</strong> <a href="https://www.cncf.io/blog/2026/08/04/you-cant-debug-what-you-cant-see-observability-for-ai-agents/">You Can’t Debug What You Can’t See — Observability for AI Agents</a></p>
+</section>
 
-I'm a Principal Engineer at [StackGen](https://stackgen.com). I write about the systems we build, the mistakes we make, and what we can actually learn from them.
+## Start with a production problem
 
-Much of this site is about AI agents: software that uses a language model to choose and carry out steps, often by calling tools. A **[runtime](/blog/what-is-an-ai-agent-runtime/)** runs those steps and handles things like tool access and retries. **[Aiden](/blog/aiden-platform/)** is StackGen's platform for running agents for multiple teams. The examples often come from site reliability engineering (SRE): keeping services working and investigating incidents. These are engineering notes from a particular setting, not a claim that every team needs an agent—or needs to build one in Go.
+No need to read the whole archive. Pick the problem in front of you and follow a focused path.
 
-**Featured by CNCF:** [You Can't Debug What You Can't See — Observability for AI Agents](https://www.cncf.io/blog/2026/08/04/you-cant-debug-what-you-cant-see-observability-for-ai-agents/)
+<div class="guide-grid">
+  <article class="guide-card">
+    <p class="guide-card__label">Debugging</p>
+    <h3><a href="/blog/best-way-to-debug-multi-step-ai-agent/">Find where an agent run went wrong</a></h3>
+    <p>Freeze a reproducible task, inspect the trace, and replay one controlled change.</p>
+  </article>
+  <article class="guide-card">
+    <p class="guide-card__label">Evaluation</p>
+    <h3><a href="/blog/how-to-evaluate-ai-agent-root-cause-analysis/">Test whether an RCA is trustworthy</a></h3>
+    <p>Score evidence and named unknowns before fluency, latency, or token cost.</p>
+  </article>
+  <article class="guide-card">
+    <p class="guide-card__label">Architecture</p>
+    <h3><a href="/blog/what-is-an-ai-agent-runtime/">Understand the agent runtime boundary</a></h3>
+    <p>Separate the execution loop from the model, chat UI, and multi-tenant platform.</p>
+  </article>
+  <article class="guide-card">
+    <p class="guide-card__label">Language choice</p>
+    <h3><a href="/blog/why-go/">Compare Go and Python for AI agents</a></h3>
+    <p>Make the trade-off using deployment, concurrency, libraries, and team experience.</p>
+  </article>
+  <article class="guide-card">
+    <p class="guide-card__label">Operations</p>
+    <h3><a href="/blog/steer-ai-agents-mid-run/">Interrupt or contain an active agent</a></h3>
+    <p>Apply corrections at safe boundaries without silently dropping operator feedback.</p>
+  </article>
+  <article class="guide-card">
+    <p class="guide-card__label">API selection</p>
+    <h3><a href="/blog/chat-completions-vs-responses-api/">Diagnose API, model, and latency choices</a></h3>
+    <p>Distinguish Chat Completions, Responses, reasoning effort, retries, and tool wait.</p>
+  </article>
+</div>
 
-## Start here
-
-New to the subject? Start with a short reading path rather than the whole archive:
+## Choose a reading path
 
 | Path | Best for |
 |------|----------|
 | **[SRE on-call starter pack](/start/sre-on-call/)** | Triage, RCA, observability — 5 posts |
-| **[SRE as service starter pack](/start/sre-as-service/)** | Service Rendered Efficiently — culture + investigation product — 5 posts |
+| **[SRE as service starter pack](/start/sre-as-service/)** | Investigation as a service product — 5 posts |
 | **[Go agent runtime starter pack](/start/go-runtime/)** | Runtime definition, Go vs Python, platform split — 5 posts |
 | **[ClickHouse on AWS starter pack](/start/clickhouse-aws/)** | Self-managed ClickHouse from first principles — 9 posts |
-| **[Full series (searchable)](/series/enterprise-ai-agents-go/)** | Month-folded archive + search |
+| **[Full enterprise AI agent series](/series/enterprise-ai-agents-go/)** | Searchable, month-folded archive |
 | **[Service Rendered Efficiently](/series/service-rendered-efficiently/)** | AI investigation as a service product for on-call |
-
-Or read these four in order:
-
-1. **[What Is an AI Agent Runtime?](/blog/what-is-an-ai-agent-runtime/)** — plain definition of the production agent loop
-2. **[Go vs Python for AI Agents](/blog/why-go/)** — why we chose Go for a production agent runtime
-3. **[What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/)** — triage vs RCA vs remediation without demo theater
-4. **[AI Incident Triage for SREs — What Actually Helps On-Call](https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call)** — what actually helps on-call (on StackGen)
 
 ## Pocket checklists
 
-Shareable operator checklists (no proprietary schemas):
+Copy these into an incident review or agent launch review. No proprietary schemas required.
 
-- [Evidence-gated RCA](/checklists/evidence-gated-rca/)
-- [“Is the agent task done?”](/checklists/agent-done/)
-- [SRE as service](/checklists/sre-as-service/)
+- **[Debug a multi-step agent](/checklists/agent-debug/)** — reproduce, inspect, change one thing, replay
+- **[Review evidence-gated RCA](/checklists/evidence-gated-rca/)** — claims, receipts, and unknowns
+- **[Ask whether the agent task is done](/checklists/agent-done/)** — independent verification and mutation safety
+- **[Review SRE as a service](/checklists/sre-as-service/)** — reuse, honest partials, and handoff
 
-## Topic hubs
+## Browse by topic
 
-- [AI agent runtime](/topics/ai-agent-runtime/) — what a runtime is vs a GenAI platform
-- [AI agent workflows](/topics/ai-agent-workflows/) — bring-up, evidence-gated RCA, verification
-- [AI agents for SRE](/topics/ai-agents-sre/) — triage, observability, tokenomics
-- [Service Rendered Efficiently](/topics/service-rendered-efficiently/) — AI investigation as a service product
-- [AI incident triage](/topics/ai-incident-triage/) — on-call triage vs demo theater
-- [Go AI agents](/topics/go-ai-agents/) — language choice, platform architecture
-- [ClickHouse on AWS](/topics/clickhouse-aws/) — self-managed log analytics: engines, S3 storage, spot readers, cost
+- **[AI agent runtime](/topics/ai-agent-runtime/)** — execution boundaries, debugging, testing, and Go architecture
+- **[AI agent workflows](/topics/ai-agent-workflows/)** — bring-up, evidence-gated RCA, and verification
+- **[AI agents for SRE](/topics/ai-agents-sre/)** — triage, observability, and tokenomics
+- **[AI incident triage](/topics/ai-incident-triage/)** — on-call triage versus demo theater
+- **[Go AI agents](/topics/go-ai-agents/)** — language choice and platform architecture
+- **[ClickHouse on AWS](/topics/clickhouse-aws/)** — engines, S3 storage, spot readers, and cost
+- **[Service Rendered Efficiently](/topics/service-rendered-efficiently/)** — investigation product design
 
-## Aiden — Enterprise Agent Platform
+## About these notes
 
-**[What Is an AI Agent Runtime?](/blog/what-is-an-ai-agent-runtime/)** — plain definition of the production agent loop.
+I’m Sabith K S, a Principal Engineer at [StackGen](https://stackgen.com). I write about the systems we build, the mistakes we make, and what we can learn from them. The examples often come from building **[Aiden](/blog/aiden-platform/)**, StackGen’s platform for running agents for multiple teams, and from site reliability engineering (SRE) work.
 
-**[AI Agent Runtime vs Platform — Why We Split Them](/blog/aiden-platform/)** — the engineering trade-off behind turning a single-user CLI agent into a multi-tenant enterprise platform.
+These are engineering notes from a particular production setting, not a claim that every team needs an agent—or needs to build one in Go.
 
 {% include subscribe.html %}
 

@@ -19,7 +19,7 @@ Prefer Start here and Featured arcs first. Topics, Recent posts, and All posts f
 - [Service Rendered Efficiently]({{ "/series/service-rendered-efficiently/" | absolute_url }}): Sibling series on service culture, investigation product decisions, and operator outcomes.
 - [What Is an AI Agent Runtime?]({{ "/blog/what-is-an-ai-agent-runtime/" | absolute_url }}): Plain definition of the production agent loop vs platform, chatbot, or notebook demo.
 - [What Are SRE AI Agents?]({{ "/blog/what-are-sre-ai-agents/" | absolute_url }}): SRE AI agents for triage, RCA, and bounded autonomy, not demo theater.
-- [Python vs Go for AI Agents — Why We Chose Go]({{ "/blog/why-go/" | absolute_url }}): Go vs Python for production agent runtimes: concurrency, deployment, and when Python still wins.
+- [Go vs Python for AI Agents: Concurrency, Deployment & Tools]({{ "/blog/why-go/" | absolute_url }}): Go vs Python for production agent runtimes: concurrency, deployment, and when Python still wins.
 
 ## Featured arcs
 
@@ -29,6 +29,7 @@ Prefer Start here and Featured arcs first. Topics, Recent posts, and All posts f
 
 ## Checklists
 
+- [Multi-step AI agent debugging checklist]({{ "/checklists/agent-debug/" | absolute_url }}): Freeze the task, inspect traces and tool evidence, change one host behavior, and replay.
 - [Evidence-gated RCA checklist]({{ "/checklists/evidence-gated-rca/" | absolute_url }}): Prove with receipts before narrating.
 - [“Is the agent task done?” checklist]({{ "/checklists/agent-done/" | absolute_url }}): Completion checks that do not self-grade.
 - [SRE as service checklist]({{ "/checklists/sre-as-service/" | absolute_url }}): Ten yes/no questions for service-shaped AI investigation.

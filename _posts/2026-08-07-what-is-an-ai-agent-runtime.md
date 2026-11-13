@@ -2,7 +2,7 @@
 layout: post
 title: "What Is an AI Agent Runtime? (Not a Chatbot or Platform)"
 date: 2026-08-07 10:00:00 -0700
-last_modified_at: 2026-10-18 12:00:00 -0700
+last_modified_at: 2026-11-13 14:20:00 -0800
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 36
 description: "An AI agent runtime owns the plan→tool→context loop in production. Not a GenAI platform, chatbot, or notebook. Bounds, traces, and mid-run steer live here."
@@ -81,6 +81,44 @@ A useful runtime has a small but demanding job. It turns an open-ended model con
 The exact implementation varies. A local coding agent and an SRE investigation agent need different tools. They may have different safety rules too. The ownership boundary stays recognizable.
 
 This is why a runtime is more than a software development kit (SDK) callback loop. The difficult part is not making the second model call. The difficult part is making the hundredth run predictable when tools are slow, context is messy, and a person changes the goal halfway through.
+
+### A minimal AI agent runtime loop in Go
+
+This **illustrative pseudocode** shows the ownership boundary, not a production-ready library. `model`, `tools`, `policy`, and `state` are interfaces your application supplies.
+
+```go
+for turn := 0; turn < maxTurns; turn++ {
+    if err := ctx.Err(); err != nil {
+        return finishCancelled(state, err)
+    }
+
+    decision, err := model.Next(ctx, state)
+    if err != nil {
+        return finishFailed(state, err)
+    }
+
+    if decision.Done {
+        // Completion still needs evidence and output-contract checks.
+        return completeIfVerified(state, decision.Answer)
+    }
+
+    tool, ok := tools[decision.ToolName]
+    if !ok || !policy.Allow(ctx, decision) {
+        state.Append(deniedObservation(decision))
+        continue
+    }
+
+    result, err := tool.Call(ctx, decision.Arguments)
+    // Preserve typed failure as an observation; never convert it to success.
+    state.Append(toolObservation(decision, result, err))
+}
+
+return finishFailed(state, ErrTurnBudgetExhausted)
+```
+
+The loop—not the model—owns the turn budget, cancellation, tool lookup, authorization, typed outcomes, context updates, and completion gate. A real implementation also needs argument-schema validation, tracing, retry rules, secrets handling, durable state where required, and protection against repeated writes. It should also merge [mid-run feedback](/blog/steer-ai-agents-mid-run/) at a safe boundary and expose the run for [trace-first debugging](/blog/best-way-to-debug-multi-step-ai-agent/).
+
+Use this skeleton to ask where those responsibilities live in your own system. If they are scattered across prompt prose, UI callbacks, and tool implementations, the runtime boundary may not be explicit yet.
 
 ---
 
