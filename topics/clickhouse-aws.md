@@ -36,5 +36,6 @@ For the AI-agent SRE work that this cluster serves, see [AI agents for SRE](/top
 | [The Cost Levers of Self-Managed ClickHouse on AWS](/blog/clickhouse-aws-cost-engineering/) | The real monthly numbers — Graviton, a 50% spot split, S3 tiering, and the $1,700/month orphaned-volume leak |
 | [After ReplicatedMergeTree: CAS, Iceberg, and When to Just Buy ClickHouse Cloud](/blog/clickhouse-whats-next-cas-iceberg/) | CAS content-addressed storage, Apache Iceberg, and the honest buy-versus-build checklist |
 | [Why I Draw ClickHouse Data Flows (and Why EC2 Beat Kubernetes for This Cluster)](/blog/clickhouse-ec2-vs-k8s-mermaid-data-flow/) | Mermaid data-flow diagrams of the whole cluster, and why plain EC2 beat the Kubernetes operator here |
+| [Dead Projections and Useless FINAL: Tuning ClickHouse Tenant Databases by Reading the Source](/blog/clickhouse-tenant-tuning-from-source/) | A projection that doubled storage but never ran, why SUM(count) over SummingMergeTree never needs FINAL, the {database} keeper-path macro for per-database tenancy, and the system-log TTL trap |
 
 {% include subscribe.html %}
