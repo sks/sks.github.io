@@ -64,7 +64,9 @@ That describes the coding-agent workflow remarkably well:
 
 Least privilege does not assume malicious intent. It assumes that intent and outcome can diverge. An agent with write access can cause damage while trying to be helpful; an application role with `s3:*` can turn one generated bug into a much larger incident.
 
-The [Open Worldwide Application Security Project (OWASP) Excessive Agency guidance](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/) makes the modern version of this argument explicit: excessive functionality, excessive permissions, and excessive autonomy are distinct risks. Its recommended controls include minimum permissions and authorization in downstream systems rather than relying on the LLM to decide whether an action is allowed.
+The [Open Worldwide Application Security Project (OWASP) Top 10 for Agentic Applications for 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) carries this principle into current agent systems. Its detailed [Excessive Agency guidance](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/) separates excessive functionality, excessive permissions, and excessive autonomy. The recommended controls include minimum permissions and authorization in downstream systems rather than relying on the LLM to decide whether an action is allowed.
+
+Microsoft's July 2026 guidance on [least privilege for AI agents](https://www.microsoft.com/en-us/security/blog/2026/07/16/least-privilege-for-ai-agents-identity-access-and-tool-binding/) makes the operational version just as explicit: give agents first-class identities, narrowly scoped role-based access controls (RBAC), bound tool access, and a revocation path. That is infrastructure and identity design, not a prompt improvement.
 
 ### There are two privilege planes to review
 
@@ -81,13 +83,13 @@ Keeping the planes separate prevents a common mistake: making the coding agent r
 
 ## The security lapses are real—but the details matter
 
-This is not hypothetical, and it is not all “the model went rogue.” Three disclosures show different failure modes:
+This is not hypothetical, and it is not all “the model went rogue.” Current research and one earlier supply-chain disclosure show different failure modes:
 
-- **GitHub Copilot Chat / CamoLeak:** [Legit Security's September 2025 research](https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code) demonstrated indirect prompt injection through a pull-request description and exfiltration of private source and secrets using the victim's Copilot context. Legit reported that GitHub fixed the issue in August 2025. The lesson is that untrusted repository content can act through the permissions of the person using the assistant.
-- **Gemini CLI, a command-line interface (CLI):** [Tracebit's July 2025 disclosure](https://tracebit.com/blog/code-exec-deception-gemini-ai-cli-hijack) combined malicious repository content, shell-command allowlist weaknesses, and a misleading command display to demonstrate credential exfiltration while a user explored a codebase. Google fixed the issue in v0.1.14. The demonstration used the default no-sandbox mode; it was controlled research, not a reported real-world breach.
-- **Amazon Q Developer for VS Code:** A [July 2025 bulletin from Amazon Web Services (AWS)](https://aws.amazon.com/security/security-bulletins/AWS-2025-015/) says an inappropriately scoped GitHub token in CodeBuild allowed an actor to commit malicious code that entered extension v1.84.0. AWS withdrew that release and replaced the credentials. The payload did not execute because of a syntax error. This was a supply-chain compromise around an AI coding product—and a direct credential-scoping failure—not an autonomous model attack.
+- **Repository-borne prompt injection:** The 2026 [RepoGuardBench paper](https://openreview.net/forum?id=58AGMTgU3L) and its [reproducible GitHub artifact](https://github.com/DaoyuanLi2816/RepoGuardBench) placed inert instructions in README files, issue text, code comments, test logs, and agent-rule files, then measured whether local coding agents stayed on a legitimate repair. Code comments and agent-rule files were the highest-risk carriers in its experiments. Its path-only action gate also missed semantic test deletion. This was controlled research on local open-weight agents, not a reported production breach.
+- **Prompt injection to host-level code execution:** [Microsoft's May 2026 research](https://www.microsoft.com/en-us/security/blog/2026/05/07/prompts-become-shells-rce-vulnerabilities-ai-agent-frameworks/) documented a vulnerable Semantic Kernel path that could turn prompt injection into remote code execution (RCE). A single prompt could launch `calc.exe` on the machine running the agent. The relevant boundary is not just what the model says; it is what the host and tools allow that output to trigger.
+- **Build credential scope:** A [July 2025 bulletin from Amazon Web Services (AWS)](https://aws.amazon.com/security/security-bulletins/AWS-2025-015/) says an inappropriately scoped GitHub token in CodeBuild allowed an actor to commit malicious code that entered Amazon Q Developer for VS Code extension v1.84.0. AWS withdrew that release and replaced the credentials. The payload did not execute because of a syntax error. This was a supply-chain compromise around an AI coding product—and a direct credential-scoping failure—not an autonomous model attack.
 
-The common denominator is not a particular vendor. **Content can be hostile, tools can be over-capable, and credentials can outgrow the task.** Patching one vulnerability does not remove the need for least privilege.
+The common denominator is not a particular vendor or model generation. **Content can be hostile, tools can be over-capable, and credentials can outgrow the task.** Patching one vulnerability or enlarging a context window does not remove the need for least privilege.
 
 ## “Give the LLM the whole repository” is not a POLP strategy
 
@@ -101,9 +103,11 @@ Repository-wide context can include proprietary code, credentials that should no
 
 Context exclusions help, but they are not a security boundary. [GitHub's Copilot documentation](https://docs.github.com/en/copilot/concepts/security-governance-and-network-settings/content-exclusion) says exactly that and notes that indirect access and third-party Model Context Protocol (MCP) clients can bypass the guarantee teams might assume.
 
-### A larger context window is not complete analysis
+### A one-million-token window is not complete analysis
 
-The [*Lost in the Middle*](https://aclanthology.org/2024.tacl-1.9/) study found that language-model performance could degrade when relevant information appeared in the middle of long contexts, even in models designed for long context. That was not an IAM study, but it defeats a dangerous assumption: **present in the prompt does not mean reliably found and used**.
+Modern long-context models solve a real capacity problem. [Google's current long-context documentation](https://ai.google.dev/gemini-api/docs/long-context) says many Gemini models accept 1 million or more tokens. That makes repository-scale prompts feasible in more cases. It does not make a repository dump an authoritative permission inventory.
+
+Capacity answers only “does it fit?” [Redis's February 2026 engineering blog on context overflow](https://redis.io/blog/context-window-overflow/) distinguishes the hard token limit from earlier context rot, where useful information is crowded out or ignored, and concludes that bigger windows do not replace deliberate context management. Input processing cost and latency also grow with the prompt. Neither point is specific to IAM, but both defeat a dangerous assumption: **present in the prompt does not mean reliably found, used, or economical to process**.
 
 Repositories also change. A repeatable permission baseline cannot depend on which files fit today, how the prompt was phrased, or whether the model noticed a wrapper in a different directory.
 
@@ -126,7 +130,7 @@ That is where CCE fits.
 
 ## CCE: source calls in, reviewable evidence out
 
-CCE is a Go CLI that uses tree-sitter to parse source, resolve SDK call names, and map them through YAML Ain't Markup Language (YAML) rules into `(provider, resource, operation)` tuples. The built-in mapper covers AWS, Azure, Google Cloud Platform (GCP), Oracle Cloud Infrastructure (OCI), IBM, and Alibaba. It supports Go, Java, Python, and JavaScript; polyglot repositories need one scan per language.
+CCE is a Go command-line interface (CLI) that uses tree-sitter to parse source, resolve SDK call names, and map them through YAML Ain't Markup Language (YAML) rules into `(provider, resource, operation)` tuples. The built-in mapper covers AWS, Azure, Google Cloud Platform (GCP), Oracle Cloud Infrastructure (OCI), IBM, and Alibaba. It supports Go, Java, Python, and JavaScript; polyglot repositories need one scan per language.
 
 For a local folder scan, parsing happens locally and produces a local report. No LLM is required to extract the inventory:
 
