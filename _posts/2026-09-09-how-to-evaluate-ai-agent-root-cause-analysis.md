@@ -2,10 +2,10 @@
 layout: post
 title: "How to Evaluate an AI Agent for Root Cause Analysis"
 date: 2026-09-09 18:00:00 -0700
-last_modified_at: 2026-10-18 12:00:00 -0700
+last_modified_at: 2026-11-13 14:20:00 -0800
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 66
-description: "Know if an AI agent's RCA is trustworthy or hallucinating: checklist Theory, Unknowns, measured signals, and honesty about gaps before wall time or tokens."
+description: "Evaluate AI agent root cause analysis with a 13-point evidence scorecard. Catch unsupported claims, reward honest unknowns, then compare latency and cost."
 image: /assets/images/diagrams/sept/rca-eval.svg
 tags: [ai-agents, evaluation, sre, incident-response, rca, benchmarking, reactree, aiden]
 permalink: /blog/how-to-evaluate-ai-agent-root-cause-analysis/
@@ -79,6 +79,22 @@ From a live Grafana/Loki job ([numbers](/blog/six-model-mode-combos-alert-logs-b
 For this bench, correctness was hits / 13. A Responses hierarchical stub scored **0.69**; full-checklist runs scored **1.0**. These checks capture coverage and gap disclosure, not whether every proposed cause is true. Keep the known incident mechanism and human review alongside the score.
 
 Use the operator [evidence-gated RCA checklist](/checklists/evidence-gated-rca/) as the human twin.
+
+### Add an evidence-validity pass
+
+A 13/13 coverage score is not enough if the agent cites a real number from the wrong service or time window. Before accepting the score, sample every claim that drives the Theory and record:
+
+| Field | Question for the reviewer |
+|-------|---------------------------|
+| Claim | What exact causal or factual statement is being made? |
+| Source | Which metric, log, deployment record, configuration, or trace supports it? |
+| Query and window | Can another person retrieve the same observation for the intended service and period? |
+| Observation | What value or result was actually returned, including errors and truncation? |
+| Inference | Does the observation directly support the claim, or is an additional assumption required? |
+
+Do not award evidence credit merely because a number or query appears. Mark unsupported claims and incorrect windows explicitly, and keep “Undetermined” available when the required observation is blocked. This reviewer pass is where fluent but wrong RCA gets caught.
+
+For a failed run, pair this scorecard with the [multi-step agent debugging checklist](/checklists/agent-debug/) to trace the bad claim back to the decision, tool outcome, or observation that produced it.
 
 ---
 

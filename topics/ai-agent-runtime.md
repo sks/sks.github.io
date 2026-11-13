@@ -1,8 +1,8 @@
 ---
 layout: page
-title: AI Agent Runtime
+title: AI Agent Runtime Guides, Debugging & Go Architecture
 permalink: /topics/ai-agent-runtime/
-description: "Start here for AI agent runtime: plain definition, Go vs platform split, mid-run steer, and how we test the loop in CI."
+description: "A reading map for AI agent runtimes: definitions, Go architecture, debugging, evaluation, observability, and production testing guides."
 hub: ai-agent-runtime
 faqs:
   - question: "What is an AI agent runtime?"
@@ -15,7 +15,7 @@ faqs:
     answer: "Concurrency, single-binary deployment, and typed middleware for tools and gates. Python still wins for research notebooks; Go wins for long-running production runtimes."
 ---
 
-An **AI agent runtime** is the process that actually runs the agent: plan, call tools, manage context, finish or fail. Most “agent” marketing skips this layer and sells a platform, a chatbot, or a notebook demo instead.
+An **AI agent runtime** runs an agent’s plan, tool calls, context, and completion or failure. Use this reading map to move from that definition to architecture, debugging, evaluation, and production operations. Each guide below answers a different question; start with the decision you need to make rather than reading chronologically.
 
 **Start here if you only have five minutes:** [What Is an AI Agent Runtime?](/blog/what-is-an-ai-agent-runtime/) → [Go vs Python](/blog/why-go/) → [Testing pyramid](/blog/ai-agent-testing-pyramid/).
 
@@ -54,5 +54,6 @@ Part of the series [Building an Enterprise AI Agent Platform in Go](/series/ente
 - [Go AI agents](/topics/go-ai-agents/) — language and architecture
 - [AI agent workflows](/topics/ai-agent-workflows/) — multi-stage bring-up and verification
 - [AI agents for SRE](/topics/ai-agents-sre/) — triage, RCA, and on-call use
+- [Multi-step agent debugging checklist](/checklists/agent-debug/) — a reusable trace-review worksheet
 
 {% include subscribe.html %}

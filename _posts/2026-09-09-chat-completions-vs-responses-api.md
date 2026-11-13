@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Chat Completions vs Responses API (and Why Agents Feel Slow)"
+title: "Chat Completions vs Responses API: Latency, Tools & Reasoning"
 date: 2026-09-09 22:00:00 -0700
+last_modified_at: 2026-11-13 14:20:00 -0800
 series: "Building an Enterprise AI Agent Platform in Go"
 series_order: 69
-description: "OpenAI Chat Completions and the Responses API are two ways to call a model. Reasoning models are a different choice. How to tell them apart in a debug export, and why Responses is not automatically slower."
+description: "Compare OpenAI Chat Completions vs Responses API for AI agents: tools, reasoning tokens, retries, and latency. Debug a slow run from its trace."
 image: /assets/images/og-default.png
 tags: [ai-agents, openai, reasoning, debugging, tokenomics, aiden, golang]
 permalink: /blog/chat-completions-vs-responses-api/
@@ -26,6 +27,18 @@ Three decisions are often conflated:
 3. **How hard** that model was told to think (reasoning effort)
 
 This post separates those three with language you can reuse in a runbook, plus fields you can check in a debug export. Related reading: [reasoning effort](/blog/reasoning-effort-is-not-a-free-upgrade/), [reasoning vs normal models on tool-heavy jobs](/blog/reasoning-vs-generate-tool-heavy-agents/), [planner on a thinking model, workers on a fast model](/blog/hybrid-plan-smart-planner-generate-digs/).
+
+## Quick decision guide
+
+| Situation | What to do first | What not to assume |
+|-----------|------------------|--------------------|
+| An existing Chat Completions integration works with the selected model and tools | Keep it while you evaluate migration costs and needed features | Rewriting endpoints will automatically reduce latency |
+| Chat Completions rejects a required reasoning-plus-tools configuration | Test Responses with that exact model, tools, and effort setting | Every model has the same endpoint compatibility |
+| An agent run is slow | Compare model-call time, reasoning tokens, retries, and tool wait in the trace | The `resp_` or `chatcmpl_` prefix explains the delay |
+| A Completions attempt fails before a Responses retry succeeds | Count the failed request and retry in latency and cost measurements | The visible successful call represents the whole run |
+| A new integration supports several model classes | Check current provider documentation and run a small compatibility matrix | “Responses” and “reasoning model” are interchangeable terms |
+
+The practical unit of comparison is **one complete agent turn**, including retries and tools—not the endpoint name in isolation.
 
 ---
 
@@ -107,6 +120,23 @@ Export one run ([how we debug multi-step agents](/blog/best-way-to-debug-multi-s
 Also check **which model** each role received. A reasoning planner with lower-effort tool workers is one configuration to test, not a universal best mix. If every worker uses high effort, compare per-turn reasoning tokens and tool wait against a lower-effort worker on the same job.
 
 Do not trust `gen_ai.operation.name: chat` alone. We still see that label on Responses calls.
+
+---
+
+## A five-minute latency triage
+
+Start with one slow run and one comparable healthy run. Do not change the endpoint until you know which component owns the elapsed time.
+
+| Observation in the trace | Likely area to investigate | Next controlled test |
+|--------------------------|----------------------------|----------------------|
+| Long gap before the first visible output; high reasoning-token usage | Model reasoning effort | Repeat the same task with a supported lower effort setting |
+| HTTP 400 followed by a successful call on another endpoint | Compatibility retry | Select a compatible endpoint initially and measure the removed retry |
+| Model calls finish quickly; most time sits between call and observation | Tool or network wait | Trace the tool server, query, queue, and downstream dependency |
+| Many sequential worker calls with similar duration | Orchestration shape | Test bounded parallelism only where task dependencies allow it |
+| Large prompt tokens on every turn | Context growth | Compare the same task with bounded observations or compaction |
+| Similar per-call usage but different total calls | Looping or planning behavior | Compare tool-call counts, repeated queries, and completion gates |
+
+Change one variable and keep the task, model, tools, and data window fixed. For the complete workflow, use the [trace-first debugging guide](/blog/best-way-to-debug-multi-step-ai-agent/) and [debugging checklist](/checklists/agent-debug/).
 
 ---
 
