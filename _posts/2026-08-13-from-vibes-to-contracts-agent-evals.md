@@ -28,7 +28,7 @@ A live [site reliability engineering (SRE) investigation consistency evaluation]
 ## What to check
 
 - **A single score cannot measure run-to-run reliability.** It remains useful for diagnosing an individual output.
-- **Several evaluation frameworks use separable pieces:** cases, rubrics, pass/fail criteria, and graders. We adopted those distinctions without adopting a particular SDK.
+- **Several evaluation frameworks use separable pieces:** cases, rubrics, pass/fail criteria, and graders. We adopted those distinctions without adopting a particular software development kit (SDK).
 - **Here `pass^k` means all k sampled trials pass.** It is stricter than their mean score, but a pass on three trials does not guarantee every future run will pass.
 - **Correctness ≠ consistency ≠ reliability.** Three different gates. We used to collapse them into one.
 - **In one internal run:** three root cause analyses (RCAs) concurred on the mechanism, but one missed the evidence-quality bar. Agreement passed; the all-trials gate failed.
@@ -44,10 +44,10 @@ The old flow had exactly one moving part that mattered: a judge produced a corre
 That design has three quiet failures:
 
 1. **The rubric and the gate were the same thing.** "What good looks like" (a paragraph a human can argue with) got fused with "what number blocks the merge." You cannot evolve one without disturbing the other.
-2. **Case identity was tied to prompt text.** Tweak the wording and the eval looked like a *new* case, so you lost the ability to compare tonight's run to last week's.
+2. **Case identity was tied to prompt text.** Tweak the wording and the evaluation looked like a *new* case, so you lost the ability to compare tonight's run to last week's.
 3. **One trial decided everything.** For a non-deterministic agent, that is like judging a coin as "heads" because the first flip landed heads.
 
-None of this is exotic. It is just what happens when evals grow organically instead of from a contract.
+None of this is exotic. It is just what happens when evaluations (evals) grow organically instead of from a contract.
 
 ---
 
@@ -61,7 +61,7 @@ The frameworks we considered differ in implementation, but four useful concerns 
 
 | Concept | What it holds | Why it exists |
 |---|---|---|
-| **Eval set / case** | A stable case: input, expected *shape*, and a durable ID | Compare the same case across time even when prompts change |
+| **Eval set / case** | A stable case: input, expected *shape*, and a durable identifier (ID) | Compare the same case across time even when prompts change |
 | **Rubric** | Prose description of what a good answer contains | Human-readable, argue-able, evolves independently of gates |
 | **Criteria** | The metrics that actually gate, with their bars | Separates "what good means" from "what blocks the build" |
 | **Grader stack** | Multiple scorers — cheap structural checks, model judges, cross-run checks | No single scorer is trusted for everything |
@@ -70,7 +70,7 @@ And sitting on top of all of it: **reliability as a first-class metric**, usuall
 
 The insight that reordered my thinking: **these are separable concerns that we had welded together.** A rubric is not a threshold. A case is not its prompt. A grader is not the gate. Once you split them, the eval stops being a vibe and becomes a contract you can reason about.
 
-I deliberately did *not* adopt anyone's runtime. Pulling in a heavy eval SDK to get four good ideas is the classic over-abstraction trap. We borrowed the **portable contract** — the vocabulary and the separation — and expressed it in our own harness. Ideas travel; dependencies calcify.
+I deliberately did *not* adopt anyone's runtime. Pulling in a heavy evaluation SDK to get four good ideas is the classic over-abstraction trap. We borrowed the **portable contract** — the vocabulary and the separation — and expressed it in our own harness. Ideas travel; dependencies calcify.
 
 ---
 
@@ -148,4 +148,4 @@ For tool-using benchmarks, the same contract applies at the wiring layer first: 
 
 ---
 
-> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).
+> StackGen develops artificial intelligence (AI) tools for SRE, including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

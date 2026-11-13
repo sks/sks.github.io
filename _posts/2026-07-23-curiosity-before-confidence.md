@@ -10,7 +10,7 @@ tags: [ai-agents, root-cause-analysis, sre, incident-response, on-call, evaluati
 permalink: /blog/curiosity-before-confidence/
 ---
 
-A root-cause analysis (RCA) should explain an incident using observations, not just a plausible story. While building [AI agents for site reliability engineering (SRE)](/topics/ai-agents-sre/)—software operations and incident response—we found that instructions to “check everything before claiming a cause” did not consistently prevent early conclusions.
+A root-cause analysis (RCA) should explain an incident using observations, not just a plausible story. While building [artificial intelligence (AI) agents for site reliability engineering (SRE)](/topics/ai-agents-sre/)—software operations and incident response—we found that instructions to “check everything before claiming a cause” did not consistently prevent early conclusions.
 
 A wrong RCA can send responders toward the wrong service. The practical question is what checks must be recorded before a high-confidence claim reaches them, and how to report a gap without pretending it was filled.
 

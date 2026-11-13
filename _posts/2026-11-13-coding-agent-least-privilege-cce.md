@@ -7,18 +7,18 @@ image: /assets/images/og-governance.png
 tags: [ai-agents, ai-coding, cce, security, least-privilege, iam, platform-engineering]
 ---
 
-A coding agent can add an S3 integration before I have finished writing the IAM ticket. That speed is why I use it. It is also why I do not want the deployment fix to be “just give it `s3:*` for now.”
+A coding agent can add an Amazon Simple Storage Service (S3) integration before I have finished writing the Identity and Access Management (IAM) ticket. That speed is why I use it. It is also why I do not want the deployment fix to be “just give it `s3:*` for now.”
 
-The agent did its job: it wrote plausible code, wired the SDK, and made the tests pass. **Security is still a critical engineering responsibility.** Someone has to determine which operations the application needs, which resources it may touch, and whether this pull request quietly changed that answer.
+The agent did its job: it wrote plausible code, wired the software development kit (SDK), and made the tests pass. **Security is still a critical engineering responsibility.** Someone has to determine which operations the application needs, which resources it may touch, and whether this pull request quietly changed that answer.
 
-That is the problem [Code Context Engine (CCE)](https://appcd-dev.github.io/cce/) helps with. CCE statically analyzes source code and turns cloud SDK calls into structured, reviewable evidence: provider, resource, operation, file, line, and enclosing function. It gives me a concrete starting point for least-privilege review without asking an LLM to read the entire repository and guess.
+That is the problem [Code Context Engine (CCE)](https://appcd-dev.github.io/cce/) helps with. CCE statically analyzes source code and turns cloud SDK calls into structured, reviewable evidence: provider, resource, operation, file, line, and enclosing function. It gives me a concrete starting point for least-privilege review without asking a large language model (LLM) to read the entire repository and guess.
 
 **Key takeaways**
 
 - The principle of least privilege (POLP) limits damage from mistakes as well as attacks; coding agents make both easier to scale.
 - The agent's credentials and the generated application's cloud role are separate privilege planes. Both need controls.
 - Sending a whole repository to an LLM is not a durable way to discover or enforce permissions.
-- CCE turns visible SDK calls into candidate entitlements and can flag new mapped call sites in CI. Humans still review resource scope and effective IAM.
+- CCE turns visible SDK calls into candidate entitlements and can flag new mapped call sites in continuous integration (CI). Humans still review resource scope and effective IAM.
 {: .key-takeaways}
 
 ## Coding changed. Authorization did not.
@@ -43,7 +43,7 @@ versus:
 s3:* on every bucket the role can reach
 ```
 
-The first requires understanding the code and its deployment boundary. The second makes the error go away by expanding the blast radius. AI-assisted development makes this tension more common because it reduces the cost of adding an SDK call to almost nothing. It does not reduce the cost of getting authorization wrong.
+The first requires understanding the code and its deployment boundary. The second makes the error go away by expanding the blast radius. Development assisted by artificial intelligence (AI) makes this tension more common because it reduces the cost of adding an SDK call to almost nothing. It does not reduce the cost of getting authorization wrong.
 
 This is not an argument against coding agents. It is an argument for giving their output the same security engineering we owe any other code—and for automating the evidence collection that slows that review down.
 
@@ -64,7 +64,7 @@ That describes the coding-agent workflow remarkably well:
 
 Least privilege does not assume malicious intent. It assumes that intent and outcome can diverge. An agent with write access can cause damage while trying to be helpful; an application role with `s3:*` can turn one generated bug into a much larger incident.
 
-[OWASP's Excessive Agency guidance](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/) makes the modern version of this argument explicit: excessive functionality, excessive permissions, and excessive autonomy are distinct risks. Its recommended controls include minimum permissions and authorization in downstream systems rather than relying on the LLM to decide whether an action is allowed.
+The [Open Worldwide Application Security Project (OWASP) Excessive Agency guidance](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/) makes the modern version of this argument explicit: excessive functionality, excessive permissions, and excessive autonomy are distinct risks. Its recommended controls include minimum permissions and authorization in downstream systems rather than relying on the LLM to decide whether an action is allowed.
 
 ### There are two privilege planes to review
 
@@ -75,7 +75,7 @@ Teams often mix these together:
 | **The coding agent** | Can this session read private repositories, run shell commands, or push to `main`? | Repository scopes, short-lived credentials, sandboxing, tool allowlists, approval gates |
 | **The application the agent changed** | Can this service read one bucket, write another prefix, or delete objects? | IAM actions, resource constraints, permission boundaries, deployment tests |
 
-CCE addresses the **second plane**: source-level evidence for the application's cloud API usage. It does not sandbox the coding agent or authorize the agent's own tool calls. For that runtime boundary, a policy engine belongs between the model and tool execution; I covered that in [Authorize AI agent tool calls with OPA](/blog/authorize-ai-agent-tool-calls-opa/).
+CCE addresses the **second plane**: source-level evidence for the application's cloud application programming interface (API) usage. It does not sandbox the coding agent or authorize the agent's own tool calls. For that runtime boundary, a policy engine belongs between the model and tool execution; I covered that in [Authorize AI agent tool calls with Open Policy Agent (OPA)](/blog/authorize-ai-agent-tool-calls-opa/).
 
 Keeping the planes separate prevents a common mistake: making the coding agent read-only does not make the application it generated read-only.
 
@@ -84,8 +84,8 @@ Keeping the planes separate prevents a common mistake: making the coding agent r
 This is not hypothetical, and it is not all “the model went rogue.” Three disclosures show different failure modes:
 
 - **GitHub Copilot Chat / CamoLeak:** [Legit Security's September 2025 research](https://www.legitsecurity.com/blog/camoleak-critical-github-copilot-vulnerability-leaks-private-source-code) demonstrated indirect prompt injection through a pull-request description and exfiltration of private source and secrets using the victim's Copilot context. Legit reported that GitHub fixed the issue in August 2025. The lesson is that untrusted repository content can act through the permissions of the person using the assistant.
-- **Gemini CLI:** [Tracebit's July 2025 disclosure](https://tracebit.com/blog/code-exec-deception-gemini-ai-cli-hijack) combined malicious repository content, shell-command allowlist weaknesses, and a misleading command display to demonstrate credential exfiltration while a user explored a codebase. Google fixed the issue in v0.1.14. The demonstration used the default no-sandbox mode; it was controlled research, not a reported real-world breach.
-- **Amazon Q Developer for VS Code:** [AWS's July 2025 bulletin](https://aws.amazon.com/security/security-bulletins/AWS-2025-015/) says an inappropriately scoped GitHub token in CodeBuild allowed an actor to commit malicious code that entered extension v1.84.0. AWS withdrew that release and replaced the credentials. The payload did not execute because of a syntax error. This was a supply-chain compromise around an AI coding product—and a direct credential-scoping failure—not an autonomous model attack.
+- **Gemini CLI, a command-line interface (CLI):** [Tracebit's July 2025 disclosure](https://tracebit.com/blog/code-exec-deception-gemini-ai-cli-hijack) combined malicious repository content, shell-command allowlist weaknesses, and a misleading command display to demonstrate credential exfiltration while a user explored a codebase. Google fixed the issue in v0.1.14. The demonstration used the default no-sandbox mode; it was controlled research, not a reported real-world breach.
+- **Amazon Q Developer for VS Code:** A [July 2025 bulletin from Amazon Web Services (AWS)](https://aws.amazon.com/security/security-bulletins/AWS-2025-015/) says an inappropriately scoped GitHub token in CodeBuild allowed an actor to commit malicious code that entered extension v1.84.0. AWS withdrew that release and replaced the credentials. The payload did not execute because of a syntax error. This was a supply-chain compromise around an AI coding product—and a direct credential-scoping failure—not an autonomous model attack.
 
 The common denominator is not a particular vendor. **Content can be hostile, tools can be over-capable, and credentials can outgrow the task.** Patching one vulnerability does not remove the need for least privilege.
 
@@ -99,7 +99,7 @@ That can produce a useful review note. It should not become the system of record
 
 Repository-wide context can include proprietary code, credentials that should not have been committed, customer examples, and security-sensitive design details. Sending all of it to answer a narrow question violates data minimization before we even discuss authorization.
 
-Context exclusions help, but they are not a security boundary. [GitHub's Copilot documentation](https://docs.github.com/en/copilot/concepts/security-governance-and-network-settings/content-exclusion) says exactly that and notes that indirect access and third-party MCP clients can bypass the guarantee teams might assume.
+Context exclusions help, but they are not a security boundary. [GitHub's Copilot documentation](https://docs.github.com/en/copilot/concepts/security-governance-and-network-settings/content-exclusion) says exactly that and notes that indirect access and third-party Model Context Protocol (MCP) clients can bypass the guarantee teams might assume.
 
 ### A larger context window is not complete analysis
 
@@ -126,7 +126,7 @@ That is where CCE fits.
 
 ## CCE: source calls in, reviewable evidence out
 
-CCE is a Go CLI that uses tree-sitter to parse source, resolve SDK call names, and map them through YAML rules into `(provider, resource, operation)` tuples. The built-in mapper covers AWS, Azure, GCP, OCI, IBM, and Alibaba. It supports Go, Java, Python, and JavaScript; polyglot repositories need one scan per language.
+CCE is a Go CLI that uses tree-sitter to parse source, resolve SDK call names, and map them through YAML Ain't Markup Language (YAML) rules into `(provider, resource, operation)` tuples. The built-in mapper covers AWS, Azure, Google Cloud Platform (GCP), Oracle Cloud Infrastructure (OCI), IBM, and Alibaba. It supports Go, Java, Python, and JavaScript; polyglot repositories need one scan per language.
 
 For a local folder scan, parsing happens locally and produces a local report. No LLM is required to extract the inventory:
 
@@ -191,7 +191,7 @@ s3:GetObject
 s3:PutObject
 ```
 
-The JSON retains the call sites, so a reviewer can go back to the exact file and function rather than trusting a summary. The review is not finished: bucket and key scope, encryption requirements, SDK pagination, and deployment behavior still need attention. But the starting point is now `GetObject` plus `PutObject`, not a reflexive `s3:*`.
+The JavaScript Object Notation (JSON) report retains the call sites, so a reviewer can go back to the exact file and function rather than trusting a summary. The review is not finished: bucket and key scope, encryption requirements, SDK pagination, and deployment behavior still need attention. But the starting point is now `GetObject` plus `PutObject`, not a reflexive `s3:*`.
 
 That is the first pain point CCE removes: **manually reconstructing cloud API usage by grepping a repository after the agent has changed it.**
 
@@ -211,11 +211,11 @@ cce -folder . -language GO -filter cloud \
 cce diff baseline.json current.json --fail-new
 ```
 
-If the PR adds a mapped `DeleteObject` call to a feature that previously only read and wrote artifacts, the new call site appears in the diff and `--fail-new` returns a failure. That does not mean the operation is bad. It means the security review now has a specific question:
+If the pull request (PR) adds a mapped `DeleteObject` call to a feature that previously only read and wrote artifacts, the new call site appears in the diff and `--fail-new` returns a failure. That does not mean the operation is bad. It means the security review now has a specific question:
 
 > Why does this change need delete, on which objects, and should that permission ship with this role?
 
-The same workflow catches less dramatic drift: a new KMS operation, a different messaging service, or an SDK call added outside the package the reviewer expected. CCE also has [GitHub Actions workflows](https://appcd-dev.github.io/cce/guides/github-actions/) for running the scan and diff in CI.
+The same workflow catches less dramatic drift: a new Key Management Service (KMS) operation, a different messaging service, or an SDK call added outside the package the reviewer expected. CCE also has [GitHub Actions workflows](https://appcd-dev.github.io/cce/guides/github-actions/) for running the scan and diff in CI.
 
 A clean diff is not a security proof. It only says CCE found no new mapped call sites relative to that baseline. IAM edits, unmapped wrappers, runtime behavior, and infrastructure changes still need their own controls.
 
@@ -227,7 +227,7 @@ For a first pass on a checkout, CCE's quickstart creates both machine- and human
 cce quickstart .
 ```
 
-It writes a Cloud API BOM, a self-contained HTML report, SARIF for code scanning, and a lens lock file with version and rule hashes. It also prepares a CI workflow without overwriting an existing one. If a supported IAM policy file is present, quickstart can add a static IAM-drift report for code-evidenced AWS operations missing from that policy.
+It writes a Cloud API bill of materials (BOM), a self-contained Hypertext Markup Language (HTML) report, Static Analysis Results Interchange Format (SARIF) for code scanning, and a lens lock file with version and rule hashes. It also prepares a CI workflow without overwriting an existing one. If a supported IAM policy file is present, quickstart can add a static IAM-drift report for code-evidenced AWS operations missing from that policy.
 
 This is a better review artifact than “I asked the agent, and it said these are the permissions.” The reviewer can inspect the call site, see which rules produced the row, reproduce the scan, and attach the result to the change.
 
@@ -242,7 +242,7 @@ A security tool earns trust by making its boundary clear:
 | Map visible source call sites to candidate operations | Execute the application or observe runtime-only calls |
 | Show file, line, method, and enclosing function | Build an inter-procedural, cross-file call graph |
 | Compare reports and flag new mapped call sites | Prove that an unchanged IAM policy is least privilege |
-| Provide input for IAM review | Evaluate IAM policies, SCPs, permission boundaries, or resource policies |
+| Provide input for IAM review | Evaluate IAM policies, service control policies (SCPs), permission boundaries, or resource policies |
 | Scan one selected language per run | Infer every call behind internal wrappers or dynamic dispatch |
 | Parse application source | Parse Terraform, CloudFormation, Kubernetes manifests, or IAM JSON as part of the core scan |
 
@@ -282,4 +282,4 @@ Start with one service that already uses coding agents. Put the report in its ne
 
 ---
 
-*Related: [CCE cloud entitlements: CLI, CI, and custom lenses](/blog/cce-cloud-entitlements/) · [Why prompts fail as ACLs](/blog/authorize-ai-agent-tool-calls-opa/) · [Defense in depth for tool-wielding agents](/blog/defense-in-depth/).*
+*Related: [CCE cloud entitlements: CLI, CI, and custom lenses](/blog/cce-cloud-entitlements/) · [Why prompts fail as access control lists (ACLs)](/blog/authorize-ai-agent-tool-calls-opa/) · [Defense in depth for tool-wielding agents](/blog/defense-in-depth/).*

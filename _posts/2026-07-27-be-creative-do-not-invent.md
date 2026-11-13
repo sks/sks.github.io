@@ -10,7 +10,7 @@ tags: [ai-agents, sre, root-cause-analysis, incident-response, on-call, prompt-e
 permalink: /blog/be-creative-do-not-invent/
 ---
 
-An AI agent helping with site reliability engineering (SRE)—keeping services available—can search broadly during an incident without inventing facts. In one investigation, the alert was real, but the agent supplied a rule identifier that did not exist, a metric family that was not collected, and a lead drawn from exporter warnings when it could not reproduce the reported symptom. Those details made the resulting explanation look stronger than the tool results allowed.
+An artificial intelligence (AI) agent helping with site reliability engineering (SRE)—keeping services available—can search broadly during an incident without inventing facts. In one investigation, the alert was real, but the agent supplied a rule identifier that did not exist, a metric family that was not collected, and a lead drawn from exporter warnings when it could not reproduce the reported symptom. Those details made the resulting explanation look stronger than the tool results allowed.
 
 The useful distinction is between changing how you search and filling a missing result with a plausible-sounding value.
 
@@ -21,14 +21,14 @@ The useful distinction is between changing how you search and filling a missing 
 | Creative (The Goal) | Invent (The Bug) |
 | --- | --- |
 | Retry the identifier copied directly from the alert page | Create an unverified identifier from the title |
-| Discover available measurement series after an empty PromQL query | Guess a counter from an unrelated, past incident |
+| Discover available measurement series after an empty Prometheus Query Language (PromQL) query | Guess a counter from an unrelated, past incident |
 | Broaden label filters using values in the alert or returned data | Paste tokens from an entirely unrelated playbook |
 | Treat exporter warnings as a possible collection problem, not proof of the incident cause | Promote them to "Theory" because *something* had to be wrong |
 | Close with *undetermined* and suggest next probes | Close with a tidy, fabricated mechanism you never reproduced |
 
 A defensible search can widen from identifiers in the alert, retrieved documentation, or tool results. Retrieval-augmented generation (RAG) means supplying retrieved documents to the model as context; those documents still need to be checked for relevance. Invention begins when a value is guessed because it resembles a value from another incident.
 
-We saw two versions of the shortcut: guessed failure counters after a PromQL (Prometheus query language) search returned `No data`, and guessed alert details after loading the alert rule failed. Neither empty response establishes that a guessed value exists.
+We saw two versions of the shortcut: guessed failure counters after a PromQL search returned `No data`, and guessed alert details after loading the alert rule failed. Neither empty response establishes that a guessed value exists.
 
 ---
 

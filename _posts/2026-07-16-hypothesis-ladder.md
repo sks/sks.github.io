@@ -17,7 +17,7 @@ faqs:
     answer: "A longer prompt alone may not prevent early conclusions. Record competing explanations and check required evidence before accepting a strong claim."
 ---
 
-A root-cause analysis (RCA) explains why an incident happened. An AI investigator can write one before it has checked alternatives. In our work on [AI agents for site reliability engineering (SRE)](/topics/ai-agents-sre/)—software operations and incident response—we saw the model favor a recent deployment even when the available measurements did not yet support that explanation.
+A root-cause analysis (RCA) explains why an incident happened. An artificial intelligence (AI) investigator can write one before it has checked alternatives. In our work on [AI agents for site reliability engineering (SRE)](/topics/ai-agents-sre/)—software operations and incident response—we saw the model favor a recent deployment even when the available measurements did not yet support that explanation.
 
 We used a **hypothesis ladder** to structure the search: identify the affected system and start time, test competing explanations, then write a conclusion no stronger than the evidence. It does not make every cause discoverable; it makes an unresolved cause easier to report honestly.
 
@@ -43,7 +43,7 @@ A large language model (LLM) can amplify that trap: a sentence naming a service,
 >
 > **The hasty conclusion:** *"Likely caused by the v2.4.1 deploy ten minutes ago. Recommend rollback."*
 >
-> **Illustrative alternative:** Suppose the deploy only changed CSS, while connection logs showed an expired database certificate. Checking identity and onset would distinguish the two; the alert alone would not.
+> **Illustrative alternative:** Suppose the deploy only changed Cascading Style Sheets (CSS), while connection logs showed an expired database certificate. Checking identity and onset would distinguish the two; the alert alone would not.
 
 A useful cycle is **theory, prediction, attempted disproof, repeat**. During a live incident, complete understanding may be out of reach. The immediate goal is a testable explanation or a clear statement of what remains unknown and what to check next.
 
@@ -63,7 +63,7 @@ The **ladder** adds an order to those checks:
 4. **Grade the claim** — events occurring together, moving together over time, and having a causal mechanism support different levels of certainty; the write-up should reflect that distinction.
 5. **Stop or escalate honestly** — unknown with ranked next probes beats a confident wrong answer.
 
-The ladder is not a runbook replacement. Runbooks still teach *what* to query for Kafka lag or API error spikes. The ladder teaches *when* you are allowed to say "root cause" at all.
+The ladder is not a runbook replacement. Runbooks still teach *what* to query for Kafka lag or application programming interface (API) error spikes. The ladder teaches *when* you are allowed to say "root cause" at all.
 
 ---
 

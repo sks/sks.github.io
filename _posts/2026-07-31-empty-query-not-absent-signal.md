@@ -17,9 +17,9 @@ faqs:
     answer: "Discover available labels, check an appropriate time range, and consult another relevant data source or customer-identity mapping when available."
 ---
 
-Grafana, a monitoring interface, may return `no_data` for a PromQL (Prometheus query language) request. An empty result means the particular query found no matching time series (measurements tracked over time) in its requested window. It does not establish that the underlying signal is absent: labels, time range, data source, or query type may be wrong. An AI agent helping site reliability engineering (SRE) responders should check those possibilities before concluding that data is unavailable.
+Grafana, a monitoring interface, may return `no_data` for a Prometheus Query Language (PromQL) request. An empty result means the particular query found no matching time series (measurements tracked over time) in its requested window. It does not establish that the underlying signal is absent: labels, time range, data source, or query type may be wrong. An artificial intelligence (AI) agent helping site reliability engineering (SRE) responders should check those possibilities before concluding that data is unavailable.
 
-*The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
+*The incident patterns below are composite and anonymized. Counts are rounded. Names, identifiers (IDs), and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 

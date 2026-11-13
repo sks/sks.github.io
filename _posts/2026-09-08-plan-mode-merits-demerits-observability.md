@@ -17,7 +17,7 @@ faqs:
     answer: "When you need structured multi-part collection, tool packing on workers, or a coordinator that keeps the root from drowning in large tool dumps. Measure with the same prompt — do not assume."
 ---
 
-[What is ReAcTree?](/blog/what-is-reactree/) defines the two shapes: a **single-agent ReAct loop** (one reason→act→observe trajectory) versus a **hierarchical ReAcTree planner** (parent decomposes subgoals, may spawn child nodes, control-flow coordination). Paper: [PDF](https://arxiv.org/pdf/2511.02424) · [abs](https://arxiv.org/abs/2511.02424). Older AppWorld notes: [simple vs plan when to use which](/blog/simple-vs-plan-when-to-use-which/).
+[What is ReAcTree?](/blog/what-is-reactree/) defines the two shapes: a **single-agent ReAct (reasoning and acting) loop** (one reason→act→observe trajectory) versus a **hierarchical ReAcTree planner** (parent decomposes subgoals, may spawn child nodes, control-flow coordination). Paper: [Portable Document Format (PDF)](https://arxiv.org/pdf/2511.02424) · [abstract](https://arxiv.org/abs/2511.02424). Older AppWorld notes: [simple vs plan when to use which](/blog/simple-vs-plan-when-to-use-which/).
 
 This comparison concerns one session with two deliverables: investigate a firing alert, then compare a log anomaly with its baseline. It tests whether coordination overhead buys enough structure on this particular Grafana/Loki plane; it does not establish a default orchestration mode.
 
@@ -29,7 +29,7 @@ Full scorecard: [six model×orchestration combos](/blog/six-model-mode-combos-al
 
 - **Merit (xAI):** hierarchical finished **~10% faster** than single-agent with similar tokens and full correctness.
 - **Merit (gpt-5.4):** the hierarchical run used **~32% fewer total prompt tokens** than single-agent at the same quality (wave 1).
-- **Demerit (Responses preview):** hierarchical once produced a **thin Undetermined** close (corr 0.69) while single-agent scored 1.0 — faster wall, worse product.
+- **Demerit (Responses preview):** hierarchical once produced a **thin Undetermined** close (correctness 0.69) while single-agent scored 1.0 — faster wall, worse product.
 - **Demerit (wave 2):** absolute wall increased while Grafana clients were contended. One Responses hierarchical close met more checklist items after host changes, but this rematch cannot isolate a speed or quality effect from contention and run variability.
 
 
@@ -55,7 +55,7 @@ The prompt demanded **two** Theory blocks. The hierarchical coordinator habit ma
 
 ### 1. Quality collapse is possible
 
-Responses hierarchical (wave 1): corr **0.69**, ~**530** characters, Undetermined on both parts. Single-agent on the same model: corr **1.0**, full measured write-up, slower wall. **Faster ≠ better.**
+Responses hierarchical (wave 1): correctness **0.69**, ~**530** characters, Undetermined on both parts. Single-agent on the same model: correctness **1.0**, full measured write-up, slower wall. **Faster ≠ better.**
 
 ### 2. Orchestration without children still costs
 

@@ -28,7 +28,7 @@ faqs:
 
 This week, a recurring question was whether moving our agents to Python or TypeScript would make them better investigators. A language change could improve access to libraries or speed of prototyping, but it would not by itself change which incident evidence the model sees.
 
-This reflection separates three choices: **context engineering** (what information enters the model's limited window at each step), orchestration (how the work is sequenced), and implementation language (how the service is built and operated). Our investigation A/B gives a concrete reason to keep them separate: reducing context cost also reduced the evidence gathered. This is a set of observations and places to look next, not a universal architecture recipe.
+This reflection separates three choices: **context engineering** (what information enters the model's limited window at each step), orchestration (how the work is sequenced), and implementation language (how the service is built and operated). Our investigation A/B comparison gives a concrete reason to keep them separate: reducing context cost also reduced the evidence gathered. This is a set of observations and places to look next, not a universal architecture recipe.
 
 ---
 
@@ -36,7 +36,7 @@ This reflection separates three choices: **context engineering** (what informati
 
 - **Pick orchestration by task.** A fixed workflow suits a known path; a ReAct loop (reason, act with a tool, observe, repeat) suits a short open-ended task; longer work may justify a planning and offload harness. Compare outcomes before adopting the extra machinery.
 - **Manage the context window deliberately.** Write useful findings outside it, select what this step needs, compress older material, and isolate noisy work. Each operation can also lose evidence if used carelessly.
-- **Language affects delivery, not a model's reasoning directly.** Holding model, tools, and context fixed is a useful comparison, though different SDKs may make those inputs easier or harder to implement.
+- **Language affects delivery, not a model's reasoning directly.** Holding model, tools, and context fixed is a useful comparison, though different software development kits (SDKs) may make those inputs easier or harder to implement.
 - **Our week:** [simple vs plan](/blog/simple-vs-plan-when-to-use-which/) both have uses; [observation masking](/blog/host-reclaim-plan-mode-ab-lessons/) cut spend but failed the root-cause analysis (RCA) quality gate.
 - **Places to start:** The public repositories and context tools below offer examples, not a required stack. Trace cost and tool use alongside outcome quality.
 
@@ -61,7 +61,7 @@ LangChain's [context engineering for agents](https://www.langchain.com/blog/cont
 
 Anthropic's [building effective agents](https://www.anthropic.com/engineering/building-effective-agents) makes a complementary case for starting with the simplest workable design and defining tool interfaces carefully. A framework helps when it exposes state and decisions; it hinders debugging when it hides them.
 
-Provider APIs such as Claude's memory tools, tool-result clearing, and server-side compaction offer ways to implement these operations. Clearing removes older tool responses from active context; compaction reduces the transcript. Neither is a Python-only idea, and neither guarantees that important evidence survives.
+Provider application programming interfaces (APIs) such as Claude's memory tools, tool-result clearing, and server-side compaction offer ways to implement these operations. Clearing removes older tool responses from active context; compaction reduces the transcript. Neither is a Python-only idea, and neither guarantees that important evidence survives.
 
 ### 2. Deep harnesses, not “more agents”
 
@@ -73,7 +73,7 @@ A handoff is useful when the next worker receives the specific findings and open
 
 [Langfuse's agent framework survey](https://langfuse.com/blog/2025-03-19-ai-agent-comparison) lists LangGraph, DeepAgents, Pydantic AI, Mastra, and the Claude/OpenAI agent SDKs. It is a useful menu of state, tool, and tracing patterns, not a ranking for every workload. Compare what you need to control and inspect before choosing a runtime.
 
-### 4. Language is ops, not IQ
+### 4. Language is operations (ops), not intelligence quotient (IQ)
 
 Python offers fast experimentation and a broad machine-learning ecosystem. Go may suit a service team that values concurrency and a straightforward deployment artifact. Those are consequential engineering tradeoffs; they are not evidence that an agent will reach a better answer merely by moving languages. When comparing two implementations, first check whether the model, tool interfaces, context assembly, and evaluation task are actually the same.
 
@@ -125,7 +125,7 @@ What is portable:
 - Skill and system text
 - MCP tool contracts
 - Spill / note / clear / compact policies
-- Outcome evals
+- Outcome evaluations (evals)
 
 What is local:
 
@@ -137,7 +137,7 @@ Keep tool contracts and outcome checks portable where practical; choose SDK-spec
 
 ---
 
-## Repos to clone this week (public OSS)
+## Repos to clone this week (public open-source software (OSS))
 
 These **public** repositories show different implementation patterns. The tables are starting points for reading code, not endorsements of every dependency or a suggestion to migrate an existing service. Pick one that matches a problem you have and check its current APIs and maintenance status.
 
@@ -146,7 +146,7 @@ These **public** repositories show different implementation patterns. The tables
 | Lang | Repo | Why checkout |
 |------|------|--------------|
 | **Python** | [langchain-ai/langgraph](https://github.com/langchain-ai/langgraph) | An example of stateful graphs, checkpoints, human-in-the-loop (HITL) interrupts, and durable resume. Useful when the workflow needs explicit state transitions. |
-| **TypeScript** | [langchain-ai/langgraphjs](https://github.com/langchain-ai/langgraphjs) | Same graph ideas in JS/TS. Useful when your product already lives in Node and you want LangGraph-shaped control without a Python sidecar. |
+| **TypeScript** | [langchain-ai/langgraphjs](https://github.com/langchain-ai/langgraphjs) | Same graph ideas in JavaScript/TypeScript (JS/TS). Useful when your product already lives in Node and you want LangGraph-shaped control without a Python sidecar. |
 | **Go** | [trpc-group/trpc-agent-go](https://github.com/trpc-group/trpc-agent-go) | GraphAgent + runners + MCP in a Go-native stack. A Go-native graph and runner design to compare if service deployment and concurrency are priorities. |
 
 ### Deep harness (plan + spill + subagents)
@@ -164,7 +164,7 @@ These **public** repositories show different implementation patterns. The tables
 | **Python** | [pydantic/pydantic-ai](https://github.com/pydantic/pydantic-ai) | Type-safe agents and tools with validation as a first-class citizen. A starting point for a typed single-agent loop in Python. |
 | **Python** | [huggingface/smolagents](https://github.com/huggingface/smolagents) | Minimal code-first agents. A compact example for examining tool calls and the agent loop. |
 | **Python / TypeScript** | [openai/openai-agents-python](https://github.com/openai/openai-agents-python) · [openai/openai-agents-js](https://github.com/openai/openai-agents-js) | Small primitives: agent, tools, handoffs, sessions, guardrails. Provider-friendly and easy to read end-to-end. |
-| **TypeScript** | [vercel/ai](https://github.com/vercel/ai) | Streaming + UI + agent loop helpers for product teams. Reach for this when the agent is a feature inside a Next.js app, not a separate control plane. |
+| **TypeScript** | [vercel/ai](https://github.com/vercel/ai) | Streaming + user interface (UI) + agent loop helpers for product teams. Reach for this when the agent is a feature inside a Next.js app, not a separate control plane. |
 | **Go** | [cloudwego/eino](https://github.com/cloudwego/eino) | CloudWeGo’s Go agent/orchestration toolkit. Another public Go path if you want to compare designs next to trpc-agent-go. |
 
 ### Multi-agent / role crews (use carefully)
@@ -180,7 +180,7 @@ These **public** repositories show different implementation patterns. The tables
 |------|------|--------------|
 | **Spec + servers** | [modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers) | Reference MCP servers. Start here to see how tools and resources are exposed as a standard. |
 | **Python** | [modelcontextprotocol/python-sdk](https://github.com/modelcontextprotocol/python-sdk) | Official Python MCP SDK. |
-| **TypeScript** | [modelcontextprotocol/typescript-sdk](https://github.com/modelcontextprotocol/typescript-sdk) | Official TS MCP SDK. |
+| **TypeScript** | [modelcontextprotocol/typescript-sdk](https://github.com/modelcontextprotocol/typescript-sdk) | Official TypeScript (TS) MCP SDK. |
 | **Go** | [modelcontextprotocol/go-sdk](https://github.com/modelcontextprotocol/go-sdk) · [mark3labs/mcp-go](https://github.com/mark3labs/mcp-go) | Official Go MCP SDK plus a widely used community Go MCP library. Checkout both if you build Go tool servers. |
 
 ### Suggested learning path
@@ -198,7 +198,7 @@ Stars measure attention, not fit. Prefer a repository whose state model, tool co
 
 Frameworks provide the loop; the tools below help assemble its context window. The selection criteria here are a clear API, a public open-source core, and access from more than one client language (or through MCP). Check licensing, deployment requirements, and current client support before adoption.
 
-### How to judge a CE tool
+### How to judge a context engineering (CE) tool
 
 1. Can you explain the API in one sentence with a few verbs?
 2. Can a non-Python service call it (native SDK or MCP)?
@@ -216,13 +216,13 @@ A session cleaner built for one interactive host may still be useful there, but 
 | [getzep/graphiti](https://github.com/getzep/graphiti) (+ in-repo MCP server) | Temporal knowledge graph: entities + facts with validity windows | Python library + MCP tools; Zep cloud SDKs for Python, TypeScript, and Go | When “what was true when” matters more than a flat vector recall. |
 | [langchain-ai/langmem](https://github.com/langchain-ai/langmem) | Manage/search memory tools on LangGraph store | Python (LangGraph-native) | Use when you already live in LangGraph and want hot-path memory tools without a new service. |
 
-**Scope note:** Letta is a full stateful runtime rather than a drop-in memory library. Cognee's ingest-to-graph path is Python-centered; non-Python agents may need a REST or MCP boundary.
+**Scope note:** Letta is a full stateful runtime rather than a drop-in memory library. Cognee's ingest-to-graph path is Python-centered; non-Python agents may need a representational state transfer (REST) or MCP boundary.
 
 ### Compress and isolate (active window)
 
 | Tool | Mental model | Clients / access | Why checkout |
 |------|--------------|------------------|--------------|
-| Provider context APIs (Claude memory tool, tool-result clearing, server compaction) | Clear re-fetchable payloads; compact the transcript; note durable facts | HTTP clients / official SDKs | Compare provider clearing and compaction before building a custom summarizer, and test recovery of evidence. See Anthropic’s [context engineering cookbook](https://platform.claude.com/cookbook/tool-use-context-engineering-context-engineering-tools). |
+| Provider context APIs (Claude memory tool, tool-result clearing, server compaction) | Clear re-fetchable payloads; compact the transcript; note durable facts | Hypertext Transfer Protocol (HTTP) clients / official SDKs | Compare provider clearing and compaction before building a custom summarizer, and test recovery of evidence. See Anthropic’s [context engineering cookbook](https://platform.claude.com/cookbook/tool-use-context-engineering-context-engineering-tools). |
 | [langchain-ai/deepagents](https://github.com/langchain-ai/deepagents) | Offload bulky results to a filesystem, then summarize; isolate work in subagents | Python (patterns travel) | An open example of offload-before-summarize and context isolation; the pattern can be applied in another runtime. |
 | MCP resources + spill/note stores | Pointer in-window, payload out-of-window | Any MCP client language | Durable note first, then a smaller active window; check that the pointer can retrieve the source. |
 
@@ -242,7 +242,7 @@ A session cleaner built for one interactive host may still be useful there, but 
 | You need… | Start here |
 |-----------|------------|
 | A memory service reachable from several host languages | **Mem0** or **Hindsight** (consider MCP if the host is Cursor/Claude) |
-| Entity relationships and “true when” | **Graphiti** (+ MCP); Zep cloud if you want managed Py/TS/Go SDKs |
+| Entity relationships and “true when” | **Graphiti** (+ MCP); Zep cloud if you want managed Python/TypeScript (Py/TS)/Go SDKs |
 | Already on LangGraph | **LangMem** |
 | Large tool responses filling the active window | Test provider **clear/compact** with a recovery check; study DeepAgents for offload and isolation |
 | Evidence that context changes helped | **Langfuse** traces plus an outcome scorecard (RAGAS or a task-specific rubric) |
@@ -269,7 +269,7 @@ A practical distinction is Mem0 for a bolt-on memory store, Graphiti/Zep when re
 - [Simple vs plan](/blog/simple-vs-plan-when-to-use-which/)
 - [Agent orchestration tax](/blog/agent-orchestration-tax-evals/)
 - [Claim-aware evidence packing](/blog/claim-aware-evidence-packing/)
-- [Go vs Python for AI agents](/blog/why-go/)
+- [Go vs Python for artificial intelligence (AI) agents](/blog/why-go/)
 - [Prompt caching for agents](/blog/prompt-caching-ai-agents/)
 
 ---
@@ -278,4 +278,4 @@ A practical distinction is Mem0 for a bolt-on memory store, Graphiti/Zep when re
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports, check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> 🚀 **We're building AI-powered site reliability engineering (SRE) at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports, check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.

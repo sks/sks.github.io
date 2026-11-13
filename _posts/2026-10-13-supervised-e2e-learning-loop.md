@@ -19,11 +19,11 @@ faqs:
     answer: "Not in this setup. Auto-merge and unattended deploy skip ownership, risk judgment, and the deploy-to-verify join that makes a finding durable."
 ---
 
-Last week we tightened [CI honesty for agent evals](/blog/ai-agent-evals-cicd-flakes/): missing tasks fail, retries stay visible, trial IDs match traces. That stops a green build from lying about the current suite. It does not answer whether the suite got stronger after the run.
+Last week we tightened [continuous integration (CI) honesty for artificial intelligence (AI) agent evals](/blog/ai-agent-evals-cicd-flakes/): missing tasks fail, retries stay visible, trial identifiers (IDs) match traces. That stops a green build from lying about the current suite. It does not answer whether the suite got stronger after the run.
 
-We once treated a green nightly and a freshly opened draft pull request as proof the suite had learned. The draft held a plan. The job that proposed a fix closed its own candidate during cleanup. Nothing new ran on the next cadence. The pyramid still caught some regressions. It did not get stronger.
+We once treated a green nightly and a freshly opened draft pull request (PR) as proof the suite had learned. The draft held a plan. The job that proposed a fix closed its own candidate during cleanup. Nothing new ran on the next cadence. The pyramid still caught some regressions. It did not get stronger.
 
-A *supervised E2E learning loop* turns two inputs into better coverage: product changes that need asserts, and observed failures that need a product or test fix. Automation gathers evidence and drafts proposals. Humans review, implement, merge, deploy when the product changed, and re-assert. A created PR is an intermediate result, not proof the loop closed.
+A *supervised end-to-end (E2E) learning loop* turns two inputs into better coverage: product changes that need asserts, and observed failures that need a product or test fix. Automation gathers evidence and drafts proposals. Humans review, implement, merge, deploy when the product changed, and re-assert. A created PR is an intermediate result, not proof the loop closed.
 
 **Key takeaways**
 
@@ -42,7 +42,7 @@ A *supervised E2E learning loop* turns two inputs into better coverage: product 
 
 The [testing pyramid](/blog/ai-agent-testing-pyramid/) answers where a check belongs. Fast stubbed bounds and contract checks run often. Live trials stay few. That split matches [Ham Vocke's practical test pyramid](https://martinfowler.com/articles/practical-test-pyramid.html) and the agent-specific framing in [Block's Testing Pyramid for AI Agents](https://engineering.block.xyz/blog/testing-pyramid-for-ai-agents): keep expensive probabilistic work off the default merge path.
 
-[AWS's Agentic AI Lens](https://docs.aws.amazon.com/wellarchitected/latest/agentic-ai-lens/agentops06-bp01.html) makes the same point in ops language. Unit and integration layers stay fast; end-to-end and shadow work stay deliberate. It also says the pyramid gets stronger over time only if the suite grows with production failures. That growth step is the learning loop.
+The [Amazon Web Services (AWS) Agentic AI Lens](https://docs.aws.amazon.com/wellarchitected/latest/agentic-ai-lens/agentops06-bp01.html) makes the same point in ops language. Unit and integration layers stay fast; end-to-end and shadow work stay deliberate. It also says the pyramid gets stronger over time only if the suite grows with production failures. That growth step is the learning loop.
 
 Cadence still matters for cost. In this setup, merge-tier work stays cheap with selective live smoke. Nightly runs mid-cost integration and journey suites. Weekly work holds longer investigations and soak. That layering is the pyramid applied to wall-clock and token spend.
 
@@ -75,7 +75,7 @@ A pyramid stops known regressions at the cheapest useful layer. A supervised lea
 ## Further reading
 
 - [Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) (Anthropic) on regression versus capability questions
-- [Testing Pyramid for AI Agents](https://engineering.block.xyz/blog/testing-pyramid-for-ai-agents) (Block) on keeping live LLM work out of default CI
+- [Testing Pyramid for AI Agents](https://engineering.block.xyz/blog/testing-pyramid-for-ai-agents) (Block) on keeping live large language model (LLM) work out of default CI
 - [AGENTOPS06-BP01: multi-layered testing](https://docs.aws.amazon.com/wellarchitected/latest/agentic-ai-lens/agentops06-bp01.html) (AWS Well-Architected) on growing the suite from production
 
-Previous: [AI Agent Evals in CI/CD](/blog/ai-agent-evals-cicd-flakes/). Next: [Two E2E Feedback Loops](/blog/e2e-coverage-and-failure-loops/).
+Previous: [AI Agent Evals in continuous integration and continuous delivery (CI/CD)](/blog/ai-agent-evals-cicd-flakes/). Next: [Two E2E Feedback Loops](/blog/e2e-coverage-and-failure-loops/).

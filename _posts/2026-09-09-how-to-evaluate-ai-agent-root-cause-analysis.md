@@ -20,7 +20,7 @@ faqs:
     answer: "A dual-part job: one firing alert to triage, one related log or change plane to compare. Forces measurement and cross-linking instead of a single-paragraph vibe. Run both single-agent ReAct and hierarchical ReAcTree if your runtime supports both."
 ---
 
-## How do you know if an AI agent's RCA is trustworthy or hallucinating?
+## How do you know if an artificial intelligence (AI) agent's root cause analysis (RCA) is trustworthy or hallucinating?
 
 Score the close against an explicit checklist before you look at latency or prose quality. Require a Theory disposition, named Unknowns, a next action, and measured alert or query evidence. Reward honest gaps. Reject confident fiction that invents series or skips required digs.
 
@@ -31,7 +31,7 @@ Score the close against an explicit checklist before you look at latency or pros
 - Rematch the frozen prompt after every harness change.
 {: .key-takeaways}
 
-Root cause analysis (RCA) is an explanation of what caused an incident, supported by measurements and a mechanism. An agent can produce a fluent explanation without having checked the relevant system. A frozen prompt and explicit rubric make that difference inspectable.
+RCA is an explanation of what caused an incident, supported by measurements and a mechanism. An agent can produce a fluent explanation without having checked the relevant system. A frozen prompt and explicit rubric make that difference inspectable.
 
 ---
 
@@ -39,7 +39,7 @@ Root cause analysis (RCA) is an explanation of what caused an incident, supporte
 
 - Freeze a **dual-part** prompt (alert + related logs/change).  
 - Score **13 binary checks** (or your variant) before you look at latency.  
-- Then record wall, tokens, USD.  
+- Then record wall time, tokens, and cost in US dollars (USD).
 - Reject confident closes that invent series. Reward honest Unknowns with named gaps.  
 - Rematch after every harness change — and across orchestration shapes if you ship both.
 
@@ -52,7 +52,7 @@ Root cause analysis (RCA) is an explanation of what caused an incident, supporte
 *The evaluation checks whether the final claim matches the source record, not just how confident it sounds.*
 
 
-From a live Grafana/Loki job ([numbers](/blog/six-model-mode-combos-alert-logs-bench/)), comparing a **single-agent ReAct loop** and a **hierarchical ReAcTree planner** ([primer](/blog/what-is-reactree/) · [PDF](https://arxiv.org/pdf/2511.02424)):
+From a live Grafana/Loki job ([numbers](/blog/six-model-mode-combos-alert-logs-bench/)), comparing a **single-agent ReAct (reasoning and acting) loop** and a **hierarchical ReAcTree planner** ([primer](/blog/what-is-reactree/) · [Portable Document Format (PDF)](https://arxiv.org/pdf/2511.02424)):
 
 **Part A**
 
@@ -68,7 +68,7 @@ From a live Grafana/Loki job ([numbers](/blog/six-model-mode-combos-alert-logs-b
 - 24h window  
 - 7d (or stated baseline) window  
 - Compare / anomaly language  
-- Logs / LogQL evidence  
+- Logs / Loki query language (LogQL) evidence
 
 **Cross-cutting**
 
@@ -100,7 +100,7 @@ First reject unsupported or incomplete diagnoses; then compare wall time and tok
 
 - Judging on prose fluency  
 - Allowing human-in-the-loop (HITL) tools in an unattended bench without recording the human intervention
-- Changing the prompt between A/B seats  
+- Changing the prompt between the two variants under comparison
 - Reporting only relative [efficiency](/blog/relative-efficiency-scores-lie/)  
 - Crowning one orchestration shape without rematching the other  
 

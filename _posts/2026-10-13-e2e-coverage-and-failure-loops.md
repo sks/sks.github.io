@@ -19,7 +19,7 @@ faqs:
     answer: "No. A quick check just proves the automation can suggest fixes. A daily review is a thorough, organized look at everything that failed recently."
 ---
 
-Imagine you have an automated robot helper that checks your software team's work. To be effective, this robot needs two completely separate job descriptions, rather than trying to do everything at once in one messy mega-job. 
+Imagine you have an automated robot helper that checks your software team's end-to-end (E2E) testing work. To be effective, this robot needs two completely separate job descriptions, rather than trying to do everything at once in one messy mega-job.
 
 When we try to point a single daily process at "making testing smarter," things slip through the cracks. We can't tell if our automation missed a brand new feature or if it simply failed to fix an old test.
 
@@ -45,12 +45,12 @@ Whenever a developer finishes building a brand new feature, the robot's job is t
 Here is how that looks in practice:
 1. Scheduled tests run as usual.
 2. The automation scans the recent code the team just wrote. (It ignores the testing folder itself so it doesn't get confused).
-3. It figures out if the changes are real "user-visible" updates (like a new button or API) or just background chores (like updating a read-me file).
+3. It figures out if the changes are real "user-visible" updates (like a new button or application programming interface (API)) or just background chores (like updating a read-me file).
 4. If it spots a missing test for a real feature, it flags it and drafts a plan to cover it.
 5. A human reviewer steps in, validates the plan, and approves the new test.
 6. The new test runs for real! 
 
-This "last mile" of checking for missing tests is a hot topic right now. Research like [ChaCo (ICSE 2026)](https://software-lab.org/publications/icse2026_ChaCo.pdf) and Uber’s [AutoCover](https://homes.cs.washington.edu/~rjust/publ/auto_cover_icse_2026.pdf) show how automation can suggest tests for brand new code while a human is still thinking about it. The automation proposes, but the human always approves.
+This "last mile" of checking for missing tests is a hot topic right now. Research like [Change And Cover (ChaCo)](https://software-lab.org/publications/icse2026_ChaCo.pdf), presented at the International Conference on Software Engineering (ICSE) 2026, and Uber’s [AutoCover](https://homes.cs.washington.edu/~rjust/publ/auto_cover_icse_2026.pdf) show how automation can suggest tests for brand new code while a human is still thinking about it. The automation proposes, but the human always approves.
 
 ## Job 2: The "Broken Stuff" Fixer (Loop B)
 
@@ -89,8 +89,8 @@ The [testing pyramid](/blog/ai-agent-testing-pyramid/) still decides *how* we te
 
 ## Further reading
 
-- [Change And Cover (ChaCo)](https://software-lab.org/publications/icse2026_ChaCo.pdf) - How automation can suggest tests for specific code updates.
+- [ChaCo](https://software-lab.org/publications/icse2026_ChaCo.pdf) - How automation can suggest tests for specific code updates.
 - [AutoCover at industry scale](https://homes.cs.washington.edu/~rjust/publ/auto_cover_icse_2026.pdf) - How big companies manage robot-generated test suggestions.
-- [State of Digital Quality 2026: functional testing](https://www.applause.com/state-of-digital-quality-2026/functional-testing-report/) - Balancing AI helpers with human ownership.
+- [State of Digital Quality 2026: functional testing](https://www.applause.com/state-of-digital-quality-2026/functional-testing-report/) - Balancing artificial intelligence (AI) helpers with human ownership.
 
 Previous: [Supervised E2E Learning Loop](/blog/supervised-e2e-learning-loop/). Next: [When Is an E2E Finding Actually Closed?](/blog/closing-e2e-findings/).

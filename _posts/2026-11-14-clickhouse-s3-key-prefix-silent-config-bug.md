@@ -24,13 +24,13 @@ faqs:
 Every infrastructure team has a bug class they don't have a name for until
 it bites: the config element that parses, validates, applies — and does
 nothing. This post is about finding one in a running ClickHouse cluster,
-the deprecation it was hiding, and what a correct S3 layout looks like
+the deprecation it was hiding, and what a correct Amazon Simple Storage Service (S3) layout looks like
 once you stop trusting the config file and start asking the bucket.
 
 The short version: for months, every multi-tenant S3 disk on my cluster
 was configured with a `key_prefix`. ClickHouse 26.8 silently ignored it.
 Every tenant's parts landed in the bucket root under generated
-three-character prefixes. The per-tenant IAM policies that scoped
+three-character prefixes. The per-tenant Identity and Access Management (IAM) policies that scoped
 `data/<tenant>/*` matched nothing ClickHouse actually wrote. And the
 comment in my own settings file claimed zero-copy replication was the
 default on shared object storage — which upstream deprecated in 2025.
@@ -40,13 +40,13 @@ default on shared object storage — which upstream deprecated in 2025.
 - `<key_prefix>` is not a supported element for s3-type disks in
   ClickHouse 26.8 — unknown disk-config elements are silently ignored.
   Tenant paths must live in `endpoint_subpath`, which is macro-expanded.
-- Zero-copy replication is deprecated (PR #82250). Without it, replicas
+- Zero-copy replication is deprecated (pull request (PR) #82250). Without it, replicas
   physically copy parts, so every replica needs its own S3 prefix — a
   shared prefix means one replica's merge deletes another replica's
   objects while its metadata still references them.
-- The CAS-ready policy shape is two volumes: hot local
+- The Content-Addressed Storage (CAS)-ready policy shape is two volumes: hot local
   (`volume_priority=1`), cold S3 (`volume_priority=2`,
-  `perform_ttl_move_on_insert=false`). Insert locally, TTL-move to S3.
+  `perform_ttl_move_on_insert=false`). Insert locally, then move parts to S3 when their time-to-live (TTL) expires.
   CAS adoption later is a disk-definition swap, not a migration.
 - Prove storage layout with a live insert and an `aws s3 ls`, not with a
   config review. The bucket is the only witness that tells the truth.
@@ -89,7 +89,7 @@ A tenant table had been writing for weeks. Where were its parts?
 
 ## Proving it live
 
-Config review finds nothing wrong: the XML parses, the server boots, the
+Config review finds nothing wrong: the Extensible Markup Language (XML) parses, the server boots, the
 disk answers in `system.disks`:
 
 ```
@@ -162,7 +162,7 @@ are the design: physical copying, always.
 So on a shared prefix, each replica physically writes its own copy of
 every part — into the *same* object keys. A merge on writer-0 rewrites
 parts and deletes the originals; reader-0's metadata still points at the
-deleted objects. TTL drops do the same. You get broken parts, S3 404s,
+deleted objects. TTL drops do the same. You get broken parts, S3 Hypertext Transfer Protocol (HTTP) 404 (not found) errors,
 and refetch storms that look like replication problems, not storage
 problems.
 
@@ -201,7 +201,7 @@ dead and CAS not yet adopted, cold storage scales with replica count:
 cold bytes ≈ sum over tenants of (N_replicas × tenant cold bytes)
 ```
 
-A reader ASG scaling 3 → 10 multiplies the cold tier by up to ~3.3×.
+A reader Auto Scaling Group (ASG) scaling 3 → 10 multiplies the cold tier by up to ~3.3×.
 That is the structural cost from
 [the CAS post](/blog/clickhouse-whats-next-cas-iceberg/) — it is not a
 setting, it is the engine — and per-replica paths make it visible
@@ -250,7 +250,7 @@ And the CAS seam: adopting content-addressed storage later swaps only
 the disk definition — `type=s3` becomes `object_storage` with
 `metadata_type=cas` on a *shared* prefix (no `{replica}` segment,
 because the hash identifies the object, not the owner). Every policy,
-every table, every DDL stays untouched. That's the entire point of the
+every table, every data definition language (DDL) statement stays untouched. That's the entire point of the
 shape.
 
 Verified live on the restructured policy: a 10,000-row insert lands on
@@ -266,7 +266,7 @@ every fresh boot re-runs the bootstrap that renders users, macros, and
 cluster config. When that chain breaks, the failure modes masquerade as
 each other:
 
-1. **Auth failures everywhere.** The writer's chctl user render produced
+1. **Authentication (auth) failures everywhere.** The writer's chctl user render produced
    a malformed `z_chctl-users.xml` — two nested `<clickhouse>` roots.
    The server crash-looped on `SAXParseException`, then on a missing
    profile. The reader's render had produced the correct file. Same
@@ -281,7 +281,7 @@ each other:
    starts fine in the foreground.
 4. **Root-start refusals.** Emergency starts ran as root; 26.8 refuses
    when the data directory is owned by `clickhouse`:
-   `MISMATCHING_USERS_FOR_PROCESS_AND_DATA`. SSM runs as root —
+   `MISMATCHING_USERS_FOR_PROCESS_AND_DATA`. Amazon Web Services (AWS) Systems Manager (SSM) runs as root —
    `sudo -u clickhouse` or the systemd unit, always.
 5. **Missing macros.** A fresh boot whose metadata disk attached slowly
    aborted bootstrap before rendering `macros.xml`, and every
@@ -294,8 +294,7 @@ The recovery for all of it was the same shape: restore identity
 then re-apply the schema — which, because it's a single idempotent file
 with `IF NOT EXISTS`, converges in one pass. The schema-sync unit then
 propagated it to every replica that booted later. No data was lost
-because dev is a zero-data environment; the runbook documents the
-prod path (restore from backup, or re-replicate from a healthy peer).
+because development (dev) is a zero-data environment; the runbook documents the production (prod) path (restore from backup, or re-replicate from a healthy peer).
 
 ## What I'd tell the next person
 
@@ -319,11 +318,11 @@ prod path (restore from backup, or re-replicate from a healthy peer).
 The repo now documents all of it: the per-replica path contract in the
 module's AGENTS.md, the cost model and CAS migration diff in the
 scaling runbook, and the corrected replication diagram. The schema that
-runs on top of this storage is one idempotent SQL file — replicated
+runs on top of this storage is one idempotent Structured Query Language (SQL) file — replicated
 engines, `ON CLUSTER` everywhere, and the materialized-view chain it
 feeds — the same single-file shape that let the fleet re-apply it in one
 pass after every replacement.
 
-Previous: [ClickHouse Config Is Not YAML: What One Re-Render Taught Me About Replica Identity](/blog/clickhouse-replica-identity-config-render/).
+Previous: [ClickHouse Config Is Not YAML Ain't Markup Language (YAML): What One Re-Render Taught Me About Replica Identity](/blog/clickhouse-replica-identity-config-render/).
 
 Series index: [ClickHouse on AWS: Self-Managed from First Principles](/series/clickhouse-on-aws/).

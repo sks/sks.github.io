@@ -20,9 +20,9 @@ faqs:
     answer: "opa test green, correct policy type, attachment enabled only after review, deny for secrets/exfil, HITL for reversible destruction, and fail closed on evaluate errors."
 ---
 
-Guardrails and human approval are not the same control.
+Guardrails for artificial intelligence (AI) agents and human approval are not the same control.
 
-**Deny** blocks. **Ask** pauses until a person decides. Framework docs call that triad allow / ask / deny ([TanStack sandbox policy](https://tanstack.com/ai/latest/docs/sandbox/policy), [OpenAI guardrails and human review](https://developers.openai.com/api/docs/guides/agents/guardrails-approvals)). Aiden maps ask to `approval_required` on an `intervention` policy. This post finishes the series with when to use which, a HITL shell lab, and an operator checklist.
+**Deny** blocks. **Ask** pauses until a person decides. Framework docs call that triad allow / ask / deny ([TanStack sandbox policy](https://tanstack.com/ai/latest/docs/sandbox/policy), [OpenAI guardrails and human review](https://developers.openai.com/api/docs/guides/agents/guardrails-approvals)). Aiden maps ask to `approval_required` on an `intervention` policy. This post finishes the series with when to use which, a human-in-the-loop (HITL) shell lab, and an operator checklist.
 
 **Key takeaways**
 
@@ -37,16 +37,16 @@ Guardrails and human approval are not the same control.
 
 *Asking a human about `gh secret set` is the wrong control. Blocking it is the right one.*
 
-## Architecture: ask is a third PDP outcome
+## Architecture: ask is a third policy decision point (PDP) outcome
 
 Deny and allow finish in one evaluate. **Ask** splits the path:
 
-1. Tool call hits the PEP. Attached `intervention` Rego sets `approval_required`.
+1. Tool call hits the policy enforcement point (PEP). Attached `intervention` Rego sets `approval_required`.
 2. Runtime **does not** execute the tool. It records a pending approval (requester, tool, arguments).
 3. A human decides. On that resolve, `approval_authorization` policies may evaluate `input.approver` (who is allowed to Approve).
 4. On approve, the PEP runs the original tool call. On reject, the agent gets a denial, not a silent success.
 
-That is why ask is not “a softer deny.” It is a durable pause with a second policy type for who may unpause. The LLM never self-approves.
+That is why ask is not “a softer deny.” It is a durable pause with a second policy type for who may unpause. The large language model (LLM) never self-approves.
 
 Composition: attach several policies to one agent. Typical layout is one `logic` deny catalog, one `intervention` HITL file, optional time-window `logic`, optional `approval_authorization`. Keep each file one concern.
 
@@ -113,18 +113,18 @@ opa test 04-freeze-and-hitl/hitl
 make opa-test
 ```
 
-Platform dry-run: POST evaluate with the same Rego and a factsheet (e2e helpers do this without an LLM). That is your “audit before enforce” step.
+Platform dry-run: Hypertext Transfer Protocol (HTTP) POST evaluate with the same Rego and a factsheet (end-to-end (e2e) helpers do this without an LLM). That is your “audit before enforce” step.
 
 ## Operator checklist
 
 1. Default deny for allow-list catalogs; explicit deny for secret and exfil patterns.
-2. Co-locate `*_test.rego` next to every uploaded policy; CI runs `opa test`.
+2. Co-locate `*_test.rego` next to every uploaded policy; continuous integration (CI) runs `opa test`.
 3. Use `logic` vs `intervention` deliberately; wrong type silently does nothing useful.
 4. Attach only policies you tested; enable after `tofu plan` review.
 5. Prefer HITL for reversible high impact; hard deny for secrets and dumps.
 6. Fail closed when evaluation errors; never treat “policy engine down” as allow.
 7. Record deny and ask reasons humans can read (`deny_reason`, `approval_reason`).
-8. Stack sandbox isolation (OpenShell-style) under tool-call OPA when blast radius demands it ([defense in depth](/blog/defense-in-depth/)).
+8. Stack sandbox isolation (OpenShell-style) under tool-call Open Policy Agent (OPA) when blast radius demands it ([defense in depth](/blog/defense-in-depth/)).
 
 ## Where to go
 

@@ -26,7 +26,7 @@ Every ClickHouse tuning article you have ever read has a version it was
 true for and a workload it was measured on. Most of them don't say which.
 So when a fresh cluster install gave me a clean slate to fix the schema
 of a multi-tenant log analytics platform — one ClickHouse database per
-tenant, on the shared EC2 cluster this series has been building — I did
+tenant, on the shared Amazon Elastic Compute Cloud (EC2) cluster this series has been building — I did
 the pass differently: every candidate optimization had to be verified in
 the ClickHouse 26.8 source tree before it shipped. Not the docs. The
 source.
@@ -49,14 +49,14 @@ four more.
   facet queries dropped from 20-30 seconds to sub-second when it went.
 - The implicit `{database}` macro in replicated keeper paths
   ([Macros.cpp](https://github.com/ClickHouse/ClickHouse/blob/b47359294fe0f498ee19c5e31f18a9155b6dedae/src/Common/Macros.cpp#L99))
-  is what makes one DDL file serve N tenant databases. Without it,
+  is what makes one data definition language (DDL) file serve N tenant databases. Without it,
   same-named tables in different databases collide in Keeper.
 - Bloom indexes on `mapKeys()`/`mapValues()` *do* accelerate
   `attributes['k'] = v` predicates in 26.8 — the analyzer resolves
   `arrayElement(map, key)` against the index
   ([MergeTreeIndexBloomFilter.cpp](https://github.com/ClickHouse/ClickHouse/blob/b47359294fe0f498ee19c5e31f18a9155b6dedae/src/Storages/MergeTree/MergeTreeIndexBloomFilter.cpp#L1239)).
   I nearly deleted working indexes on the folklore that they don't.
-- System log tables have no default TTL — the config read for
+- System log tables have no default time-to-live (TTL) — the config read for
   `<log>/ttl` falls back to an empty string
   ([SystemLog.cpp](https://github.com/ClickHouse/ClickHouse/blob/b47359294fe0f498ee19c5e31f18a9155b6dedae/src/Interpreters/SystemLog.cpp#L205))
   — and rotated log tables without one are frozen readonly
@@ -66,7 +66,7 @@ four more.
 - The read path decides column order: every stats query arrives as
   `PREWHERE time BETWEEN ...`, so the time column leads the sorting key.
 - Write-through caching needs two flags — one on the cache disk, one in
-  the default profile — and TTL moves local→S3 do pass through the
+  the default profile — and TTL moves local→Amazon Simple Storage Service (S3) do pass through the
   destination disk's write path, so they populate the cache.
 {: .key-takeaways}
 
@@ -83,8 +83,8 @@ merged parts TTL-move to per-tenant S3 prefixes, reads go through local
 cache disks.
 
 That fresh-install moment is when schema mistakes are cheapest to fix.
-The schema is one idempotent SQL file: a raw log table, a chain of
-rollup tables fed by materialized views, all `Replicated*` engines with
+The schema is one idempotent Structured Query Language (SQL) file: a raw log table, a chain of
+rollup tables fed by materialized views (MVs), all `Replicated*` engines with
 `ON CLUSTER`. The question I took into the source was simple: what in
 this DDL is costing storage or latency that the source says it
 shouldn't?
@@ -125,7 +125,7 @@ ALTER TABLE events ADD PROJECTION p_pagination
 );
 ```
 
-The intent was sound: the UI's dominant query is cursor-paginated —
+The intent was sound: the dominant query in the user interface (UI) is cursor-paginated —
 `WHERE timestamp BETWEEN ... ORDER BY timestamp, id LIMIT n`, resuming
 from `(timestamp, id) > (previous)`. The base table's key led with a
 different column, so the projection gave that access shape its own
@@ -144,7 +144,7 @@ everything the query reads. One missing column and the planner cannot
 select it — not for this query, not for any query, ever. Meanwhile the
 projection is materialized into every part the table writes. In a log
 table, the two `Map(String, String)` payload columns are the bulk of the
-bytes (this series' measured example: a 182 MiB table shrinks to 78 MiB
+bytes (this series' measured example: a 182-mebibyte (MiB) table shrinks to 78 MiB
 with codecs — nearly all of it in the payload). A projection that stores
 both payload columns a second time *doubles* the table's footprint to
 serve zero queries.
@@ -462,7 +462,7 @@ but the rotation logic in
 [SystemLog.cpp](https://github.com/ClickHouse/ClickHouse/blob/b47359294fe0f498ee19c5e31f18a9155b6dedae/src/Interpreters/SystemLog.cpp#L913)
 makes it permanent: when a log hits `max_size_rows`, the existing table
 is renamed (`query_log_0`, `query_log_1`, …) and the rotated table is
-frozen **readonly** as an optimization, so it wastes no CPU on
+frozen **readonly** as an optimization, so it wastes no central processing unit (CPU) on
 background work. Readonly tables don't run TTL drops. The comment in
 the source is explicit: only the logs configured *with* a TTL stay
 writable and reclaimed. Every TTL-less rotation leaves a frozen,
@@ -570,4 +570,4 @@ the cluster adds.
 
 Previous: [The S3 Path Bug Nobody Sees: Silent Config, Shattered Tenants, and a CAS-Ready Fix](/blog/clickhouse-s3-key-prefix-silent-config-bug/).
 
-Series index: [ClickHouse on AWS: Self-Managed from First Principles](/series/clickhouse-on-aws/).
+Series index: [ClickHouse on Amazon Web Services (AWS): Self-Managed from First Principles](/series/clickhouse-on-aws/).

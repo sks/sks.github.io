@@ -21,19 +21,19 @@ faqs:
     answer: "Same contract: systems of record — here AppWorld's evaluate — vote before you trust narration. Self-report is a failure mode, not a tie-breaker."
 ---
 
-One transcript claimed a pass even though no judge result confirmed it. In a tool-using benchmark, a readable account of work is not the same as the app state the benchmark checks. These runs exposed both test-harness problems and task errors; the sample is too small to assign a general share of blame to either.
+One artificial intelligence (AI) agent evaluation (eval) transcript claimed a pass even though no judge result confirmed it. In a tool-using benchmark, a readable account of work is not the same as the app state the benchmark checks. These runs exposed both test-harness problems and task errors; the sample is too small to assign a general share of blame to either.
 
 Parts [one](/blog/fair-agent-evals-before-performance/) and [two](/blog/agent-orchestration-tax-evals/) fixed tool fairness and measured **agent orchestration tax**. This post classifies **what blocked benchmark success** on a small AppWorld slice — harness issues (budget, spawn infra, redaction) mixed with task-hardness signals.
 
-Benchmark: [AppWorld](https://github.com/stonybrooknlp/appworld) ([paper](https://arxiv.org/abs/2407.18901)). Tools: Model Context Protocol (MCP), which exposes actions the agent can call. Judge: AppWorld `/evaluate` — **`success: true`** is strict all-tests pass (TGC). Partial `pass_percentage` can look “close” while `success` stays false. We publish **aggregates only** — AppWorld data is license-protected; see their repo for terms.
+Benchmark: [AppWorld](https://github.com/stonybrooknlp/appworld) ([paper](https://arxiv.org/abs/2407.18901)). Tools: Model Context Protocol (MCP), which exposes actions the agent can call. Judge: AppWorld `/evaluate` — **`success: true`** is strict all-tests task-goal completion (TGC) pass. Partial `pass_percentage` can look “close” while `success` stays false. We publish **aggregates only** — AppWorld data is license-protected; see their repo for terms.
 
-![AI agent eval failure modes: budget, PII poison, wrong API, prose vs judge](/assets/images/og-appworld-failure-modes.jpg)
+![AI agent eval failure modes: budget, personally identifiable information (PII) poison, wrong application programming interface (API), prose vs judge](/assets/images/og-appworld-failure-modes.jpg)
 
 ---
 
 ## What a failed run tells you
 
-In this five-task paired sample, neither path passed AppWorld’s strict state checks, so the head-to-head rule recorded **5/5 ties**. That does not mean they failed for the same reason. A single-agent run could use up its turn budget before `/evaluate`; a planner worker could copy a redacted method name into a call and get HTTP **422** (the server rejected the request). Record both the failure class and whether the external judge ran. A transcript saying “PASS” without a judge result is not a pass; see [Is the task actually done?](/blog/is-the-task-actually-done/) and [evidence-based verification](/blog/evidence-based-verification/).
+In this five-task paired sample, neither path passed AppWorld’s strict state checks, so the head-to-head rule recorded **5/5 ties**. That does not mean they failed for the same reason. A single-agent run could use up its turn budget before `/evaluate`; a planner worker could copy a redacted method name into a call and get Hypertext Transfer Protocol (HTTP) **422** (the server rejected the request). Record both the failure class and whether the external judge ran. A transcript saying “PASS” without a judge result is not a pass; see [Is the task actually done?](/blog/is-the-task-actually-done/) and [evidence-based verification](/blog/evidence-based-verification/).
 
 ---
 
@@ -53,7 +53,7 @@ In this five-task paired sample, neither path passed AppWorld’s strict state c
 
 ## Delegation-fit cohort (n = 5 per mode)
 
-Tasks chosen to reward delegate-then-synthesize: phone → notes → SMS, inbox + contacts + payments, workout note → playlist sizing, batch social payments, trip ledger → settle debts.
+Tasks chosen to reward delegate-then-synthesize: phone → notes → Short Message Service (SMS), inbox + contacts + payments, workout note → playlist sizing, batch social payments, trip ledger → settle debts.
 
 ### Observed failure signals
 
@@ -91,7 +91,7 @@ Use [From Vibes to Contracts](/blog/from-vibes-to-contracts-agent-evals/) vocabu
 
 When [PII redaction](/blog/pii-redaction-ai-agents/) (masking personal or sensitive information) replaces method names or tool tokens with `[HIDDEN:…]`, the agent can **call the placeholder as if it were a real API**. AppWorld returns 422 — “no API named …”
 
-This is the same two-view tension as SRE evals: redaction for safety vs pass-through for evidence. For fair A/B, eval twins must document which redaction layers are on. See also [Microsoft Presidio](https://github.com/microsoft/presidio) for a public reference implementation of detect-and-replace redaction.
+This is the same two-view tension as site reliability engineering (SRE) evals: redaction for safety vs pass-through for evidence. For fair A/B comparisons, eval twins must document which redaction layers are on. See also [Microsoft Presidio](https://github.com/microsoft/presidio) for a public reference implementation of detect-and-replace redaction.
 
 Planner paths hit **`pii_poison` on 2/5** tasks in this cohort; single-agent hit **0** — not because single-agent is immune, but because fewer hops meant fewer chances to copy redacted tokens into worker spawns.
 
@@ -157,4 +157,4 @@ Without publishing internal wiring: we treated these as harness and policy issue
 
 **Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft root cause analysis (RCA) reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.

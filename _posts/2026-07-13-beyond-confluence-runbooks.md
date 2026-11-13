@@ -14,7 +14,7 @@ Both are following "the runbook." They are not following the same runbook.
 
 This is an illustration of where GitOps-style triage artifacts—procedures reviewed and versioned in Git—can be easier to execute consistently than wiki prose, and where wiki articles remain useful. It is not a measured comparison of two products. The scenario below is **composite and fictional** — it illustrates a pattern we have seen across several production rollouts, not a transcript of any one customer's playbook.
 
-It pairs with [Your RCA Agent Doesn't Need Another Runbook — It Needs a Map](/blog/agents-need-a-map-not-a-script/): that post argues against runbook-as-only-navigation. This one argues for **executable** runbooks when the investigation graph itself must stay reviewable and gated.
+It pairs with [Your Root Cause Analysis (RCA) Agent Doesn't Need Another Runbook — It Needs a Map](/blog/agents-need-a-map-not-a-script/): that post argues against runbook-as-only-navigation. This one argues for **executable** runbooks when the investigation graph itself must stay reviewable and gated.
 
 ---
 
@@ -32,15 +32,15 @@ These symptoms are illustrative, not measurements from a real incident. The impo
 
 ## Version A — The Wiki Playbook
 
-A mature team's Confluence article — the kind exported to PDF for auditors and pinned in the `#payments-oncall` channel.
+A mature team's Confluence article — the kind exported to Portable Document Format (PDF) for auditors and pinned in the `#payments-oncall` channel.
 
 **What it contains:**
 
 * A calm narrative intro: "This playbook covers checkout slowness when the latency SLO page fires."
 * Embedded screenshots of the "Payments Overview" dashboard with arrows drawn on heatmaps.
 * Step list in prose: acknowledge the page, open dashboard A, compare to last week, check the deploy calendar, open dashboard B if errors rose, skim logs for timeout strings, escalate to the database team if pool wait time looks high.
-* A sidebar link to a *different* article: "Connection pool exhaustion — read this if checkout is slow but CPU is fine."
-* Example values baked into the text: `prod-us`, `checkout-api`, a sample trace ID format, a phone number for the payments duty manager.
+* A sidebar link to a *different* article: "Connection pool exhaustion — read this if checkout is slow but the central processing unit (CPU) is fine."
+* Example values baked into the text: `prod-us`, `checkout-api`, a sample trace identifier (ID) format, a phone number for the payments duty manager.
 
 For humans, the page gives context, visuals, escalation contacts, and cues for when to call for help.
 
@@ -60,14 +60,14 @@ None of this means the wiki article is bad. It means it was written for a **huma
 
 ## Version B — Git-Managed Triage (Same Incident Class)
 
-The same investigation lives in **version-controlled markdown** wired into an agent workflow through config-as-code. This avoids a separate YAML domain-specific language (DSL) for operators, while still giving the runtime a machine-readable contract instead of asking the large language model (LLM) to infer every rule from prose.
+The same investigation lives in **version-controlled markdown** wired into an agent workflow through config-as-code. This avoids a separate YAML Ain’t Markup Language (YAML) domain-specific language (DSL) for operators, while still giving the runtime a machine-readable contract instead of asking the large language model (LLM) to infer every rule from prose.
 
 That distinction matters. If execution were pure natural-language interpretation, Version B would inherit Version A's failure modes with a shorter retrieval window. We avoided that by splitting responsibilities across three layers:
 
 | Layer | Who reads it | What it controls |
 | --- | --- | --- |
 | **Human steps** | On-call engineers | Numbered prose — trigger, actions, decision points |
-| **Structured metadata** | CI + workflow binder | Key-value block inside HTML comments — never parsed from bullet wording |
+| **Structured metadata** | Continuous integration (CI) + workflow binder | Key-value block inside Hypertext Markup Language (HTML) comments — never parsed from bullet wording |
 | **Workflow gates** | Runtime (deterministic) | Evidence lines must exist before the next stage advances |
 
 The markdown is the *authoring surface*. The workflow is the *execution contract*. The model fills gaps inside a bounded skill — it does not freestyle the investigation graph.
@@ -108,7 +108,7 @@ An engineer who rephrases step 2 as "Check latency and errors for the alerted sl
 
 ### Under the hood (illustrative)
 
-Continuous integration (CI) walks the markdown abstract syntax tree (AST), visits HTML comment nodes, parses key-value lines inside, and validates against a small registry — step IDs exist, `action` maps to an allowed tool family, `output` names a known evidence key. Sketch of the idea:
+CI walks the markdown abstract syntax tree (AST), visits HTML comment nodes, parses key-value lines inside, and validates against a small registry — step IDs exist, `action` maps to an allowed tool family, `output` names a known evidence key. Sketch of the idea:
 
 ```go
 // Illustrative: collect machine contracts from HTML comments only.
@@ -134,7 +134,7 @@ func collectStepMeta(comments []string) ([]stepMeta, []error) {
 }
 ```
 
-`parseCommentKV` is mundane string splitting and required-key checks — not an NLP pipeline. If the comment block is malformed, the PR fails. If the prose is messy, nobody cares.
+`parseCommentKV` is mundane string splitting and required-key checks — not a natural language processing (NLP) pipeline. If the comment block is malformed, the pull request (PR) fails. If the prose is messy, nobody cares.
 
 At runtime, each `step` ID maps to a **bound skill** with a fixed tool allowlist. Stage 2 cannot start until stage 1 emitted an **evidence line** matching the gate pattern for `scope_summary`. That is where [evidence-based verification](/blog/evidence-based-verification/) connects: triage proposes inside the skill; gates check required outputs before promotion. Tool results and the final claim need separate verification.
 
@@ -143,7 +143,7 @@ At runtime, each `step` ID maps to a **bound skill** with a fixed tool allowlist
 Parsing nested markdown list text for `**Input:**` vs `*Inputs:*` vs an extra space is brittle — exactly the fight platform teams lose when they pretend markdown is YAML. Front-matter-style metadata inside comments gives you:
 
 * **Stable machine parsing** without a second file format operators must learn
-* **Pristine human prose** SREs actually want to edit after incidents
+* **Pristine human prose** site reliability engineering (SRE) practitioners actually want to edit after incidents
 * **Clear PR diffs** — contract changes show up in the comment block; narrative edits stay separate
 
 When a team outgrows comment blocks, the escape hatch is generating the skill registry from explicit config *alongside* the markdown — not replacing the human-readable layer.
@@ -165,13 +165,13 @@ If I were defending the wiki in an architecture review:
 
 **Most knowledge is not executable.** Vendor contacts, escalation trees, compliance narratives, architecture decision history — keep these human-first. Forcing everything into Git because agents exist creates empty modules and angry technical writers.
 
-**Storytelling is a feature.** The wiki explains *why* pool exhaustion masquerades as API latency, when to call the payments duty manager, and what "good" looks like on a heatmap. Juniors often learn faster from a well-curated page than from a diff.
+**Storytelling is a feature.** The wiki explains *why* pool exhaustion masquerades as application programming interface (API) latency, when to call the payments duty manager, and what "good" looks like on a heatmap. Juniors often learn faster from a well-curated page than from a diff.
 
 **GitOps can create a priesthood.** Not every responder wants a PR to fix a typo in step 3. If only platform teams can edit executable runbooks, shadow knowledge returns in Slack pins and oral tradition.
 
 **Retrieval-augmented generation (RAG) can help narrow a search.** Semantic search plus citations can support read-only triage, though retrieved fragments may omit a branch. The cliff edge is mutating steps and cross-system branches.
 
-**Screenshots orient humans in seconds.** A heatmap PNG beats a paragraph of axis labels for the bridge lead.
+**Screenshots orient humans in seconds.** A heatmap Portable Network Graphics (PNG) image beats a paragraph of axis labels for the bridge lead.
 
 Confluence can remain a useful human reference. Using its prose as the only execution contract for an agent leaves too much behavior implicit.
 
@@ -218,7 +218,7 @@ Think of it like infrastructure: you would not replace your architecture wiki wi
 ## A Practical Migration Path (No Big Bang)
 
 1. **Pick one high-churn alert class** — latency SLO breach, error-rate spike, queue depth — where dashboard drift already burned you.
-2. **Lift decisions, not URLs** — replace brittle links with named integrations and discover-first queries; keep the wiki link as a human shortcut.
+2. **Lift decisions, not uniform resource locators (URLs)** — replace brittle links with named integrations and discover-first queries; keep the wiki link as a human shortcut.
 3. **Put contract in comment blocks** — `step`, `input`, `action`, `output` as key-value metadata; keep human steps as normal prose.
 4. **Lint comments in CI** — AST walk + registry validation before the runbook can bind to a workflow.
 5. **Pin revision on Sev-1** — high severity uses a bound version; lower severity can still search the wiki.
@@ -241,7 +241,7 @@ Platform teams can build or adopt the comment linter, skill registry, and gates.
 - [Your RCA Agent Doesn't Need Another Runbook — It Needs a Map](/blog/agents-need-a-map-not-a-script/) — maps for navigation; runbooks as overlay
 - [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/) — dual-audience playbooks and stage gates
 - [Defense in Depth for Tool Calls](/blog/defense-in-depth/) — policy and HITL around remediation
-- More on [AI agents for SRE](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
+- More on [artificial intelligence (AI) agents for SRE](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---
 

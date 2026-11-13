@@ -21,7 +21,7 @@ The [six-combo scorecard](/blog/six-model-mode-combos-alert-logs-bench/) reports
 
 The prompt and tool access were held constant, but each cell ran once. The three patterns below describe these write-ups, not enduring properties of the model families. "Theory" is the proposed explanation of the alert, not a confirmed root cause.
 
-We compared two orchestration shapes: a **single-agent ReAct loop** (one trajectory) and a **hierarchical ReAcTree planner** (parent decomposes subgoals, may spawn children). Primer: [What is ReAcTree?](/blog/what-is-reactree/) · [PDF](https://arxiv.org/pdf/2511.02424).
+We compared two orchestration shapes: a **single-agent ReAct (reasoning and acting) loop** (one trajectory) and a **hierarchical ReAcTree planner** (parent decomposes subgoals, may spawn children). Primer: [What is ReAcTree?](/blog/what-is-reactree/) · [Portable Document Format (PDF)](https://arxiv.org/pdf/2511.02424).
 
 ---
 
@@ -40,7 +40,7 @@ We compared two orchestration shapes: a **single-agent ReAct loop** (one traject
 Part A: sustained goroutine-growth alert on a control-plane service.  
 Part B: Loki for namespace `ops-platform`, 24h vs 7d, cross-link to Part A.
 
-Required shape: Theory / Unknowns / Do-this-now per part. See [evidence-gated RCA](/checklists/evidence-gated-rca/).
+Required shape: Theory / Unknowns / Do-this-now per part. See [evidence-gated root cause analysis (RCA)](/checklists/evidence-gated-rca/).
 
 ---
 

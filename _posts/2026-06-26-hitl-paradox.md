@@ -25,7 +25,7 @@ We replaced the single rule with three tiers:
 - **Require approval:** operations that can change external state, including tools not explicitly allowed for automatic use.
 - **Hard deny:** tools blocked even if someone offers to approve them.
 
-The gate acts on tool invocations, not substrings inside commands. Blocking a tool named `bash` blocks that tool; checking a command string for `rm` is not a reliable safety boundary because shell syntax can express an operation in many ways. A general shell tool therefore needs review as a whole, with the full proposed command shown. For finer access control, typed application programming interfaces (APIs) with role-based access control (RBAC) are safer than regex filters on shell text.
+The gate acts on tool invocations, not substrings inside commands. Blocking a tool named `bash` blocks that tool; checking a command string for `rm` is not a reliable safety boundary because shell syntax can express an operation in many ways. A general shell tool therefore needs review as a whole, with the full proposed command shown. For finer access control, typed application programming interfaces (APIs) with role-based access control (RBAC) are safer than regular expression (regex) filters on shell text.
 
 In our workflow this reduced approval volume to a handful of consequential requests per task. We observed more deliberate review, though lower volume alone cannot prove every approval was sound. A shell command that looks read-only may still contact external systems or expose secrets; classification should reflect the actual capability, not just a label.
 
@@ -50,7 +50,7 @@ The middle branch is a pending request with an expiry, not permission to execute
 
 A delayed decision creates **state drift**: production may have changed since the command was proposed. Short time-to-live limits (TTLs) expire old requests, and session-scoped caching avoids executing long-deferred approvals without re-evaluation. A short TTL reduces but cannot eliminate that risk.
 
-Operators can see pending requests grouped by tool and handle some in bulk. Bulk review is most suitable for read-only investigation commands. State-changing calls should be inspected individually, or batching simply moves the rubber stamp to a larger button. If a request is rejected, the agent receives a tool error and can plan again; feedback such as "use staging instead" can guide that replanning. This is related to [steering an AI agent mid-run](/blog/steer-ai-agents-mid-run/).
+Operators can see pending requests grouped by tool and handle some in bulk. Bulk review is most suitable for read-only investigation commands. State-changing calls should be inspected individually, or batching simply moves the rubber stamp to a larger button. If a request is rejected, the agent receives a tool error and can plan again; feedback such as "use staging instead" can guide that replanning. This is related to [steering an artificial intelligence (AI) agent mid-run](/blog/steer-ai-agents-mid-run/).
 
 ## A Delegation Bypass We Found
 
@@ -75,4 +75,4 @@ Watch approval times, approval and rejection rates, and whether teams switch to 
 
 ---
 
-> **StackGen builds AI-assisted SRE (site reliability engineering) tools.** Our offering at [ai.stackgen.com](https://ai.stackgen.com) supports incident triage, diagnostics, and draft root-cause analyses.
+> **StackGen builds AI-assisted site reliability engineering (SRE) tools.** Our offering at [ai.stackgen.com](https://ai.stackgen.com) supports incident triage, diagnostics, and draft root-cause analyses.

@@ -19,17 +19,17 @@ faqs:
     answer: "Implemented-gap rate, verification latency, recurrence, duplicate candidates, skip and preflight rate, evidence completeness, false positives, and analysis cost. PR count alone misleads."
 ---
 
-Yesterday we split the [supervised loop](/blog/supervised-e2e-learning-loop/) into [coverage versus failure paths](/blog/e2e-coverage-and-failure-loops/). Both paths still need an exit criterion stricter than “the agent opened something.”
+Yesterday we split the [supervised end-to-end (E2E) loop](/blog/supervised-e2e-learning-loop/) into [coverage versus failure paths](/blog/e2e-coverage-and-failure-loops/). Both paths still need an exit criterion stricter than “the agent opened something.”
 
-We closed a ticket because an agent had opened a draft fix. The draft linked a run URL. Nobody recorded which log pages were unread. The merge happened days later on a different SHA than the one we eventually deployed. The next nightly failed the same assert. The finding had never been closed. We had filed paperwork.
+We closed a ticket because an artificial intelligence (AI) agent had opened a draft fix. The draft linked a run uniform resource locator (URL). Nobody recorded which log pages were unread. The merge happened days later on a different Secure Hash Algorithm (SHA) digest than the one we eventually deployed. The next nightly failed the same assert. The finding had never been closed. We had filed paperwork.
 
-In this setup a *finding* is a durable record of a coverage gap or an observed failure. Closing it is stricter than creating a candidate. The same discipline that makes [RCA evals](/blog/how-to-evaluate-ai-agent-root-cause-analysis/) reject fluent fiction applies here: independent evidence, named gaps, and a check that can fail.
+In this setup a *finding* is a durable record of a coverage gap or an observed failure. Closing it is stricter than creating a candidate. The same discipline that makes [root cause analysis (RCA) evals](/blog/how-to-evaluate-ai-agent-root-cause-analysis/) reject fluent fiction applies here: independent evidence, named gaps, and a check that can fail.
 
 **Key takeaways**
 
 - Each evidence plane may claim only what it owns.
 - Minimum finding fields beat tribal memory.
-- Loop health is implemented gaps and verification latency, not PR volume.
+- Loop health is implemented gaps and verification latency, not pull request (PR) volume.
 {: .key-takeaways}
 
 ---
@@ -42,7 +42,7 @@ In this setup a *finding* is a durable record of a coverage gap or an observed f
 
 | Plane | May claim | May not claim alone |
 |-------|-----------|---------------------|
-| CI scheduler | Run, ref, attempt, artifacts, concurrency | That every scenario executed |
+| Continuous integration (CI) scheduler | Run, ref, attempt, artifacts, concurrency | That every scenario executed |
 | E2E harness | Fixtures, sessions, skipped / blocked / failed / unknown / verified | That a product root cause is true |
 | Agent runtime | Investigation steps and tool calls | That terminal status equals a usable result |
 | Remote runner | Scoped dig commands under its credentials | Host CI token authority |
@@ -56,7 +56,7 @@ This is also where industry guidance and our ledger agree. [Anthropic](https://w
 
 ## Minimum finding record
 
-Record at least: scheduled window; run URL and attempt; target ref or SHA; session or trace ids when created; query links and coverage limits; source and deployed revision; candidate URL, repo, and status; confidence and unknowns; regression assertion; review decision; deployment and verification-run evidence. Keep secrets out of the record.
+Record at least: scheduled window; run URL and attempt; target ref or SHA; session or trace identifiers (IDs) when created; query links and coverage limits; source and deployed revision; candidate URL, repository (repo), and status; confidence and unknowns; regression assertion; review decision; deployment and verification-run evidence. Keep secrets out of the record.
 
 ## Closure checklist
 
@@ -70,7 +70,7 @@ A finding is closed and verified only when:
 6. The post-change run passes the specific assertion with independent evidence.
 7. The next scheduled review can mark the same finding resolved, still open, or contradicted without paying for an identical investigation.
 
-[AWS's multi-layer testing guidance](https://docs.aws.amazon.com/wellarchitected/latest/agentic-ai-lens/agentops06-bp01.html) puts shadow and staging comparison above end-to-end gates for a reason. Merge is not the same plane as “this revision behaved on the target environment.”
+[Multi-layer testing guidance from Amazon Web Services (AWS)](https://docs.aws.amazon.com/wellarchitected/latest/agentic-ai-lens/agentops06-bp01.html) puts shadow and staging comparison above end-to-end gates for a reason. Merge is not the same plane as “this revision behaved on the target environment.”
 
 ## Loop-health measures
 
@@ -85,7 +85,7 @@ A finding is closed and verified only when:
 | False-positive rate | Fixture issues labelled as product bugs |
 | Analysis cost | Tokens spent without durable closure |
 
-These are targets to track. Do not claim them until the ledger exists. ChaCo’s ICSE evaluation even separates “test generated” from “reviewers would merge it” and “it found a real bug.” Count the last two, not the first.
+These are targets to track. Do not claim them until the ledger exists. ChaCo’s International Conference on Software Engineering (ICSE) evaluation even separates “test generated” from “reviewers would merge it” and “it found a real bug.” Count the last two, not the first.
 
 ## Try this on the next five findings
 

@@ -21,7 +21,7 @@ Site reliability engineering (SRE) teams run and improve the systems other teams
 
 I use **Service Rendered Efficiently** as a way to ask who benefits from our work, how the service is delivered, and whether the effort is proportionate.
 
-*The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
+*The incident patterns below are composite and anonymized. Counts are rounded. Names, identifiers (IDs), and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
@@ -45,18 +45,18 @@ This comparison shows how rewarding a shipped framework differs from designing a
 |--------------------------|----------------------|
 | Success = what we built | Success = what on-call can do next |
 | Showcase frameworks and tools | Showcase fewer duplicate investigations |
-| Compete with product eng for “real work” | Amplify product eng during incidents |
-| Measure agent LOC and model cleverness | Measure time-to-first-useful-answer and handoff quality |
+| Compete with product engineering for “real work” | Amplify product engineering during incidents |
+| Measure agent lines of code (LOC) and model cleverness | Measure time-to-first-useful-answer and handoff quality |
 
 The right measures depend on the service: a platform framework may matter when it enables safer changes, but its existence alone does not show whether incident response improved.
 
-Definitions of triage vs RCA vs remediation still live in [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/). This series is the culture and product layer on top.
+Definitions of triage vs RCA vs remediation for artificial intelligence (AI) agents still live in [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/). This series is the culture and product layer on top.
 
 ---
 
 ## A number that changed how we shipped
 
-In one week of production debug export analysis for a mid-size SaaS customer’s AI investigate path, we saw roughly **100 investigations**. About **fifteen** alert IDs had multiple full digs. **One alert saw twenty-plus full reruns** — same worker failure pattern, hourly cycle, Slack follow-ups that each launched a fresh workflow despite a completed RCA already sitting on the thread.
+In one week of production debug export analysis for a mid-size software-as-a-service (SaaS) customer’s AI investigate path, we saw roughly **100 investigations**. About **fifteen** alert IDs had multiple full digs. **One alert saw twenty-plus full reruns** — same worker failure pattern, hourly cycle, Slack follow-ups that each launched a fresh workflow despite a completed RCA already sitting on the thread.
 
 That pattern suggests a launch-policy problem before a model-quality problem: each follow-up started another run despite a completed RCA. Some follow-ups may warrant fresh analysis; the default should not assume they all do.
 
@@ -73,7 +73,7 @@ We prioritized reuse-first launch policy, correlation gates (checks that relate 
 ## If you ship the agent platform
 
 - Prefer product gates (reuse cooldown, user-goal enforcement, spill honesty) over prompt pep talks
-- Treat Slack and Activity UX as part of the investigation service, not a logging afterthought
+- Treat Slack and Activity user experience (UX) as part of the investigation service, not a logging afterthought
 - Review batches of production debug exports — that is how we prioritized reuse and correlation work
 
 ---

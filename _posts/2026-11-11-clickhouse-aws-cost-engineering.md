@@ -21,15 +21,15 @@ faqs:
     answer: "Yes, if the instance family includes it. cache_on_nvme_instance_store uses the instance-store NVMe disks that ship free with r8g instances. The cache re-warms from S3 after a replacement, and the entire gp3 cache line item — about $465/month in the prod profile — goes away."
 ---
 
-Self-managed ClickHouse is only worth the operational work if the bill stays predictable. I run a log analytics platform on EC2 — writers, readers, Keeper, S3-backed storage — and this post shows the real monthly numbers, then every lever that moves them. The levers are simple: arm64 CPUs, spot instances, an S3 lifecycle rule, no bastion host, one janitor Lambda — a small program that cleans up behind you every day. Simple is the point.
+Self-managed ClickHouse is only worth the operational work if the bill stays predictable. I run a log analytics platform on Amazon Elastic Compute Cloud (EC2) — writers, readers, Keeper, S3-backed storage — and this post shows the real monthly numbers, then every lever that moves them. The levers are simple: arm64 central processing units (CPUs), spot instances, an Amazon Simple Storage Service (S3) lifecycle rule, no bastion host, one janitor Lambda — a small program that cleans up behind you every day. Simple is the point.
 
-First the steady state, then each lever with its number, then the guardrails, then the war story. The war story is the reason this post exists: one Terraform setting leaked about 38 TB — roughly $1,700 a month — and no tag would have identified it. The sentence that drives everything below: costs should fall with load, not just rise.
+First the steady state, then each lever with its number, then the guardrails, then the war story. The war story is the reason this post exists: one Terraform setting leaked about 38 terabytes (TB) — roughly $1,700 a month — and no tag would have identified it. The sentence that drives everything below: costs should fall with load, not just rise.
 
 **Key takeaways**
 
 - A dev profile runs ~$150–250/month; the prod profile runs ~$3,100–3,500/month in us-east-1, lifecycle included.
 - Graviton, a 50% spot split on readers, and S3 Standard→Infrequent-Access tiering do most of the work.
-- `delete_on_termination = false` on inline EBS volumes is a silent leak. Standalone tagged `aws_ebs_volume` resources plus a daily janitor close it.
+- `delete_on_termination = false` on inline Elastic Block Store (EBS) volumes is a silent leak. Standalone tagged `aws_ebs_volume` resources plus a daily janitor close it.
 {: .key-takeaways}
 
 ---
@@ -44,11 +44,11 @@ us-east-1, November 2026 rates. Keeper is the coordination service ClickHouse us
 | Readers | 1, on-demand | 3 × r8g.4xlarge at 50% spot |
 | Keeper | 1 × t4g.small | 3 × r8g.xlarge |
 | Backup | — | 1 × t4g.xlarge |
-| Storage | ~500 GB → ~$25/mo | ~50 TB → ~$650/mo with IA lifecycle (~$1,180 without) |
+| Storage | ~500 gigabytes (GB) → ~$25/mo | ~50 TB → ~$650/mo with Infrequent Access (IA) lifecycle (~$1,180 without) |
 
 ## Lever 1: Graviton arm64
 
-Graviton is AWS's arm64 CPU family. Think of CPU families as car engines: a car must be built for one engine brand before it can run on it. ClickHouse publishes official arm64 builds, so the car is already built for this engine, and every trip burns ~20% less fuel than the x86 engine for the same work — ~35% less than the comparable Azure Ebdsv5 series I priced while comparing clouds. In AWS terms, Graviton is the cheaper engine: the same software at a lower price per vCPU.
+Graviton is the arm64 CPU family from Amazon Web Services (AWS). Think of CPU families as car engines: a car must be built for one engine brand before it can run on it. ClickHouse publishes official arm64 builds, so the car is already built for this engine, and every trip burns ~20% less fuel than the x86 engine for the same work — ~35% less than the comparable Azure Ebdsv5 series I priced while comparing clouds. In AWS terms, Graviton is the cheaper engine: the same software at a lower price per virtual central processing unit (vCPU).
 
 ## Lever 2: spot for readers
 
@@ -58,23 +58,23 @@ Spot instances are spare EC2 capacity, sold at up to ~70% off; AWS can take one 
 
 S3 Standard lists at $0.023/GB-month; Azure Blob hot tier lists around $0.035/GB-month ([S3 pricing](https://aws.amazon.com/s3/pricing/)). The bigger lever is a lifecycle rule. Picture boxes at home: boxes you open often stay in the room you rent by the month; boxes you almost never open move to a cheaper storage unit after 30 days. Same boxes, lower rent — $0.023 → $0.0125/GB-month ([storage classes](https://aws.amazon.com/s3/storage-classes/)) — and you can still fetch any box in seconds. That is why you never use the deep-freeze vault (Glacier), where fetching takes hours. At 50 TB that is ~$650/month instead of ~$1,180. In AWS terms, the lifecycle rule is the moving service: it relocates old objects from Standard to Infrequent-Access automatically. IA charges a fee per GB fetched, so only tier data that is rarely read — logs older than a month.
 
-## Lever 4: gp3, not premium SSD
+## Lever 4: gp3, not premium solid-state drive (SSD)
 
 gp3 volumes cost roughly half the $/GB of premium cloud SSD tiers and include a 3,000 IOPS baseline at no extra charge. IOPS means input/output operations per second — disk reads and writes. Local EBS only holds the hot cache and where merges write; S3 holds the durable copy. Paying premium-SSD prices for a cache is the most common mistake I see in self-managed bills.
 
 ## Lever 5: no private-endpoint tax
 
-The S3 gateway endpoint is a private road between your house and the warehouse: free to use. The public toll road is the NAT gateway, at $0.045/GB — every truckload pays. Your heaviest traffic is the data itself, so it takes the free road. In AWS terms, the endpoint is a route from your VPC (your private network) to S3 that never touches the toll road ([S3 gateway endpoints](https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html)). The comparable Azure private endpoint bills $7.30/month each plus $0.01/GB processed — at 50 TB of monthly traffic, about $500. That line item does not exist here.
+The S3 gateway endpoint is a private road between your house and the warehouse: free to use. The public toll road is the network address translation (NAT) gateway, at $0.045/GB — every truckload pays. Your heaviest traffic is the data itself, so it takes the free road. In AWS terms, the endpoint is a route from your virtual private cloud (VPC) (your private network) to S3 that never touches the toll road ([S3 gateway endpoints](https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html)). The comparable Azure private endpoint bills $7.30/month each plus $0.01/GB processed — at 50 TB of monthly traffic, about $500. That line item does not exist here.
 
-## Lever 6: SSM Session Manager, no bastion
+## Lever 6: AWS Systems Manager (SSM) Session Manager, no bastion
 
-SSM Session Manager opens a shell through the SSM agent channel. It costs $0, IAM permissions limit who can connect, and every session is logged. A bastion is a separate EC2 instance you must pay for, patch, and guard — about $140/month.
+SSM Session Manager opens a shell through the SSM agent channel. It costs $0, Identity and Access Management (IAM) permissions limit who can connect, and every session is logged. A bastion is a separate EC2 instance you must pay for, patch, and guard — about $140/month.
 
-## Lever 7: ACM certificates
+## Lever 7: AWS Certificate Manager (ACM) certificates
 
-ACM issues public certificates free, renewal included. TLS — the encryption between servers — costs nothing but the load balancer listener.
+ACM issues public certificates free, renewal included. Transport Layer Security (TLS) — the encryption between servers — costs nothing but the load balancer listener.
 
-## The NVMe option: `cache_on_nvme_instance_store`
+## The Non-Volatile Memory Express (NVMe) option: `cache_on_nvme_instance_store`
 
 r8g instances ship with instance-store NVMe — local disks included in the instance price, $0 extra. `cache_on_nvme_instance_store` uses them as the hot cache. Ephemeral means the disks are erased when the instance stops or is replaced. That is acceptable for a cache: it re-warms from S3, where the durable copy lives. You rebuild a cache; you do not lose data. This deletes the whole gp3 cache line: ~$465/month in the prod profile.
 
@@ -109,7 +109,7 @@ A war story is a story of something that went wrong, told so others can avoid th
 **The fix, two parts:**
 
 1. **Name tags on every piece of furniture.** All data disks became standalone `aws_ebs_volume` resources with the full tag set, attached with `aws_volume_attachment`. A standalone volume carries the tags you write, so the next leak is visible the day it starts.
-2. **A daily inspector.** A leak-guard Lambda on an EventBridge `rate(1 day)` schedule walks the building every day. It **deletes** only what is unattached, completely untagged, and older than a 24-hour grace window. It **reports** — never deletes — unassociated EIPs and untagged snapshots, like calling the owner about something suspicious instead of throwing it out. An alarm pages the moment a run finds anything.
+2. **A daily inspector.** A leak-guard Lambda on an EventBridge `rate(1 day)` schedule walks the building every day. It **deletes** only what is unattached, completely untagged, and older than a 24-hour grace window. It **reports** — never deletes — unassociated Elastic IP addresses (EIPs)—Internet Protocol (IP) addresses not attached to running resources—and untagged snapshots, like calling the owner about something suspicious instead of throwing it out. An alarm pages the moment a run finds anything.
 
 Lesson: self-managed means your bill has failure modes. Cloud spending breaks like software does: silently, in the background, on a setting that looked safe. Build janitors — small programs that clean up every day.
 
@@ -117,4 +117,4 @@ Lesson: self-managed means your bill has failure modes. Cloud spending breaks li
 
 Each tenant writes to its own S3 prefix — a named shelf inside one shared warehouse. Per-prefix byte metrics and Storage Lens groups turn those shelves into a per-tenant cost report with no extra infrastructure. A tenant at 2 TB costs what 2 TB costs, and the report says so by name.
 
-Previous: [Operations runbooks for self-managed ClickHouse](/blog/clickhouse-operations-runbooks/). Next: [After ReplicatedMergeTree: CAS, Iceberg, and when to just buy ClickHouse Cloud](/blog/clickhouse-whats-next-cas-iceberg/).
+Previous: [Operations runbooks for self-managed ClickHouse](/blog/clickhouse-operations-runbooks/). Next: [After ReplicatedMergeTree: Content-Addressed Storage (CAS), Iceberg, and when to just buy ClickHouse Cloud](/blog/clickhouse-whats-next-cas-iceberg/).

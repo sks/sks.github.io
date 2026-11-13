@@ -20,10 +20,10 @@ faqs:
     answer: "Two rules. First, the keeper's server_id must come from the raft log's own myid file, not from anything derived at boot — a re-imaged keeper presenting a different id looks like a new member to the surviving ensemble and breaks raft recovery. Second, listen_host is a root-level setting in keeper config; placing it under the keeper_server section silently leaves the client port bound to localhost."
 ---
 
-I thought replacing hand-written ClickHouse cluster XML was a config cleanup.
+I thought replacing hand-written ClickHouse cluster Extensible Markup Language (XML) was a config cleanup.
 It was actually a tour of the identity machinery that most ClickHouse
 documentation waves at: the macros that name a replica, the Keeper paths
-those macros expand into, the raft IDs that name a keeper, and the exact
+those macros expand into, the raft identifiers (IDs) that name a keeper, and the exact
 places where "just regenerate the config" silently re-identifies a node
 with live data.
 
@@ -36,12 +36,12 @@ ReplicatedMergeTree anywhere, they apply to you.
 **Key takeaways**
 
 - The `<macros>` block is not metadata. It is the *name* your data is filed
-  under: Keeper paths and, with S3-tiered storage, part of the S3 prefix.
+  under: Keeper paths and, with Amazon Simple Storage Service (S3)-tiered storage, part of the S3 prefix.
   Changing a macro value on a live cluster does not migrate anything —
   it re-keys every table.
 - The Altinity operator's value off-Kubernetes is its domain code: the
   spec normalizer, the config generators, the schemer that propagates
-  schema to scaled-out replicas. chctl runs those against EC2, VMs, or
+  schema to scaled-out replicas. chctl runs those against Amazon Elastic Compute Cloud (EC2), virtual machines (VMs), or
   bare metal.
 - Keeper identity (server_id, raft_configuration IDs) must be treated as
   state that outlives the instance — it lives in the raft log, and the
@@ -80,8 +80,7 @@ chctl config render \
   -out /etc/clickhouse-server/config.d
 ```
 
-The `-host name=address` inventory maps the spec's abstract host names to
-real DNS. The `-replica` flag answers the question the operator never
+The `-host name=address` inventory maps the spec's abstract host names to real Domain Name System (DNS). The `-replica` flag answers the question the operator never
 had to ask on Kubernetes: *what is this node's replica name?* On EC2
 the answer is your hostname convention — `writer-0`, `reader-3` — because
 that's what your autoscaling identity scheme gives you.
@@ -190,8 +189,7 @@ For keeper nodes the split bites hardest, twice.
 **First bite: the server ID.** ClickHouse Keeper identifies raft members
 by an integer. A fresh `keeper_config.xml` from any generator will
 derive one — an index, a hash, whatever the generator's convention is.
-But a re-imaged keeper joining an *existing* ensemble must present the
-ID its raft log was written under, or the surviving members see a
+But a re-imaged keeper joining an *existing* ensemble must present the ID its raft log was written under, or the surviving members see a
 stranger: raft recovery stalls, keeper logs a raft ID mismatch, exits.
 The myid file lives on the raft disk next to the log, and it is the
 authority. The config must be rendered to match it, never the reverse:
@@ -292,13 +290,13 @@ The Altinity operator's assets here are the *domain* pieces — a
 normalizer that applies hundreds of defaults and hardenings to a spec,
 generators whose output ClickHouse parses correctly because they're the
 same generators the on-cluster ConfigMaps come from, and a schemer that
-has handled edge cases like UUID collisions and ATTACH fallbacks for
+has handled edge cases like universally unique identifier (UUID) collisions and ATTACH fallbacks for
 years. The Kubernetes-specific part is mostly plumbing: StatefulSets,
-pod hostnames, PVC binding.
+pod hostnames, PersistentVolumeClaim (PVC) binding.
 
 chctl is that observation, packaged. The normalizer, generators, and
 schemer run as a single static binary against any cluster. The
-translation layer is thin: where the operator resolves a pod FQDN, the
+translation layer is thin: where the operator resolves a pod fully qualified domain name (FQDN), the
 off-cluster binary takes a `-host name=address` inventory; where the
 operator derives a replica name from the pod, the binary takes a
 `-replica` mapping. Everything past that boundary is the same code.
@@ -316,7 +314,7 @@ component needs:
 - **A release process.** Cross-compiled binaries, checksums, a tagged
   workflow that runs the tests before publishing.
 - **Blast-radius discipline.** The render surface changed faster than
-  the image build cycle, so the golden AMI bakes one version and node
+  the image build cycle, so the golden Amazon Machine Image (AMI) bakes one version and node
   bootstrap swaps in a newer one, checksum-gated — same discipline as
   the database itself, applied to the thing that configures the
   database.
@@ -334,7 +332,7 @@ would have saved my afternoon:
    your spec and diff the output against the live files — byte by byte.
    The one that differs by "one character" is the migration.
 3. **Check the macro expansion sites.** Keeper paths, S3-tiered storage
-   prefixes, `ON CLUSTER` DDL — everything that interpolates `{shard}`
+   prefixes, `ON CLUSTER` data definition language (DDL) — everything that interpolates `{shard}`
    or `{replica}`. Those are the contracts your config must honor.
 4. **Keepers: read the myid before you write any config.** Then verify
    with `ss -tln` that the client port actually bound where you think.

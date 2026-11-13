@@ -23,7 +23,7 @@ faqs:
 
 We tried making a site reliability engineering (SRE) investigation cheaper by removing older, bulky tool results from the model's active context. The host did this only after the agent had written a durable note it could read later. We call that **observation masking**, or **tool-result clearing**.
 
-In a matched gateway-timeout investigation, clearing ran and the ON arm was faster and cheaper. But the OFF arm identified a probable connectivity failure between the gateway and an upstream service; ON could not determine the cause. A cheaper run did not meet our root-cause analysis (RCA) bar. Below are the setup, the observations, and the quality check we used. Related: [AI SRE agent benchmarks](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/), [fair agent evals](/blog/fair-agent-evals-before-performance/), [simple vs plan](/blog/simple-vs-plan-when-to-use-which/).
+In a matched gateway-timeout investigation, clearing ran and the ON arm was faster and cheaper. But the OFF arm identified a probable connectivity failure between the gateway and an upstream service; ON could not determine the cause. A cheaper run did not meet our root-cause analysis (RCA) bar. Below are the setup, the observations, and the quality check we used. Related: [Artificial intelligence (AI) SRE agent benchmarks](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/), [fair agent evaluations (evals)](/blog/fair-agent-evals-before-performance/), [simple vs plan](/blog/simple-vs-plan-when-to-use-which/).
 
 ---
 
@@ -34,7 +34,7 @@ In a matched gateway-timeout investigation, clearing ran and the ON arm was fast
 - **Evidence gap:** OFF ran **8** Datadog and **21** Grafana calls, including full-result spill and time-series queries, and identified a probable upstream hop. ON ran **4** Datadog and **14** Grafana calls, with **no** full-series tools; its application performance monitoring (APM) path from caller to origin remained empty.
 - **Both** called `discover_skills` **10** times. Repeated discovery was not specific to clearing.
 - **A unit fixture is not a live cost estimate.** A synthetic note-and-clear path can drastically reduce visible tool characters, but that is not a measured multiplier for an investigation.
-- **Next experiment:** higher auto-clear threshold (~20KB-shaped) vs 0; summarize / extra compaction off; pass only on RCA parity.
+- **Next experiment:** auto-clear threshold of roughly 20 kilobytes (KB) vs 0; summarize / extra compaction off; pass only on RCA parity.
 
 ---
 
@@ -62,11 +62,11 @@ We ran matched plan-style incident investigations, one with auto-clear OFF and o
 | Summarize / extra context-summarize / cache / sanitize / PII / grounding guard | OFF | | |
 | Loop detection | ON | | |
 | Auto-clear tool-result bytes | | **0** (off) | **8000** (bench forced fire; prod-shaped default when enabled is closer to **~20KB**) |
-| Prompt | Same historical gateway timeout on a catalog API path | | |
-| Surface | chat UI | | |
-| Tools | Grafana + Datadog MCP tool servers | | |
+| Prompt | Same historical gateway timeout on a catalog application programming interface (API) path | | |
+| Surface | chat user interface (UI) | | |
+| Tools | Grafana + Datadog Model Context Protocol (MCP) tool servers | | |
 
-The obfuscated scenario used tenant **TENANT-UAT**, request `GET /api/catalog/v2/.../assets`, caller **edge-gateway**, and origin **catalog-service**. Signals included `error.type=ResourceAccessException`, connection refused or connect timeout, and a gateway **504** (timeout). We report **cost, latency, and tool counts** from Langfuse traces, not customer trace IDs or secrets. These are observations from these matched runs, not a general estimate of what clearing saves.
+The obfuscated scenario used tenant **TENANT-UAT**, request `GET /api/catalog/v2/.../assets`, caller **edge-gateway**, and origin **catalog-service**. Signals included `error.type=ResourceAccessException`, connection refused or connect timeout, and a gateway **504** (timeout). We report **cost, latency, and tool counts** from Langfuse traces, not customer trace identifiers (IDs) or secrets. These are observations from these matched runs, not a general estimate of what clearing saves.
 
 ---
 
@@ -102,7 +102,7 @@ Tool totals alone conceal which evidence was gathered:
 | Grafana | **21** (incl. full-result spill / series / parallel) | **14**, **no** full-series tools |
 | Skill/catalog discovery | **10** | **10** |
 
-OFF's APM and log queries supported a probable caller→origin connectivity explanation. ON did fewer of those queries, left that APM path unestablished, and reported an undetermined cause. The difference in tool use is associated with the quality gap, but one A/B does not prove that clearing alone caused every skipped query.
+OFF's APM and log queries supported a probable caller→origin connectivity explanation. ON did fewer of those queries, left that APM path unestablished, and reported an undetermined cause. The difference in tool use is associated with the quality gap, but one A/B comparison does not prove that clearing alone caused every skipped query.
 
 There are other limits to the test. Both arms could mark work complete without establishing a matching path. The **8KB** threshold was chosen to force clearing in the benchmark; it is lower than the ~20KB production-shaped default when clearing is enabled. Repeated discovery or Datadog calls can also consume time before a useful query. These constraints matter when interpreting the cost and RCA results.
 
@@ -112,7 +112,7 @@ There are other limits to the test. Both arms could mark work complete without e
 
 A **43%** cost reduction with real clear events is worth studying, but it does not justify enabling this setting for investigations if it loses the evidence needed to identify a cause. Turning on summarization or another context-summarize path at the same time would make it harder to attribute any change to clearing; both were **off** here.
 
-Our runtime also refuses to have an LLM summarize the durable note store. A recoverability probe can show that notes are readable, but if those notes have been rewritten and lost key details, the probe alone may give false reassurance. Check the evidence in the notes as well as the ability to retrieve them.
+Our runtime also refuses to have a large language model (LLM) summarize the durable note store. A recoverability probe can show that notes are readable, but if those notes have been rewritten and lost key details, the probe alone may give false reassurance. Check the evidence in the notes as well as the ability to retrieve them.
 
 A synthetic note-and-clear unit path showed an order-of-magnitude drop in visible tool characters. Even a “512×” figure from such a fixture describes that fixture, not live investigation cost or RCA quality.
 
@@ -127,7 +127,7 @@ Pass only if **all** of the following hold:
    - Window anchored (time range honest to the incident)
    - Caller→origin APM path closed (path measured)
    - Origin logs / `error.type` named when present
-   - Infra / readiness checked when relevant
+   - Infrastructure / readiness checked when relevant
    - Honest gaps: systems we could not query
    - Gateway-as-symptom (do not stop at the 504)
    - Recoverability (durable notes can restate Symptom/Cause)

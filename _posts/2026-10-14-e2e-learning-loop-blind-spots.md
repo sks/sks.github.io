@@ -19,9 +19,9 @@ faqs:
     answer: "Retain coverage drafts for human adoption by default. Treat fix-draft cleanup as proposal smoke unless someone deliberately adopts the candidate into a review queue."
 ---
 
-This morning’s [closure checklist](/blog/closing-e2e-findings/) assumes the ledger is honest. Most open [supervised learning loops](/blog/supervised-e2e-learning-loop/) fail before that checklist, as operations bugs.
+This morning’s [closure checklist](/blog/closing-e2e-findings/) assumes the ledger is honest. Most open [supervised learning loops](/blog/supervised-e2e-learning-loop/) for end-to-end (E2E) tests fail before that checklist, as operations bugs.
 
-We trusted a green nightly. The feature scan had run. The RCA smoke had opened and closed a draft. Concurrently, a required suite skipped on a missing credential, a newer pending run replaced an older one, and the product fix from last week was still not on the environment the tests hit. The model was fine. The bookkeeping was not.
+We trusted a green nightly. The feature scan had run. The root cause analysis (RCA) smoke had opened and closed a draft. Concurrently, a required suite skipped on a missing credential, a newer pending run replaced an older one, and the product fix from last week was still not on the environment the tests hit. The artificial intelligence (AI) model was fine. The bookkeeping was not.
 
 **Key takeaways**
 
@@ -41,15 +41,15 @@ We trusted a green nightly. The feature scan had run. The RCA smoke had opened a
 | Blind spot | What goes wrong | Closure |
 |------------|-----------------|---------|
 | Cadence mismatch | Feature discovery mistaken for a full anomaly sweep | Keep [Loop A and Loop B](/blog/e2e-coverage-and-failure-loops/) explicit |
-| Top-N / pagination | Latest N failures or truncated APIs omit the rest | Report limits; mark unread incomplete |
+| Top-N / pagination | Latest N failures or truncated application programming interfaces (APIs) omit the rest | Report limits; mark unread incomplete |
 | Skip as success | Job success masks skipped suites | Inspect scenario counts, not only conclusion |
 | Fixture versus product | Missing creds or apps labelled as product bugs | Fail preflight explicitly; no runtime verdict |
-| Merge ≠ deploy | Merged SHA not live, or telemetry from another env | Observe exact image or build on the target |
+| Merge ≠ deploy | Merged Secure Hash Algorithm (SHA) digest not live, or telemetry from another env | Observe exact image or build on the target |
 | Lost proposals | Plans unimplemented; fix drafts cleaned up unread | Retain coverage drafts; adopt fixes deliberately |
 | Queue starvation | Newer pending run replaces older; windows vanish | Record what actually ran; chase missing windows |
 | No post-deploy verify | Fix merged, assert never run on new build | Link a verification run to the finding |
 
-Related CI honesty themes live in [evals in CI/CD](/blog/ai-agent-evals-cicd-flakes/): a required-task skip is not a pass. [Block's agent testing pyramid](https://engineering.block.xyz/blog/testing-pyramid-for-ai-agents) keeps live LLM work off every-PR CI partly because flaky or skipped probabilistic jobs teach the wrong lesson about green. [AWS](https://docs.aws.amazon.com/wellarchitected/latest/agentic-ai-lens/agentops06-bp01.html) adds shadow comparison for the same reason staging lies.
+Related continuous integration (CI) honesty themes live in [evals in continuous integration and continuous delivery (CI/CD)](/blog/ai-agent-evals-cicd-flakes/): a required-task skip is not a pass. [Block's agent testing pyramid](https://engineering.block.xyz/blog/testing-pyramid-for-ai-agents) keeps live large language model (LLM) work off CI for every pull request (PR) partly because flaky or skipped probabilistic jobs teach the wrong lesson about green. [Amazon Web Services (AWS)](https://docs.aws.amazon.com/wellarchitected/latest/agentic-ai-lens/agentops06-bp01.html) adds shadow comparison for the same reason staging lies.
 
 [Applause](https://www.applause.com/state-of-digital-quality-2026/functional-testing-report/) calls out another failure mode that looks like Loop B success: automation that rewrites the test to pass. That is skip-as-success with better marketing. Closing a finding by deleting the assert leaves the product broken and the ledger smug.
 
@@ -66,7 +66,7 @@ Related CI honesty themes live in [evals in CI/CD](/blog/ai-agent-evals-cicd-fla
 
 ## What not to optimize
 
-Do not chase PR volume. Do not treat prompt text as an authorization barrier. Do not assume a concurrency group is a FIFO review of every commit. Do not weaken asserts to make a shared environment look healthy.
+Do not chase PR volume. Do not treat prompt text as an authorization barrier. Do not assume a concurrency group is a first-in, first-out (FIFO) review of every commit. Do not weaken asserts to make a shared environment look healthy.
 
 The [pyramid](/blog/ai-agent-testing-pyramid/) still places checks at the cheapest useful layer. The learning loop only makes the system better when these blind spots are named and closed in the ledger, not when the agent sounds confident in a draft.
 

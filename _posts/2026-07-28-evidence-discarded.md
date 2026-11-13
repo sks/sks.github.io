@@ -18,7 +18,7 @@ The agent focused instead on a fingerprint miss and an unrelated firing alert in
 
 **This was not an empty-data case: the report dropped an observed lead.**
 
-That is a different epistemic bug than invention under emptiness, and a different one than [closing RCA before homework](/blog/curiosity-before-confidence/). Invention fills gaps with fiction. Premature confidence skips digs. **Abandon-after-lead** describes that loss between collection and summary. A mismatch in a secondary alert identifier or a quiet current window may warrant a check, but neither automatically erases a relevant measurement from the fire-time window. For [AI agents for SRE](/topics/ai-agents-sre/), the tool log and final report should be reconcilable.
+That is a different epistemic bug than invention under emptiness, and a different one than [closing RCA before homework](/blog/curiosity-before-confidence/). Invention fills gaps with fiction. Premature confidence skips digs. **Abandon-after-lead** describes that loss between collection and summary. A mismatch in a secondary alert identifier or a quiet current window may warrant a check, but neither automatically erases a relevant measurement from the fire-time window. For [artificial intelligence (AI) agents for SRE](/topics/ai-agents-sre/), the tool log and final report should be reconcilable.
 
 ---
 
@@ -56,7 +56,7 @@ Strip the product names. The shape repeats on any alert-card triage agent doing 
 1. **Paste** — rule UID, fingerprint, fire time, Do-this-next checklist.
 2. **Rule fetch succeeds** — title and annotations match the paste.
 3. **Fingerprint miss** — instance not currently firing (aging is allowed).
-4. **Wrong window** — the first PromQL (Prometheus query language) batch uses wall-clock “now − a few hours” and returns No data.
+4. **Wrong window** — the first Prometheus Query Language (PromQL) batch uses wall-clock “now − a few hours” and returns No data.
 5. **Broaden** — longer window returns the locus near fire (reason + path + labels).
 6. **Peer distraction** — a list of currently firing alerts returns an unrelated alert name during the same period.
 7. **Abandon** — dig claims the UID is wrong; coordinator Summary goes undetermined and pastes the checklist back at the human.

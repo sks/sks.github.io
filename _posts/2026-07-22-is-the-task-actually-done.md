@@ -16,7 +16,7 @@ faqs:
     answer: "Not because of tokens, but because humans close tickets, merge changes, or sleep based on that claim."
 ---
 
-When an AI agent says **“done,”** someone may close a ticket, merge a change, or stop investigating. The claim needs to mean more than “the agent called a tool.” A submission can be rejected, and a fluent report can leave a required check unfinished. Completion should be checked against the actual goal.
+When an artificial intelligence (AI) agent says **“done,”** someone may close a ticket, merge a change, or stop investigating. The claim needs to mean more than “the agent called a tool.” A submission can be rejected, and a fluent report can leave a required check unfinished. Completion should be checked against the actual goal.
 
 We changed the runtime—the software that coordinates model calls and tools—to verify completion on tasks with measurable deliverables. [External verification](/blog/evidence-based-verification/) asks whether a monitoring, deployment, or ticketing system confirms an outcome. Here the narrower question is whether the agent’s own recorded steps justify its completion claim, and what to do when checking costs time or money.
 
@@ -53,7 +53,7 @@ We argued through several designs. None were free.
 | **Always verify every chat turn** | Simple mental model | Pays a second model call for "thanks" and "hello"; latency and cost explode on interactive chat |
 | **Regex / "DONE" string gates** | Cheap, deterministic | Agents learn to print the magic word; brittle across languages and tools |
 | **Same-turn self-critique only** | No extra architecture | Shares the planner's blind spots; classic self-grade bias |
-| **Human approval on every finish** | Human judgment for consequential tasks | Routine approvals can become a queue or a rubber stamp — see [the HITL paradox](/blog/hitl-paradox/) |
+| **Human approval on every finish** | Human judgment for consequential tasks | Routine approvals can become a queue or a rubber stamp — see [the human-in-the-loop (HITL) paradox](/blog/hitl-paradox/) |
 | **Only external system checks** | Strong when available | Some goals are internal, such as submitting a structured deliverable; not every finish has a monitoring-system query |
 | **Period spending limits alone** | Familiar cost control | Too broad for a single task: they may stop an account only after one attempt has already spent too much |
 | **Uncapped evaluator retries** | More opportunities to correct a rejected answer | Spending and delay can grow without a limit |
@@ -121,7 +121,7 @@ func RunUntilDone(ctx context.Context, goal string, maxAttempts int, budget *Spe
 }
 ```
 
-**What the evaluator sees:** the original goal, the latest candidate string, and a bounded JSON-shaped list of tool execution statuses (succeeded vs failed/denied) — redacted excerpts, not the full transcript. It does **not** get raw secrets or multi-megabyte dumps. The handoff is: worker proposes → ledger records tool outcomes → evaluator checks → runtime accepts, retries, or returns an explicitly unverified candidate.
+**What the evaluator sees:** the original goal, the latest candidate string, and a bounded JavaScript Object Notation (JSON)-shaped list of tool execution statuses (succeeded vs failed/denied) — redacted excerpts, not the full transcript. It does **not** get raw secrets or multi-megabyte dumps. The handoff is: worker proposes → ledger records tool outcomes → evaluator checks → runtime accepts, retries, or returns an explicitly unverified candidate.
 
 In short: propose with the planner, check within a bounded loop, and account for cost and state-changing actions in the host application.
 
@@ -141,8 +141,8 @@ We did not invent "ask another model if the work is finished." We stole the good
 | **[Reflexion](https://arxiv.org/abs/2303.11366)** (Shinn et al.) | Verbal feedback from a critique step can improve the next attempt | Treating reflection as free and always-on |
 | **[Self-Refine](https://arxiv.org/abs/2303.17651)** (Madaan et al.) | Iterative improve-with-feedback is a real pattern | Same-model self-grade without an evidence seam |
 | **[CRITIC](https://arxiv.org/abs/2305.11738)** (Gou et al.) | Tool-interactive critique beats pure introspection | Assuming every environment exposes perfect verifiers |
-| **[LLM-as-a-Judge](https://arxiv.org/abs/2306.05685)** (Zheng et al.) | A separate evaluator can help on measurable tasks | Using judges as a substitute for systems-of-record checks |
-| **[Let's Verify Step by Step](https://arxiv.org/abs/2305.20050)** (Lightman et al.) | Process-level signals beat outcome-only self-report | Importing math-benchmark process rewards wholesale into SRE |
+| **[Large language model as a judge (LLM-as-a-Judge)](https://arxiv.org/abs/2306.05685)** (Zheng et al.) | A separate evaluator can help on measurable tasks | Using judges as a substitute for systems-of-record checks |
+| **[Let's Verify Step by Step](https://arxiv.org/abs/2305.20050)** (Lightman et al.) | Process-level signals beat outcome-only self-report | Importing math-benchmark process rewards wholesale into site reliability engineering (SRE) |
 
 The synthesis for enterprise agents: **critique is valuable; critique without evidence, budgets, and mutation policy is a liability.** These research patterns informed the design, but deployment adds questions about operating cost, verification gaps, and repeatable writes.
 
@@ -174,7 +174,7 @@ The synthesis for enterprise agents: **critique is valuable; critique without ev
 
 **5. Pricing must be wired in.** A cost ceiling cannot work without model prices; attempt limits still apply when prices are unavailable.
 
-Related: [evidence-gated RCA](/blog/evidence-gated-multiplane-rca/), [hypothesis ladder](/blog/hypothesis-ladder/), [curiosity before confidence](/blog/curiosity-before-confidence/), [tokenomics](/blog/maintaining-tokenomics-with-aiden/). Topic hubs: [AI agent workflows](/topics/ai-agent-workflows/) · [AI agents for SRE](/topics/ai-agents-sre/).
+Related: [evidence-gated root cause analysis (RCA)](/blog/evidence-gated-multiplane-rca/), [hypothesis ladder](/blog/hypothesis-ladder/), [curiosity before confidence](/blog/curiosity-before-confidence/), [tokenomics](/blog/maintaining-tokenomics-with-aiden/). Topic hubs: [AI agent workflows](/topics/ai-agent-workflows/) · [AI agents for SRE](/topics/ai-agents-sre/).
 
 ---
 

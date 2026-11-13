@@ -11,7 +11,7 @@ tags: [config, toml, yaml, devops, ai-agents]
 
 Configuration is an input to the runtime: a wrong type or misplaced setting can change what an agent is allowed to do. The format should make those errors visible before deployment.
 
-When we built our AI agent runtime at StackGen, we needed a config format for defining agents, tools, security policies, memory settings, and model routing. We tried YAML, evaluated PKL (Apple’s programmable configuration language) and CUE, and chose TOML for this relatively flat, typed configuration. The decision would be different for configurations that need extensive reuse or validation rules.
+When we built our artificial intelligence (AI) agent runtime at StackGen, we needed a config format for defining agents, tools, security policies, memory settings, and model routing. We tried YAML Ain't Markup Language (YAML), evaluated PKL (Apple’s programmable configuration language) and CUE, a configuration and validation language, and chose Tom's Obvious, Minimal Language (TOML) for this relatively flat, typed configuration. The decision would be different for configurations that need extensive reuse or validation rules.
 
 ---
 
@@ -50,13 +50,13 @@ YAML’s multi-line strings are sometimes counted as **nine** style-and-modifier
 
 ## Why PKL Was Interesting but Premature
 
-Apple released [PKL](https://pkl-lang.org/) in 2024 as a "programmable config language." It has static types, schema validation, code reuse, and IDE support. We evaluated it seriously — and it's a genuinely elegant design.
+Apple released [PKL](https://pkl-lang.org/) in 2024 as a "programmable config language." It has static types, schema validation, code reuse, and integrated development environment (IDE) support. We evaluated it seriously — and it's a genuinely elegant design.
 
 But three things ruled it out for us:
 
 ### Problem 1: It requires a build step
 
-PKL files aren't directly readable by Go's standard library. You need the PKL runtime to evaluate them into JSON/YAML/Go structs. That adds a build dependency, a CI step, and a failure mode — another dependency in our build and deployment path, though generated config could still be shipped with a binary.
+PKL files aren't directly readable by Go's standard library. You need the PKL runtime to evaluate them into JavaScript Object Notation (JSON)/YAML/Go structs. That adds a build dependency, a continuous integration (CI) step, and a failure mode — another dependency in our build and deployment path, though generated config could still be shipped with a binary.
 
 ### Problem 2: The ecosystem is thin
 
@@ -78,7 +78,7 @@ The config path shows what TOML makes explicit and why typed decoding must still
 
 ![Hand-edited or generated TOML passes through Go typed decoding and field and policy validation before acceptance or rejection](/assets/images/diagrams/june-foundations/toml-config-acceptance.svg)
 
-[TOML](https://toml.io/) (Tom's Obvious, Minimal Language) matched our constraints:
+[TOML](https://toml.io/) matched our constraints:
 
 ### 1. Explicit types — no surprises
 
@@ -126,13 +126,13 @@ For our shallow sections, TOML diffs are usually easy to review. Large arrays of
 
 ## Two Layers, Two Config Surfaces
 
-A single-developer CLI tool and a platform managing many agents across many teams have fundamentally different config lifecycle needs — one favors a file a developer edits locally, the other favors something reviewable and governed at the organization level, which is a separate design problem I cover in a [follow-up post on infrastructure-as-code for agent configuration](/blog/terraform-config/). The two surfaces share the same underlying agent runtime; only the config source and audience differ.
+A single-developer command-line interface (CLI) tool and a platform managing many agents across many teams have fundamentally different config lifecycle needs — one favors a file a developer edits locally, the other favors something reviewable and governed at the organization level, which is a separate design problem I cover in a [follow-up post on infrastructure-as-code for agent configuration](/blog/terraform-config/). The two surfaces share the same underlying agent runtime; only the config source and audience differ.
 
 ---
 
 ## Lessons Learned
 
-1. **Config format is an API contract.** Once users adopt it, changing is expensive. Choose carefully upfront.
+1. **Config format is an application programming interface (API) contract.** Once users adopt it, changing is expensive. Choose carefully upfront.
 
 2. **Check parser behavior in production.** YAML versions and implementations differ. Explicit values and schema tests matter more than assuming a format alone prevents errors.
 

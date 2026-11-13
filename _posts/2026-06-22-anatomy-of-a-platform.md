@@ -29,7 +29,7 @@ The specifics don't matter for this post — what mattered was **consistency at 
 - **Generated test doubles** — fakes stand in for dependencies in unit tests and fail to compile when an interface changes. They do not replace tests of actual integrations.
 - **Explicit dependencies** — methods can hold injected clients, while free functions still work for stateless transformations. Both are testable.
 - **Readable control flow** — early returns help when they make error paths clear; they are not a substitute for small functions.
-- **Small public APIs** — export only what other packages need; this reduces the number of callers affected by a change.
+- **Small public application programming interfaces (APIs)** — export only what other packages need; this reduces the number of callers affected by a change.
 
 **Why this matters for agents:** our agent runtime calls models and tools through several integrations. Consistent interfaces make new providers easier to inspect, but reviewers still need to examine each provider’s failure and permission behavior.
 
@@ -55,7 +55,7 @@ Our merge checks run linting, formatting, and the test suite. Those checks reduc
 
 ## Patterns That Emerged
 
-**A composable middleware chain** for tool execution — the same idea as HTTP middleware, applied to AI tool calls. Each concern (logging, safety checks, rate limiting, and so on) is its own small, independently testable unit that wraps the next one in the chain. Adding a concern means writing a wrapper and placing it at the right point in the chain. Order matters: an approval check must wrap every path that can execute a tool.
+**A composable middleware chain** for tool execution — the same idea as Hypertext Transfer Protocol (HTTP) middleware, applied to artificial intelligence (AI) tool calls. Each concern (logging, safety checks, rate limiting, and so on) is its own small, independently testable unit that wraps the next one in the chain. Adding a concern means writing a wrapper and placing it at the right point in the chain. Order matters: an approval check must wrap every path that can execute a tool.
 
 **A provider pattern** for every external integration — model providers, vector stores, document parsers, messaging platforms implement small interfaces and are registered by name. Configuration can choose an implementation, but provider-specific behavior still needs tests and operational review.
 

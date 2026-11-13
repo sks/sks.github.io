@@ -21,16 +21,16 @@ faqs:
 
 Same replica. Different instance every hour.
 
-I run a log analytics platform on self-managed ClickHouse. Most queries go to the readers. A reader is a replica: it serves read queries (SELECT) and holds a full copy of the data. If one reader dies, the others answer its queries. That makes readers good candidates for EC2 Spot. Spot instances are spare AWS capacity. They cost up to about 70% less than normal on-demand machines. In exchange, AWS can take a spot machine back at any time, with a two-minute warning ([AWS Spot](https://aws.amazon.com/ec2/spot/)).
+I run a log analytics platform on self-managed ClickHouse. Most queries go to the readers. A reader is a replica: it serves read queries (SELECT) and holds a full copy of the data. If one reader dies, the others answer its queries. That makes readers good candidates for Amazon Elastic Compute Cloud (EC2) Spot. Spot instances are spare Amazon Web Services (AWS) capacity. They cost up to about 70% less than normal on-demand machines. In exchange, AWS can take a spot machine back at any time, with a two-minute warning ([AWS Spot](https://aws.amazon.com/ec2/spot/)).
 
 The problem is not price. It is identity. Imagine a company with three shared reception desks, numbered 0, 1, and 2. Those desks are our readers: `reader-0`, `reader-1`, `reader-2`. The desks are staffed by temporary workers, who cost much less than permanent staff and arrive and leave all the time. Those workers are spot instances. Each desk has a logbook. The logbook records everything that happened at that desk, and it belongs to the desk number, not to the person sitting there. In ClickHouse terms, the logbook is the replication state: the record of which data parts a replica holds, stored under paths in [ClickHouse Keeper](https://clickhouse.com/docs/en/operations/clickhouse-keeper), the coordination service that replaced ZooKeeper. A new worker must take over a desk number together with its logbook. If she sits at a desk with a random new number, she has no logbook. If she shares desk 2's logbook, two people write in the same book and the records get damaged. This post describes the fix: a DynamoDB ordinal claimer.
 
 **Key takeaways**
 
-- Spot readers are ~70% cheaper, but ClickHouse replica identity must be stable across instance generations; the ASG will not give you that.
+- Spot readers are ~70% cheaper, but ClickHouse replica identity must be stable across instance generations; the Auto Scaling Group (ASG) will not give you that.
 - A one-table DynamoDB claimer arbitrates who is `reader-0`: one conditional PutItem per ordinal, no locks and no leader.
 - A 15-minute lease renewed every 5 minutes frees a dead reader's name on its own and tolerates two missed cron runs.
-- The 2-minute spot warning handler releases the claim and drains ClickHouse; without it every eviction leaves a ghost and an S3 re-warm.
+- The 2-minute spot warning handler releases the claim and drains ClickHouse; without it every eviction leaves a ghost and an Amazon Simple Storage Service (S3) re-warm.
 {: .key-takeaways}
 
 ---
@@ -51,7 +51,7 @@ ReplicatedMergeTree tables keep per-replica bookkeeping under Keeper paths like 
 1. The replacement boots as `ip-10-0-1-42`. Keeper has no state for that name, so the table starts cold (from an empty state) and re-fetches every part from S3 and peers. On a reader with tiered storage (data kept in S3, a small local cache), that is many S3 downloads and a large bill. It is the worker sitting at a desk number with no logbook, rebuilding her records from nothing.
 2. Worse: the replacement claims a name that a live replica already owns. Two writers on one Keeper path is split-brain — two replicas writing the same record at the same time. ClickHouse's own docs warn it can corrupt data. It is two workers writing in one logbook, destroying each other's pages.
 
-An Auto Scaling Group (ASG) is the AWS service that adds and removes machines automatically. It gives you temporary instance IDs. ClickHouse needs a stable name. Nothing in AWS provides one for free. That is the gap.
+An ASG is the AWS service that adds and removes machines automatically. It gives you temporary instance identifiers (IDs). ClickHouse needs a stable name. Nothing in AWS provides one for free. That is the gap.
 
 ## The ordinal claimer
 
@@ -75,7 +75,7 @@ That condition is the design. DynamoDB evaluates the condition inside the item w
 
 **Release.** On a spot interruption, delete the row. The ordinal becomes free immediately.
 
-Expired rows are deleted by DynamoDB TTL (time-to-live), which removes expired items on its own schedule — typically within 48 hours. That is only extra cleanup. Correctness never depends on it. Only the lease comparison matters.
+Expired rows are deleted by DynamoDB time-to-live (TTL), which removes expired items on its own schedule — typically within 48 hours. That is only extra cleanup. Correctness never depends on it. Only the lease comparison matters.
 
 ```
 boot                        every 5 min                spot warning (2 min)
@@ -98,7 +98,7 @@ A reader that dies without a spot warning — a kernel panic (an operating syste
 
 ## What the claim unlocks
 
-The claimed ordinal becomes the hostname: `reader-0`. That drives the `{replica}` macro, so Keeper paths stay stable. At claim time the node also registers an A record in a Route 53 private hosted zone (DNS that works only inside the VPC) with a 60-second TTL. Peers can therefore always find its address. On restart the node comes back with the same name. It finds its replication state and copies only the missing changes instead of starting cold. That is the worker signing in for desk 1, opening the desk-1 logbook, and reading what she missed. Restart is boring. Boring is the goal.
+The claimed ordinal becomes the hostname: `reader-0`. That drives the `{replica}` macro, so Keeper paths stay stable. At claim time the node also registers an A record in a Route 53 private hosted zone (Domain Name System (DNS) that works only inside the virtual private cloud (VPC)) with a 60-second TTL. Peers can therefore always find its address. On restart the node comes back with the same name. It finds its replication state and copies only the missing changes instead of starting cold. That is the worker signing in for desk 1, opening the desk-1 logbook, and reading what she missed. Restart is boring. Boring is the goal.
 
 ## The spot interruption handler
 
@@ -114,7 +114,7 @@ SYSTEM SHUTDOWN;                 -- drain, then exit
 
 then it de-registers the DNS record and releases the lease.
 
-Skip the handler and every eviction leaves a "ghost" — a record that belongs to a dead machine, like a name plate on an empty desk. The DNS record points at a dead IP. The claim row stays leased for up to 15 minutes, so the replacement cannot take the name. When it finally takes the name, it boots cold and re-downloads its data from S3. That is a 15-minute ghost window plus a full S3 re-download per eviction. These are the exact costs that spot was supposed to save.
+Skip the handler and every eviction leaves a "ghost" — a record that belongs to a dead machine, like a name plate on an empty desk. The DNS record points at a dead Internet Protocol (IP) address. The claim row stays leased for up to 15 minutes, so the replacement cannot take the name. When it finally takes the name, it boots cold and re-downloads its data from S3. That is a 15-minute ghost window plus a full S3 re-download per eviction. These are the exact costs that spot was supposed to save.
 
 ## The on-demand floor
 

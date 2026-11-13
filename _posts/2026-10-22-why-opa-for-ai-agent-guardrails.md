@@ -22,13 +22,13 @@ faqs:
     answer: "PDP is OPA evaluating Rego. PEP is the Guild runtime that builds the factsheet, calls OPA, and only then runs the tool or pauses for HITL."
 ---
 
-System prompts tell an agent to be careful. That is not how authorization works.
+System prompts tell an artificial intelligence (AI) agent to be careful. That is not how authorization works.
 
-When an agent can open PRs, run shell, or call MCP tools, something outside the model has to answer: *may this tool run, with these arguments, right now?* That is what [Open Policy Agent](https://www.openpolicyagent.org/docs/latest/) (OPA) was built for, long before agents showed up. This post covers where OPA came from, why it fits agent guardrails, how frameworks like Pydantic AI wire the same allow/ask/deny pattern yourself, and what [Aiden](/blog/aiden-platform/) already ships so you are not bolting a policy engine onto every agent.
+When an agent can open pull requests (PRs), run shell, or call Model Context Protocol (MCP) tools, something outside the model has to answer: *may this tool run, with these arguments, right now?* That is what [Open Policy Agent](https://www.openpolicyagent.org/docs/latest/) (OPA) was built for, long before agents showed up. This post covers where OPA came from, why it fits agent guardrails, how frameworks like Pydantic AI wire the same allow/ask/deny pattern yourself, and what [Aiden](/blog/aiden-platform/) already ships so you are not bolting a policy engine onto every agent.
 
 **Key takeaways**
 
-- OPA started as a cloud-native answer to DIY authorization, not as an agent product.
+- OPA started as a cloud-native answer to do-it-yourself (DIY) authorization, not as an agent product.
 - Policy engines decide before side effects; prompts do not.
 - Frameworks give you the pause hook. Aiden gives you the policy engine, attach, and Terraform path.
 {: .key-takeaways}
@@ -37,9 +37,9 @@ When an agent can open PRs, run shell, or call MCP tools, something outside the 
 
 ![DIY frameworks versus Aiden agent platform for OPA policy](/assets/images/diagrams/oct/why-opa-agent-guardrails.jpg)
 
-*DIY pause hooks and bridging code versus Aiden’s built-in enforcement point, OPA engine, Terraform/GitOps, HITL, and shared catalog.*
+*DIY pause hooks and bridging code versus Aiden’s built-in enforcement point, OPA engine, Terraform and Git-based operations (GitOps), human-in-the-loop (HITL), and shared catalog.*
 
-## Architecture: PDP, PEP, and the factsheet
+## Architecture: policy decision point (PDP), policy enforcement point (PEP), and the factsheet
 
 ![Aiden control plane versus data plane OPA architecture](/assets/images/diagrams/oct/aiden-policy-architecture.svg)
 
@@ -52,17 +52,17 @@ Classical authorization splits into two roles:
 | **PDP** | Policy Decision Point | Embedded OPA evaluates Rego and returns allow / deny / ask |
 | **PEP** | Policy Enforcement Point | Guild runtime: build input, call OPA, then run the tool only on allow (or after HITL) |
 
-The LLM is never the PDP. It proposes a tool call. The PEP refuses to execute until the PDP answers.
+The large language model (LLM) is never the PDP. It proposes a tool call. The PEP refuses to execute until the PDP answers.
 
-**Factsheet.** Before each tool run, the runtime builds a JSON `input` document (agent, timestamp, tool name and arguments, optional user / `policy_data` / skill). Rego reads that document only. No hidden prompt text. No trust in the model’s “I checked the rules.”
+**Factsheet.** Before each tool run, the runtime builds a JavaScript Object Notation (JSON) `input` document (agent, timestamp, tool name and arguments, optional user / `policy_data` / skill). Rego reads that document only. No hidden prompt text. No trust in the model’s “I checked the rules.”
 
-**Attachment.** Policies are stored as versioned Rego (`sg_policy`). `sg_agent_policy_attachment` binds a policy UUID to an agent name. At runtime the PEP loads attached policies for that agent and evaluates them. Manage happens out of band (Terraform, API, UI). Enforce happens on the hot path.
+**Attachment.** Policies are stored as versioned Rego (`sg_policy`). `sg_agent_policy_attachment` binds a policy universally unique identifier (UUID) to an agent name. At runtime the PEP loads attached policies for that agent and evaluates them. Manage happens out of band (Terraform, application programming interface (API), user interface (UI)). Enforce happens on the hot path.
 
 **Layers.** Tool-call OPA sits above the model and below the tool. Sandbox products such as [OpenShell](https://developer.nvidia.com/blog/run-autonomous-self-evolving-agents-more-safely-with-nvidia-openshell/) add filesystem / network / process isolation. Same industry vocabulary (deny by default, out-of-process policy). Different layers. Stack them when blast radius demands it ([defense in depth](/blog/defense-in-depth/)).
 
 ## How did Open Policy Agent come about?
 
-Before OPA, teams kept rewriting authorization for each service, API, and orchestrator. Policies lived in wikis and PDFs while automation moved faster than humans could keep up. Styra’s founders described that mess directly when OPA moved into CNCF incubating status: heterogeneous stacks, too many APIs, and no single place to enforce invariants ([Open Policy Agent moved to CNCF incubating status](https://www.styra.com/blog/open-policy-agent-moved-to-cncf-incubating-status/)).
+Before OPA, teams kept rewriting authorization for each service, API, and orchestrator. Policies lived in wikis and Portable Document Format (PDF) files while automation moved faster than humans could keep up. Styra’s founders described that mess directly when OPA moved into Cloud Native Computing Foundation (CNCF) incubating status: heterogeneous stacks, too many APIs, and no single place to enforce invariants ([Open Policy Agent moved to CNCF incubating status](https://www.styra.com/blog/open-policy-agent-moved-to-cncf-incubating-status/)).
 
 In 2016, Tim Hinrichs and Torin Sandall (with Teemu Koponen) created OPA and its policy language, Rego, at Styra. Their pitch still holds: every team used to roll its own storage until databases existed; every team still rolls its own policy engine until something purpose-built takes that job ([The origin of Open Policy Agent and Rego](https://www.styra.com/blog/origin-of-open-policy-agent-rego/), [OPA 101](https://www.styra.com/blog/open-policy-agent-101-a-beginners-guide/)).
 
@@ -74,7 +74,7 @@ Agents did not invent the need. They made it louder. An LLM that calls tools is 
 
 **Policy lives outside the agent.** You change Rego without redeploying model prompts. Review happens in git, same as application code.
 
-**One language across layers.** Teams already use OPA for Kubernetes admission, Terraform plan checks, and microservice authz. Agent tool calls are another JSON document with a tool name, arguments, and identity.
+**One language across layers.** Teams already use OPA for Kubernetes admission, Terraform plan checks, and microservice authorization (authz). Agent tool calls are another JSON document with a tool name, arguments, and identity.
 
 **Deny by default is natural.** `default allow := false` plus explicit allow rules matches how sandbox products and MCP blogs talk about safe rollout ([TrueFoundry OPA guardrails](https://www.truefoundry.com/docs/ai-gateway/opa-guardrails), [ThreatClaw on MCP tool permissions](https://threatclaw.io/en/blog/opa-rego-mcp-tool-permissions-ai-agent)).
 
@@ -134,7 +134,7 @@ approval_required if {
 }
 ```
 
-The Python version is fine for one agent process. The Rego version is what you attach to many agents, test with fixtures, and ship through Terraform without rewriting guards in each SDK.
+The Python version is fine for one agent process. The Rego version is what you attach to many agents, test with fixtures, and ship through Terraform without rewriting guards in each software development kit (SDK).
 
 ## What does Aiden come pre-equipped with?
 
@@ -170,4 +170,4 @@ Next post walks through deny-by-default authorization with a real Rego example: 
 
 > Free to try: [create an account](https://app.stackgen.com/), then create a [personal access token](https://app.stackgen.com/app/settings/personal-access-tokens) for Terraform. StackGen / Aiden: [app.stackgen.com](https://app.stackgen.com/).
 
-Previous: [E2E Learning Loop Blind Spots](/blog/e2e-learning-loop-blind-spots/). Next: [Authorize AI agent tool calls with OPA](/blog/authorize-ai-agent-tool-calls-opa/).
+Previous: [End-to-end (E2E) Learning Loop Blind Spots](/blog/e2e-learning-loop-blind-spots/). Next: [Authorize AI agent tool calls with OPA](/blog/authorize-ai-agent-tool-calls-opa/).

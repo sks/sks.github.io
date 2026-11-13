@@ -17,9 +17,9 @@ faqs:
     answer: "Higher elapsed time and tokens, hierarchical ReAcTree quality collapse without gates, and a habit of exploring catalogs before measuring."
 ---
 
-[Reasoning effort is not free](/blog/reasoning-effort-is-not-a-free-upgrade/). This is the cousin question: **reasoning model vs normal chat model** when the job is mostly tools. Which OpenAI API you call is a third choice ([Completions vs Responses](/blog/chat-completions-vs-responses-api/)). A `resp_` id identifies the Responses endpoint, not the cause of a slow dig. Compare per-turn reasoning tokens, tool wait, and retries before attributing time to a model or API.
+[Reasoning effort is not free](/blog/reasoning-effort-is-not-a-free-upgrade/). This is the cousin question: **reasoning model vs normal chat model** when the job is mostly tools. Which OpenAI application programming interface (API) you call is a third choice ([Completions vs Responses](/blog/chat-completions-vs-responses-api/)). A response identifier with the `resp_` prefix identifies the Responses endpoint, not the cause of a slow dig. Compare per-turn reasoning tokens, tool wait, and retries before attributing time to a model or API.
 
-Data: [six combos](/blog/six-model-mode-combos-alert-logs-bench/), voice: [what they write](/blog/what-reasoning-models-write-on-triage/). We ran one **single-agent ReAct** and one **hierarchical ReAcTree** trial for each class ([what is ReAcTree?](/blog/what-is-reactree/) · [PDF](https://arxiv.org/pdf/2511.02424)).
+Data: [six combos](/blog/six-model-mode-combos-alert-logs-bench/), voice: [what they write](/blog/what-reasoning-models-write-on-triage/). We ran one **single-agent ReAct (reasoning and acting)** and one **hierarchical ReAcTree** trial for each class ([what is ReAcTree?](/blog/what-is-reactree/) · [Portable Document Format (PDF)](https://arxiv.org/pdf/2511.02424)).
 
 ---
 
@@ -27,9 +27,9 @@ Data: [six combos](/blog/six-model-mode-combos-alert-logs-bench/), voice: [what 
 
 | Class | Merit | Demerit | Wave-1 ballpark |
 |-------|-------|---------|-----------------|
-| **xAI-class reasoning** | Highest relative efficiency in this wave; full closes; hierarchical slightly faster | Still ~190k tokens | ~141–157s, corr 1.0 |
-| **Generate (gpt-5.4)** | Solid falsifiers; hierarchical used fewer total tokens | Verbose; hierarchical can get expensive under load | ~148–154s, 255–373k tok |
-| **Responses reasoning preview** | In this run, skeptical artifact Theories | Slow, costly; hierarchical can stub | ~200–285s, ~475–516k tok; hierarchical corr 0.69 once |
+| **xAI-class reasoning** | Highest relative efficiency in this wave; full closes; hierarchical slightly faster | Still ~190k tokens | ~141–157s, correctness 1.0 |
+| **Generate (gpt-5.4)** | Solid falsifiers; hierarchical used fewer total tokens | Verbose; hierarchical can get expensive under load | ~148–154s, 255–373k tokens |
+| **Responses reasoning preview** | In this run, skeptical artifact Theories | Slow, costly; hierarchical can stub | ~200–285s, ~475–516k tokens; hierarchical correctness 0.69 once |
 
 
 ---
@@ -44,7 +44,7 @@ Data: [six combos](/blog/six-model-mode-combos-alert-logs-bench/), voice: [what 
 
 1. **Elapsed time and tokens** climb fast on preview-class models. Calling the Responses API is not the tax; **hidden thinking tokens and high effort** are ([Completions vs Responses](/blog/chat-completions-vs-responses-api/)).  
 2. **Hierarchical ReAcTree fragility** without observation gates.  
-3. **Catalog thrash** — empty `search_file`, skill loads, before the first PromQL.
+3. **Catalog thrash** — empty `search_file`, skill loads, before the first Prometheus Query Language (PromQL) query.
 
 ## Merits of generate seats
 

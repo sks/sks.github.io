@@ -21,9 +21,9 @@ faqs:
     answer: "No. Any planner-worker shape — LangGraph, CrewAI, AutoGen, OpenAI Agents, or an in-house tree — needs the same fairness gate before you compare modes."
 ---
 
-If you are trying to **evaluate AI agents** on a tool-using benchmark, the first question is not “which mode wins?” It is **whether both modes could use the same tools on the worker that does the work.**
+If you are trying to **evaluate artificial intelligence (AI) agents** on a tool-using benchmark, the first question is not “which mode wins?” It is **whether both modes could use the same tools on the worker that does the work.**
 
-We ran paired evals on [AppWorld](https://github.com/stonybrooknlp/appworld) — a controllable multi-app benchmark ([paper](https://arxiv.org/abs/2407.18901)) — through our agent runtime in Aiden, with domain APIs exposed via [Model Context Protocol](https://modelcontextprotocol.io/) (MCP). The early cost comparison was misleading. The planner path looked cheaper until we found that its delegated workers often made **zero** calls to the app APIs, while the single-agent path actually attempted the task.
+We ran paired evaluations (evals) on [AppWorld](https://github.com/stonybrooknlp/appworld) — a controllable multi-app benchmark ([paper](https://arxiv.org/abs/2407.18901)) — through our agent runtime in Aiden, with domain application programming interfaces (APIs) exposed via [Model Context Protocol](https://modelcontextprotocol.io/) (MCP). The early cost comparison was misleading. The planner path looked cheaper until we found that its delegated workers often made **zero** calls to the app APIs, while the single-agent path actually attempted the task.
 
 This post is part one of the **AppWorld agent eval series**: fix tool parity, then measure orchestration tax, then classify failure modes. Later posts cover [handoff gates](/blog/stop-duplicate-agent-workers-handoff-gate/), [local setup](/blog/running-appworld-locally-genie-agent-eval/), [unattended harness rules](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/), [MCP tool tax + pass@k](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/), and [simple vs plan routing](/blog/simple-vs-plan-when-to-use-which/). Part two: [orchestration tax](/blog/agent-orchestration-tax-evals/). Part three: [failure modes](/blog/ai-agent-eval-failure-modes/).
 
@@ -39,11 +39,11 @@ This is a **methodology** series about how to run fair planner-vs-single-agent e
 
 | Lens | What we measured | What Aiden ships in production |
 |------|------------------|-------------------------------|
-| **Benchmark** | [AppWorld](https://github.com/stonybrooknlp/appworld) — multi-app API mutation tasks (phone, payments, notes, …) | [SRE triage](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/), [evidence-gated RCA](/blog/evidence-gated-multiplane-rca/), operator workflows |
+| **Benchmark** | [AppWorld](https://github.com/stonybrooknlp/appworld) — multi-app API mutation tasks (phone, payments, notes, …) | [Site reliability engineering (SRE) triage](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/), [evidence-gated root cause analysis (RCA)](/blog/evidence-gated-multiplane-rca/), operator workflows |
 | **Goal of the run** | Calibrate fairness gates, orchestration tax, failure classes | Incident response, diagnostics, audit trails |
-| **Sample size** | 5–10 tasks per cohort (directional) | Customer environments with different SLOs |
+| **Sample size** | 5–10 tasks per cohort (directional) | Customer environments with different service-level objectives (SLOs) |
 
-On these small AppWorld slices, **strict TGC/SGC success** (`judge.success`) did not clear — both modes often landed at **30–50% partial `pass_percentage`** with harness blockers (budget, API discovery, PII redaction in eval mode). That tells us where the **eval harness** still needs work. It does **not** mean the runtime fails at jobs it was built for. When we say “judge did not pass,” read it as **“this benchmark bar on this slice”** — the same way a unit test red does not mean the whole product is broken.
+On these small AppWorld slices, **strict task-goal completion/scenario-goal completion (TGC/SGC) success** (`judge.success`) did not clear — both modes often landed at **30–50% partial `pass_percentage`** with harness blockers (budget, API discovery, personally identifiable information (PII) redaction in eval mode). That tells us where the **eval harness** still needs work. It does **not** mean the runtime fails at jobs it was built for. When we say “judge did not pass,” read it as **“this benchmark bar on this slice”** — the same way a unit test red does not mean the whole product is broken.
 
 ---
 
@@ -62,7 +62,7 @@ Two execution shapes on the same AppWorld tasks:
 | **Single-agent loop** | Root agent holds the full MCP tool pack | One plan → tool → context cycle |
 | **Planner + worker** | Meta root delegates; **worker** should hold the MCP pack | Spawn subcontractor with explicit `tool_names` |
 
-The benchmark judge is AppWorld’s own **evaluate** step (TGC/SGC mean task-goal completion and scenario-goal completion: checks of the resulting app state). We treat that as ground truth, not assistant prose. Telemetry came from [Langfuse](https://langfuse.com/) generation counts (aggregates only in this write-up).
+The benchmark judge is AppWorld’s own **evaluate** step (TGC/SGC check the resulting app state). We treat that as ground truth, not assistant prose. Telemetry came from [Langfuse](https://langfuse.com/) generation counts (aggregates only in this write-up).
 
 This is the eval sequel to [single-agent vs multi-agent orchestration](/blog/single-agent-vs-multi-agent/) — same “match the axes” discipline, applied to a public tool benchmark instead of a single-plane triage dig.
 
@@ -96,7 +96,7 @@ We defined **tool-access fairness** separately from **task success**:
 1. **Single-agent:** domain MCP tools present; no worker spawn tool on the root.
 2. **Planner:** at least one worker spawn; worker registry includes the full domain MCP pack; no hard-fail because optional infra names were missing from the registry.
 3. **Unattended:** no clarify / permission prompts (eval mode must not wait for a human).
-4. **Judge:** `evaluate` result parsed; fallback DB scoring labeled when the agent stopped on budget.
+4. **Judge:** `evaluate` result parsed; fallback database (DB) scoring labeled when the agent stopped on budget.
 
 On a two-task **fair canary**, **2/2** pairs passed fairness. Domain calls averaged **12** (single-agent) vs **31.5** (planner workers) — both sides touched the APIs.
 
@@ -116,7 +116,7 @@ Before you compare planner vs single-agent on any tool benchmark, record:
 | 2 | Planner root is not required to call domain APIs if design is meta-only | |
 | 3 | Spawn payload does not hard-fail on benign extra tool names | |
 | 4 | Parent telemetry does not count subagent tools as root tools (or you split roles in analysis) | |
-| 5 | Unattended mode — no HITL / clarify stalls | |
+| 5 | Unattended mode — no human-in-the-loop (HITL) / clarify stalls | |
 | 6 | External judge invoked and parsed; prose PASS ≠ judge PASS | |
 
 If row 1 fails, stop. Fix wiring, then rerun. Tokens and “wins” before that are noise.
@@ -148,7 +148,7 @@ If row 1 fails, stop. Fix wiring, then rerun. Tokens and “wins” before that 
 - [Model Context Protocol](https://modelcontextprotocol.io/) — how domain tools reached the agent
 - [Langfuse](https://langfuse.com/) — token and generation observability
 - Planner-worker docs: [LangGraph](https://langchain-ai.github.io/langgraph/), [CrewAI](https://docs.crewai.com/), [AutoGen](https://microsoft.github.io/autogen/), [OpenAI Agents](https://openai.github.io/openai-agents-python/)
-- [Google ADK evaluation](https://google.github.io/adk-docs/evaluate/) — eval-set vocabulary we borrow on this site
+- [Google Agent Development Kit (ADK) evaluation](https://google.github.io/adk-docs/evaluate/) — eval-set vocabulary we borrow on this site
 
 ---
 

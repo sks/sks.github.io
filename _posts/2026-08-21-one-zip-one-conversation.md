@@ -17,9 +17,9 @@ faqs:
     answer: "Qualifier search for initiator and Slack channel so you can find the thread without opening every row."
 ---
 
-Support hears, “this AI investigation went wrong.” A single conversation may have several separate agent runs. A debug zip containing the whole thread lets support see which run produced which claim; reviewing a week of such exports can reveal repeated failures worth fixing.
+Support hears, “this artificial intelligence (AI) investigation went wrong.” A single conversation may have several separate agent runs. A debug zip containing the whole thread lets support see which run produced which claim; reviewing a week of such exports can reveal repeated failures worth fixing.
 
-*The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
+*The incident patterns below are composite and anonymized. Counts are rounded. Names, identifiers (IDs), and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
@@ -52,15 +52,15 @@ Composite table from a **7-day anonymized** export set (rounded). These examples
 | Missed correlate asks | Close without prior-session search | User-goal gates |
 | Empty claims | “No data” on truncated previews | Honesty about truncated vs full tool output (`return_full`) |
 
-The rubric was operator-facing: Did we serve the human who already had an RCA? Did we tell the truth about completeness? Could support reproduce the failure from one artifact?
+The rubric was operator-facing: Did we serve the human who already had a root cause analysis (RCA)? Did we tell the truth about completeness? Could support reproduce the failure from one artifact?
 
 That is **Service Rendered Efficiently** in reverse: measure what you made possible (or failed to), then ship product gates — not demo theater.
 
-Canary evals still matter for live path health ([canary-first consistency](/blog/canary-first-sre-investigate-consistency-evals/)). Debug-zip grading answers a different question: what are we systematically doing to the teams we serve?
+Canary evaluations (evals) still matter for live path health ([canary-first consistency](/blog/canary-first-sre-investigate-consistency-evals/)). Debug-zip grading answers a different question: what are we systematically doing to the teams we serve?
 
 ---
 
-## If you lead an SRE team
+## If you lead a site reliability engineering (SRE) team
 
 - Require one-zip handoff for any “conversation went wrong” ticket
 - Consider regular export grading alongside incident review when support volume warrants it

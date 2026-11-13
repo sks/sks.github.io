@@ -21,11 +21,11 @@ faqs:
     answer: "The table engines map one to one: SharedMergeTree to MergeTree, SharedSummingMergeTree to SummingMergeTree, and so on. Rewrite engine names in DDL, remove Cloud-only settings, and export and re-insert the data."
 ---
 
-The first surprise in self-hosting ClickHouse is a DDL error.
+The first surprise in self-hosting ClickHouse is a data definition language (DDL) error.
 
-You export a schema from ClickHouse Cloud, or you copy a tutorial that assumes it. Then you paste it onto your own EC2-hosted clickhouse-server. The CREATE TABLE fails with `Unknown table engine SharedMergeTree`. The engine you just read about does not exist in the software you installed. That is not a misconfiguration. It is the dividing line between the paid product and the open source project. Understanding it is the first decision in any self-managed deployment on AWS.
+You export a schema from ClickHouse Cloud, or you copy a tutorial that assumes it. Then you paste it onto your own Amazon Elastic Compute Cloud (EC2)-hosted clickhouse-server. The CREATE TABLE fails with `Unknown table engine SharedMergeTree`. The engine you just read about does not exist in the software you installed. That is not a misconfiguration. It is the dividing line between the paid product and the open source project. Understanding it is the first decision in any self-managed deployment on Amazon Web Services (AWS).
 
-I run a log analytics platform on self-managed ClickHouse on AWS. Cloud users get this decision made for them. I had to make it consciously. This post covers what SharedMergeTree actually is, what open source gives you instead, and why the obvious middle path (replicas sharing S3 objects) was abandoned. Future posts in this series build the real architecture on EC2.
+I run a log analytics platform on self-managed ClickHouse on AWS. Cloud users get this decision made for them. I had to make it consciously. This post covers what SharedMergeTree actually is, what open source gives you instead, and why the obvious middle path (replicas sharing Amazon Simple Storage Service (S3) objects) was abandoned. Future posts in this series build the real architecture on EC2.
 
 One running example carries the post: a company with branch offices and a head office. Each branch keeps records. The head office keeps one shared list of who has recorded what. The example maps closely onto ClickHouse replication, and each section notes where the picture stops matching the real mechanism.
 
@@ -34,7 +34,7 @@ One running example carries the post: a company with branch offices and a head o
 - SharedMergeTree is ClickHouse Cloud only. Open source DDL with Shared* engines fails with `Unknown table engine`.
 - On open source you run ReplicatedMergeTree with a Keeper quorum: one ZooKeeper-style path per table, one named replica per node.
 - Zero-copy replication — the 2020s attempt to have replicas share S3 objects — was deprecated upstream in 2025 because orphan files never got cleaned properly.
-- The real OSS pattern: ReplicatedMergeTree + Keeper + a storage policy with a local hot disk, an S3 cold tier, and a cache disk in between.
+- The real open-source software (OSS) pattern: ReplicatedMergeTree + Keeper + a storage policy with a local hot disk, an S3 cold tier, and a cache disk in between.
 - Engine families map 1:1 between Cloud and OSS (MergeTree→SharedMergeTree, Summing→SharedSumming), so migration is engine-name rewrites plus data export.
 {: .key-takeaways}
 
@@ -109,7 +109,7 @@ Replication is asynchronous. A node that was down during inserts fetches missed 
 
 ## The zero-copy history lesson
 
-There is an obvious-sounding middle path between full copies and Cloud's shared storage: keep ReplicatedMergeTree, but have replicas share the S3 objects instead of each downloading full parts. It was tried. It is called zero-copy replication, and it was deprecated upstream in 2025. Reference: [ClickHouse PR #82250](https://github.com/ClickHouse/ClickHouse/pull/82250), "Remove tests for zero-copy replication" (merged July 2025).
+There is an obvious-sounding middle path between full copies and Cloud's shared storage: keep ReplicatedMergeTree, but have replicas share the S3 objects instead of each downloading full parts. It was tried. It is called zero-copy replication, and it was deprecated upstream in 2025. Reference: [ClickHouse pull request (PR) #82250](https://github.com/ClickHouse/ClickHouse/pull/82250), "Remove tests for zero-copy replication" (merged July 2025).
 
 Why it failed is worth knowing, because it explains the whole design space:
 
@@ -125,7 +125,7 @@ Zero-copy replication (deprecated):
 
 In the branch-office picture, the old system tried this: branch 2 says to branch 1, "do not photocopy page 12 for me. I will read your original, on your shelf, without moving it." The problem: nobody kept track of who was still reading which page. When branch 1 wanted to throw a page away, it could not tell whether another branch still needed it. Pages nobody owned never got thrown away. Those are the *orphan files*.
 
-In ClickHouse terms, three systems had to agree: the S3 objects, each replica's local reference state (which parts it logically has), and the per-replica bookkeeping in Keeper. No transaction spanned all three, so parts got deleted from S3 while another replica still referenced them (or the reverse), and garbage collection could not tell live references from stale ones. Altinity's [introducing CAS](https://altinity.com/blog/introducing-cas-drop-in-compute-storage-separation-for-clickhouse-mergetree-tables) post tells the same story and links Tinybird's write-up of the orphan-objects problems users hit in production.
+In ClickHouse terms, three systems had to agree: the S3 objects, each replica's local reference state (which parts it logically has), and the per-replica bookkeeping in Keeper. No transaction spanned all three, so parts got deleted from S3 while another replica still referenced them (or the reverse), and garbage collection could not tell live references from stale ones. Altinity's [introducing Content-Addressed Storage (CAS)](https://altinity.com/blog/introducing-cas-drop-in-compute-storage-separation-for-clickhouse-mergetree-tables) post tells the same story and links Tinybird's write-up of the orphan-objects problems users hit in production.
 
 The lesson generalizes: sharing mutable state between replicas over object storage is a correctness problem, not a performance problem. Cloud solves it with a different architecture, SharedMergeTree's single copy with one writer path. It does not solve it by attaching sharing onto ReplicatedMergeTree.
 
@@ -135,7 +135,7 @@ So what does the rest of this series build? Not S3-shared parts. The architectur
 
 - **ReplicatedMergeTree** for every table, with the two-argument shape above.
 - **Keeper** as the mandatory coordination quorum (3 nodes, tolerating 1 failure).
-- **A storage policy** with a local hot disk (SSD-backed) for recent parts, an S3 cold tier for older parts, and a cache disk in front of S3 so repeated cold reads are served from the cache, not from S3.
+- **A storage policy** with a local hot disk (solid-state drive (SSD)-backed) for recent parts, an S3 cold tier for older parts, and a cache disk in front of S3 so repeated cold reads are served from the cache, not from S3.
 
 ```
 Storage policy tiering:
@@ -148,7 +148,7 @@ Storage policy tiering:
 
 Back to the filing room. Keep today's pages in your own desk drawer. Keep the archive in the basement. But leave pages you looked at yesterday on top of your desk. In ClickHouse terms, the desk drawer is the local SSD, the basement is S3, and the desk-top stack is the cache disk.
 
-The trade-off is clear. You lose Cloud's instant elastic scale: adding a replica means copying data over the network. You gain full control of cost, placement, and retention. For a log platform with a predictable ingest rate and a 30-day TTL, the trade-off favors self-managing, which is the subject of the posts that follow.
+The trade-off is clear. You lose Cloud's instant elastic scale: adding a replica means copying data over the network. You gain full control of cost, placement, and retention. For a log platform with a predictable ingest rate and a 30-day time-to-live (TTL), the trade-off favors self-managing, which is the subject of the posts that follow.
 
 ## Migration is engine-name rewrites plus data export
 
@@ -170,7 +170,7 @@ So a Cloud schema export becomes four steps: rewrite the engine name, drop Cloud
 | ClickHouse Cloud | SharedMergeTree (automatic) | Buy | Metered, elastic, compute-compute separation included by default |
 | OSS on EC2 | ReplicatedMergeTree + Keeper | Build | Add replicas by copying data; storage tiering via storage policies |
 
-A third option is emerging: Altinity CAS. CAS stands for compute and storage separation, offered as a drop-in MergeTree extension; it is experimental as of September 2026, in the Antalya 26.6 release. It is the open source answer to shared storage. In the branch-office picture, CAS stamps every page with a fingerprint of its *content* — the same idea as the tracking number on a parcel, or the commit hash in git. Any branch can look up a page by its fingerprint, so duplicate copies disappear naturally, and two identical pages are recognized as one. In ClickHouse terms, the fingerprint is a content-addressed part reference: any node can find the single copy in shared storage without a per-replica ledger of borrowed originals. CAS is not what this series builds on: it is too new to be safe for a production log platform. Full coverage in the final post of the series: [What's next: CAS and Iceberg](/blog/clickhouse-whats-next-cas-iceberg/).
+A third option is emerging: Altinity CAS. CAS separates compute and storage, offered as a drop-in MergeTree extension; it is experimental as of September 2026, in the Antalya 26.6 release. It is the open source answer to shared storage. In the branch-office picture, CAS stamps every page with a fingerprint of its *content* — the same idea as the tracking number on a parcel, or the commit hash in git. Any branch can look up a page by its fingerprint, so duplicate copies disappear naturally, and two identical pages are recognized as one. In ClickHouse terms, the fingerprint is a content-addressed part reference: any node can find the single copy in shared storage without a per-replica ledger of borrowed originals. CAS is not what this series builds on: it is too new to be safe for a production log platform. Full coverage in the final post of the series: [What's next: CAS and Iceberg](/blog/clickhouse-whats-next-cas-iceberg/).
 
 Next: cluster topology and sizing Keeper and shards on AWS. [ClickHouse cluster topology and Keeper sizing](/blog/clickhouse-cluster-topology-keeper/).
 

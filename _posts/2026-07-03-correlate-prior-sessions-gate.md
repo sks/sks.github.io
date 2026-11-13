@@ -19,7 +19,7 @@ faqs:
 
 An operator asked an incident-investigation agent to compare the current alert with earlier incidents. The agent wrote a plausible root-cause analysis (RCA) without doing that comparison. A language-model instruction alone did not make the requested search a condition of finishing.
 
-*The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
+*The incident patterns below are composite and anonymized. Counts are rounded. Names, identifiers (IDs), and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
@@ -70,6 +70,6 @@ The distinction is also central to [curiosity before confidence](/blog/curiosity
 
 ---
 
-**Acknowledgments.** User-goal gating lessons from shipping Aiden SRE investigate. Patterns composite.
+**Acknowledgments.** User-goal gating lessons from shipping Aiden site reliability engineering (SRE) investigate. Patterns composite.
 
-*Building AI for incident triage without the demo theater? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+*Building artificial intelligence (AI) for incident triage without the demo theater? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*

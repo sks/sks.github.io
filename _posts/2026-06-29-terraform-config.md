@@ -35,7 +35,7 @@ The invocation boundary matters: an applied tool or policy change does not rewri
 
 ## References Between Resources
 
-Terraform's dependency graph lets an agent refer to a governance policy by its resource ID. The policy can be created before the agent that uses it. A plan can also expose a proposed deletion of a referenced policy before apply. That is useful, though the provider and platform still need to validate references and handle external changes; a graph alone does not prevent every orphaned reference.
+Terraform's dependency graph lets an agent refer to a governance policy by its resource identifier (ID). The policy can be created before the agent that uses it. A plan can also expose a proposed deletion of a referenced policy before apply. That is useful, though the provider and platform still need to validate references and handle external changes; a graph alone does not prevent every orphaned reference.
 
 ## Secrets Need Separate Care
 
@@ -64,4 +64,4 @@ Treat tool and policy changes as production changes, preview them, and give revi
 
 ---
 
-> **StackGen builds AI-assisted SRE (site reliability engineering) tools.** Our offering at [ai.stackgen.com](https://ai.stackgen.com) supports incident triage, diagnostics, and draft root-cause analyses.
+> **StackGen builds artificial intelligence (AI)-assisted site reliability engineering (SRE) tools.** Our offering at [ai.stackgen.com](https://ai.stackgen.com) supports incident triage, diagnostics, and draft root-cause analyses.

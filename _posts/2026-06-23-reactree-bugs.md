@@ -144,4 +144,4 @@ In a future post, I'll cover Pensieve — our memory management system — and w
 
 ---
 
-I work on AI-assisted incident investigation at StackGen; project information is at [ai.stackgen.com](https://ai.stackgen.com).
+I work on artificial intelligence (AI)-assisted incident investigation at StackGen; project information is at [ai.stackgen.com](https://ai.stackgen.com).

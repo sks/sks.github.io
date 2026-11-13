@@ -27,7 +27,7 @@ The dashboard was not broken. The formula was giving extra credit for finishing 
 
 ## Words we use
 
-If you have never scored an AI agent eval, these five terms are enough:
+If you have never scored an artificial intelligence (AI) agent evaluation (eval), these five terms are enough:
 
 | Word | Plain meaning |
 |------|----------------|
@@ -88,7 +88,7 @@ Same Correct. Same thrift. Different story if your pass/fail check says “must 
 
 **Cost-of-Pass** is total dollars divided by the number of Correct problems. Report the denominator and handle a zero-Correct suite explicitly: the ratio is undefined then. It is a spending metric, not a substitute for diagnosis quality.
 
-When people [benchmark agents](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/), they still need absolute wall, tools, and tokens on the page. A combined score is one possible gate, not the only number in a changelog. Keep absolute measurements beside it, and publish whether token totals include cached reads. Keep evals [fair before you chase performance](/blog/fair-agent-evals-before-performance/), [start with canaries](/blog/canary-first-sre-investigate-consistency-evals/), and keep [RCA judge checklists](/blog/how-to-evaluate-ai-agent-root-cause-analysis/) readable next to the score.
+When people [benchmark agents](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/), they still need absolute wall, tools, and tokens on the page. A combined score is one possible gate, not the only number in a changelog. Keep absolute measurements beside it, and publish whether token totals include cached reads. Keep evals [fair before you chase performance](/blog/fair-agent-evals-before-performance/), [start with canaries](/blog/canary-first-sre-investigate-consistency-evals/), and keep [root cause analysis (RCA) judge checklists](/blog/how-to-evaluate-ai-agent-root-cause-analysis/) readable next to the score.
 
 ---
 

@@ -36,9 +36,9 @@ This sits next to [benchmarks for wall time and tool tax](/blog/ai-sre-agent-ben
 - **Sync failure ≠ empty queue.** Prefer discover from existing alerts over blocking on a flaky sync.
 - **Correctness ≠ consistency.** Three high scores that tell different stories still fail.
 - **Quiet nights are untested, not green.** Warn when no active alert is available; make alert availability a hard requirement only if the test contract calls for it.
-- **Stream progress logs.** Buffered stdout can make a fifteen-minute poll appear stalled.
+- **Stream progress logs.** Buffered standard output (stdout) can make a fifteen-minute poll appear stalled.
 
-Run one investigation to verify authentication, alert discovery, polling, and a terminal success state before paying for repeated model-judged trials. Text in a draft root cause analysis (RCA) is not a terminal state.
+Run one investigation to verify authentication, alert discovery, polling, and a terminal success state before paying for repeated model-judged trials. Text in a draft RCA is not a terminal state.
 
 ---
 
@@ -68,7 +68,7 @@ Running three investigations immediately cost time and model calls before we had
 
 - Auth headers actually reach the SRE app
 - Alerts exist tonight
-- Investigate returns an id
+- Investigate returns an identifier
 - Polling reaches a real success state
 
 **Canary mode** flipped the order:
@@ -80,7 +80,7 @@ Running three investigations immediately cost time and model calls before we had
 
 The structural check requires a successful terminal status **and** root cause text. It catches some poller and authentication failures without paying for model judges, but it does not assess the root cause itself.
 
-**Finding.** Tokenomics for evals is the same discipline as [tokenomics for agents](/blog/maintaining-tokenomics-with-aiden/): do not spend the expensive pass until the cheap pass is green.
+**Finding.** Tokenomics for evaluations (evals) is the same discipline as [tokenomics for agents](/blog/maintaining-tokenomics-with-aiden/): do not spend the expensive pass until the cheap pass is green.
 
 ---
 
@@ -113,7 +113,7 @@ If you treat sync failure as fatal, every quiet-looking night becomes a red buil
 - Discover from whatever is already active
 - Only then decide “quiet night”
 
-**Finding.** Distinguishing **infra flake**, **empty queue**, and **agent regression** is the whole point of a nightly. Collapse those three and you train the team to ignore the pager.
+**Finding.** Distinguishing **infrastructure flake**, **empty queue**, and **agent regression** is the whole point of a nightly. Collapse those three and you train the team to ignore the pager.
 
 ---
 
@@ -153,7 +153,7 @@ For any live “button path” eval on an agent product:
 5. **Opt-in strict emptiness** — quiet nights warn unless forced  
 6. **Unbuffered logs** — if you cannot see poll ticks, you will sabotage yourself  
 
-Then schedule the expensive full mode nightly. Keep canary for PR confidence and “did we break dogfood?” mornings.
+Then schedule the expensive full mode nightly. Keep canary for pull request (PR) confidence and “did we break dogfood?” mornings.
 
 ---
 
@@ -171,4 +171,4 @@ Next steps are broader alert coverage, a cheaper deterministic agreement check b
 
 ---
 
-> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).
+> StackGen develops artificial intelligence (AI) tools for SRE, including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

@@ -11,7 +11,7 @@ tags: [ai-agents, production, go, reliability, tool-calls]
 
 A tool-calling agent can run normally until a handler parses its arguments and returns `invalid character after top-level value`. By then the run has already spent tokens, and the error may leave an investigation unfinished.
 
-If you build [production AI agents in Go](/topics/go-ai-agents/) — middleware pipelines, tool handlers, streaming model adapters — you've probably seen this. This post is for that crowd: AI backend and platform engineers shipping tool-calling agents to production, not prompt-engineering tutorials.
+If you build [production artificial intelligence (AI) agents in Go](/topics/go-ai-agents/) — middleware pipelines, tool handlers, streaming model adapters — you've probably seen this. This post is for that crowd: AI backend and platform engineers shipping tool-calling agents to production, not prompt-engineering tutorials.
 
 A large language model (LLM) may produce almost-valid JavaScript Object Notation (JSON), the structured format many tool handlers expect. Strict parsing rejects it even when the intended arguments are apparent.
 
@@ -47,7 +47,7 @@ Think of repair happening at different **boundaries** in the stack, each catchin
 
 **In domain-specific middleware** — generic repair can't fix *meaning*. Sometimes the model puts a user's goal in the wrong field, or nests fields incorrectly for a tool that expects a specific envelope shape. That requires product logic, not a syntax repair library. Framework syntax repair alone cannot replace checks on the meaning and placement of fields.
 
-**In prose output parsers** — a different job entirely. [Aiden](/blog/aiden-platform/) parses free-text model responses — navigation payloads, UI schemas, quality rubrics. That's not tool-call JSON. It's LLM prose that *should* contain JSON somewhere. Different input shape, different call sites, different failure modes. Prose parsers remain a separate concern even if tool-argument repair improves upstream.
+**In prose output parsers** — a different job entirely. [Aiden](/blog/aiden-platform/) parses free-text model responses — navigation payloads, user interface (UI) schemas, quality rubrics. That's not tool-call JSON. It's LLM prose that *should* contain JSON somewhere. Different input shape, different call sites, different failure modes. Prose parsers remain a separate concern even if tool-argument repair improves upstream.
 
 ---
 
@@ -125,7 +125,7 @@ A syntax-valid payload can still have missing or wrong fields, so the final sche
 
 - [LLM Tokenomics for Production Agents](/blog/maintaining-tokenomics-with-aiden/) — tool response compression at the boundary
 - [Go vs Python for AI Agents](/blog/why-go/) — why middleware chains live in Go
-- More on [AI agents for SRE](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
+- More on [AI agents for site reliability engineering (SRE)](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---
 

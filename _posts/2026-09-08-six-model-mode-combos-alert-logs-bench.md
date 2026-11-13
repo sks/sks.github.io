@@ -44,17 +44,17 @@ Two orchestration shapes. First mention definitions (used everywhere below):
 
 | Shape | Open name | Meaning |
 |-------|-----------|---------|
-| **single-agent** | Single-agent ReAct loop | One agent, reason→act→observe in one trajectory |
+| **single-agent** | Single-agent ReAct (reasoning and acting) loop | One agent, reason→act→observe in one trajectory |
 | **hierarchical** | Hierarchical ReAcTree planner | Parent decomposes subgoals, may spawn child agent nodes, control-flow coordination |
 
-Background: [What is ReAcTree?](/blog/what-is-reactree/) · paper [PDF](https://arxiv.org/pdf/2511.02424) / [abs](https://arxiv.org/abs/2511.02424) · production notes [ReAcTree bugs](/blog/reactree-bugs/).
+Background: [What is ReAcTree?](/blog/what-is-reactree/) · paper [Portable Document Format (PDF)](https://arxiv.org/pdf/2511.02424) / [abstract](https://arxiv.org/abs/2511.02424) · production notes [ReAcTree bugs](/blog/reactree-bugs/).
 
 ---
 
 ## What the evidence supports
 
 - **Job:** triage a sustained goroutine-growth alert, then compare **24h vs 7d** logs in one Kubernetes namespace for anomalies and cross-links.
-- **Highest cohort-relative score (wave 1):** xAI hierarchical — ~**141s**, ~**191k** tokens, corr **1.0**, efficiency **1.375**.
+- **Highest cohort-relative score (wave 1):** xAI hierarchical — ~**141s**, ~**191k** tokens, correctness **1.0**, efficiency **1.375**.
 - **gpt-5.4 hierarchical** matched quality with ~**255k** tokens vs ~**373k** for single-agent (~**0.68×** tokens — smaller total context bill across the whole tree).
 - **Responses reasoning preview** burned **~475–516k** tokens; hierarchical once scored **0.69** correctness (thin Undetermined close).
 - **Efficiency without absolute wall is a trap** — see [relative scores](/blog/relative-efficiency-scores-lie/).
@@ -82,14 +82,14 @@ Cost: from session traces where present; otherwise estimated using the gpt-5.4 $
 
 ## Wave 1 leaderboard
 
-| Rank | Combo | Shape | Wall | Tokens | Cost | Corr | Eff |
+| Rank | Combo | Shape | Wall | Tokens | Cost | Correctness | Efficiency |
 |-----:|-------|-------|-----:|-------:|-----:|-----:|----:|
-| 1 | xAI · hierarchical | ReAcTree | 141s | 191k | ~$0.16 est | 1.00 | **1.375** |
-| 2 | xAI · single-agent | ReAct | 157s | 187k | ~$0.15 est | 1.00 | 1.301 |
+| 1 | xAI · hierarchical | ReAcTree | 141s | 191k | ~$0.16 estimated | 1.00 | **1.375** |
+| 2 | xAI · single-agent | ReAct | 157s | 187k | ~$0.15 estimated | 1.00 | 1.301 |
 | 3 | gpt-5.4 · hierarchical | ReAcTree | 148s | 255k | $0.37 | 1.00 | 1.107 |
 | 4 | gpt-5.4 · single-agent | ReAct | 154s | 373k | $0.30 | 1.00 | 0.935 |
-| 5 | Responses · single-agent | ReAct | 285s | 475k | ~$0.39 est | 1.00 | 0.617 |
-| 6 | Responses · hierarchical | ReAcTree | 200s | 516k | ~$0.42 est | **0.69** | 0.480 |
+| 5 | Responses · single-agent | ReAct | 285s | 475k | ~$0.39 estimated | 1.00 | 0.617 |
+| 6 | Responses · hierarchical | ReAcTree | 200s | 516k | ~$0.42 estimated | **0.69** | 0.480 |
 
 Hierarchical vs single-agent ratios (hierarchical / single-agent):
 
@@ -107,7 +107,7 @@ Second wave: same six cells on a harness that already preferred parent measureme
 
 Absolute changes matter more than efficiency deltas:
 
-| Combo | Wall × | Tok × | Corr |
+| Combo | Wall × | Tokens × | Correctness |
 |-------|-------:|------:|------|
 | xAI hierarchical | 1.86× | ~1.01× | 1→1 |
 | xAI single-agent | 1.74× | 1.27× | 1→1 |
@@ -125,6 +125,6 @@ Wave 2 also kept six Grafana clients active in parallel for the full run. That m
 1. Publish **wall, tokens, cost, correctness** as four columns. Label estimated cost and cohort-relative efficiency separately.
 2. Never crown a model on one shape. Single-agent ReAct and hierarchical ReAcTree are different products.
 3. Test reasoning-preview seats behind the same completion and budget gates; in these runs they consumed ~475–516k tokens in wave 1, but a different incident or effort setting may behave differently.
-4. When a harness change lands, re-run the **same prompt**. Without a rematch, a before/after story cannot separate the change from the task and tool conditions. Random one-incident eval reruns are the same trap with extra models ([same incident, five models](/blog/same-problem-sre-model-bake-off/)).
+4. When a harness change lands, re-run the **same prompt**. Without a rematch, a before/after story cannot separate the change from the task and tool conditions. Random one-incident evaluation reruns are the same trap with extra models ([same incident, five models](/blog/same-problem-sre-model-bake-off/)).
 
-Related: [What is ReAcTree?](/blog/what-is-reactree/), [hierarchical vs single-agent on this job](/blog/plan-mode-merits-demerits-observability/), [hybrid plan roster](/blog/hybrid-plan-smart-planner-generate-digs/), [AI SRE benchmarks](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/), [reasoning effort is not free](/blog/reasoning-effort-is-not-a-free-upgrade/).
+Related: [What is ReAcTree?](/blog/what-is-reactree/), [hierarchical vs single-agent on this job](/blog/plan-mode-merits-demerits-observability/), [hybrid plan roster](/blog/hybrid-plan-smart-planner-generate-digs/), [Artificial intelligence (AI) site reliability engineering (SRE) benchmarks](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/), [reasoning effort is not free](/blog/reasoning-effort-is-not-a-free-upgrade/).

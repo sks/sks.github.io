@@ -22,28 +22,28 @@ faqs:
 
 Same agent. Different risk by the clock.
 
-Time-based AI agent policies use OPA’s time builtins so tool permissions follow business hours, lunch blocks, and change freezes. Official reference: [OPA time builtins](https://openpolicyagent.org/docs/policy-reference/builtins/time). You already have [authorize](/blog/authorize-ai-agent-tool-calls-opa/) and [Terraform attach](/blog/manage-ai-agent-policies-terraform/). This post adds the clock.
+Time-based artificial intelligence (AI) agent policies use Open Policy Agent (OPA)’s time builtins so tool permissions follow business hours, lunch blocks, and change freezes. Official reference: [OPA time builtins](https://openpolicyagent.org/docs/policy-reference/builtins/time). You already have [authorize](/blog/authorize-ai-agent-tool-calls-opa/) and [Terraform attach](/blog/manage-ai-agent-policies-terraform/). This post adds the clock.
 
 **Key takeaways**
 
 - Drive windows from `input.timestamp`, not only wall clock, so tests stay fixed.
 - Allow-list hours and freeze windows are different postures: one denies everything off-hours; the other denies change actions on weekdays.
-- Put fixed timestamps in `opa test` fixtures so CI does not depend on wall clock.
+- Put fixed timestamps in `opa test` fixtures so continuous integration (CI) does not depend on wall clock.
 {: .key-takeaways}
 
 ---
 
-![UTC allow morning deny lunch allow afternoon deny off-hours](/assets/images/diagrams/oct/time-window-clock.svg)
+![Coordinated Universal Time (UTC) allow morning deny lunch allow afternoon deny off-hours](/assets/images/diagrams/oct/time-window-clock.svg)
 
 *Parse the factsheet clock. Do not invent a second time source in Rego if the platform already sent one.*
 
 ## Architecture: time is an input field, not a prompt
 
-Time-based authorization is still the same PDP/PEP loop from [authorize](/blog/authorize-ai-agent-tool-calls-opa/). The only change is which factsheet fields Rego reads.
+Time-based authorization is still the same policy decision point/policy enforcement point (PDP/PEP) loop from [authorize](/blog/authorize-ai-agent-tool-calls-opa/). The only change is which factsheet fields Rego reads.
 
 | Source | Use |
 |--------|-----|
-| `input.timestamp` | Platform factsheet clock (RFC3339). Prefer this for business hours and freezes so `opa test` fixtures stay fixed. |
+| `input.timestamp` | Platform factsheet clock (Request for Comments 3339 (RFC 3339) format). Prefer this for business hours and freezes so `opa test` fixtures stay fixed. |
 | `time.parse_rfc3339_ns` | Turn that string into nanoseconds for `time.clock` / `time.weekday`. |
 | `time.now_ns` | Wall clock at evaluate time. Useful for skew or staleness checks; avoid as the only clock in unit tests. |
 

@@ -37,7 +37,7 @@ A map is not another markdown standard operating procedure (SOP). In our design 
 
 Discovery already knows which integrations exist (metrics, logs, warehouse, Git), which services and env tags appear in your estate, and which repos deploy to which workloads. Inject the available graph at investigation launch so the agent starts with known connections rather than assuming dependencies. Discovery can be incomplete or stale, so the graph remains a starting hypothesis.
 
-Without it, every incident is a blind crawl. With it, "check deploy correlation" is a first-class probe, not folklore buried in a static PDF.
+Without it, every incident is a blind crawl. With it, "check deploy correlation" is a first-class probe, not folklore buried in a static Portable Document Format (PDF).
 
 ### 2. Verify-first probes
 
@@ -101,7 +101,7 @@ Runbooks stay valid when:
 | **Stable, bounded archetypes** | You've closed the same alert class fifty times; the probe sequence is known (queue depth → consumer tag → rebalance). Encode that as **recipes on the map**, not rediscovery every run. |
 | **Reference demo** | Greenfield estates need a worked example before discovery is rich. A reference notebook as an **optional demo** while the platform map matures is fine. |
 | **Human-in-the-loop (HITL) remediation** | The map ends at evidence and class. The runbook documents who approves scale-down, which job to run, what lands in the ticket. Investigation vs blast-radius governance are different artifacts. |
-| **Local overlay** | Env-specific dashboard IDs, tag quirks, "always widen to 7d on this monitor." **Templates on top of** topology + verifier — not the entire navigation layer. |
+| **Local overlay** | Env-specific dashboard identifiers (IDs), tag quirks, "always widen to 7d on this monitor." **Templates on top of** topology + verifier — not the entire navigation layer. |
 
 The failure mode was **runbook as sole navigation**: many estate-specific pages compensated for missing discovery and verification. Topology, gates, and memory are intended to supplement those pages; their effectiveness still has to be tested against live investigations.
 
@@ -117,9 +117,9 @@ Common patterns:
 - **Loudest spike wins** — rank correlation over causation.
 - **Hollow gather** — fluent narrative while a middle stage never committed tool receipts.
 - **Premature "observability gap"** — give up before widening the window, fixing env tags, or running tag discovery.
-- **Sub-agent loops** — spawn helpers until a **spawn budget** (max LLM turns per worker) exhausts, leaving `pending_from_*` stubs the gate accepts anyway.
+- **Sub-agent loops** — spawn helpers until a **spawn budget** (max large language model (LLM) turns per worker) exhausts, leaving `pending_from_*` stubs the gate accepts anyway.
 
-Operators need **receipts**: concrete IDs, numeric KPIs, ruled-out branches, and next probes that survive a deterministic check.
+Operators need **receipts**: concrete IDs, numeric key performance indicators (KPIs), ruled-out branches, and next probes that survive a deterministic check.
 
 Prior posts in this series drill into specific antidotes: [evidence-gated RCA](/blog/evidence-gated-multiplane-rca/), [bring-up like hardware](/blog/bring-up-agent-workflows-like-hardware/), [evidence-based verification](/blog/evidence-based-verification/). This one is the product frame they fit inside.
 
@@ -140,12 +140,12 @@ Different alerts, same script failures — two parallel use cases, one failure t
 | What a good run proves | What the script did instead |
 |------------------------|-----------------------------|
 | Primary signal with **numbers**, not "elevated" | Stopped at a window too narrow for sparse metrics |
-| Primary scope key identified with evidence | Pasted **redacted placeholder tokens** into SQL → syntax errors → retry loop |
+| Primary scope key identified with evidence | Pasted **redacted placeholder tokens** into Structured Query Language (SQL) → syntax errors → retry loop |
 | Cross-plane **crosscheck** resolved | Left `pending` forever while gather declared complete |
 | Queue consumer or pod health with concrete fields | Wrote `blocked: no data` or `pending_from_*` while gate cheered on non-empty text |
-| Presentation uses gather transcript | Read only navigation JSON ("FINISH, iter=1") and ignored evidence |
+| Presentation uses gather transcript | Read only navigation JavaScript Object Notation (JSON) ("FINISH, iter=1") and ignored evidence |
 
-Fixes were rarely "more poetry in the runbook." They were **topology + verifier + gates**: UUID-aware regex, forbidden hollow stubs (`branch dispatched…` is not evidence), spawn contracts that allow tag-discovery tools, and headlines that say **no active incident on scoped path** when the signal is inactive. The runbook's *probe ideas* were often right; the platform had not encoded them as structured evidence and gates.
+Fixes were rarely "more poetry in the runbook." They were **topology + verifier + gates**: universally unique identifier (UUID)-aware regex, forbidden hollow stubs (`branch dispatched…` is not evidence), spawn contracts that allow tag-discovery tools, and headlines that say **no active incident on scoped path** when the signal is inactive. The runbook's *probe ideas* were often right; the platform had not encoded them as structured evidence and gates.
 
 ### Symptom tickets (human words, messy scope)
 
@@ -227,7 +227,7 @@ Possible next experiments include hypothesize-then-verify, causal graphs pruned 
 **Further reading (same series):**
 
 - [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/)
-- [How We Debug Multi-Stage AI Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/)
+- [How We Debug Multi-Stage Artificial Intelligence (AI) Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/)
 - [Evidence-Based Verification](/blog/evidence-based-verification/)
 - [AI-Augmented Incident Triage](/blog/ai-incident-triage-sre/)
 

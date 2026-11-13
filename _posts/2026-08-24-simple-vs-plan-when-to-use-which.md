@@ -25,7 +25,7 @@ Earlier this week, [planning beat reacting](/blog/multi-agent-vs-single-agent-mc
 
 We ran a small **simple vs plan** smoke on three skill-shaped errands. Plan passed one task and had a higher partial score on another. Simple matched plan on a hard action task while spending far less. The practical choice depends on the task and the costs you can tolerate. Keep both modes available while measuring them on your own work.
 
-Dataset: [AppWorld](https://github.com/stonybrooknlp/appworld), a simulated-app benchmark, via Model Context Protocol (MCP), the interface for app actions. Runtime: Aiden. Series id: `simple-vs-plan-3-20260824T213004Z`. **n = 3 tasks — directional, not a launch scorecard.**
+Dataset: [AppWorld](https://github.com/stonybrooknlp/appworld), a simulated-app benchmark, via Model Context Protocol (MCP), the interface for app actions. Runtime: Aiden. Series identifier: `simple-vs-plan-3-20260824T213004Z`. **n = 3 tasks — directional, not a launch scorecard.**
 
 ---
 
@@ -41,7 +41,7 @@ Both paths scored **28.6%** on a Spotify action task and failed the strict check
 |------|---------:|-------:|--------|--------|
 | uc-06 Spotify rate liked playlist songs (`692c77d_1`) | 28.6 | 28.6 | both fail | **tie** |
 | uc-07 Venmo like roommate transactions (`2a163ab_1`) | 66.7 | 83.3 | both fail | **plan on partial checks only** |
-| uc-10 Spotify most-recommended artist Q&A (`287e338_1`) | 50.0 | 100.0 | plan pass | **plan** |
+| uc-10 Spotify most-recommended artist question-and-answer (Q&A) (`287e338_1`) | 50.0 | 100.0 | plan pass | **plan** |
 
 *Caption: pass percentages from AppWorld `/evaluate` · series `simple-vs-plan-3-20260824T213004Z`.*
 
@@ -56,7 +56,7 @@ Both paths scored **28.6%** on a Spotify action task and failed the strict check
 | **Simple** | ~40–73s | One agent; final context ~15–16k; Σ prompt ~15–16k |
 | **Plan** | ~141–275s (~2–4×) | Σ prompt ~5–6× higher (orchestration tax); final coordinator turn often similar to or *smaller* than simple’s single turn |
 
-Workers absorbed the bulk of the tokens. Subagent isolation held — compact handoffs stayed under **2KB**, same class of boundary we saw in the [MCP tool-tax post](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/).
+Workers absorbed the bulk of the tokens. Subagent isolation held — compact handoffs stayed under **2 kilobytes (KB)**, same class of boundary we saw in the [MCP tool-tax post](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/).
 
 **Monday-morning rule:** quote **peak per seat** *and* **sum across the run**. If you only watch the coordinator gauge, plan can look “smaller.” If you only watch the sum, simple looks “cheaper.” Ship with both numbers on the receipt.
 
@@ -106,8 +106,8 @@ For the earlier cohort where plan moved failure classes (mutations vs wording) a
 - [Multi-Agent vs Single-Agent: MCP Tool Tax + pass@k](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/)
 - [Agent orchestration tax](/blog/agent-orchestration-tax-evals/)
 - [Single-Agent vs Multi-Agent Orchestration: How to Choose](/blog/single-agent-vs-multi-agent/)
-- [How to evaluate AI agents: clarify + zero-tool failures](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/)
-- [Fair agent evals before performance](/blog/fair-agent-evals-before-performance/)
+- [How to evaluate artificial intelligence (AI) agents: clarify + zero-tool failures](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/)
+- [Fair agent evaluations (evals) before performance](/blog/fair-agent-evals-before-performance/)
 - [Running AppWorld locally](/blog/running-appworld-locally-genie-agent-eval/)
 
 ---
@@ -116,4 +116,4 @@ For the earlier cohort where plan moved failure classes (mutations vs wording) a
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> 🚀 **We're building AI-powered site reliability engineering (SRE) at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft root cause analysis (RCA) reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.

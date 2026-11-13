@@ -20,7 +20,7 @@ faqs:
     answer: "Bring up one stage at a time against a golden gate, score committed tool effects rather than raw transcripts, and keep a single export per conversation so nested chains stay inspectable."
 ---
 
-## What is the best way to debug a multi-step AI agent?
+## What is the best way to debug a multi-step artificial intelligence (AI) agent?
 
 Freeze one golden prompt you can rematch cold, export one execution bundle for that run, grade what the model saw on each step, separate tools that paid rent from waste, then change one host gate or tool contract. Rewrite the system prompt only after the harness is honest.
 
@@ -49,7 +49,7 @@ When a multi-step agent gives a plausible but unsupported incident diagnosis, st
 
 A two-part test—alert triage plus a log comparison, as in [our bench](/blog/six-model-mode-combos-alert-logs-bench/)—makes omissions visible. Freeze the request, expected evidence, time windows, and tool access; otherwise a rematch may test a different task. A single-part job can still work if its expected observations are explicit.
 
-Record: model, **orchestration shape** (**single-agent** ReAct vs **hierarchical** ReAcTree — [primer](/blog/what-is-reactree/) · [PDF](https://arxiv.org/pdf/2511.02424)), host flags, tool endpoint, session id.
+Record: model, **orchestration shape** (**single-agent** ReAct (reasoning and acting) vs **hierarchical** ReAcTree — [primer](/blog/what-is-reactree/) · [Portable Document Format (PDF)](https://arxiv.org/pdf/2511.02424)), host flags, tool endpoint, session identifier (ID).
 
 ---
 
@@ -61,7 +61,7 @@ Prefer a single artifact: transcript + tool results + stage timeline. If you onl
 - token in/out  
 - tool names + error strings  
 - final Theory / Unknowns / Do-this-now  
-- per model call: model name, whether the response id starts with `resp_` (Responses API) or `chatcmpl_` (Chat Completions), and whether usage lists reasoning tokens ([Completions vs Responses](/blog/chat-completions-vs-responses-api/))
+- per model call: model name, whether the response id starts with `resp_` for the Responses application programming interface (API) or `chatcmpl_` for Chat Completions, and whether usage lists reasoning tokens ([Completions vs Responses](/blog/chat-completions-vs-responses-api/))
 
 For hierarchical runs, merge parent and child spans (timed records of model and tool calls) using the session id. A parent-only view can miss a child’s measurement or hide a child’s repeated failed query.
 
@@ -74,13 +74,13 @@ For hierarchical runs, merge parent and child spans (timed records of model and 
 *Change one host or tool behavior at a time so the next run is a useful comparison.*
 
 
-Read the sequence from tool request to observation to final claim. For example, an HTTP 200 may carry a query envelope whose `outcome` is `failed`; transport success is not measurement success. Ask four questions:
+Read the sequence from tool request to observation to final claim. For example, a Hypertext Transfer Protocol (HTTP) 200 response may carry a query envelope whose `outcome` is `failed`; transport success is not measurement success. Ask four questions:
 
 | Question | Fail looks like |
 |----------|-----------------|
 | Did measurement tools run? | Only `search_tools` / skills |
 | Did failures look like failures? | HTTP 200 empty treated as success |
-| Did observations change? | Same failed LogQL five times |
+| Did observations change? | Same failed Loki query language (LogQL) five times |
 | Did the close name receipts? | Undetermined with no blocked query |
 
 Bring-up multi-stage workflows [like hardware](/blog/bring-up-agent-workflows-like-hardware/): green one stage at a time.

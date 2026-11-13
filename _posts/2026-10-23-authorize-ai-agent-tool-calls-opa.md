@@ -20,9 +20,9 @@ faqs:
     answer: "For allow-list catalogs, yes (default allow := false). For a single deny rule like blocking secret writes, default allow := true and flip only matching calls is easier to reason about."
 ---
 
-How do you authorize AI agent tool calls with OPA? You put a decision between the model and the tool.
+How do you authorize artificial intelligence (AI) agent tool calls with Open Policy Agent (OPA)? You put a decision between the model and the tool.
 
-The agent can still *choose* `gh secret set`. Policy decides whether that call ever reaches the shell. That is the same enforcement-point story MCP tutorials and [OpenShell](https://developer.nvidia.com/blog/run-autonomous-self-evolving-agents-more-safely-with-nvidia-openshell/) tell: controls outside the agent, evaluated before side effects. [Why OPA](/blog/why-opa-for-ai-agent-guardrails/) covered the history. This post ships the first Rego lab.
+The agent can still *choose* `gh secret set`. Policy decides whether that call ever reaches the shell. That is the same enforcement-point story Model Context Protocol (MCP) tutorials and [OpenShell](https://developer.nvidia.com/blog/run-autonomous-self-evolving-agents-more-safely-with-nvidia-openshell/) tell: controls outside the agent, evaluated before side effects. [Why OPA](/blog/why-opa-for-ai-agent-guardrails/) covered the history. This post ships the first Rego lab.
 
 **Key takeaways**
 
@@ -37,7 +37,7 @@ The agent can still *choose* `gh secret set`. Policy decides whether that call e
 
 *Agent proposes a tool call. Aiden Runtime sends a factsheet to OPA. Allow reaches the tool boundary; deny never does.*
 
-## Why prompts fail as ACLs
+## Why prompts fail as access control lists (ACLs)
 
 You write: “Never set GitHub secrets.” The model still emits a tool call with `gh secret set` after a prompt injection, a confused summary, or a “just this once” reasoning trail. The failure is not that the prompt was unclear. The failure is that the only enforcer was the model.
 
@@ -48,8 +48,8 @@ You write: “Never set GitHub secrets.” The model still emits a tool call wit
 Architecture in one sequence:
 
 1. Model emits a tool call (name + arguments).
-2. **PEP** (Guild runtime) loads policies attached to that agent.
-3. Runtime builds a **factsheet** JSON and sends it to **PDP** (OPA).
+2. **Policy enforcement point (PEP)** (Guild runtime) loads policies attached to that agent.
+3. Runtime builds a **factsheet** JavaScript Object Notation (JSON) document and sends it to the **policy decision point (PDP)** (OPA).
 4. Rego returns allow, deny, or ask (`approval_required`).
 5. Only on allow (or after human approve) does the tool execute.
 
@@ -60,14 +60,14 @@ The agent cannot skip steps 2 through 4 by rephrasing. That is the whole point o
 | Field | Meaning |
 |-------|---------|
 | `agent` | Which agent is acting (id, name, optional tags) |
-| `timestamp` | When the check ran (UTC RFC3339) |
+| `timestamp` | When the check ran (Coordinated Universal Time (UTC), Request for Comments 3339 (RFC 3339) format) |
 | `tool.name` | Tool about to run |
 | `tool.arguments` | Structured parameters (always an object) |
 | `reason` | Optional short justification from the agent |
 | `user` / `current_project` | Optional caller identity and project role |
 | `policy_data` | Optional static JSON you store on the policy |
 | `skill` | Optional loaded skill metadata |
-| `approver` / `requester` | Present on HITL resolve for who may Approve |
+| `approver` / `requester` | Present on human-in-the-loop (HITL) resolve for who may Approve |
 
 Prefer `policy_data` for custom config. A top-level `context` key is legacy and not what current evaluators emit by default.
 
@@ -83,7 +83,7 @@ This post stays on `logic` deny. HITL comes in [Guardrails and human approval](/
 
 ## Minimal Rego: deny `gh secret set`
 
-Teaching shape from Aiden e2e GitHub guardrails. Package and rules match [solutions](https://github.com/appcd-dev/solutions) conventions (`package policy`), not older provider snippets that use `decision := "deny"`.
+Teaching shape from Aiden end-to-end (e2e) GitHub guardrails. Package and rules match [solutions](https://github.com/appcd-dev/solutions) conventions (`package policy`), not older provider snippets that use `decision := "deny"`.
 
 ```rego
 package policy
@@ -131,14 +131,14 @@ make opa-test
 # or: opa test 01-deny-secret-write
 ```
 
-Lab `01-deny-secret-write/` holds `policy.rego` and `policy_test.rego`. Fixtures under `fixtures/` show the factsheet shape for playground or evaluate APIs.
+Lab `01-deny-secret-write/` holds `policy.rego` and `policy_test.rego`. Fixtures under `fixtures/` show the factsheet shape for playground or evaluate application programming interfaces (APIs).
 
 Do not attach a policy you have not tested. A wrong deny bricks a demo; a missing deny ships a secret write.
 
 ## Lab step
 
 1. Clone [sks/sks.github.io](https://github.com/sks/sks.github.io).
-2. Install the [OPA CLI](https://www.openpolicyagent.org/docs/latest/#running-opa).
+2. Install the [OPA command-line interface (CLI)](https://www.openpolicyagent.org/docs/latest/#running-opa).
 3. Run `make opa-test` in `samples/aiden-opa-policies`.
 4. Edit the denied substring, add a fixture, re-run tests.
 

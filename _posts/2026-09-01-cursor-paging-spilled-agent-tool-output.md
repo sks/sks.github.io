@@ -19,7 +19,7 @@ faqs:
     answer: "Write-time spill manifest, completeness truncated on the originating tool, opaque cursor tokens, small pages that fit after JSON escaping, and inventory hints so the agent knows what exists before it finishes paging."
 ---
 
-An incident-triage agent batched twelve PromQL queries (Prometheus metric queries) through Grafana. The resulting 345KB JSON exceeded the agent tool-result limit. The runtime stored the complete result on disk and returned only a preview and a `spill_id`, an identifier for retrieving the stored result.
+An incident-triage agent batched twelve Prometheus Query Language (PromQL) queries through Grafana. The resulting 345-kilobyte (KB) JavaScript Object Notation (JSON) result exceeded the agent tool-result limit. The runtime stored the complete result on disk and returned only a preview and a `spill_id`, an identifier for retrieving the stored result.
 
 The agent searched that stored result for `"name": "cpu_usage"`. The text search matched metadata but missed `series[]`, the arrays of timestamped measurements. It then marked every pod (Kubernetes workload instance) in the placeholder acme checkout fleet **Unavailable** and ended the investigation. In this case, "Unavailable" described what the agent had failed to retrieve, not the state of the pods.
 
@@ -55,9 +55,9 @@ The compromise is spill:
 
 That works until the agent treats the preview as the universe, or treats grep on the spill as a cheap substitute for reading it.
 
-In the acme-style incident, a multi-query metrics batch returned dozens of result objects. CPU, memory, and request-rate series for many pods lived in the spill. The preview showed structure and labels. The agent never walked the bytes where the numbers were.
+In the acme-style incident, a multi-query metrics batch returned dozens of result objects. Central processing unit (CPU), memory, and request-rate series for many pods lived in the spill. The preview showed structure and labels. The agent never walked the bytes where the numbers were.
 
-The RCA sounded confident and wrong: every pod unavailable, plane empty. Operators re-ran one query manually and got green series. Trust in the agent dropped faster than error rates.
+The root cause analysis (RCA) sounded confident and wrong: every pod unavailable, plane empty. Operators re-ran one query manually and got green series. Trust in the agent dropped faster than error rates.
 
 Related: [claim-aware evidence packing](/blog/claim-aware-evidence-packing/) explains why verifiers must not accuse agents of inventing what you truncated. This post is about **getting the truncated data back** before the verdict.
 
@@ -147,7 +147,7 @@ For operators and prompt authors, the playbook is short:
 
 Training beats hidden policy: tool descriptions should state that truncated observability results **require cursor paging**, not preview inference.
 
-For SRE review: treat "Unavailable" on every series after a truncated tool return as a **recovery bug**, not a datasource bug.
+For site reliability engineering (SRE) review: treat "Unavailable" on every series after a truncated tool return as a **recovery bug**, not a datasource bug.
 
 ---
 
@@ -173,9 +173,9 @@ Related design references: [cursor-based pagination](https://slack.engineering/e
 
 ## Related
 
-- [AI agents call truncated Grafana "no data"](/blog/no-data-is-often-truncated-data/) (the preview failure mode)
+- [Artificial intelligence (AI) agents call truncated Grafana "no data"](/blog/no-data-is-often-truncated-data/) (the preview failure mode)
 - [Claim-aware evidence packing](/blog/claim-aware-evidence-packing/) (do not accuse agents of inventing truncated receipts)
-- [LLM tokenomics for production agents](/blog/maintaining-tokenomics-with-aiden/) (why spills exist in the first place)
+- [Large language model (LLM) tokenomics for production agents](/blog/maintaining-tokenomics-with-aiden/) (why spills exist in the first place)
 - [Web metrics to LLM metrics](/blog/web-metrics-to-llm-metrics/) (tool payload size as a first-class metric)
 
 ---

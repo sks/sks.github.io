@@ -21,7 +21,7 @@ faqs:
     answer: "Same invoice, different job. Our SRE A/B showed ~1.6× wall time and ~3.9× tool calls for the same findings on single-plane triage. Here we measure the tax on a public multi-app benchmark after fixing tool fairness."
 ---
 
-Once **fair agent evals** prove both modes can reach the same domain tools ([part one](/blog/fair-agent-evals-before-performance/)), the next question is cost: what does the planner path charge for coordination?
+Once **fair artificial intelligence (AI) agent evaluations (evals)** prove both modes can reach the same domain tools ([part one](/blog/fair-agent-evals-before-performance/)), the next question is cost: what does the planner path charge for coordination?
 
 We call the added coordination **agent orchestration tax**: tokens (pieces of text processed by the model), model turns, and worker launches spent managing delegation in addition to calling the AppWorld apps. It can be worth paying when work branches, but it needs to be measured rather than assumed.
 
@@ -33,19 +33,19 @@ Dataset: [AppWorld](https://github.com/stonybrooknlp/appworld), a simulated-app 
 
 ## A concrete cost comparison
 
-On ten paired tasks where both paths could reach the same app tools, the planner averaged **217,252 tokens** and **43.8 model turns**, versus **132,374 tokens** and **14.6 turns** for one agent. Both failed the strict AppWorld completion check on this small slice. More turns here show a coordination cost, not an improvement in finished tasks. If the job is “create a record, then use its new ID to update it,” one agent can keep that sequence together; parallel independent reads may justify separate workers. Test that tradeoff on your own tasks.
+On ten paired tasks where both paths could reach the same app tools, the planner averaged **217,252 tokens** and **43.8 model turns**, versus **132,374 tokens** and **14.6 turns** for one agent. Both failed the strict AppWorld completion check on this small slice. More turns here show a coordination cost, not an improvement in finished tasks. If the job is “create a record, then use its new identifier (ID) to update it,” one agent can keep that sequence together; parallel independent reads may justify separate workers. Test that tradeoff on your own tasks.
 
 ---
 
-## Scorecard (record these on every fair A/B)
+## Scorecard (record these on every fair A/B comparison)
 
 | Metric | Why it matters |
 |--------|----------------|
 | **Tokens** (prompt + completion) | Coordination shows up in root + worker streams |
 | **Model iterations** | Spawn, repair, and gate retries are iterations, not “thinking harder” |
-| **Domain tool calls** | Did extra loops translate into more API work or just overhead? |
+| **Domain tool calls** | Did extra loops translate into more application programming interface (API) work or just overhead? |
 | **Worker spawns** | Planner tax often scales with spawn count |
-| **External judge pass** | AppWorld TGC/SGC — not assistant prose |
+| **External judge pass** | AppWorld task-goal completion/scenario-goal completion (TGC/SGC) — not assistant prose |
 | **Fairness OK** | From [part one](/blog/fair-agent-evals-before-performance/) checklist |
 
 ---
@@ -64,7 +64,7 @@ After the handoff fix, every pair passed tool-access fairness.
 
 **Outcomes texture:** single-agent often hit its maximum number of turns **without** reaching evaluate (`ran_without_judge` on 7/10). Planner paths reached evaluate more often — useful for diagnosing harness gaps, not a routing win by itself.
 
-Same findings class as our [SRE agent benchmarks](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/) post: coordination multiplies iterations; it does not automatically deepen inspection.
+Same findings class as our [Site reliability engineering (SRE) agent benchmarks](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/) post: coordination multiplies iterations; it does not automatically deepen inspection.
 
 ![Where orchestration tax stacks on top of domain work](/assets/images/appworld/orchestration-stack.svg)
 
@@ -101,7 +101,7 @@ On “planner-shaped” work, **neither mode cleared strict TGC** on this five-t
 
 This mirrors [single-agent vs multi-agent](/blog/single-agent-vs-multi-agent/): **branching is the job**, not the slide deck.
 
-For **LLM token budget** discipline when tax is unavoidable, see [maintaining tokenomics](/blog/maintaining-tokenomics-with-aiden/) — measure root + worker streams together.
+For **large language model (LLM) token budget** discipline when tax is unavoidable, see [maintaining tokenomics](/blog/maintaining-tokenomics-with-aiden/) — measure root + worker streams together.
 
 ---
 
@@ -109,7 +109,7 @@ For **LLM token budget** discipline when tax is unavoidable, see [maintaining to
 
 - **Small n:** ten and five task cohorts — directional, not a leaderboard.
 - **Unequal caps:** planner runs allowed slightly higher iteration and worker node limits in this harness.
-- **Missing telemetry:** some planner rows showed **zero** Langfuse tokens while SSE showed tool activity — exclude or flag before averaging.
+- **Missing telemetry:** some planner rows showed **zero** Langfuse tokens while server-sent events (SSE) showed tool activity — exclude or flag before averaging.
 - **Historical 168-task Grok pairing** from an earlier era is a **separate prior** — different model and harness; do not overlay these OpenAI-family runs.
 - **We did not benchmark LangGraph, CrewAI, or AutoGen** — we measured one runtime on AppWorld. Other systems may also pay for coordination, but the size and even direction of the cost need their own measurements.
 
@@ -141,7 +141,7 @@ For **LLM token budget** discipline when tax is unavoidable, see [maintaining to
 - [Model Context Protocol](https://modelcontextprotocol.io/)
 - [Langfuse](https://langfuse.com/)
 - [LangGraph](https://langchain-ai.github.io/langgraph/) · [CrewAI](https://docs.crewai.com/) · [AutoGen](https://microsoft.github.io/autogen/) · [OpenAI Agents](https://openai.github.io/openai-agents-python/)
-- [Google ADK evaluation](https://google.github.io/adk-docs/evaluate/)
+- [Google Agent Development Kit (ADK) evaluation](https://google.github.io/adk-docs/evaluate/)
 
 ---
 
@@ -149,4 +149,4 @@ For **LLM token budget** discipline when tax is unavoidable, see [maintaining to
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft root cause analysis (RCA) reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.

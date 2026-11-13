@@ -17,9 +17,9 @@ faqs:
     answer: "Force measuring the rule's real query before parallel tool digs. Do not invent PromQL from the title alone."
 ---
 
-An alert title suggested latency, but the stored rule queried ClickHouse. An AI agent used for site reliability engineering (SRE) could infer a Prometheus Query Language (PromQL) metric from that title and produce the wrong root cause analysis (RCA).
+An alert title suggested latency, but the stored rule queried ClickHouse. An artificial intelligence (AI) agent used for site reliability engineering (SRE) could infer a Prometheus Query Language (PromQL) metric from that title and produce the wrong root cause analysis (RCA).
 
-*The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
+*The incident patterns below are composite and anonymized. Counts are rounded. Names, identifiers (IDs), and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
@@ -44,7 +44,7 @@ The title is a label, not the measurement definition. Fetch the stored rule expr
 - Agent narrates “>80% capacity storm” without live samples
 - Human measures the rule’s stored query, finds a double-count or a warehouse query that never touched Prometheus
 
-Or: AI Governance–style alert; human finds CDN 500s + application exception; agent restates the symptom with `not_enough_information` after querying the wrong place.
+Or: AI Governance–style alert; human finds content delivery network (CDN) 500s + application exception; agent restates the symptom with `not_enough_information` after querying the wrong place.
 
 This is [hypothesis ladder](/blog/hypothesis-ladder/) discipline applied at the **first** fork: identity of the signal before depth theories.
 

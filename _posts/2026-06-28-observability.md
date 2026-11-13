@@ -16,17 +16,17 @@ faqs:
     answer: "Yes. An edited version was featured on the CNCF blog covering observability for AI agents."
 ---
 
-> **Featured by CNCF.** An edited version of this article was published on the [Cloud Native Computing Foundation blog](https://www.cncf.io/blog/2026/08/04/you-cant-debug-what-you-cant-see-observability-for-ai-agents/).
+> **Featured by the Cloud Native Computing Foundation (CNCF).** An edited version of this article was published on the [CNCF blog](https://www.cncf.io/blog/2026/08/04/you-cant-debug-what-you-cant-see-observability-for-ai-agents/).
 
 A service can return a successful response even when an agent has asked the same question repeatedly, spent far more than expected, or reported a result that its tools do not support. Standard application performance monitoring (APM) tells you whether requests were fast and error-free; it does not explain the sequence of decisions inside an agent session.
 
-We have run [AI agents for site reliability engineering (SRE) teams](/topics/ai-agents-sre/) in production for months. The following signals helped us investigate their failures. They add to ordinary service monitoring rather than replacing it.
+We have run [artificial intelligence (AI) agents for site reliability engineering (SRE) teams](/topics/ai-agents-sre/) in production for months. The following signals helped us investigate their failures. They add to ordinary service monitoring rather than replacing it.
 
 ---
 
 ## What We Need to Answer
 
-For an agent session—a task from start to finish—we want to know why its cost rose, whether tools repeated without progress, what evidence supports its final answer, and which dependency or model caused an error. Counters for HTTP latency and error rates cannot answer those questions alone. Prometheus metrics and Grafana dashboards still help with alerting and service health; detailed session timelines supply the missing context.
+For an agent session—a task from start to finish—we want to know why its cost rose, whether tools repeated without progress, what evidence supports its final answer, and which dependency or model caused an error. Counters for Hypertext Transfer Protocol (HTTP) latency and error rates cannot answer those questions alone. Prometheus metrics and Grafana dashboards still help with alerting and service health; detailed session timelines supply the missing context.
 
 ## 1. Traces Show the Sequence
 
@@ -56,7 +56,7 @@ We run automated reviews of completed traces for duration, cost, tool count, rep
 
 For real-time dashboards, we export bounded metrics such as success and failure rates by tool, agent-level cost, approval latency histograms, and classification counts. Traces and structured logs retain per-session detail.
 
-Avoid unique session IDs as Prometheus labels: each new value creates another time series. Tool and agent names can be bounded labels if your deployment controls their number; even those labels need scrutiny when users can create arbitrary names. Thousands of unique session labels can overwhelm metric storage. Put the session ID in a trace instead.
+Avoid unique session identifiers (IDs) as Prometheus labels: each new value creates another time series. Tool and agent names can be bounded labels if your deployment controls their number; even those labels need scrutiny when users can create arbitrary names. Thousands of unique session labels can overwhelm metric storage. Put the session ID in a trace instead.
 
 | Signal | Question it helps answer |
 |--------|--------------------------|
@@ -76,7 +76,7 @@ These are complementary views of one session: a metric alerts, a trace explains 
 
 ## Related reading
 
-- [LLM Tokenomics for Production Agents](/blog/maintaining-tokenomics-with-aiden/) — context budgets and cost attribution
+- [Large Language Model (LLM) Tokenomics for Production Agents](/blog/maintaining-tokenomics-with-aiden/) — context budgets and cost attribution
 - [AI Incident Triage for SREs](/blog/ai-incident-triage-sre/) — what to gather once sessions are visible
 - More on [AI agents for SRE](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
 

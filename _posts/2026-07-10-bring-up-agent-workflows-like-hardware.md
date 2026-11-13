@@ -25,13 +25,13 @@ The useful debugging rule was to pass one stage repeatedly, then add the next.
 
 The main surprise was not a model failure. A test that searched the full transcript flagged forbidden wording in the instructions themselves, even though the agent had not taken the forbidden action.
 
-A version of this write-up also lives on StackGen: [How We Debug Multi-Stage AI Agent Workflows](https://stackgen.com/blog/how-we-debug-multi-stage-ai-agent-workflows).
+A version of this write-up also lives on StackGen: [How We Debug Multi-Stage Artificial Intelligence (AI) Agent Workflows](https://stackgen.com/blog/how-we-debug-multi-stage-ai-agent-workflows).
 
 ---
 
 ## Why a full run was hard to debug
 
-The workflow was a sequential investigation. Each stage depended on the one before it: establish *when* the problem started, then *who* was involved, then corroborate across a second and third data plane, then synthesize an answer. This is a compound AI system: fixed stages with a model performing work inside each stage. (I wrote about that architecture in [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/).)
+The workflow was a sequential investigation. Each stage depended on the one before it: establish *when* the problem started, then *who* was involved, then corroborate across a second and third data plane, then synthesize an answer. This is a compound AI system: fixed stages with a model performing work inside each stage. (I wrote about that architecture in [Evidence-Gated Root Cause Analysis (RCA) — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/).)
 
 Here's the trap: when you run all of it and the final answer is wrong, the final answer alone rarely identifies which stage went wrong.
 
@@ -183,4 +183,4 @@ Cumulative bring-up shortened our debugging loop and exposed a faulty scorer. It
 
 ---
 
-> We build incident-triage agents at StackGen; the SRE offering is at [ai.stackgen.com](https://ai.stackgen.com).
+> We build incident-triage agents at StackGen; the site reliability engineering (SRE) offering is at [ai.stackgen.com](https://ai.stackgen.com).

@@ -10,18 +10,18 @@ series: "Building an Enterprise AI Agent Platform in Go"
 ---
 Web performance work asks when a page becomes useful, how long the main content takes, and whether the interface stays stable. Those questions still help when the feature calls a large language model (LLM), but the measurements change. An LLM generates output a piece at a time; a page usually renders bytes already sent to the browser.
 
-This is a comparison for debugging, not a claim that Google's Lighthouse scores can be applied to model responses. In particular, broken JSON is not literally a layout shift, and prompt processing is not browser main-thread blocking.
+This is a comparison for debugging, not a claim that Google's Lighthouse scores can be applied to model responses. In particular, broken JavaScript Object Notation (JSON) is not literally a layout shift, and prompt processing is not browser main-thread blocking.
 
 | Web concern | Related LLM concern | Important difference |
 |-------------|---------------------|----------------------|
 | First Contentful Paint (FCP): first rendered content | Time to first token (TTFT) | A token can be an invisible or unusable fragment, not useful feedback |
 | Largest Contentful Paint (LCP): main visible content | End-to-end completion time | An agent may run several model calls and tools before it finishes |
-| Total Blocking Time (TBT): main-thread tasks over 50 ms | Queue and prompt processing time | The browser may remain interactive while the server works |
+| Total Blocking Time (TBT): main-thread tasks over 50 milliseconds (ms) | Queue and prompt processing time | The browser may remain interactive while the server works |
 | Cumulative Layout Shift (CLS): unexpected movement | Output validity and structural consistency | This is a parser/workflow failure, not a visual metric |
 
 ## First response: TTFT
 
-**Time to first token (TTFT)** is the elapsed time from sending a request until receiving the first generated output token. A token is a small unit of text the model produces; it might be part of a word or the opening `{` of a JSON object. For a streaming API, mark the request send time and the first actual content chunk received over server-sent events (SSE) or a WebSocket:
+**Time to first token (TTFT)** is the elapsed time from sending a request until receiving the first generated output token. A token is a small unit of text the model produces; it might be part of a word or the opening `{` of a JSON object. For a streaming application programming interface (API), mark the request send time and the first actual content chunk received over server-sent events (SSE) or a WebSocket:
 
 ```text
 user_submitted_at  →  first_token_received_at  =  TTFT
@@ -61,7 +61,7 @@ The timeline shows why first-token latency includes queueing and prompt processi
 | Pre-fill | Model processes prompt, history, retrieved material and tool results | Input-token count and provider prompt timing |
 | Decode | Model produces output tokens | Output-token count and generation time |
 
-A 10,000-token PDF, 40 retrieved chunks from retrieval-augmented generation (RAG, inserting searched material into the prompt), or a large `kubectl describe` result increases the input the model must handle. Even 50 loosely selected RAG chunks can leave a model processing irrelevant text. Longer prompts often increase pre-fill time, but the relationship depends on hardware, batching, caching and model architecture; don't assume a fixed linear slope.
+A 10,000-token Portable Document Format (PDF) file, 40 retrieved chunks from retrieval-augmented generation (RAG, inserting searched material into the prompt), or a large `kubectl describe` result increases the input the model must handle. Even 50 loosely selected RAG chunks can leave a model processing irrelevant text. Longer prompts often increase pre-fill time, but the relationship depends on hardware, batching, caching and model architecture; don't assume a fixed linear slope.
 
 If the provider exposes `queue_time_ms`, `prompt_tokens` / `prompt_eval_duration`, and `completion_tokens` / `eval_duration`, record them. Otherwise compare request-to-first-content time with input-token counts across similar requests; that correlation does not isolate pre-fill from queueing. Cap history, select fewer relevant documents, trim tool output, and use provider prompt-prefix caching where supported. Summaries can drop evidence, so keep links or references to the full source when an investigation needs it. In a multi-step agent, chart input tokens by step: in a five-step investigation, each tool result can increase the context processed on the next call.
 
@@ -93,6 +93,6 @@ When someone says a feature feels slow, locate the time: before first content, d
 | `retry_count` | Hidden extra work |
 | `model` / `region` | Compare like with like |
 
-For agents, attach each model call and tool execution as a child span of the overall run. The [observability model for AI agents](/blog/observability/) adds cost and audit data. These four web analogies can help organize an investigation, but the actionable measurements are the per-call timings, token counts, tool waits and validation results. A fast first token doesn't compensate for an incomplete task; a valid JSON shape doesn't guarantee a correct answer. For a one-shot, non-streamed classification, first-token latency may not be useful at all—measure time to a validated decision instead.
+For agents, attach each model call and tool execution as a child span of the overall run. The [observability model for artificial intelligence (AI) agents](/blog/observability/) adds cost and audit data. These four web analogies can help organize an investigation, but the actionable measurements are the per-call timings, token counts, tool waits and validation results. A fast first token doesn't compensate for an incomplete task; a valid JSON shape doesn't guarantee a correct answer. For a one-shot, non-streamed classification, first-token latency may not be useful at all—measure time to a validated decision instead.
 
 *If you've found another useful way to break down agent latency or output failures, find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks). I work on AI-assisted incident investigation at StackGen; project information is at [ai.stackgen.com](https://ai.stackgen.com).*

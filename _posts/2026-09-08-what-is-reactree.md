@@ -21,11 +21,11 @@ faqs:
     answer: "In the wiring: governance on child tools, parallel graph compile, per-step timeouts, session isolation. See our production bug notes after implementing ReAcTree."
 ---
 
-A **single-agent ReAct loop** uses one model trajectory: decide what to check, call a tool, read its result, and repeat. The entire sequence can be inspected in one trace. It can also accumulate a large prompt when a task requires many tool results.
+A **single-agent ReAct (reasoning and acting) loop** uses one model trajectory: decide what to check, call a tool, read its result, and repeat. The entire sequence can be inspected in one trace. It can also accumulate a large prompt when a task requires many tool results.
 
 **ReAcTree** organizes several such loops into a hierarchy. A parent can divide a goal into child tasks and specify whether they run in order, concurrently, or as fallbacks. The parent must then combine their reports. That structure can keep one noisy log search out of the parent prompt, but costs extra model calls and requires the runtime to preserve child evidence.
 
-Paper ([PDF](https://arxiv.org/pdf/2511.02424) · [abs](https://arxiv.org/abs/2511.02424)) · [reference code](https://github.com/Choi-JaeWoo/ReAcTree) · production scars: [ReAcTree bugs we hit](/blog/reactree-bugs/).
+Paper ([Portable Document Format (PDF)](https://arxiv.org/pdf/2511.02424) · [abstract](https://arxiv.org/abs/2511.02424)) · [reference code](https://github.com/Choi-JaeWoo/ReAcTree) · production scars: [ReAcTree bugs we hit](/blog/reactree-bugs/).
 
 ---
 
@@ -33,9 +33,9 @@ Paper ([PDF](https://arxiv.org/pdf/2511.02424) · [abs](https://arxiv.org/abs/25
 
 - **Single-agent (ReAct):** one trajectory, one context, reason→act→observe until done.
 - **Hierarchical (ReAcTree):** parent plans subgoals; children dig; control flow stitches results.
-- In the cited paper’s WAH-NL long-horizon household-task evaluation with Qwen 2.5 72B, the authors report ReAcTree ~**61%** vs ReAct ~**31%**. Those rates are task- and setup-specific, not incident-response results.
+- In the cited paper’s Watch-And-Help Natural Language (WAH-NL) long-horizon household-task evaluation with Qwen 2.5 72B, the authors report ReAcTree ~**61%** vs ReAct ~**31%**. Those rates are task- and setup-specific, not incident-response results.
 - For incident triage, a tree may help separate alert, log, and change investigations when those subgoals are independent. If one backend and one short query chain suffice, coordination can add unnecessary calls.
-- Always A/B both shapes on the **same** frozen prompt. We did that here: [six model×orchestration combos](/blog/six-model-mode-combos-alert-logs-bench/).
+- Always run an A/B test (a two-variant comparison) of both shapes on the **same** frozen prompt. We did that here: [six model×orchestration combos](/blog/six-model-mode-combos-alert-logs-bench/).
 
 
 ---
@@ -79,7 +79,7 @@ Short labels we use in benches:
 
 ---
 
-## Why ops / SRE people care
+## Why operations / site reliability engineering (SRE) people care
 
 Some incident investigations span metrics, logs, deployments, and tickets. When independent queries can run concurrently, a tree may shorten elapsed time; when they depend on each other or all hit one contended server, parallel branches may add load instead. A single-agent loop can drown in catalog tools and megabyte tool dumps. A tree can:
 

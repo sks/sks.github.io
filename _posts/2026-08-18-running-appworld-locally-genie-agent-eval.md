@@ -21,13 +21,13 @@ faqs:
     answer: "Probe environment and APIs with HTTP GET, then list_tools on MCP (non-empty). We gate cohorts on all three; starting the agent when MCP is down produces confusing tool-missing errors."
 ---
 
-> **Skip this post** if you only want eval lessons — start with [how to evaluate AI agents](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/) or [multi-agent vs single-agent](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/). Come back here when you need to reproduce the stack.
+> **Skip this post** if you only want evaluation (eval) lessons — start with [how to evaluate artificial intelligence (AI) agents](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/) or [multi-agent vs single-agent](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/). Come back here when you need to reproduce the stack.
 
 **Prerequisite for the AppWorld eval series** ([fair evals](/blog/fair-agent-evals-before-performance/) → [orchestration tax](/blog/agent-orchestration-tax-evals/) → [failure modes](/blog/ai-agent-eval-failure-modes/) → [handoff gate](/blog/stop-duplicate-agent-workers-handoff-gate/)): get the benchmark running on your machine before you argue about planner tax or failure modes.
 
 We wired the **Aiden agent runtime** to the official [AppWorld](https://github.com/stonybrooknlp/appworld) [MCP server](https://github.com/stonybrooknlp/appworld#electric_plug-introducing-appworld-mcp-server-and-client) ([paper](https://arxiv.org/abs/2407.18901)) to compare one agent with a planner and workers. AppWorld is a simulated set of apps; Model Context Protocol (MCP) supplies a standard way for the agent to discover and call their actions. This post is the **ops guide** we wanted on day one: Docker Compose, copy-paste snippets, and the traps that burned an afternoon.
 
-![AppWorld local stack: environment, APIs, MCP HTTP](/assets/images/appworld/orchestration-stack.svg)
+![AppWorld local stack: environment, application programming interfaces (APIs), MCP Hypertext Transfer Protocol (HTTP)](/assets/images/appworld/orchestration-stack.svg)
 
 ---
 
@@ -75,13 +75,13 @@ Upstream documents the full three-server flow for terminal agents in [`guides/ev
 
 ### 1. The official Docker image is a base layer, not the full stack
 
-`docker pull ghcr.io/stonybrooknlp/appworld:latest` gives you an older build with `serve environment|apis` only. **In the image version we used, there was no `serve mcp` or `serve multiple`.** PyPI `appworld` 0.1.3 matched that era; inspect your version because upstream may change.
+`docker pull ghcr.io/stonybrooknlp/appworld:latest` gives you an older build with `serve environment|apis` only. **In the image version we used, there was no `serve mcp` or `serve multiple`.** Python Package Index (PyPI) `appworld` 0.1.3 matched that era; inspect your version because upstream may change.
 
 **Fix:** Reinstall `appworld[mcp]` from current [`stonybrooknlp/appworld`](https://github.com/stonybrooknlp/appworld) main on top of the image — exactly what [GAGE's Dockerfile](https://github.com/HiThink-Research/GAGE/blob/83cc359dbb3056ea8f4090f4c398ba2f066231a0/docker/appworld/Dockerfile) does. The [`serve mcp`](https://github.com/stonybrooknlp/appworld/blob/main/src/appworld/cli.py) subcommand lives in current source, not the published image.
 
 ### 2. Git clone ≠ installable AppWorld
 
-[`src/appworld/.source/apps.bundle`](https://github.com/stonybrooknlp/appworld/tree/main/src/appworld/.source) and `tests.bundle` are **encrypted blobs**, often shipped via **Git LFS**. A shallow clone without Git LFS (the extension used to fetch large files) can leave small pointer text files in place of the bundles; `appworld install` then fails or unpacks incomplete apps.
+[`src/appworld/.source/apps.bundle`](https://github.com/stonybrooknlp/appworld/tree/main/src/appworld/.source) and `tests.bundle` are **encrypted blobs**, often shipped via **Git Large File Storage (LFS)**, the extension used to fetch large files. A shallow clone without Git LFS can leave small pointer text files in place of the bundles; `appworld install` then fails or unpacks incomplete apps.
 
 ```bash
 cd /path/to/appworld
@@ -128,7 +128,7 @@ Trust the judge's `success` bit — not assistant prose ([evidence-based verific
 
 ### 4. `serve multiple` races MCP if APIs are not ready
 
-Starting all three in one CLI invocation is correct **when** your installed `appworld` supports it ([`cli.py`](https://github.com/stonybrooknlp/appworld/blob/main/src/appworld/cli.py), [`parallelizing_worlds.md`](https://github.com/stonybrooknlp/appworld/blob/main/guides/parallelizing_worlds.md)):
+Starting all three in one command-line interface (CLI) invocation is correct **when** your installed `appworld` supports it ([`cli.py`](https://github.com/stonybrooknlp/appworld/blob/main/src/appworld/cli.py), [`parallelizing_worlds.md`](https://github.com/stonybrooknlp/appworld/blob/main/guides/parallelizing_worlds.md)):
 
 ```bash
 appworld serve multiple \
@@ -156,7 +156,7 @@ We repeatedly hit: `curl :8000` and `:9000` return 200, cohort starts, the agent
 
 ### 6. Do not duplicate `data/` under your agent repo
 
-Point `APPWORLD_ROOT` at one upstream checkout. Task DBs and `api_docs` belong there after [`appworld download data`](https://github.com/stonybrooknlp/appworld/blob/main/src/appworld/cli.py).
+Point `APPWORLD_ROOT` at one upstream checkout. Task databases (DBs) and `api_docs` belong there after [`appworld download data`](https://github.com/stonybrooknlp/appworld/blob/main/src/appworld/cli.py).
 
 ### 7. Apple Silicon: pin platform for the base image
 
@@ -265,7 +265,7 @@ APPWORLD_VERSION=source USE_DOCKER=1 ./scripts/appworld_stack.sh
 
 When Docker is overkill, use **two Python environments**:
 
-| Venv | Purpose |
+| Virtual environment (venv) | Purpose |
 |------|---------|
 | `.venv-appworld-stack` | PyPI `appworld` — reliable **env + apis** |
 | `.venv-appworld` | Editable [`stonybrooknlp/appworld[mcp]`](https://github.com/stonybrooknlp/appworld) — **MCP HTTP** |
@@ -326,13 +326,13 @@ While a cohort runs, open:
 
 `http://127.0.0.1:8000/dashboard?experiment=genie_routing&task_ids=29caf6f_1,3aa1a22_3,b0a8eae_3,60d0b5b_1`
 
-The UI shows per-task status, the latest API call (“where it is now”), and a re-evaluate action. Polls every few seconds.
+The user interface (UI) shows per-task status, the latest API call (“where it is now”), and a re-evaluate action. Polls every few seconds.
 
 ---
 
 ## Wire your agent (reference harness)
 
-Point MCP at HTTP transport — not a custom stdio shim:
+Point MCP at HTTP transport — not a custom standard input/output (stdio) shim:
 
 ```toml
 [[mcp.servers]]
@@ -376,7 +376,7 @@ This unblocks harness and judge work while you fix LFS/bundles for a single-cont
 2. Bundles under [`.source/`](https://github.com/stonybrooknlp/appworld/tree/main/src/appworld/.source) are real files, not LFS pointers.
 3. All three ports respond; MCP `list_tools` is non-empty.
 4. Harness calls `/initialize` before the agent and `/evaluate` after — agent never does.
-5. Agent config uses official `{app}__{method}` tools, not invented `list_notes` REST names ([failure modes](/blog/ai-agent-eval-failure-modes/)).
+5. Agent config uses official `{app}__{method}` tools, not invented `list_notes` representational state transfer (REST) names ([failure modes](/blog/ai-agent-eval-failure-modes/)).
 6. Cohort refuses to start if the stack is down — fail fast beats debugging hallucinated tool errors.
 
 ---

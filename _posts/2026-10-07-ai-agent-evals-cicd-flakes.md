@@ -19,7 +19,7 @@ faqs:
     answer: "The matching ID links the graded trial to the conversation trace. If they differ, the trace may belong to a different run; a root span showing a worker assignment rather than the user's ask is another sign of mis-correlation."
 ---
 
-We had a green CI result even though a difficult task was skipped and the remaining attempts were averaged. The color described the reporter's arithmetic, not whether the agent completed every required task. CI needs to distinguish an agent miss from an infrastructure problem and a missing result from a pass.
+We had a green continuous integration (CI) result even though a difficult task was skipped and the remaining attempts were averaged. The color described the reporter's arithmetic, not whether the agent completed every required task. CI needs to distinguish an agent miss from an infrastructure problem and a missing result from a pass.
 
 A *live trial* runs the agent with its model and tools on a task. A *flake* is a run failure caused by unstable infrastructure or another condition unrelated to the agent behavior being evaluated; do not assume every inconsistent answer is a flake. [Ham Vocke's practical test pyramid](https://martinfowler.com/articles/practical-test-pyramid.html) places costly end-to-end tests sparingly. One of our live trials can take about fifteen minutes, so we keep them deliberate and inspectable.
 
@@ -45,15 +45,15 @@ Retries help when a sidecar fails to start or a trial times out before producing
 | Success exit but no required deliverable | Contract failure: the expected artifact was not written |
 | Required baseline task absent from summary | Reporter/gate failure; mark the report unsuccessful |
 | Required-task skip marked as pass | Reporter bug; a skip is not a successful run |
-| Trial ID differs from trace ID | Correlation bug; waiting longer does not make two IDs equal |
+| Trial identifier (ID) differs from trace ID | Correlation bug; waiting longer does not make two IDs equal |
 
 A required task blocked by a missing dependency should write a skip and fail the report. An optional token-spend explanation may fall back to a heuristic, provided the report says so and does not change a failed required task to green.
 
 ## Link a result to the right conversation
 
-The trial ID should match the trace ID used by the exporter. Otherwise a grader can inspect the wrong conversation. Check that the root trace span describes the user's ask, not merely a worker assignment. An HTTP 501 (“API not implemented”) is not an eventual-consistency delay; retrying sleep will not create that endpoint.
+The trial ID should match the trace ID used by the exporter. Otherwise a grader can inspect the wrong conversation. Check that the root trace span describes the user's ask, not merely a worker assignment. A Hypertext Transfer Protocol (HTTP) 501 (“application programming interface (API) not implemented”) is not an eventual-consistency delay; retrying sleep will not create that endpoint.
 
-Keep keys in the secret store, but leave non-secret trace UI hosts as plain configuration. Our CI redacted a host stored as a secret and broke the link in the summary. Export traces into the run artifact so a result can be reviewed later. Import shared CI helpers as modules rather than relying on behavior that only works when a file runs as `__main__`.
+Keep keys in the secret store, but leave non-secret trace user interface (UI) hosts as plain configuration. Our CI redacted a host stored as a secret and broke the link in the summary. Export traces into the run artifact so a result can be reviewed later. Import shared CI helpers as modules rather than relying on behavior that only works when a file runs as `__main__`.
 
 Weekly research tasks can mention the product under test without naming private tools in the persona. They explore *capability*—what the agent might do on unfamiliar work—rather than serving as the default *regression* gate for known work.
 
@@ -68,4 +68,4 @@ Weekly research tasks can mention the product under test without naming private 
 
 A red build is useful when it points to a real, identifiable failure; a green one is useful when it accounts for every required task and does not conceal unstable attempts.
 
-Previous: [Multi-Agent Handoff Testing](/blog/multi-agent-handoff-testing-context-loss/). Next: [Supervised E2E Learning Loop](/blog/supervised-e2e-learning-loop/).
+Previous: [Multi-Agent Handoff Testing](/blog/multi-agent-handoff-testing-context-loss/). Next: [Supervised end-to-end (E2E) Learning Loop](/blog/supervised-e2e-learning-loop/).

@@ -50,7 +50,7 @@ Three jobs — map them to whatever runtime you already run:
 |---|---|
 | **Summarizer** | Bounds the token context and extracts boring facts (failures, sequences, spend, feedback) — honest about what it sampled. |
 | **Evaluator** | Compares those facts against a small taxonomy (table below) and emits **proposals only** — never silent deploys. |
-| **Materializer** | Turns an *approved* proposal into a typed draft artifact humans already know how to review (workflow draft, policy draft, doc PR, ticket). |
+| **Materializer** | Turns an *approved* proposal into a typed draft artifact humans already know how to review (workflow draft, policy draft, documentation pull request (PR), ticket). |
 
 ```
 Daily digests + feedback + cost signals
@@ -88,8 +88,8 @@ A concise proposal makes review more feasible; complex policy changes may still 
 
 How you approve matters as much as *that* you approve.
 
-- **Prefer GitOps—reviewed changes in Git—when the change is code.** Policies, workflow definitions, and persona prompts that already live in git should materialize as a **draft pull request** (or equivalent reviewable diff) against that repo. Same review bar as Rego, runbooks, or Terraform — AI does not get a side door.
-- **A dashboard approval can help triage proposals, but is not enough by itself for production policy.** A dashboard “Approve / Dismiss” queue works for WIP and noise control. Shipping deny-rule text with only a button click — and no reviewable artifact — is how you recreate shadow IT with nicer UX.
+- **Prefer GitOps—reviewed changes in Git—when the change is code.** Policies, workflow definitions, and persona prompts that already live in git should materialize as a **draft pull request** (or equivalent reviewable diff) against that repo. Same review bar as Rego, runbooks, or Terraform — artificial intelligence (AI) does not get a side door.
+- **A dashboard approval can help triage proposals, but is not enough by itself for production policy.** A dashboard “Approve / Dismiss” queue works for work in progress (WIP) and noise control. Shipping deny-rule text with only a button click — and no reviewable artifact — is how you recreate shadow information technology (IT) with nicer user experience (UX).
 - **A weekly queue too large to review carefully** recreates the [human-in-the-loop (HITL) paradox](/blog/hitl-paradox/). Cap WIP; shorter queues get real read time.
 
 Four boundaries we use:
@@ -171,7 +171,7 @@ Related: [Pensieve memory](/blog/pensieve-memory/) is about forgetting and curat
 ## Related reading
 
 - [The HITL Paradox](/blog/hitl-paradox/) — approvals that create false confidence
-- [LLM Tokenomics for Production Agents](/blog/maintaining-tokenomics-with-aiden/) — bounding digests so offline jobs finish
+- [Large Language Model (LLM) Tokenomics for Production Agents](/blog/maintaining-tokenomics-with-aiden/) — bounding digests so offline jobs finish
 - [Evidence-Gated RCA — Prove, Then Narrate](/blog/evidence-gated-multiplane-rca/) — receipts before narrative
 - [From Demo to Deploy — Failure Modes with Receipts](/blog/demo-to-deploy-receipts/) — umbrella for prod-hardening lessons
 - More on [AI agent workflows](/topics/ai-agent-workflows/) · [AI agents for SRE](/topics/ai-agents-sre/)

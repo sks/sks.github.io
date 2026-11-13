@@ -11,7 +11,7 @@ tags: [ai-agents, sre, verification, observability, production, golang]
 
 An agent can say "I've confirmed the issue is resolved" after a remediation. That sentence is useful only if an operator can see what was checked, when, and against which system. A deployment request being accepted, for example, does not mean the new pods are serving traffic.
 
-For SRE (site reliability engineering) workflows, we use **evidence-based verification**: the agent can propose and explain checks, but monitoring, deployment, and configuration systems supply the observations used to decide whether a workflow is complete. This is a downstream gate for [evidence-gated agent workflows](/topics/ai-agent-workflows/). It complements [AI-augmented incident triage](/blog/ai-incident-triage-sre/): triage develops a hypothesis; verification tests the outcome of a change.
+For site reliability engineering (SRE) workflows, we use **evidence-based verification**: the agent can propose and explain checks, but monitoring, deployment, and configuration systems supply the observations used to decide whether a workflow is complete. This is a downstream gate for [evidence-gated agent workflows](/topics/ai-agent-workflows/). It complements [Artificial intelligence (AI)-augmented incident triage](/blog/ai-incident-triage-sre/): triage develops a hypothesis; verification tests the outcome of a change.
 
 ---
 

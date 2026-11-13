@@ -25,7 +25,7 @@ faqs:
 ---
 
 Boot scripts are the least-reviewed production code in a self-managed
-database deployment. Everyone reads the DDL, the schema, the Grafana
+database deployment. Everyone reads the data definition language (DDL), the schema, the Grafana
 dashboards. Almost nobody reads what runs between the instance launching
 and the first successful query — which is exactly where the interesting
 failures live. This post walks the boot sequence of the
@@ -52,10 +52,10 @@ each drifting at its own pace.
 
 | Role | Compute shape | Identity mechanism | Notes |
 |---|---|---|---|
-| writer | fixed instance | static — last octet of the private IP maps to `writer-N` | Terraform allocates IPs at offset `.10+` |
-| reader | ASG member (spot/on-demand mix) | **lease** — claims `reader-N` from a DynamoDB TTL lease | identity outlives the instance; the claim does |
+| writer | fixed instance | static — last octet of the private Internet Protocol (IP) address maps to `writer-N` | Terraform allocates IPs at offset `.10+` |
+| reader | Auto Scaling Group (ASG) member (spot/on-demand mix) | **lease** — claims `reader-N` from a DynamoDB time-to-live (TTL) lease | identity outlives the instance; the claim does |
 | keeper | fixed instance | static — `.20+` → `keeper-N` | runs `clickhouse-keeper`, never the server |
-| backup | single instance | static — `.30` → `backup-0` | renders *out of* the CR on purpose |
+| backup | single instance | static — `.30` → `backup-0` | renders *out of* the custom resource (CR) on purpose |
 
 The static identity works because the fleet's IP addresses are part of
 the Terraform contract. Readers have no such contract — spot reclaims
@@ -65,10 +65,10 @@ or a reader whose replica path changes every reboot.
 
 ## Stage 0: the wrapper is deliberately boring
 
-The user_data payload is ~1.5 KB of shell with one job: make sure the
+The user_data payload is ~1.5 kilobytes (KB) of shell with one job: make sure the
 bootstrapper is the pinned version and hand it the role's spec. It does
 **not** install any database component. The golden image — built by
-packer, checksum-gated in CI — owns every binary at a pinned, validated
+packer, checksum-gated in continuous integration (CI) — owns every binary at a pinned, validated
 version. The boot only verifies presence:
 
 ```bash
@@ -81,8 +81,7 @@ exec /usr/local/bin/chinit boot -spec ... -cloud aws
 
 Lesson baked into this shape: the previous generation of scripts
 command-guarded their apt installs (`command -v curl || apt-get install`),
-so on the golden image they *never ran* — and when a node booted from a
-plain AMI they silently installed whatever the distro repo had drifted
+so on the golden image they *never ran* — and when a node booted from a plain Amazon Machine Image (AMI) they silently installed whatever the distro repo had drifted
 to, unvalidated. A missing binary is now a loud image bug, not a quiet
 supply-chain gamble. An image that passes the packer build **is** the
 version of the software; the boot treats anything else as foreign and
@@ -172,7 +171,7 @@ sequenceDiagram
 ```
 
 The rendered `<replica>` macro and keeper path are *identity-shaped* —
-they are written into the cluster's S3 parts metadata and zookeeper
+they are written into the cluster's Amazon Simple Storage Service (S3) parts metadata and zookeeper
 namespace. Once rendered with an ephemeral `ip-*` name, no later rename
 fixes it; the parts are already registered under the wrong identity. The
 fix is the ordering: **settle identity first, render second** — and make
@@ -229,7 +228,7 @@ the bash era, the pre-chctl `delete_default_user.xml`). A config
 directory is a **derived artifact** — the boot treats drift as its own
 bug, not the operator's chore.
 
-**Crash 2 — exit code 36, "Empty protocol in URL".** The S3 disk's
+**Crash 2 — exit code 36, "Empty protocol in uniform resource locator (URL)".** The S3 disk's
 endpoint is configured through an environment file
 (`/etc/default/clickhouse-server`) the boot writes from the spec. One
 spec field was missing from the rendered `chinit.yaml` → the env-file
@@ -254,8 +253,7 @@ produced each file — triage is a two-minute `state.json` read.
 
 ## Convergence: the boot is a loop, not a line
 
-The boot records every step's outcome — duration, status, and the config
-bundle SHA it ran against — into `/var/lib/chinit/state.json`. That file
+The boot records every step's outcome — duration, status, and the config bundle Secure Hash Algorithm (SHA) digest it ran against — into `/var/lib/chinit/state.json`. That file
 carries two behaviors bash couldn't:
 
 ```mermaid
@@ -282,7 +280,7 @@ after ASG replacements, and re-runs on an hourly timer as the safety net.
 ## The gate that must not be fatal
 
 The health gate (step 12) runs after the server start: every inventory
-host must answer SQL, every replica must be writable and registered, the
+host must answer Structured Query Language (SQL), every replica must be writable and registered, the
 keeper ensemble must answer mntr, and the spec's tables must exist. It
 is **deliberately best-effort**, and this is the kind of choice that
 looks wrong until the failure mode is drawn:
@@ -327,7 +325,7 @@ back after a reload)**.
 The boot's last act is installing the systemd units — and their
 ExecStart lines are the *same binary in job mode*, not a second
 hand-written script family. The recurring jobs are the operator's own
-semantics (the Altinity schemer's propagation SQL, replica GC parity),
+semantics (the Altinity schemer's propagation SQL, replica garbage collection (GC) parity),
 carried into the Go codebase rather than re-derived in bash — the reason
 [the operator's domain layer was imported, not reimplemented](/blog/clickhouse-operate-without-kubernetes/).
 
@@ -351,7 +349,7 @@ not always the cluster's name for it anymore.
 ## The spot drain: the one place a boot rule inverts
 
 Spot reclamation gives a reader ~120 seconds. The drain daemon watches
-the IMDS interruption endpoint (or Azure scheduled events — the same
+the Instance Metadata Service (IMDS) interruption endpoint (or Azure scheduled events — the same
 contract, different wire), then executes a strict sequence, time-budgeted:
 
 1. `SYSTEM STOP REPLICATION QUEUES` + `SYSTEM STOP DISTRIBUTED SENDS` —
@@ -361,7 +359,7 @@ contract, different wire), then executes a strict sequence, time-budgeted:
    table replica *and* the database replica registration the local-only
    statement misses; the weekly GC is the safety net if writer-0 is
    unreachable inside the window
-3. Release the DNS record and the lease (best-effort — the TTL expiry is
+3. Release the Domain Name System (DNS) record and the lease (best-effort — the TTL expiry is
    the real backstop; the instance may not get another second)
 4. `SYSTEM SHUTDOWN`
 
