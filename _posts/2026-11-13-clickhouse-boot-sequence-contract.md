@@ -192,7 +192,7 @@ sequenceDiagram
     alt claim succeeds
         DDB-->>N: ok (lease 15 min)
     else sweep retries one lease window
-        Note over N: dead node's renewal cron is gone;<br/>TTL expiry frees the ordinal
+        Note over N: dead node's renewal cron is gone —<br/>TTL expiry frees the ordinal
     end
     N->>N: set-hostname reader-3 (static + transient)
     N->>R53: UPSERT reader-3 → IP (TTL 60)
