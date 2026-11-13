@@ -11,7 +11,7 @@ A coding agent can add an S3 integration before I have finished writing the IAM 
 
 The agent did its job: it wrote plausible code, wired the SDK, and made the tests pass. **Security is still a critical engineering responsibility.** Someone has to determine which operations the application needs, which resources it may touch, and whether this pull request quietly changed that answer.
 
-That is the problem [Code Context Engine (CCE)](https://github.com/appcd-dev/cce) helps with. CCE statically analyzes source code and turns cloud SDK calls into structured, reviewable evidence: provider, resource, operation, file, line, and enclosing function. It gives me a concrete starting point for least-privilege review without asking an LLM to read the entire repository and guess.
+That is the problem [Code Context Engine (CCE)](https://appcd-dev.github.io/cce/) helps with. CCE statically analyzes source code and turns cloud SDK calls into structured, reviewable evidence: provider, resource, operation, file, line, and enclosing function. It gives me a concrete starting point for least-privilege review without asking an LLM to read the entire repository and guess.
 
 **Key takeaways**
 
