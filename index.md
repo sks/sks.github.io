@@ -60,8 +60,8 @@ No need to read the whole archive. Pick the problem in front of you and follow a
 | **[SRE on-call starter pack](/start/sre-on-call/)** | Triage, RCA, observability — 5 posts |
 | **[SRE as service starter pack](/start/sre-as-service/)** | Investigation as a service product — 5 posts |
 | **[Go agent runtime starter pack](/start/go-runtime/)** | Runtime definition, Go vs Python, platform split — 5 posts |
-| **[ClickHouse on AWS starter pack](/start/clickhouse-aws/)** | Self-managed ClickHouse from first principles — 9 posts |
-| **[Full enterprise AI agent series](/series/enterprise-ai-agents-go/)** | Searchable, month-folded archive |
+| **[ClickHouse on AWS starter pack](/start/clickhouse-aws/)** | Self-managed ClickHouse from first principles — full series |
+| **[Full enterprise AI agent series](/series/enterprise-ai-agents-go/)** | Searchable archive in full reading order |
 | **[Service Rendered Efficiently](/series/service-rendered-efficiently/)** | AI investigation as a service product for on-call |
 
 ## Pocket checklists
