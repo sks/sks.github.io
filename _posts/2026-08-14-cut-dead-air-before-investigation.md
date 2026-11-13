@@ -19,13 +19,13 @@ faqs:
 
 An alert fires. Chat says “investigating,” but no diagnostic query appears yet. In these incident patterns, some of that wait came before the model could use a tool: the worker rechecked its secrets vault and rebuilt an unchanged catalog of available actions. Measure that wait separately from the model’s response time.
 
-*The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
+*The incident patterns below are composite and anonymized. Counts are rounded. Names, identifiers (IDs), and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
 ## What to measure first
 
-For an alert that needs a Grafana metric query, record the time from the operator’s request to the **first useful query**, not just the time until the chat says “investigating.” A repeat vault check (confirming access to secrets) or an unchanged MCP tool catalog (the list of actions available through Model Context Protocol) can consume that interval without advancing the investigation. Share readiness per worker and skip index writes when the catalog hash has not changed. These changes reduce setup work; they do not make a slow diagnostic query fast.
+For an alert that needs a Grafana metric query, record the time from the operator’s request to the **first useful query**, not just the time until the chat says “investigating.” A repeat vault check (confirming access to secrets) or an unchanged Model Context Protocol (MCP) tool catalog (the list of actions available to the agent) can consume that interval without advancing the investigation. Share readiness per worker and skip index writes when the catalog hash has not changed. These changes reduce setup work; they do not make a slow diagnostic query fast.
 
 ---
 
@@ -35,7 +35,7 @@ For an alert that needs a Grafana metric query, record the time from the operato
 
 *Caption: Shared readiness and skipped no-op catalog writes shorten setup before the first useful query; a 502/503 gets one bounded retry.*
 
-**1. Catalog and secrets tax.** Re-checking vault and re-upserting an unchanged tool index delays first PromQL, Grafana’s query language for metrics. Cache readiness for the worker’s lifetime; hash the catalog and skip no-op writes. Invalidate the cache when credentials or tool definitions change, or stale access can become a security and correctness problem.
+**1. Catalog and secrets tax.** Re-checking vault and re-upserting an unchanged tool index delays first Prometheus Query Language (PromQL) metric query. Cache readiness for the worker’s lifetime; hash the catalog and skip no-op writes. Invalidate the cache when credentials or tool definitions change, or stale access can become a security and correctness problem.
 
 **2. Gateway blip ≠ circuit open.** A 502 or 503 is a gateway/server error, not proof that the Grafana data source will stay unavailable. One such response used to mark it dead for the rest of the run. Retry once with a short bound, then surface the failure; unlimited retries would hide a real outage and delay the operator.
 
@@ -45,17 +45,17 @@ Tokenomics context: [maintaining tokenomics](/blog/maintaining-tokenomics-with-a
 
 ---
 
-## If you lead an SRE team
+## If you lead a site reliability engineering (SRE) team
 
 - Measure time-to-first-useful-tool-call on investigate
-- Page on sustained cold-start regressions the way you page on API latency
+- Page on sustained cold-start regressions the way you page on application programming interface (API) latency
 - Do not accept “the model is thinking” as the explanation for repeated vault readiness checks
 
 ## If you ship the agent platform
 
 - Fail closed on empty vault secrets when advertising tools — but do not re-pay the check every message
 - Retry once on known gateway classes; then surface honest failure
-- Align workflow loop-detection TTL with real investigate durations
+- Align workflow loop-detection time-to-live (TTL) with real investigate durations
 
 ---
 
@@ -69,4 +69,4 @@ Tokenomics context: [maintaining tokenomics](/blog/maintaining-tokenomics-with-a
 
 **Acknowledgments.** Cold-start and Grafana retry lessons from Aiden integration work. Patterns composite.
 
-*Building AI for incident triage without the demo theater? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+*Building artificial intelligence (AI) for incident triage without the demo theater? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*

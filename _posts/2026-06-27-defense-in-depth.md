@@ -23,7 +23,7 @@ The layers below address different risks. They reduce exposure in our implementa
 4. **Data exfiltration:** sensitive data, including personally identifiable information (PII), leaves through an output or external call.
 5. **Recursive resource use:** delegated agents spawn more work than the system can safely support.
 
-These are different failure modes for [production AI agents](/topics/ai-agents-sre/). A policy on tool calls cannot, on its own, prevent secret exposure in every read result, and a good audit log cannot prevent a destructive action.
+These are different failure modes for [production artificial intelligence (AI) agents](/topics/ai-agents-sre/). A policy on tool calls cannot, on its own, prevent secret exposure in every read result, and a good audit log cannot prevent a destructive action.
 
 ## Layer 1: Check the Request
 
@@ -63,7 +63,7 @@ The diagram separates preventive gates from post-execution claim review and audi
 
 - [The HITL Paradox](/blog/hitl-paradox/) — when human approval helps or hurts
 - [AI Agent Runtime vs Platform — Why We Split Them](/blog/aiden-platform/) — where policy enforcement lives
-- More on [AI agents for SRE](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
+- More on [AI agents for site reliability engineering (SRE)](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---
 
@@ -71,4 +71,4 @@ The diagram separates preventive gates from post-execution claim review and audi
 
 ---
 
-> **StackGen builds AI-assisted site reliability engineering (SRE) tools.** Our offering at [ai.stackgen.com](https://ai.stackgen.com) supports incident triage, diagnostics, and draft root-cause analyses.
+> **StackGen builds AI-assisted SRE tools.** Our offering at [ai.stackgen.com](https://ai.stackgen.com) supports incident triage, diagnostics, and draft root-cause analyses.

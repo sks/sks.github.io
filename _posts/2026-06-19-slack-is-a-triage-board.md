@@ -19,7 +19,7 @@ faqs:
 
 In `#incidents-prod`, an on-call site reliability engineering (SRE) operator needs a short status and a route to the evidence. A long transcript is hard to scan; an “Incomplete” card without findings gives no next step.
 
-*The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
+*The incident patterns below are composite and anonymized. Counts are rounded. Names, identifiers (IDs), and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
@@ -68,6 +68,6 @@ Slack Block Kit, the format for structured Slack messages, can carry a compact s
 
 ---
 
-**Acknowledgments.** Slack triage UX lessons from shipping Aiden incident replies. Patterns composite.
+**Acknowledgments.** Slack triage user experience (UX) lessons from shipping Aiden incident replies. Patterns composite.
 
-*If you are building AI for incident triage, Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+*If you are building artificial intelligence (AI) for incident triage, Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*

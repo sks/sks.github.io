@@ -19,9 +19,9 @@ faqs:
     answer: "Check whether it matched a legitimate citation, such as a directory in a diff. Keep verifiable facts in code and let a calibrated judge consider whether terminology is unexplained in context."
 ---
 
-A filter intended to discourage unexplained internal terminology rejected a correct coverage note: the disallowed product name was also part of a directory path in the diff. The note cited the path accurately. The code check could not tell a citation from needless jargon.
+A filter intended to discourage unexplained internal terminology in an artificial intelligence (AI) agent response rejected a correct coverage note: the disallowed product name was also part of a directory path in the diff. The note cited the path accurately. The code check could not tell a citation from needless jargon.
 
-A *deterministic grader* is a program with an explicit rule; it gives the same result for the same inputs. An *LLM-as-a-judge* is a model asked to assess a response against a rubric. [Arize's guide](https://arize.com/blog/how-to-build-llm-as-a-judge-evaluators-that-hold-up-in-production/) explains why interpretation belongs in a judge and checkable facts are often better handled by code. Neither type is automatically correct: a faulty regex is repeatably wrong, and a model judge can be inconsistent.
+A *deterministic grader* is a program with an explicit rule; it gives the same result for the same inputs. An *LLM-as-a-judge* uses a large language model (LLM) to assess a response against a rubric. [Arize's guide](https://arize.com/blog/how-to-build-llm-as-a-judge-evaluators-that-hold-up-in-production/) explains why interpretation belongs in a judge and checkable facts are often better handled by code. Neither type is automatically correct: a faulty regular expression (regex) is repeatably wrong, and a model judge can be inconsistent.
 
 ---
 
@@ -40,7 +40,7 @@ This is [Ham Vocke's](https://martinfowler.com/articles/practical-test-pyramid.h
 | Criterion | Check | Caveat |
 |-----------|-------|--------|
 | Deliverable file exists; brief fits a size limit | Code | Existence and length do not establish quality |
-| Coverage percentage, commit SHA, changed path | Code against CI, Git, or the diff | Use the appropriate source of record, not a value copied from the answer |
+| Coverage percentage, commit Secure Hash Algorithm (SHA) digest, changed path | Code against continuous integration (CI), Git, or the diff | Use the appropriate source of record, not a value copied from the answer |
 | Delegation occurred | Logs or a handoff artifact | A missing or truncated log limits what can be concluded |
 | Write-up is useful and grounded | Model judge, with human review of samples | Give the judge the task and underlying evidence |
 | Jargon is unexplained; gaps are acknowledged | Model judge, possibly narrow code hints | A word's presence alone does not establish misuse or honesty |

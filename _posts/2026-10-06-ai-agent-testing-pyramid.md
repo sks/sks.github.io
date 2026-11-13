@@ -19,9 +19,9 @@ faqs:
     answer: "Block frames layers by tolerated uncertainty and keeps live LLM work out of CI. We agree on the fast base; here live trials can run opt-in on a pull request or weekly, rather than gating every push."
 ---
 
-We considered a suite dominated by long live trials with several attempts each. It would have been slow to run and difficult to diagnose: a failed investigation might reflect an agent change, an unavailable dependency, or an unstable grader. The [Practical Test Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html) offers a useful way to split those concerns. Test small, predictable behaviors often; reserve whole-system runs for questions the smaller tests cannot answer.
+We considered an artificial intelligence (AI) agent suite dominated by long live trials with several attempts each. It would have been slow to run and difficult to diagnose: a failed investigation might reflect an agent change, an unavailable dependency, or an unstable grader. The [Practical Test Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html) offers a useful way to split those concerns. Test small, predictable behaviors often; reserve whole-system runs for questions the smaller tests cannot answer.
 
-An *agent trial* here means a run with a real model, tools, and a user-shaped task. A *stubbed model* is a fixed response supplied by a test instead of a model call. A *contract check* verifies a fact or interface against an authoritative source, such as a trace ID or a CI coverage record.
+An *agent trial* here means a run with a real model, tools, and a user-shaped task. A *stubbed model* is a fixed response supplied by a test instead of a model call. A *contract check* verifies a fact or interface against an authoritative source, such as a trace identifier (ID) or a continuous integration (CI) coverage record.
 
 ---
 

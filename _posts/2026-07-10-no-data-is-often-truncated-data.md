@@ -19,13 +19,13 @@ faqs:
 
 An incident agent called a Grafana metric “Unavailable” after seeing only a preview of the tool response. The remaining series had been written to a spill file—a disk copy used when a tool result is too large for the model’s context window. In this composite case, incomplete retrieval was mistaken for missing metrics.
 
-*The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
+*The incident patterns below are composite and anonymized. Counts are rounded. Names, identifiers (IDs), and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
 ## The failure mode
 
-PromQL (Prometheus metric queries), LogQL (log queries), and warehouse queries can return more bytes than the agent can read in one turn. The runtime presents a preview and stores the rest. If the agent treats that preview as the entire result, its root-cause analysis (RCA) can report no data even though a human rerunning the query sees series.
+Prometheus Query Language (PromQL), Loki Query Language (LogQL), and warehouse queries can return more bytes than the agent can read in one turn. The runtime presents a preview and stores the rest. If the agent treats that preview as the entire result, its root-cause analysis (RCA) can report no data even though a human rerunning the query sees series.
 
 The fault is a missing completeness contract, not evidence that the data source was empty. A genuine empty full result and an unread remainder require different conclusions.
 
@@ -72,4 +72,4 @@ Related packing discipline: [claim-aware evidence packing](/blog/claim-aware-evi
 
 **Acknowledgments.** Spill recovery lessons from shipping observability tools in Aiden. Patterns composite.
 
-*Building AI for incident triage without the demo theater? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*
+*Building artificial intelligence (AI) for incident triage without the demo theater? Find me on [GitHub](https://github.com/sks) or [LinkedIn](https://linkedin.com/in/sabithks).*

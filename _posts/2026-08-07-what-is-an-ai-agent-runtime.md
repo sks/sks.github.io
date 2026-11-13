@@ -20,9 +20,9 @@ faqs:
     answer: "Use a testing pyramid: fast stubbed bounds and contracts on every push, few live trials by opt-in or schedule, and honest CI that fails missing required tasks."
 ---
 
-## What is an AI agent runtime?
+## What is an artificial intelligence (AI) agent runtime?
 
-An **AI agent runtime** is the software that owns an AI agent’s execution loop: the repeated model decision, optional tool call, and result-handling step. It plans the next step, calls tools, adds useful results to context, and decides when to stop. Chat UIs, control planes, and notebooks sit around that loop. They are not the loop.
+An **AI agent runtime** is the software that owns an AI agent’s execution loop: the repeated model decision, optional tool call, and result-handling step. It plans the next step, calls tools, adds useful results to context, and decides when to stop. Chat user interfaces (UIs), control planes, and notebooks sit around that loop. They are not the loop.
 
 **Key takeaways**
 
@@ -33,7 +33,7 @@ An **AI agent runtime** is the software that owns an AI agent’s execution loop
 
 A one-call wrapper can still be useful; it does not need the controls required by a long-running tool loop. The distinction is about which component owns execution and its limits.
 
-This post gives the short definition and the practical boundaries. The longer engineering story explains [why we split runtime from platform](/blog/aiden-platform/) and [why we chose Go](/blog/why-go/). For how we place checks around that loop, see the [AI agent testing pyramid](/blog/ai-agent-testing-pyramid/) and the [supervised E2E learning loop](/blog/supervised-e2e-learning-loop/). Reading paths: [Go agent runtime starter pack](/start/go-runtime/), [runtime topic hub](/topics/ai-agent-runtime/). Related SRE path: [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/).
+This post gives the short definition and the practical boundaries. The longer engineering story explains [why we split runtime from platform](/blog/aiden-platform/) and [why we chose Go](/blog/why-go/). For how we place checks around that loop, see the [AI agent testing pyramid](/blog/ai-agent-testing-pyramid/) and the [supervised end-to-end (E2E) learning loop](/blog/supervised-e2e-learning-loop/). Reading paths: [Go agent runtime starter pack](/start/go-runtime/), [runtime topic hub](/topics/ai-agent-runtime/). Related site reliability engineering (SRE) path: [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/).
 
 ---
 
@@ -51,9 +51,9 @@ The distinction also keeps platform work honest. A polished catalog of agents is
 
 ## What it is not
 
-Not a chatbot. A chat product may *host* a runtime. The runtime still decides which tools fire and when the turn ends. The same runtime may also serve an API, a scheduled job, or an event-driven workflow.
+Not a chatbot. A chat product may *host* a runtime. The runtime still decides which tools fire and when the turn ends. The same runtime may also serve an application programming interface (API), a scheduled job, or an event-driven workflow.
 
-Not a notebook. Research agents that live in a REPL are valuable. They are not a production runtime until sessions and failures survive without someone babysitting the kernel.
+Not a notebook. Research agents that live in a read-eval-print loop (REPL) are valuable. They are not a production runtime until sessions and failures survive without someone babysitting the kernel.
 
 Not the platform. Tenancy, organization policy, durable workflows, model catalogs, and notification channels are platform concerns. We put those in Aiden and kept the Go runtime embeddable in-process. The platform governs many agents. The runtime executes one agent loop.
 
@@ -80,7 +80,7 @@ A useful runtime has a small but demanding job. It turns an open-ended model con
 
 The exact implementation varies. A local coding agent and an SRE investigation agent need different tools. They may have different safety rules too. The ownership boundary stays recognizable.
 
-This is why a runtime is more than an SDK callback loop. The difficult part is not making the second model call. The difficult part is making the hundredth run predictable when tools are slow, context is messy, and a person changes the goal halfway through.
+This is why a runtime is more than a software development kit (SDK) callback loop. The difficult part is not making the second model call. The difficult part is making the hundredth run predictable when tools are slow, context is messy, and a person changes the goal halfway through.
 
 ---
 
@@ -132,7 +132,7 @@ We wrote up the split in [AI Agent Runtime vs Platform](/blog/aiden-platform/). 
 
 - Definition and related posts: [AI runtime reading map](/topics/ai-agent-runtime/)
 - Language: [Go vs Python for AI agents](/blog/why-go/)
-- Testing the loop: [Testing pyramid](/blog/ai-agent-testing-pyramid/) · [Evals in CI/CD](/blog/ai-agent-evals-cicd-flakes/) · [Supervised E2E learning loop](/blog/supervised-e2e-learning-loop/)
+- Testing the loop: [Testing pyramid](/blog/ai-agent-testing-pyramid/) · [Evaluations in continuous integration/continuous delivery (CI/CD)](/blog/ai-agent-evals-cicd-flakes/) · [Supervised E2E learning loop](/blog/supervised-e2e-learning-loop/)
 - On-call use: [What Are SRE AI Agents?](/blog/what-are-sre-ai-agents/) · [AI incident triage](/topics/ai-incident-triage/)
 - Multi-stage pipelines: [AI agent workflows](/topics/ai-agent-workflows/)
 
@@ -144,4 +144,4 @@ Acknowledgments. The StackGen [Aiden](/about/) team ships the platform layer aro
 
 ---
 
-> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).
+> StackGen develops AI tools for SRE, including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

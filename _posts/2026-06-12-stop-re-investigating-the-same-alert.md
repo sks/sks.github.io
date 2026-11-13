@@ -17,9 +17,9 @@ faqs:
     answer: "Investigations per alert ID per week — not just model accuracy. Twenty full digs on one alert warrants a review of launch policy and whether new evidence justified those runs."
 ---
 
-A Slack follow-up about an alert does not always require another full site reliability engineering (SRE) AI investigation. Reusing a recent result can save time and model usage, provided operators can request a fresh look when conditions change.
+A Slack follow-up about an alert does not always require another full site reliability engineering (SRE) investigation using artificial intelligence (AI). Reusing a recent result can save time and model usage, provided operators can request a fresh look when conditions change.
 
-*The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
+*The incident patterns below are composite and anonymized. Counts are rounded. Names, identifiers (IDs), and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
@@ -39,18 +39,18 @@ The repeated diagnosis was not necessarily wrong. The entry path treated each hu
 
 ## What reuse-first looks like
 
-The decision path shows when a follow-up can reuse a completed RCA and when changed evidence or an explicit request should start a fresh investigation.
+The decision path shows when a follow-up can reuse a completed root-cause analysis (RCA) and when changed evidence or an explicit request should start a fresh investigation.
 
 ![Reuse-first alert decision gate checking a completed RCA and relevance before choosing a summary with watch link or a fresh investigation](/assets/images/diagrams/june-foundations/reuse-first-alert-gate.svg)
 
-When a recent completed root-cause analysis (RCA) exists for the alert (a default cooldown on the order of hours):
+When a recent completed RCA exists for the alert (a default cooldown on the order of hours):
 
 1. Check that the alert identity matches, the prior run is complete, and its evidence is still relevant.
 2. Answer from that investigation summary instead of launching `investigate-alert`.
 3. Include the watch / session link so the operator can inspect the evidence and its age.
 4. Start a new run when the operator asks — “re-investigate,” “from scratch,” “force new” — or when new symptoms, a changed deployment, or an expired result make reuse unsafe.
 
-A slash command such as `/reinvestigate` makes an explicit override easy to recognize. “Please check again” is ambiguous: show the earlier result and offer a fresh run, or use follow-up questions to distinguish a request for new evidence from a request for the existing answer. A simple intent regex cannot by itself detect changed conditions.
+A slash command such as `/reinvestigate` makes an explicit override easy to recognize. “Please check again” is ambiguous: show the earlier result and offer a fresh run, or use follow-up questions to distinguish a request for new evidence from a request for the existing answer. A simple intent regular expression (regex) cannot by itself detect changed conditions.
 
 ---
 
@@ -72,7 +72,7 @@ A slash command such as `/reinvestigate` makes an explicit override easy to reco
 
 - Series opener: [Service Rendered Efficiently](/blog/service-rendered-efficiently/)
 - Next: [Slack Is a Triage Board, Not a Log Dump](/blog/slack-is-a-triage-board/)
-- Token budgets: [LLM tokenomics](/blog/maintaining-tokenomics-with-aiden/)
+- Token budgets: [large language model (LLM) tokenomics](/blog/maintaining-tokenomics-with-aiden/)
 - Checklist: [SRE as service](/checklists/sre-as-service/)
 
 ---

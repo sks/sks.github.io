@@ -25,7 +25,7 @@ faqs:
 ---
 
 Two posts ago I wrote about the config element that parses, validates, and does
-nothing: `<key_prefix>` on an S3 disk, silently ignored, every tenant's parts
+nothing: `<key_prefix>` on an Amazon Simple Storage Service (S3) disk, silently ignored, every tenant's parts
 landing in the bucket root under flat three-character prefixes. I fixed it by
 reading the bucket, not the docs. That fix worked, but I was left with a
 question I didn't have a clean answer to: if `key_prefix` isn't real, what
@@ -50,21 +50,21 @@ in the source: `[a-z]{3}/[a-z]{29}`.
 
 - Start a ClickHouse server and the disk registry contains exactly three
   unconditional families: local, cache, object-storage — plus `encrypted` when
-  built with SSL. Every other disk name is a compatibility alias of the
+  built with Secure Sockets Layer (SSL). Every other disk name is a compatibility alias of the
   object-storage family.
 - A "disk" in the config is really three choices stacked: a wrapper chain
-  (`cache`, `encrypted`), an object storage type (S3, Azure, HDFS, Web, local
+  (`cache`, `encrypted`), an object storage type (S3, Azure, Hadoop Distributed File System (HDFS), Web, local
   blob storage), and a metadata storage type (Local, Plain, PlainRewritable,
   Keeper). The legacy aliases imply a metadata type for free.
 - The default S3 key layout is
   `[a-z]{3}/[a-z]{29}`
-  appended to whatever survived the URL parsing. The bucket-root 3-character
+  appended to whatever survived the uniform resource locator (URL) parsing. The bucket-root 3-character
   directories from the previous post are this template with an empty prefix.
   `key_prefix` is never read; `endpoint_subpath` and `key_template` are.
 - `perform_ttl_move_on_insert` **defaults to true** — my tiered policy's
   `false` on the cold volume is load-bearing. `move_factor` defaults to 0.1 but
   only exists when a policy has more than one volume, and it gates only the
-  disk-pressure move, never the TTL move.
+  disk-pressure move, never the time-to-live (TTL) move.
 - Zero-copy replication is still not a viable escape from per-replica S3
   prefixes: the capability flag exists, the gate that would use it defaults to
   false and is documented upstream as "not ready."
@@ -188,7 +188,7 @@ ClickHouse Cloud builds — the registration is behind
 If you've ever wondered why self-managed ClickHouse can't keep S3 disk
 metadata in the Keeper it already runs: the answer is that the code path is
 compiled out of the open-source build. My Keeper member is load-bearing for
-replicated-table state, but the *disk* metadata lives on EBS next to the
+replicated-table state, but the *disk* metadata lives on Elastic Block Store (EBS) next to the
 parts, exactly as the matrix predicts.
 
 One more silent-empty-prefix incident in the same family — different backend:
@@ -200,7 +200,7 @@ azure-with-keeper instance shared one root path until a
 `common_key_prefix_for_azure` escape hatch was added. Silent empty prefixes
 bugging people is apparently a genre.
 
-## Where the bytes actually land: URI key plus one-line default template
+## Where the bytes actually land: uniform resource identifier (URI) key plus one-line default template
 
 For an S3 disk, the object key starts from the URL. The factory builds it in
 [`getS3URI`](https://github.com/ClickHouse/ClickHouse/blob/bb6fa8b5d1561b9928db573fc73d98cb16673c08/src/Disks/DiskObjectStorage/ObjectStorages/ObjectStorageFactory.cpp#L144-L157):
@@ -270,7 +270,7 @@ server believes lives there*. Four registered types in the open-source tree
 
 - **`plain`** — the bucket *is* the filesystem. The class comment says it
   plainly: object storage is used as a filesystem "in a limited form — no
-  directory concept, files only… no move… excessive API calls," intended so
+  directory concept, files only… no move… excessive application programming interface (API) calls," intended so
   [BACKUP/RESTORE works against the same
   structure](https://github.com/ClickHouse/ClickHouse/blob/bb6fa8b5d1561b9928db573fc73d98cb16673c08/src/Disks/DiskObjectStorage/MetadataStorages/Plain/MetadataStorageFromPlainObjectStorage.h#L25-L34)
   as on-disk MergeTree. Mostly read-only in practice.
@@ -285,7 +285,7 @@ server believes lives there*. Four registered types in the open-source tree
 - **`keeper`** — Cloud-only, as covered above; in a non-Cloud build the name
   resolves to the registry-miss throw.
 
-One honest update to an earlier post in this series: my [CAS post](/blog/clickhouse-whats-next-cas-iceberg/) speculated about content-addressable
+One honest update to an earlier post in this series: my [Content-Addressed Storage (CAS) post](/blog/clickhouse-whats-next-cas-iceberg/) speculated about content-addressable
 metadata as the future. In this tree there is **no CAS metadata type
 registered yet** — the names above are the entire registry. When the
 content-addressable work lands, it will appear as exactly one more
@@ -312,7 +312,7 @@ disk's own section:
 - [`max_elements`](https://github.com/ClickHouse/ClickHouse/blob/bb6fa8b5d1561b9928db573fc73d98cb16673c08/src/Interpreters/FileCache/FileCache_fwd.h#L16-L36),
   default 10,000,000 file segments — this is the per-file overhead bound that
   matters more than bytes once parts get small.
-- eviction policy, default **SLRU** with `slru_size_ratio` 0.6 (protected
+- eviction policy, default **Segmented Least Recently Used (SLRU)** with `slru_size_ratio` 0.6 (protected
   segment vs probationary). My earlier comment in our storage.xml claiming
   "26.8 default policy SLRU" was correct; this is the line that says so.
 - [`cache_on_write_operations`](https://github.com/ClickHouse/ClickHouse/blob/bb6fa8b5d1561b9928db573fc73d98cb16673c08/src/Disks/DiskObjectStorage/ObjectStorages/Cached/CachedObjectStorage.cpp#L130-L131)
@@ -325,7 +325,7 @@ The encrypted wrapper is the other half of the same idea, registered in
 [`DiskEncrypted.cpp#L636-L639`](https://github.com/ClickHouse/ClickHouse/blob/bb6fa8b5d1561b9928db573fc73d98cb16673c08/src/Disks/DiskEncrypted.cpp#L636-L639):
 wrap any disk, transparently encrypt on the way down. The default algorithm is
 [`AES_128_CTR`](https://github.com/ClickHouse/ClickHouse/blob/bb6fa8b5d1561b9928db573fc73d98cb16673c08/src/Disks/DiskEncrypted.cpp#L45).
-I don't run it — my cluster's at-rest story is S3 SSE — but it matters for the
+I don't run it — my cluster's at-rest story is S3 server-side encryption (SSE) — but it matters for the
 classification because it means wrapper chains compose: `cache` over
 `encrypted` over S3 is a legal stack, with the cache seeing plaintext.
 

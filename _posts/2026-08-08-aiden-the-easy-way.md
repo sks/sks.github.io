@@ -35,7 +35,7 @@ You do not have to read the Hard Way first. Come back to it only when something 
 You’ll get the most out of this if:
 
 - You have (or can get) an **Aiden / StackGen tenant** and a **GitHub Projects v2 board**.
-- You’re comfortable running `tofu apply` and pasting a webhook URL into GitHub settings.
+- You’re comfortable running `tofu apply` and pasting a webhook uniform resource locator (URL) into GitHub settings.
 - You want an agent that leaves **evidence on the issue**, not a black box that says “trust me.”
 
 The module supplies a persona, workflow, and webhook configuration. You still need to set credentials, verify event delivery, and review permissions.
@@ -51,7 +51,7 @@ The module supplies a persona, workflow, and webhook configuration. You still ne
 By the end of this post you will have applied one module and wired three GitHub gestures. For **one** Project item per run, the intended workflow is:
 
 1. Vague issue → **Specify** comment + Status hop  
-2. **Research** against the repo (via GitHub APIs)  
+2. **Research** against the repo (via GitHub application programming interfaces (APIs))
 3. **Plan** someone could implement  
 4. Optional **review PR** (the agent opens it; **you** merge)  
 5. **Done** — comment + Status hop after you merge
@@ -198,7 +198,7 @@ The module hides resource assembly, not the need to verify access, triggers, com
 - Module: [sks/aiden-github-project-assistant](https://github.com/sks/aiden-github-project-assistant) (`v0.1.0`)
 - Hard Way: [/blog/from-vague-github-issue-to-pr-with-aiden/](/blog/from-vague-github-issue-to-pr-with-aiden/)
 - Provider context: [Terraform for Agent Configuration](/blog/terraform-config/)
-- Bring-up discipline: [How to Debug Multi-Step AI Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/)
+- Bring-up discipline: [How to Debug Multi-Step Artificial Intelligence (AI) Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/)
 
 ---
 

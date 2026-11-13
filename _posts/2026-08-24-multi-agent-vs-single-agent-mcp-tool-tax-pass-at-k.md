@@ -23,13 +23,13 @@ faqs:
 
 After fixing [unattended-test failures](/blog/how-to-evaluate-ai-agents-clarifying-questions-zero-tool-calls/), we saw a planner help on some AppWorld tasks while using more total model input. A planner coordinates a worker with a narrower goal; a single agent keeps all available actions in one conversation. Measure both the largest prompt in any one model call and the sum across calls before choosing.
 
-Same [AppWorld](https://github.com/stonybrooknlp/appworld) stack rebuild (453 MCP tools) through the **Aiden agent runtime**. Part of the [AI agent evaluation series](/blog/fair-agent-evals-before-performance/). Earlier posts often showed plan **losing** to a direct MCP baseline when orchestration blocked before domain bugs mattered. In two task pairs after fixes, plan improved partial scores, but only one of those two passed the strict judge check. A follow-up smoke cohort ([simple vs plan: when to use which](/blog/simple-vs-plan-when-to-use-which/)) shows plan is not universal: simple ties on hard action tasks and wins on speed/cost.
+Same [AppWorld](https://github.com/stonybrooknlp/appworld) stack rebuild (453 Model Context Protocol (MCP) tools) through the **Aiden agent runtime**. Part of the [Artificial intelligence (AI) agent evaluation series](/blog/fair-agent-evals-before-performance/). Earlier posts often showed plan **losing** to a direct MCP baseline when orchestration blocked before domain bugs mattered. In two task pairs after fixes, plan improved partial scores, but only one of those two passed the strict judge check. A follow-up smoke cohort ([simple vs plan: when to use which](/blog/simple-vs-plan-when-to-use-which/)) shows plan is not universal: simple ties on hard action tasks and wins on speed/cost.
 
 ---
 
 ## What the two task pairs show
 
-For the movie-list SMS, the single agent reached the apps but received **87.5%** because its answer included the wrong titles; the planner’s focused worker produced the David Fincher subset and passed at **100%**. For a Venmo refund, the single agent made no database writes (**0%**), while the planner made the changes but still failed the final answer check (**85.7%**). That is one strict pass across these two plan runs, not a broad “planner wins” result. On the movie task, the planner’s largest coordinator prompt was **9,398 tokens** against **17,268** for simple mode, but it used roughly **32,000 total prompt tokens** across four model calls against **17,268** in one. Narrower context per call can cost more overall.
+For the movie-list Short Message Service (SMS), the single agent reached the apps but received **87.5%** because its answer included the wrong titles; the planner’s focused worker produced the David Fincher subset and passed at **100%**. For a Venmo refund, the single agent made no database writes (**0%**), while the planner made the changes but still failed the final answer check (**85.7%**). That is one strict pass across these two plan runs, not a broad “planner wins” result. On the movie task, the planner’s largest coordinator prompt was **9,398 tokens** against **17,268** for simple mode, but it used roughly **32,000 total prompt tokens** across four model calls against **17,268** in one. Narrower context per call can cost more overall.
 
 ---
 
@@ -40,7 +40,7 @@ For the movie-list SMS, the single agent reached the apps but received **87.5%**
 | **Simple** (single-agent) | One agent + full MCP catalog |
 | **Plan** (multi-agent) | Coordinator + worker with explicit tool list |
 
-Judge: AppWorld `/evaluate`. Numbers from series run 2026-08-24; **n = 2 tasks for quality A/B, directional — not a product scorecard.**
+Judge: AppWorld `/evaluate`. Numbers from series run 2026-08-24; **n = 2 tasks for quality A/B comparison, directional — not a product scorecard.**
 
 ---
 
@@ -49,11 +49,11 @@ Judge: AppWorld `/evaluate`. Numbers from series run 2026-08-24; **n = 2 tasks f
 | Task (English name) | Single-agent | Plan | What changed |
 |---------------------|-------------:|-----:|--------------|
 | Movie list SMS to Christopher (`29caf6f_1`) | **87.5%** fail — `assert answers match` | **100%** pass | Worker goal filtered to David Fincher titles (`Fight Club`, `The Social Network`) |
-| Venmo refund (`60d0b5b_1`) | **0%** fail — no DB mutations | **85.7%** fail — `assert answers match` only | Plan moved failure from **no mutation** to **answer wording** |
+| Venmo refund (`60d0b5b_1`) | **0%** fail — no database (DB) mutations | **85.7%** fail — `assert answers match` only | Plan moved failure from **no mutation** to **answer wording** |
 
 **Movie SMS:** simple reached tools and SMS but the final answer string missed the judge. Score **87.5%** vs **100%** — not “simple never tried.” In this run, the focused worker goal coincided with a correct answer; one pair cannot isolate the goal wording as the cause.
 
-**Venmo:** simple loop-trapped with **no** `venmo.Transaction` writes (**0%**). Plan’s worker performed Venmo ops (**85.7%**) — only wording failed. That is progress you can tune; 0% is not.
+**Venmo:** simple loop-trapped with **no** `venmo.Transaction` writes (**0%**). Plan’s worker performed Venmo operations (**85.7%**) — only wording failed. That is progress you can tune; 0% is not.
 
 When comparing modes, record **failure class** next to pass% — an 85.7% with mutations is a different ticket than 0% with none.
 
@@ -67,7 +67,7 @@ When comparing modes, record **failure class** next to pass% — an 85.7% with m
 
 With **453 MCP tools** after stack rebuild, simple mode pays the full catalog in one prompt. Plan’s coordinator sees meta-tools (`search_tools`, `create_agent`, …) plus compact handoffs.
 
-| Task | Mode | Coordinator peak prompt | Total prompt (all agents) | LLM calls |
+| Task | Mode | Coordinator peak prompt | Total prompt (all agents) | Large language model (LLM) calls |
 |------|------|------------------------:|--------------------------:|----------:|
 | Movie SMS (`29caf6f_1`) | Simple | **17,268** | 17,268 | 1 |
 | Movie SMS (`29caf6f_1`) | Plan | **9,398** | ~32,000 | 4 |
@@ -97,7 +97,7 @@ On plan **movie SMS** (`29caf6f_1`), it held:
 | Stage | What we measured |
 |-------|------------------|
 | Worker full tool transcript | Peak prompt **9,003** |
-| `create_agent` handoff | **292 bytes** JSON summary |
+| `create_agent` handoff | **292 bytes** JavaScript Object Notation (JSON) summary |
 | Coordinator next turn | Peak **9,398** |
 | Final answer | Two movie titles |
 
@@ -133,7 +133,7 @@ Four-task plan cohort: **3/4 pass@3**, not **3/4 pass@1**.
 
 **This cohort:** we report **pass@1** and **pass@3** only. We did **not** measure pass^k (all three attempts must pass). A single successful trace is not a reliability estimate or a release gate.
 
-See [τ-bench on pass^k](https://qaskills.sh/blog/tau-bench-agent-evaluation-guide-2026) and [Anthropic on agent evals](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) for the general reliability framing.
+See [τ-bench on pass^k](https://qaskills.sh/blog/tau-bench-agent-evaluation-guide-2026) and [Anthropic on agent evaluations (evals)](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) for the general reliability framing.
 
 Log **failure class per attempt** (`instruction_over_broad`, `clarifying_question`, `zero_tool_worker`) — not just the final judge bit.
 
@@ -166,4 +166,4 @@ Log **failure class per attempt** (`instruction_over_broad`, `clarifying_questio
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> 🚀 **We're building AI-powered site reliability engineering (SRE) at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft root cause analysis (RCA) reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.

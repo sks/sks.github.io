@@ -26,7 +26,7 @@ A cohort-normalized efficiency score increased between two benchmark waves even 
 - Our efficiency formula normalizes wall, tokens, and cost to the **cohort median**.
 - In a slower wave, the median rises. Relative scores can improve while **absolute** wall and tokens get worse.
 - Use relative scores to **rank seats inside one wave**. Use absolutes to compare harnesses across days.
-- Example: xAI hierarchical wall **141s → 262s**, relative eff **1.375 → 1.584**. Rank 1 both times. Operator latency lost.
+- Example: xAI hierarchical wall **141s → 262s**, relative efficiency **1.375 → 1.584**. Rank 1 both times. Operator latency lost.
 
 
 ---
@@ -42,7 +42,7 @@ A cohort-normalized efficiency score increased between two benchmark waves even 
 eff = correctness / (0.45·wall/median + 0.45·tokens/median + 0.10·cost/median)
 ```
 
-Each denominator is divided by the median of the *current* six-seat cohort: wall-clock time, total tokens, and estimated or traced cost. This can rank the [six combinations](/blog/six-model-mode-combos-alert-logs-bench/) within a wave across **single-agent ReAct** and **hierarchical ReAcTree** ([primer](/blog/what-is-reactree/)). Because the reference medians move, a changelog claim such as “efficiency +15%” across waves is not a fixed-scale comparison.
+Each denominator is divided by the median of the *current* six-seat cohort: wall-clock time, total tokens, and estimated or traced cost. This can rank the [six combinations](/blog/six-model-mode-combos-alert-logs-bench/) within a wave across **single-agent ReAct (reasoning and acting)** and **hierarchical ReAcTree** ([primer](/blog/what-is-reactree/)). Because the reference medians move, a changelog claim such as “efficiency +15%” across waves is not a fixed-scale comparison.
 
 ---
 
@@ -52,7 +52,7 @@ Each denominator is divided by the median of the *current* six-seat cohort: wall
 |-------|----------------|-------------------|
 | Wall seconds | **Yes** | Yes |
 | Tokens in+out | **Yes** | Yes |
-| USD | **Yes** | Yes |
+| US dollars (USD) | **Yes** | Yes |
 | Correctness checklist | **Yes** | Yes |
 | Relative efficiency | No (label it) | **Yes** |
 
@@ -66,4 +66,4 @@ Also log **contention**: the number of sessions sharing the Grafana tool server 
 
 A median-relative rank is useful for choosing among concurrent seats with the same task and tool conditions. For a service-level objective or a before/after deployment decision, compare absolute seconds and repeat under comparable load.
 
-Related: [web metrics → LLM metrics](/blog/web-metrics-to-llm-metrics/), [fair evals before performance](/blog/fair-agent-evals-before-performance/), [same incident then swap models](/blog/same-problem-sre-model-bake-off/).
+Related: [web metrics → large language model (LLM) metrics](/blog/web-metrics-to-llm-metrics/), [fair evaluations before performance](/blog/fair-agent-evals-before-performance/), [same incident then swap models](/blog/same-problem-sre-model-bake-off/).

@@ -18,7 +18,7 @@ faqs:
 
 An agent can remain available while its decisions become less useful. Availability alone will not show that failure.
 
-An HTTP 200 confirms that a request completed, not that an AI agent classified an alert correctly. A misclassification can still return a successful response. For example, even 10,000 misclassified PagerDuty alerts would not necessarily lower API uptime.
+A Hypertext Transfer Protocol (HTTP) 200 response confirms that a request completed, not that an artificial intelligence (AI) agent classified an alert correctly. A misclassification can still return a successful response. For example, even 10,000 misclassified PagerDuty alerts would not necessarily lower application programming interface (API) uptime.
 
 **Site reliability engineering (SRE)** for agentic systems adds checks on decisions made by AI agents—software that can select tools and take steps toward a task. If an agent can propose or perform bounded production changes, latency, error rate, and saturation still matter, but they do not measure whether the decision was appropriate.
 
@@ -34,13 +34,13 @@ But behind the scenes, a subtle change in the underlying foundational model caus
 
 This is **agentic drift**: decision quality decays over time, potentially because of upstream model changes, shifting prompt context, or degraded tool integrations. Execution metrics alone would not have identified this decision-quality change.
 
-## The Solution: Judgment SLOs
+## The Solution: Judgment service-level objectives (SLOs)
 
 ![Agent decisions are judged live against rubrics and nightly against historical incidents, separately from uptime](/assets/images/diagrams/aug-runtime/judgment-slo.svg)
 
 *A healthy API response does not prove the agent made a sound decision.*
 
-We added **Judgment service-level objectives (SLOs)**: explicit targets for decision quality, alongside operational targets.
+We added **Judgment SLOs**: explicit targets for decision quality, alongside operational targets.
 
 A Judgment SLO measures the fidelity and correctness of an agent's decisions against a known baseline. For example, a service might target 99.9% of HTTP requests returning a 200 within 200ms; a judgment target here asks that 95% of root-cause hypotheses match a historical human-verified cause for comparable incidents. Neither target alone establishes that the live decision is safe.
 
@@ -64,4 +64,4 @@ Decision-quality SLOs, error budgets, and regression tests can reveal failures t
 
 ---
 
-> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).
+> StackGen develops AI tools for SRE, including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

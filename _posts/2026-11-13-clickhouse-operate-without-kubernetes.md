@@ -23,16 +23,15 @@ faqs:
 ---
 
 This is the story of the second half of the migration. The first half —
-[provisioning ClickHouse on EC2 from Terraform](/blog/clickhouse-ec2-vs-k8s-mermaid-data-flow/)
-— covered storage, DNS, and spot autoscaling. This half is the part I keep
+[provisioning ClickHouse on Amazon Elastic Compute Cloud (EC2) from Terraform](/blog/clickhouse-ec2-vs-k8s-mermaid-data-flow/)
+— covered storage, Domain Name System (DNS), and spot autoscaling. This half is the part I keep
 describing to other engineers as "we taught the Altinity operator to work
 without Kubernetes," which sounds impossible. Some of it was.
 
 ## Why not just run the operator?
 
 The obvious question. The answer starts with reading the operator's source
-tree as three distinct layers, split by how hard each one leans on the
-Kubernetes API:
+tree as three distinct layers, split by how hard each one leans on the Kubernetes application programming interface (API):
 
 ```mermaid
 graph LR
@@ -44,16 +43,15 @@ graph LR
 ```
 
 The controller is the operator, in the informer-watches-a-CRD sense, and it
-is welded to Pods. But underneath it sits a domain layer that turns a
-`ClickHouseInstallation` YAML document into validated, defaulted,
-runtime-wired structures — and generators that emit the config XML — with a
+is welded to Pods. But underneath it sits a domain layer that turns a `ClickHouseInstallation` YAML Ain't Markup Language (YAML) document into validated, defaulted,
+runtime-wired structures — and generators that emit the config Extensible Markup Language (XML) — with a
 coupling to Kubernetes so shallow that the operator's own unit tests
 initialize it with `chop.New(nil, nil, "")` and a nil clientset.
 
 That was the bet: **the operator's brain is reusable; its nervous system
 is not.** Rebuilding the brain as bash was the mistake this whole exercise
-started from — three systemd units re-implementing the schemer's SQL, one
-regex at a time, drifting one upstream release behind.
+started from — three systemd units re-implementing the schemer's Structured Query Language (SQL), one
+regular expression (regex) at a time, drifting one upstream release behind.
 
 ## The import
 
@@ -74,13 +72,13 @@ Three things needed handling:
    in-repo with provenance. (Proposed upstream; now merged into the fork's
    tree so consumers need nothing.)
 
-2. **Tags are not semver.** Upstream tags read `release-0.27.4`; Go module
+2. **Tags are not semantic versioning (semver).** Upstream tags read `release-0.27.4`; Go module
    resolution wants `v0.27.4`. Every dependency pin is a commit
    pseudo-version, which in practice means: bumps are an explicit diff
    review, never `@latest`. I've come to like this even as a constraint —
    it matches how infrequently a ClickHouse cluster should change.
 
-3. **YAML parses like JSON if you want the user sections back.** The
+3. **YAML parses like JavaScript Object Notation (JSON) if you want the user sections back.** The
    operator's `Settings` type implements `UnmarshalJSON` only — its YAML
    unmarshaler is commented upstream. A direct `yaml.Unmarshal` into the CR
    silently produces empty users and profiles. Every spec load goes YAML →
@@ -94,7 +92,7 @@ chop.New(nil, nil, "") // the off-cluster singleton, exactly as upstream tests d
 ```
 
 With those four pieces in place, `normalizer.CreateTemplated(spec)` returned
-a fully defaulted, runtime-wired CR on a laptop with no kubeconfig.
+a fully defaulted, runtime-wired custom resource (CR) on a laptop with no kubeconfig.
 
 ## What "reusable" is worth
 
@@ -106,7 +104,7 @@ is five commands, all thin wrappers over operator packages:
 | `config render` | chi + chk FilesGenerator | hand-written config XML |
 | `users render` | Settings emitter + user defaults | users.xml assembled in bash |
 | `schema sync` | `ClusterSchemer.HostCreateTables` | 60-line `clusterAllReplicas` SQL port |
-| `replica drop` / `sync` | `HostDropReplica` / `HostSyncTables` | weekly-GC cron + drain SQL |
+| `replica drop` / `sync` | `HostDropReplica` / `HostSyncTables` | weekly garbage collection (GC) cron + drain SQL |
 | `keeper safe-to-stop` | raft-safety math from the controller | "restart keepers one at a time" runbooks |
 
 The last one deserves a beat. The operator's keeper reconciliation won't
@@ -148,7 +146,7 @@ A release gate is only as good as its working tree; the pattern became
 ### 3. Two embedded levels, one namer override
 
 The schemer resolves exec hosts through an embedded `INameManager`, whose
-output is the Kubernetes pod FQDN — fine on a cluster, unresolvable on EC2.
+output is the Kubernetes pod fully qualified domain name (FQDN) — fine on a cluster, unresolvable on EC2.
 Wrapping the namers: the override had to be set on *both* embedding levels,
 and the live error was exactly the tell — `no such host` for
 `chi-...svc.cluster.local`. When you adapt a package through composition,
@@ -167,8 +165,7 @@ pre-flight check.
 
 The first users render emitted raw user trees at the document root, and my
 wrapper — written to add the `<users>` element — double-wrapped it.
-`SAXParseException: Tag mismatch, line 24`. That XML now goes through a real
-parser in CI, not a substring check.
+`SAXParseException: Tag mismatch, line 24`. That XML now goes through a real parser in continuous integration (CI), not a substring check.
 
 ## Where the line moved
 
@@ -202,10 +199,10 @@ decision I'd make differently a year from now, and it is worth knowing why
 today's shape is what it is:
 
 - **Operator packages own ClickHouse semantics.** Spec → validation →
-  XML → schema DDL → replica hygiene. Everything upstream might improve;
+  XML → schema data definition language (DDL) → replica hygiene. Everything upstream might improve;
   everything I'd otherwise re-derive and inevitably drift.
 - **chctl (my code) owns the boundary.** Cloud inventory, secret sources,
-  the CLI, the version gate. Thin, tested, replaceable.
+  the command-line interface (CLI), the version gate. Thin, tested, replaceable.
 - **cloud-init owns the cloud.** Mounts by label, DNS, ordinals, secrets
   fetch, spot drain orchestration. Everything upstream *can't* express.
 

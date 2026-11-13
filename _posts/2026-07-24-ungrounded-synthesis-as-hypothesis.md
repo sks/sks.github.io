@@ -17,9 +17,9 @@ faqs:
     answer: "Submission checks can reject unsupported confidence. Delivery should show that result in the main Slack or chat message rather than only in logs."
 ---
 
-An AI-written root-cause analysis (RCA) may sound certain even when its service names or claims cannot be traced to the data it used. A grounding check compares the answer with tool results; if it fails, the message shown to responders must change, not merely the internal log.
+An artificial intelligence (AI)-written root-cause analysis (RCA) may sound certain even when its service names or claims cannot be traced to the data it used. A grounding check compares the answer with tool results; if it fails, the message shown to responders must change, not merely the internal log.
 
-*The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
+*The incident patterns below are composite and anonymized. Counts are rounded. Names, identifiers (IDs), and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
@@ -41,9 +41,9 @@ The delivered message should reflect the verification result. This is related to
 
 ---
 
-## If you lead an SRE team
+## If you lead a site reliability engineering (SRE) team
 
-- Reject any workflow where grounding failure is invisible in the primary UI
+- Reject any workflow where grounding failure is invisible in the primary user interface (UI)
 - Tell reviewers what the hypothesis notice means: the checker found a gap, not necessarily that the entire investigation was useless
 - Keep unknowns visible, then use further checks or human review for decisions with consequences
 

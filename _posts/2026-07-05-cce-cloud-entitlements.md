@@ -7,13 +7,13 @@ image: /assets/images/og-governance.png
 tags: [cce, aws, iam, security, devops, ai-coding, go, github-actions]
 ---
 
-You asked the IDE for "sync Kubernetes services to Route 53." It wrote the Go code. Tests pass. The PR looks fine.
+You asked the integrated development environment (IDE) for "sync Kubernetes services to Route 53." It wrote the Go code. Tests pass. The pull request (PR) looks fine.
 
-The pull request still needs a review of Identity and Access Management (IAM) permissions: which AWS actions the code needs, on which resources.
+The pull request still needs a review of Identity and Access Management (IAM) permissions: which Amazon Web Services (AWS) actions the code needs, on which resources.
 
-**CCE (Code Context Engine)** is a static-analysis CLI that reads your source tree and answers:
+**CCE (Code Context Engine)** is a static-analysis command-line interface (CLI) that reads your source tree and answers:
 
-> *Which cloud API operations does this code actually call?*
+> *Which cloud application programming interface (API) operations does this code actually call?*
 
 This guide covers what CCE can infer from source, how to run it locally and in continuous integration (CI), and how to read its output. Deeper reference lives at [appcd-dev.github.io/cce](https://appcd-dev.github.io/cce/).
 
@@ -23,18 +23,18 @@ This guide covers what CCE can infer from source, how to run it locally and in c
 
 ## What CCE solves
 
-CCE is **read-only inventory**: it maps SDK and library call sites to structured tuples `(provider, resource, operation)` using tree-sitter, a parser for source-code syntax. It does not rewrite code, execute your app, or parse Terraform.
+CCE is **read-only inventory**: it maps software development kit (SDK) and library call sites to structured tuples `(provider, resource, operation)` using tree-sitter, a parser for source-code syntax. It does not rewrite code, execute your app, or parse Terraform.
 
 | Problem | How CCE helps |
 |---------|----------------|
 | **IAM / least privilege** | Produce candidate `Action` names for review before opening a platform ticket |
-| **AI-assisted cloud code** | Ground permission reviews in static facts, not guesswork or `route53:*` templates |
+| **Artificial intelligence (AI)-assisted cloud code** | Ground permission reviews in static facts, not guesswork or `route53:*` templates |
 | **PR drift** | `cce diff --fail-new` fails CI when a branch adds mapped cloud API calls |
 | **SDK modernization** | `sdk-uplift` recipe labels legacy vs v2 SDK usage in one parse |
 | **Tech debt / forbidden libs** | Custom lenses flag deprecated packages (`TECH_DEBT`, `FORBIDDEN`) |
 | **CVE reachability** | Lenses tie packages associated with Common Vulnerabilities and Exposures (CVE) identifiers to **call sites** in your repo (a function-level software bill of materials, or f-SBOM, style of inventory; not proof that a vulnerable path executes) |
-| **Platform golden path** | Detect raw `boto3` / AWS software development kit (SDK) calls bypassing your internal platform SDK |
-| **Audit evidence** | JSON or Static Analysis Results Interchange Format (SARIF) reports with file, line, and method for each mapped call |
+| **Platform golden path** | Detect raw `boto3` / AWS SDK calls bypassing your internal platform SDK |
+| **Audit evidence** | JavaScript Object Notation (JSON) or Static Analysis Results Interchange Format (SARIF) reports with file, line, and method for each mapped call |
 | **Pre-deploy review** | Attach entitlement reports to change tickets the way you attach test coverage |
 
 CCE does **not** replace security sign-off. It gives reviewers and platform teams a **machine-readable baseline** — the same facts you'd reconstruct with `grep`, code review, and spreadsheets.
@@ -54,7 +54,7 @@ Keep expectations aligned:
 | Limitation | Detail |
 |------------|--------|
 | **Static only** | No runtime tracing, reflection, or dynamic plugin dispatch |
-| **Source, not IaC** | Does not parse Terraform, CloudFormation, or IAM JSON — diff app code vs IaC externally |
+| **Source, not infrastructure as code (IaC)** | Does not parse Terraform, CloudFormation, or IAM JSON — diff app code vs IaC externally |
 | **Languages** | Go, Java, Python, JavaScript (`.go`, `.java`, `.py`, `.js`/`.jsx`/`.mjs`/`.cjs`) |
 | **Polyglot folders** | One language per scan; use `AUTO` or run per language |
 | **Facades** | Internal wrappers may hide underlying SDK calls unless you scan the SDK or add lens rules |
@@ -69,7 +69,7 @@ Full list: [Known limitations](https://appcd-dev.github.io/cce/reference/known-l
 | Term | What it is |
 |------|------------|
 | **Entitlement** | One mapped call row: `(provider, resource, operation)` plus file/line/method; here an entitlement is a candidate operation, not a granted permission |
-| **Lens** | YAML mapper (`*_lenses.yaml`) — rules that turn call sites into entitlements; passed via `-mapper-file` |
+| **Lens** | YAML Ain’t Markup Language (YAML) mapper (`*_lenses.yaml`) — rules that turn call sites into entitlements; passed via `-mapper-file` |
 | **Recipe** | Catalog entry (id, languages, `filter`) pointing at a lens — discover with `cce catalog` |
 | **Pack** | Named bundle of recipe ids (e.g. `modernization-pack`) — one parse, merged JSON |
 | **Diff** | Compare two JSON reports; `--fail-new` for CI gates |
@@ -128,7 +128,7 @@ Run from your project root. CCE honors **`.gitignore`** by default (skips `vendo
 | Cloud + SDK + tech-debt | `cce run -pack modernization-pack` | Shell loop of `cce` commands |
 | Custom org rules | `-mapper-file` + `-filter all` | `-filter cloud` alone |
 
-Browse the full [use case catalog](https://appcd-dev.github.io/cce/use-cases/catalog/) (modernization, security, governance, SRE, AI).
+Browse the full [use case catalog](https://appcd-dev.github.io/cce/use-cases/catalog/) (modernization, security, governance, site reliability engineering (SRE), AI).
 
 ---
 
@@ -137,7 +137,7 @@ Browse the full [use case catalog](https://appcd-dev.github.io/cce/use-cases/cat
 | Role | Typical workflow |
 |------|------------------|
 | **Developers** | Scan before the "fix my IAM" ticket; paste JSON into the PR |
-| **DevOps / platform** | Diff app entitlements vs Terraform/IRSA; add `sks/cce-action` to pipelines |
+| **Development and operations (DevOps) / platform** | Diff app entitlements vs Terraform/IAM Roles for Service Accounts (IRSA); add `sks/cce-action` to pipelines |
 | **SREs** | Scan before/after deploys; catch new cloud APIs in change review |
 | **Security** | SARIF + diff gates; CVE reachability and audit-evidence recipes |
 | **Engineering managers** | Entitlement count and top services in release artifacts — like test coverage |
@@ -146,7 +146,7 @@ Browse the full [use case catalog](https://appcd-dev.github.io/cce/use-cases/cat
 
 ## Worked example: [external-dns](https://github.com/kubernetes-sigs/external-dns)
 
-[kubernetes-sigs/external-dns](https://github.com/kubernetes-sigs/external-dns) syncs Kubernetes services to DNS providers. The AWS provider is a small Go package using **AWS SDK for Go v2** (Route 53 + STS). Real software, not a toy repo.
+[kubernetes-sigs/external-dns](https://github.com/kubernetes-sigs/external-dns) syncs Kubernetes services to Domain Name System (DNS) providers. The AWS provider is a small Go package using **AWS SDK for Go v2** (Route 53 + Security Token Service (STS)). Real software, not a toy repo.
 
 ### Scan
 
@@ -158,7 +158,7 @@ cce -folder provider/aws -language GO -filter cloud \
   -format json -output external-dns-aws.json
 ```
 
-CCE parses `provider/aws` with tree-sitter and emits `(provider, resource, operation)` tuples for mapped calls, including Route 53 operations and Security Token Service (STS) assume-role wiring.
+CCE parses `provider/aws` with tree-sitter and emits `(provider, resource, operation)` tuples for mapped calls, including Route 53 operations and STS assume-role wiring.
 
 ### Derive IAM actions
 
@@ -168,7 +168,7 @@ jq -r '.entitlements[]
   | "\(.resource):\(.operation)"' external-dns-aws.json | sort -u
 ```
 
-CCE proposes action names from mapped static call sites; confirm them against the AWS action model and the actual deployment path. Resource Amazon Resource Names (ARNs) and condition keys need separate policy review in Terraform or IAM Roles for Service Accounts (IRSA). The following JSON is an illustrative starting point, not a deployable least-privilege policy: each action may need its own resource scope.
+CCE proposes action names from mapped static call sites; confirm them against the AWS action model and the actual deployment path. Resource Amazon Resource Names (ARNs) and condition keys need separate policy review in Terraform or IRSA. The following JSON is an illustrative starting point, not a deployable least-privilege policy: each action may need its own resource scope.
 
 ```json
 {
@@ -188,7 +188,7 @@ CCE proposes action names from mapped static call sites; confirm them against th
 | **route53** | Hosted zones, record sets, change batches |
 | **sts** | Assume-role chain for cross-account Route 53 |
 
-Optional DynamoDB registry backend: scan `registry/dynamodb` separately — a second IAM story. There is **no S3** in the AWS provider package.
+Optional DynamoDB registry backend: scan `registry/dynamodb` separately — a second IAM story. There is **no Amazon Simple Storage Service (S3)** in the AWS provider package.
 
 ### Local PR gate
 
@@ -234,7 +234,7 @@ Details: [Analysis recipes & packs](https://appcd-dev.github.io/cce/reference/an
 
 Platform teams can ship **org-specific** rules without waiting on upstream releases.
 
-**Path A — lens only (fastest):** Host `idp_lenses.yaml` on internal HTTPS, pin version in CI:
+**Path A — lens only (fastest):** Host `idp_lenses.yaml` on internal Hypertext Transfer Protocol Secure (HTTPS), pin version in CI:
 
 ```bash
 cce -folder . -language AUTO -filter all \
@@ -373,7 +373,7 @@ More examples: [github.com/sks/cce-action](https://github.com/sks/cce-action/tre
 | `resource` | Service id (`route53`, `sts`, `s3`, …) |
 | `operation` | API operation (`ListHostedZones`, `AssumeRole`, …) |
 | `file`, `line`, `column` | Call site location |
-| `method`, `signature` | FQN and call shape for reviewers |
+| `method`, `signature` | Fully qualified name (FQN) and call shape for reviewers |
 
 ```bash
 jq '.summary' report.json
@@ -443,7 +443,7 @@ The workflow is code → candidate operations → policy review. Static inventor
 | **Homebrew** | [stackgenhq/homebrew-stackgen](https://github.com/stackgenhq/homebrew-stackgen) |
 | **Custom lens YAML** | [Grok rules & prefixes](https://appcd-dev.github.io/cce/reference/custom-lens-yaml/) |
 | **CCE vs OpenRewrite** | [When to use which](https://appcd-dev.github.io/cce/reference/cce-vs-openrewrite/) |
-| **Enterprise lenses** | [IDP catalogs & packs](https://appcd-dev.github.io/cce/guides/enterprise-lenses-and-catalogs/) |
+| **Enterprise lenses** | [Internal developer platform (IDP) catalogs & packs](https://appcd-dev.github.io/cce/guides/enterprise-lenses-and-catalogs/) |
 | **Limitations** | [Known limitations](https://appcd-dev.github.io/cce/reference/known-limitations/) |
 | **Action CI example** | [Run #28751246690](https://github.com/sks/cce-action/actions/runs/28751246690) |
 
@@ -453,7 +453,7 @@ The workflow is code → candidate operations → policy review. Static inventor
 
 AI-assisted development lowered the cost of **adding** cloud integrations. It did not lower the cost of **proving** you only requested the permissions you need. A CCE scan before merge may catch a new mapped call early, but it is not a substitute for security review or testing the role in its deployment environment.
 
-The public CLI handles local source-based entitlement extraction. [StackGen](https://cloud.stackgen.com) extends this with multi-cloud lens packs in corporate CI/CD, centralized governance, and runtime alignment. Enterprise questions: **sales@stackgen.com**.
+The public CLI handles local source-based entitlement extraction. [StackGen](https://cloud.stackgen.com) extends this with multi-cloud lens packs in corporate continuous integration and continuous delivery/deployment (CI/CD), centralized governance, and runtime alignment. Enterprise questions: **sales@stackgen.com**.
 
 ---
 

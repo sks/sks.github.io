@@ -9,7 +9,7 @@ image: /assets/images/og-memory.png
 tags: [ai-agents, memory, rag, architecture, go]
 ---
 
-An agent can retrieve a past incident and still make a worse decision because that incident is no longer relevant. In our SRE (site reliability engineering) copilot, a search over stored context could return many apparently related passages, including stale or contradictory ones. Imagine retrieving 40 chunks for a 128K-token context window when 35 do not help the current task: the large window can accommodate the text, but it cannot make it relevant. This is an illustration of the failure mode, not a measured distribution across our sessions.
+An agent can retrieve a past incident and still make a worse decision because that incident is no longer relevant. In our SRE (site reliability engineering) copilot, a search over stored context could return many apparently related passages, including stale or contradictory ones. Imagine retrieving 40 chunks for a 128,000-token context window when 35 do not help the current task: the large window can accommodate the text, but it cannot make it relevant. This is an illustration of the failure mode, not a measured distribution across our sessions.
 
 We built Pensieve to give different kinds of information different lifetimes. It separates temporary task state, past experiences, persistent facts, and reusable procedures. This is a description of our design and the problems it addresses, not a claim that every agent needs the same memory system.
 
@@ -17,7 +17,7 @@ We built Pensieve to give different kinds of information different lifetimes. It
 
 ## Why Retrieval Alone Wasn't Enough
 
-RAG (retrieval-augmented generation) typically finds document passages similar to a question and places them in a model's context, the text available to it for that response. That can work well for questions about a relatively stable document collection. An agent also creates new material as it works: attempts, failures, tool results, and user corrections. Those records have different reliability and expiration dates. "The staging API was down" may be valuable yesterday and misleading today. A failed attempt is not evidence that an approach can never work.
+RAG (retrieval-augmented generation) typically finds document passages similar to a question and places them in a model's context, the text available to it for that response. That can work well for questions about a relatively stable document collection. An agent also creates new material as it works: attempts, failures, tool results, and user corrections. Those records have different reliability and expiration dates. "The staging application programming interface (API) was down" may be valuable yesterday and misleading today. A failed attempt is not evidence that an approach can never work.
 
 Similarity therefore cannot be the only criterion for recall. We also need to know when an experience happened, whether it was validated, and whether the current task needs a fact, an account of a prior task, or a procedure.
 
@@ -117,4 +117,4 @@ Pensieve differs from a single vector-search collection by combining those lifet
 
 ---
 
-> **StackGen builds AI-assisted SRE tools.** Our offering at [ai.stackgen.com](https://ai.stackgen.com) supports incident triage, diagnostics, and draft root-cause analyses.
+> **StackGen builds artificial intelligence (AI)-assisted SRE tools.** Our offering at [ai.stackgen.com](https://ai.stackgen.com) supports incident triage, diagnostics, and draft root-cause analyses.

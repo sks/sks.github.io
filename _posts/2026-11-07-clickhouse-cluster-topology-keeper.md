@@ -21,7 +21,7 @@ faqs:
     answer: "With true, the Distributed table writes each block to one replica and the ReplicatedMergeTree engine copies it to the others. With false, the Distributed table writes every replica itself, which breaks insert dedup on retries."
 ---
 
-A single ClickHouse server can ingest, merge, and serve queries on one machine. That works until the machine fails. I run a log analytics platform on AWS, and the cluster design starts from one question: which node can we lose at 3 a.m. without waking anyone up?
+A single ClickHouse server can ingest, merge, and serve queries on one machine. That works until the machine fails. I run a log analytics platform on Amazon Web Services (AWS), and the cluster design starts from one question: which node can we lose at 3 a.m. without waking anyone up?
 
 The answer is any one node. Ingestion, querying, and coordination must be three separate jobs on three separate kinds of machine. This post is the topology: writers, readers, keepers, one shard, two load balancers, and the quorum math that keeps replicated tables writable. Reference: [ClickHouse Keeper](https://clickhouse.com/docs/en/operations/clickhouse-keeper).
 
@@ -29,8 +29,8 @@ The answer is any one node. Ingestion, querying, and coordination must be three 
 
 - Writers and readers are separate node pools so a runaway analytical query can never starve ingestion.
 - Every `ReplicatedMergeTree` table coordinates through Keeper. Two of three keepers down means no quorum, and every replicated table flips read-only — the exact failure mode the alarms watch for.
-- Keeper's raft disk is a dedicated 64 GB gp3. Keeper fsyncs every write; merge I/O on a shared disk spikes fsync latency, misses heartbeats, and triggers leader elections.
-- Writers and keepers are fixed-identity EC2 with persistent EBS. Readers scale in an Auto Scaling Group.
+- Keeper's raft disk is a dedicated 64-gigabyte (GB) gp3 volume. Keeper fsyncs every write; merge input/output (I/O) on a shared disk spikes fsync latency, misses heartbeats, and triggers leader elections.
+- Writers and keepers are fixed-identity Amazon Elastic Compute Cloud (EC2) with persistent Elastic Block Store (EBS). Readers scale in an Auto Scaling Group.
 - One shard, `internal_replication` true: the engine replicates, and the Distributed table never writes N copies.
 {: .key-takeaways}
 
@@ -40,20 +40,20 @@ The answer is any one node. Ingestion, querying, and coordination must be three 
 
 Think of a restaurant. The kitchen prepares food; the dining room serves it. A rush of customers never stops the kitchen cooking, and a slow chef makes only his own tables wait. In ClickHouse terms, writers are the kitchen and readers are the dining room.
 
-Writers are two EC2 instances with static private IPs and fixed identity. Every insert — OTLP over gRPC, HTTP, or the native protocol — enters through them. If inserts queue, upstream buffers grow and logs get dropped. Writers run no analytical queries.
+Writers are two EC2 instances with static private Internet Protocol (IP) addresses and fixed identity. Every insert — OpenTelemetry Protocol (OTLP) over gRPC, a remote procedure call framework, Hypertext Transfer Protocol (HTTP), or the native protocol — enters through them. If inserts queue, upstream buffers grow and logs get dropped. Writers run no analytical queries.
 
-Readers are an Auto Scaling Group of replicas serving dashboards, ad-hoc SQL, and the API. They are cheap to replace. A very expensive `GROUP BY` over a month of data occupies one reader; the rest keep answering.
+Readers are an Auto Scaling Group of replicas serving dashboards, ad-hoc Structured Query Language (SQL), and the application programming interface (API). They are cheap to replace. A very expensive `GROUP BY` over a month of data occupies one reader; the rest keep answering.
 
 Keepers are three small nodes running ClickHouse Keeper. They hold no table data, only the coordination state that makes replication work.
 
-Why split writers from readers? Isolation. Memory limits are per query, but CPU, disk I/O, and page cache are shared. On a shared node, a month-long aggregation can make inserts time out.
+Why split writers from readers? Isolation. Memory limits are per query, but central processing unit (CPU), disk I/O, and page cache are shared. On a shared node, a month-long aggregation can make inserts time out.
 
 ## Keeper, for someone who has never run one
 
 Keeper is ClickHouse's coordination service: a ZooKeeper-compatible replacement ClickHouse maintains itself, with raft for consensus. Every replicated table coordinates through it. Picture a bank head office that keeps one to-do list shared by all branches: "branch reader-1 has recorded page 12; fetch it from a peer." In ClickHouse terms, Keeper is the head office, and every replica acts on its list. The list lives in memory on top of a raft log:
 
 - **Replication queues**: which parts exist on which replica, and what still needs copying.
-- **The distributed DDL task queue**: `ON CLUSTER` statements land at `/clickhouse/task_queue/ddl`, and each node executes them.
+- **The distributed data definition language (DDL) task queue**: `ON CLUSTER` statements land at `/clickhouse/task_queue/ddl`, and each node executes them.
 - **Part allocation**: the record of where every part lives.
 
 No Keeper, no replicated tables — the list is the whole replication loop. Reference: [replication in MergeTree](https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/replication).
@@ -64,11 +64,11 @@ Keeper runs raft with majority quorum. Think of three bank managers who must co-
 
 Keeper fsyncs every write to its raft log before acknowledging it. That is what makes it crash-safe — and sensitive to disk latency. Picture the manager's signing desk: every signature must be written in permanent ink and dry before the page counts as signed. Now put a busy printer on the same desk — the paper shakes, the ink smears, signatures arrive late, and the bank elects a new manager mid-signature. In ClickHouse terms, fsync is the ink and the printer is merge I/O, bursts of sequential writes that can saturate a disk for minutes. With a shared disk, fsync latency spikes, heartbeats are missed, and raft elects a new leader — repeated elections end in the same read-only state as losing quorum outright.
 
-Each keeper therefore gets a dedicated 64 GB gp3 for the raft log and nothing else. gp3 delivers 3,000 baseline IOPS at any size — small, fast, and isolated from merge I/O.
+Each keeper therefore gets a dedicated 64 GB gp3 for the raft log and nothing else. gp3 delivers 3,000 baseline input/output operations per second (IOPS) at any size — small, fast, and isolated from merge I/O.
 
-## Why keepers and writers are not in an ASG
+## Why keepers and writers are not in an Auto Scaling Group (ASG)
 
-Auto Scaling groups replace instances, and replacement is where coordination systems break. Raft identifies members by server ID, not IP address. Think of bank branches at fixed street addresses: the manager's name is on a permanent plaque, so a rebuilt branch reopens under the same name and keeps signing the same ledger. In ClickHouse terms, the plaque is Keeper's `myid`, kept on a dedicated EBS volume, not an AMI. When a keeper is replaced, the volume re-attaches, the node rejoins with its old identity, and raft catches it up — no repeated elections, no split-brain (two nodes both acting as leader).
+Auto Scaling groups replace instances, and replacement is where coordination systems break. Raft identifies members by server identifier (ID), not IP address. Think of bank branches at fixed street addresses: the manager's name is on a permanent plaque, so a rebuilt branch reopens under the same name and keeps signing the same ledger. In ClickHouse terms, the plaque is Keeper's `myid`, kept on a dedicated EBS volume, not an Amazon Machine Image (AMI). When a keeper is replaced, the volume re-attaches, the node rejoins with its old identity, and raft catches it up — no repeated elections, no split-brain (two nodes both acting as leader).
 
 Writers get fixed identity for the same reason: their local state is expensive to rebuild, and static private IPs keep inter-node replication traffic predictable after replacement.
 
@@ -116,15 +116,15 @@ The first argument is the table's path in Keeper, where its replication queue li
 
 ## Two network load balancers
 
-Think of a hotel with two doors. Deliveries use the service elevator; guests use the front entrance. If a crowd blocks the lobby, food still arrives through the service door. In ClickHouse terms, the service door is the ingest NLB in front of the writers, and the front entrance is the query NLB in front of the readers. Ingestion and queries scale and fail independently: a heavy query must not block the path inserts use, and adding readers must never change ingest targets. TLS terminates at each NLB with an ACM certificate.
+Think of a hotel with two doors. Deliveries use the service elevator; guests use the front entrance. If a crowd blocks the lobby, food still arrives through the service door. In ClickHouse terms, the service door is the ingest network load balancer (NLB) in front of the writers, and the front entrance is the query NLB in front of the readers. Ingestion and queries scale and fail independently: a heavy query must not block the path inserts use, and adding readers must never change ingest targets. Transport Layer Security (TLS) terminates at each NLB with an AWS Certificate Manager (ACM) certificate.
 
 ## What it costs
 
 The platform runs two sizes of this shape:
 
-| | Dev | Prod |
+| | Development (Dev) | Production (Prod) |
 |---|---|---|
-| Writers | 1 × t4g.large (2 vCPU, 8 GB) | 2 × r8g.2xlarge (8 vCPU, 64 GB) |
+| Writers | 1 × t4g.large (2 virtual central processing units (vCPUs), 8 GB) | 2 × r8g.2xlarge (8 vCPU, 64 GB) |
 | Readers | 1 × t4g.large | 3 × r8g.4xlarge (16 vCPU, 128 GB) |
 | Keepers | 1 × t4g.small | 3 × r8g.xlarge (4 vCPU, 32 GB) |
 | Total | ~$150–250/mo | ~$3.1–3.5k/mo |
@@ -161,4 +161,4 @@ Every writer and reader is a replica of the same single shard; keepers hold coor
 
 *If the cluster can only survive nodes you never replace, it can't survive anything.*
 
-Previous: [ClickHouse Cloud vs self-managed engines](/blog/clickhouse-cloud-vs-self-managed-engines/). Next: [ClickHouse on S3: tiered storage policies that don't melt](/blog/clickhouse-s3-tiered-storage/).
+Previous: [ClickHouse Cloud vs self-managed engines](/blog/clickhouse-cloud-vs-self-managed-engines/). Next: [ClickHouse on Amazon Simple Storage Service (S3): tiered storage policies that don't melt](/blog/clickhouse-s3-tiered-storage/).

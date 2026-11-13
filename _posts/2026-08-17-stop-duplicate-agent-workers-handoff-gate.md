@@ -23,7 +23,7 @@ faqs:
 
 **Rule for this benchmark run:** once a delegated worker returns successfully, later `create_agent` (launch-worker) attempts return that result instead of launching duplicate workers. This avoids repeating the same AppWorld work. It does not remove the planner turns spent *attempting* those launches, and a production system may need a way to start a genuinely different follow-up job.
 
-We fixed **fair agent evals** and cut **agent orchestration tax** on a five-task AppWorld slice — the wins were in **measurement and cost**, not in declaring a benchmark champion. **Strict judge pass stayed 0/5** on this slice; the gate did not “win AppWorld,” it stopped invalid comparisons.
+We fixed **fair artificial intelligence (AI) agent evaluations (evals)** and cut **agent orchestration tax** on a five-task AppWorld slice — the wins were in **measurement and cost**, not in declaring a benchmark champion. **Strict judge pass stayed 0/5** on this slice; the gate did not “win AppWorld,” it stopped invalid comparisons.
 
 Parts [one](/blog/fair-agent-evals-before-performance/), [two](/blog/agent-orchestration-tax-evals/), and [three](/blog/ai-agent-eval-failure-modes/) documented unfair handoffs, ~1.6× token overhead, and failure classes. This sequel covers what changed after we shipped the **handoff gate**, re-enabled note tooling, soft-dropped missing infra names on spawn, and capped worker nodes to one.
 
@@ -57,7 +57,7 @@ After [failure-mode](/blog/ai-agent-eval-failure-modes/) runs on the same `plan_
 | **Worker node cap = 1** | Planner tree cannot grow a second worker branch on these eval configs |
 | **Unattended mode** | No clarify / human-wait tools in benchmark runs |
 
-Same five delegation-fit tasks (phone → notes → SMS, inbox + contacts + Splitwise, workout note → Spotify, batch Venmo, trip ledger → Splitwise). Same model family and MCP tool pack.
+Same five delegation-fit tasks (phone → notes → Short Message Service (SMS), inbox + contacts + Splitwise, workout note → Spotify, batch Venmo, trip ledger → Splitwise). Same model family and Model Context Protocol (MCP) tool pack.
 
 ![Handoff gate sequence: one real worker, blocked duplicate spawn retries](/assets/images/appworld/handoff-gate-flow.svg)
 
@@ -71,7 +71,7 @@ Same five delegation-fit tasks (phone → notes → SMS, inbox + contacts + Spli
 | Avg tokens (simple / plan) | 136,322 / 198,691 | 175,138 / 157,623 |
 | Planner / single token ratio | **~1.34×** | **~0.86×** |
 | Avg iterations (simple / plan) | 14.6 / 38.4 | 14.0 / 27.8 |
-| Strict AppWorld TGC (`judge_pass`) | not cleared (5/5) | not cleared (5/5) |
+| Strict AppWorld task-goal completion (TGC) (`judge_pass`) | not cleared (5/5) | not cleared (5/5) |
 | Avg judge `pass_percentage` | (pre-gate noisy) | **41.7%** / **56.0%** |
 | Head-to-head (strict) | ties 5/5 | ties 5/5 |
 
@@ -79,7 +79,7 @@ Same five delegation-fit tasks (phone → notes → SMS, inbox + contacts + Spli
 
 *Caption: `plan_fit_5` cohort, n=5 task pairs · fairness and token ratio improved post-gate.*
 
-**Interpretation:** the combined changes improved tool-access parity and lowered measured cost on this slice. The rerun cannot attribute that difference to the gate alone. Strict AppWorld TGC still failed; budgets, tool discovery and redaction merit investigation, but task correctness may also be at issue. These numbers do not evaluate [production SRE agents](/blog/what-are-sre-ai-agents/).
+**Interpretation:** the combined changes improved tool-access parity and lowered measured cost on this slice. The rerun cannot attribute that difference to the gate alone. Strict AppWorld TGC still failed; budgets, tool discovery and redaction merit investigation, but task correctness may also be at issue. These numbers do not evaluate [production site reliability engineering (SRE) agents](/blog/what-are-sre-ai-agents/).
 
 ---
 
@@ -114,7 +114,7 @@ This is also why [from vibes to contracts](/blog/from-vibes-to-contracts-agent-e
 
 Post-gate logs verified **one real worker spawn per task** when the handoff gate returned the prior result on repeat `create_agent` calls (`stop_after_successful_handoff` behavior).
 
-SSE (server-sent event) aggregates still showed **~3.0** `create_agent` events per plan run. Those are **blocked retries** — the planner burning orchestrator iterations on spawn attempts the gate rejected.
+Aggregates from server-sent events (SSE) still showed **~3.0** `create_agent` events per plan run. Those are **blocked retries** — the planner burning orchestrator iterations on spawn attempts the gate rejected.
 
 **Copy for your harness:**
 
@@ -132,7 +132,7 @@ Without all three, you will over-count workers and under-estimate wasted planner
 
 Even with fairness **5/5** and lower token tax:
 
-- **`wrong_method_422`** — wrong documented API names after docs search
+- **`wrong_method_422`** — wrong documented application programming interface (API) names after docs search
 - **`budget_no_eval`** — iteration cap before evaluate on both modes
 - **`pii_poison`** — redacted placeholders copied into tool calls (plan, 1/5 tasks)
 - **`discovery_hit = 0`** — harness signal still flat despite search tools being called
@@ -157,7 +157,7 @@ Strict `judge.success` did not flip on this five-task rerun. Next increments: di
 
 ### On this site
 
-- [Running AppWorld Locally](/blog/running-appworld-locally-genie-agent-eval/) — ops prerequisite
+- [Running AppWorld Locally](/blog/running-appworld-locally-genie-agent-eval/) — operations prerequisite
 - [Fair Agent Evals](/blog/fair-agent-evals-before-performance/)
 - [Agent Orchestration Tax](/blog/agent-orchestration-tax-evals/)
 - [AI Agent Eval Failure Modes](/blog/ai-agent-eval-failure-modes/)
@@ -174,4 +174,4 @@ Strict `judge.success` did not flip on this five-task rerun. Next increments: di
 
 **Acknowledgments.** Built with the [StackGen Aiden team](/about/) — the engineers behind the agent runtime and platform this series describes.
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft root cause analysis (RCA) reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.

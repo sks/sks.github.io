@@ -18,7 +18,7 @@ faqs:
     answer: "Not as the first milestone. Start with parallel context gathering and human-reviewable outputs. Remediations need fail-closed gates, receipts, and Judgment-style health checks — not demo confidence."
 ---
 
-A **site reliability engineering (SRE) AI agent** uses a model and tools to support incident triage: gather observability and change evidence, propose a hypothesis, and draft root cause analysis (RCA) for human review. Unlike a question-answering chat alone, it runs a bounded sequence of tool calls. Automatic remediation is a separate, higher-risk capability, not a prerequisite for triage.
+A **site reliability engineering (SRE) artificial intelligence (AI) agent** uses a model and tools to support incident triage: gather observability and change evidence, propose a hypothesis, and draft root cause analysis (RCA) for human review. Unlike a question-answering chat alone, it runs a bounded sequence of tool calls. Automatic remediation is a separate, higher-risk capability, not a prerequisite for triage.
 
 Fast path: [SRE on-call starter pack](/start/sre-on-call/). A topic map is [AI agents for SRE](/topics/ai-agents-sre/). For triage, see [AI incident triage](/topics/ai-incident-triage/). A longer discussion of on-call use is on StackGen: [AI Incident Triage for SREs](https://stackgen.com/blog/ai-incident-triage-for-sres-what-works-on-call).
 
@@ -38,7 +38,7 @@ Fast path: [SRE on-call starter pack](/start/sre-on-call/). A topic map is [AI a
 - A confident causal narrative without enough evidence
 - “Root cause: the deploy” before identity and onset are established ([hypothesis ladder](/blog/hypothesis-ladder/))
 - Unbounded remediation without approval or rollback controls
-- Green HTTP while judgment quietly drifts ([SRE for agentic systems](/blog/sre-for-agentic-systems/))
+- Green Hypertext Transfer Protocol (HTTP) while judgment quietly drifts ([SRE for agentic systems](/blog/sre-for-agentic-systems/))
 
 A fluent explanation is not evidence that the proposed cause is correct.
 
@@ -82,4 +82,4 @@ An SRE agent still needs an [AI agent runtime](/topics/ai-agent-runtime/) — th
 
 ---
 
-> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).
+> StackGen develops AI tools for SRE, including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

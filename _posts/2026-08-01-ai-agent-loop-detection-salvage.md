@@ -10,7 +10,7 @@ tags: [ai-agents, loop-detection, reliability, orchestration, sre, aiden, produc
 permalink: /blog/ai-agent-loop-detection-salvage/
 ---
 
-**AI agent loop detection**—stopping an agent when it repeats actions or responses without progress—can save time and model calls. In one incident investigation, our stop path also threw away a useful answer.
+**Artificial intelligence (AI) agent loop detection**—stopping an agent when it repeats actions or responses without progress—can save time and model calls. In one incident investigation, our stop path also threw away a useful answer.
 
 The agent had already answered the incident question. It had gathered evidence, narrowed the likely cause, and written a useful summary. Then it entered a small closing loop: short variations of “done,” each one less informative than the answer before it. The repetition guard eventually stopped the run.
 
@@ -121,7 +121,7 @@ That gives us two classes of completion:
 - **Presentation completion:** The answer is useful but the closing loop is stuck. Salvage is appropriate.
 - **Evidence completion:** Required observations or actions never happened. Salvage may provide partial findings, but it must not claim completion.
 
-This is why [evidence-gated orchestration](/blog/evidence-gated-multiplane-rca/) matters. A good paragraph cannot satisfy a missing evidence gate.
+This is why [evidence-gated root cause analysis (RCA)](/blog/evidence-gated-multiplane-rca/) matters. A good paragraph cannot satisfy a missing evidence gate.
 
 The runtime should preserve useful work without upgrading partial work into proof.
 

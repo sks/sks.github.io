@@ -48,7 +48,7 @@ Data should flow **into** the model from the right tier — not all tiers at ful
   [Tier 1: Active task]       --> hard-pinned instructions ----+
 ```
 
-Several published approaches use related techniques. [Prosus ARC](https://medium.com/prosus-ai-tech-blog/context-compression-for-production-ai-agents-d6cc34bd3358) replaces a single condensation pass with a structured rolling summary plus optional retrieval when the summary is not enough. [Maxim's context-engineering guide](https://www.getmaxim.ai/articles/context-engineering-for-ai-agents-production-optimization-strategies/) argues for proactive compaction before you hit the wall, not after the API returns a context-length error. The cited [long-horizon agent research](https://arxiv.org/html/2606.10209v1) reports that pruning whole tool call/response pairs and summarizing what was removed can improve task success while reducing tokens in its studied setting; that result is not a measurement of our incident workload.
+Several published approaches use related techniques. [Prosus ARC context-management approach](https://medium.com/prosus-ai-tech-blog/context-compression-for-production-ai-agents-d6cc34bd3358) replaces a single condensation pass with a structured rolling summary plus optional retrieval when the summary is not enough. [Maxim's context-engineering guide](https://www.getmaxim.ai/articles/context-engineering-for-ai-agents-production-optimization-strategies/) argues for proactive compaction before you hit the wall, not after the application programming interface (API) returns a context-length error. The cited [long-horizon agent research](https://arxiv.org/html/2606.10209v1) reports that pruning whole tool call/response pairs and summarizing what was removed can improve task success while reducing tokens in its studied setting; that result is not a measurement of our incident workload.
 
 We were already building toward tiers 3 and 4 in places. We had not named the model clearly enough for operators.
 
@@ -73,7 +73,7 @@ Think of tokenomics as **defense in depth**: ingress caps, tool middleware, sess
 
 A broad log request can return far more data than the next model turn can accommodate. Returning the entire payload also makes it harder to find the incident signal.
 
-We shape tool output **before** it enters the model's working memory — not "hope the model ignores the noise." In production, every tool call runs through a **composable middleware chain** in Go: the tool executes first; shaping runs on the **return path**. Cheap byte work happens on the hot path; an LLM summarizer is invoked only when mechanical cuts are not enough. That ordering matters when you are processing large JSON blobs on every integration response.
+We shape tool output **before** it enters the model's working memory — not "hope the model ignores the noise." In production, every tool call runs through a **composable middleware chain** in Go: the tool executes first; shaping runs on the **return path**. Cheap byte work happens on the hot path; an LLM summarizer is invoked only when mechanical cuts are not enough. That ordering matters when you are processing large JavaScript Object Notation (JSON) blobs on every integration response.
 
 Illustrative shape — one link in a longer chain, not production source:
 
@@ -126,7 +126,7 @@ The tiered pattern in plain language:
 3. **Summarization** — when the payload is still too large and thematic understanding matters, compress with a dedicated summarizer profile; cache when payloads repeat, but do not expect byte-identical log dumps to hit often
 4. **Hard ceiling** — nothing above a maximum string size enters context, period
 
-The design tension is **lossy compression with intent preservation**. Blind truncation is worse than bloat — you cut the one line that explains the outage. We preserve identifiers **mechanically** (trace IDs, commit SHAs, error codes) and let summarization handle the surrounding narrative. That mirrors what [Thomson Reuters Labs observed in proactive compression work](https://medium.com/tr-labs-ml-engineering-blog/keeping-the-lights-on-proactive-context-compression-for-pydanticai-agents-6ee3e4e84f6d): arbitrary string chopping breaks agent reasoning, but structural, hierarchical summarization keeps the lights on when you still need an LLM in the loop.
+The design tension is **lossy compression with intent preservation**. Blind truncation is worse than bloat — you cut the one line that explains the outage. We preserve identifiers **mechanically** (trace identifiers (IDs), commit Secure Hash Algorithm (SHA) digests, error codes) and let summarization handle the surrounding narrative. That mirrors what [Thomson Reuters Labs observed in proactive compression work](https://medium.com/tr-labs-ml-engineering-blog/keeping-the-lights-on-proactive-context-compression-for-pydanticai-agents-6ee3e4e84f6d): arbitrary string chopping breaks agent reasoning, but structural, hierarchical summarization keeps the lights on when you still need an LLM in the loop.
 
 Operators still get the full payload in audit and replay; the model sees a shaped view. That split matters for postmortems — see [observability for agents](/blog/observability/) and [defense in depth for tool calls](/blog/defense-in-depth/).
 
@@ -138,14 +138,14 @@ For chat follow-ups, we compact prior user prompts and maintain a small **observ
 
 ### Duplicate-work prevention
 
-Avoiding redundant calls saves tokens. Semantic memoization—reusing a recent result for a tool call with equivalent intent and arguments—can skip re-execution when the data is still fresh. Loop detection stops identical tool streaks before they become a doom spiral. Circuit breakers and rate limits are reliability tools first — but stopping a runaway loop also reduces cloud spend. FinOps here means attributing operational cost to the work that caused it.
+Avoiding redundant calls saves tokens. Semantic memoization—reusing a recent result for a tool call with equivalent intent and arguments—can skip re-execution when the data is still fresh. Loop detection stops identical tool streaks before they become a doom spiral. Circuit breakers and rate limits are reliability tools first — but stopping a runaway loop also reduces cloud spend. Financial operations (FinOps) here means attributing operational cost to the work that caused it.
 
 ### Workflow and ingress budgets
 
 On the Aiden side, we handle governance **before** a runaway tool loop starts:
 
 - **Spawn contracts:** Hard caps on LLM rounds and tool iterations propagated to sub-agents per workflow stage. Planning stays tight; investigation gets more room, but still bounded.
-- **Evidence-gated orchestration:** [Fixed workflow graphs with structural gates](/blog/evidence-gated-multiplane-rca/) instead of unbounded ReAct loops — fluency was masking skipped work *and* inflating token burn.
+- **Evidence-gated orchestration:** [Fixed workflow graphs with structural gates](/blog/evidence-gated-multiplane-rca/) instead of unbounded reasoning-and-acting (ReAct) loops — fluency was masking skipped work *and* inflating token burn.
 - **Attachment gates:** Large files get an inline preview; full documents route to retrieval instead of being re-inlined every turn.
 - **Gather-once triage:** [Parallel context collection, then narrate](/blog/ai-incident-triage-sre/) — same discipline for chat: stop stuffing the same attachment after a few turns.
 - **Stratified audit sampling:** On offline paths (diary, execution grading), errors and warnings are prioritized; the prompt includes an explicit "sampled N of M" so the model knows visibility is bounded.
@@ -161,7 +161,7 @@ Session totals can obscure which component spent the tokens. One triage session 
 
 We attribute tokens and cost at **tool boundaries** — parent tool identity in telemetry, like distributed tracing for LLM spend. That turns optimization into a conversation both engineering and finance can act on: which integration blew the budget, which middleware avoided a repeat model call, which workflow stage needs a tighter spawn contract. We therefore review cost per successful run alongside monthly spend; a cheap failed run is not useful savings.
 
-That pairs with middleware instrumentation: did cache hit avoid a model call? did shaping reduce the next turn? did the circuit breaker stop a retry storm? The vocabulary for what to measure is in [LLM performance metrics](/blog/web-metrics-to-llm-metrics/). Per-trace summaries and agent USD budgets give operators a stop signal; historical cost bands on workflows set expectations before a run starts.
+That pairs with middleware instrumentation: did cache hit avoid a model call? did shaping reduce the next turn? did the circuit breaker stop a retry storm? The vocabulary for what to measure is in [LLM performance metrics](/blog/web-metrics-to-llm-metrics/). Per-trace summaries and agent U.S. dollar (USD) budgets give operators a stop signal; historical cost bands on workflows set expectations before a run starts.
 
 ---
 
@@ -171,14 +171,14 @@ These are patterns we are considering or partly using, not commitments or benchm
 
 | Pattern | Status | Notes |
 |---------|--------|-------|
-| **Structured summary + selective retrieval** ([ARC](https://medium.com/prosus-ai-tech-blog/context-compression-for-production-ai-agents-d6cc34bd3358)) | Partial | Extends observation registers and RAG; still need an ARC-style "fetch turn N from archive" tool for long threads |
+| **Structured summary + selective retrieval** ([ARC](https://medium.com/prosus-ai-tech-blog/context-compression-for-production-ai-agents-d6cc34bd3358)) | Partial | Extends observation registers and retrieval-augmented generation (RAG); still need an ARC-style "fetch turn N from archive" tool for long threads |
 | **Proactive compaction at high utilization** | Partial | Session compaction exists; operator-facing compression metrics on every chat path are thin |
 | **Recency pruning of whole tool pairs** ([arxiv](https://arxiv.org/html/2606.10209v1)) | Adopting | Better than chopping tokens mid-string inside one tool response |
-| **Governance pinning** | Partial | Safety rules must never be evicted during compaction — see [the HITL paradox](/blog/hitl-paradox/) |
+| **Governance pinning** | Partial | Safety rules must never be evicted during compaction — see [the human-in-the-loop (HITL) paradox](/blog/hitl-paradox/) |
 | **Map-reduce for huge offline prompts** | Gap | Diary and batch paths can still choke on very large days despite sampling |
 | **Full-document workflow import without chunking** | Gap | Heuristic draft planners exist; LLM compose path does not yet chunk |
 | **Expectations → runtime** | Gap | Historical cost bands are visible but do not auto-tighten spawn budgets |
-| **Provider prompt caching** | Gap | App-layer workspace reuse only; no model KV cache blocks yet |
+| **Provider prompt caching** | Gap | App-layer workspace reuse only; no model key-value (KV) cache blocks yet |
 | **Graduated degradation** | Gap | Budgets stop spend at the limit but do not progressively tighten context as spend rises |
 
 ---
@@ -222,10 +222,10 @@ A short checklist that does not require reading our config:
 
 ## Related reading
 
-- [Prompt caching for AI agents is an architecture problem](/blog/prompt-caching-ai-agents/) — make stable context reusable across turns
+- [Prompt caching for artificial intelligence (AI) agents is an architecture problem](/blog/prompt-caching-ai-agents/) — make stable context reusable across turns
 - [You Can't Debug What You Can't See — Observability for AI Agents](/blog/observability/) — see token burn before the session dies
 - [Why One JSON Repair Pass Isn't Enough](/blog/json-repair-layers/) — tool-call reliability at the boundary
-- More on [AI agents for SRE](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
+- More on [AI agents for site reliability engineering (SRE)](/topics/ai-agents-sre/) · full [series](/series/enterprise-ai-agents-go/)
 
 ---
 

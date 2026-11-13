@@ -10,7 +10,7 @@ tags: [observability, ai-agents, telemetry, evaluation, sre, production, langfus
 permalink: /blog/when-agent-observability-lies/
 ---
 
-We built a health scorecard for AI agents—programs that call models and tools to complete tasks. It graded the wrong work. The calculations summarized traces (records of execution steps) dominated by background model calls, not complete user-facing runs. Many records lacked a session identifier, token usage, or an evaluation of answer quality. The resulting grade described that incomplete dataset, not necessarily the agents’ performance.
+We built a health scorecard for artificial intelligence (AI) agents—programs that call models and tools to complete tasks. It graded the wrong work. The calculations summarized traces (records of execution steps) dominated by background model calls, not complete user-facing runs. Many records lacked a session identifier, token usage, or an evaluation of answer quality. The resulting grade described that incomplete dataset, not necessarily the agents’ performance.
 
 A near-perfect reliability number beside a poor correctness score initially suggested a problem with the agents. First we had to ask what each number actually counted. The dashboard mixed helper calls with agent sessions and treated unevaluated work as though it had been judged.
 
@@ -111,7 +111,7 @@ A contextual span answers *which work* those numbers belong to:
 
 Same generation. Different operational meaning. The second can be grouped with the right workload; neither example alone establishes whether the user’s task succeeded.
 
-[AgentTrace](https://arxiv.org/abs/2602.10133) describes three connected views: **cognitive** (observable model interactions and decisions), **operational** (workflow steps, retries, outcomes), and **contextual** (tools, APIs, retrieved material, environment). The useful idea is not adopting another tracing product. It is linking those records under one execution identity, so a model call, a stage outcome, and a tool failure can be examined together. Linking does not on its own establish why the failure happened.
+[AgentTrace](https://arxiv.org/abs/2602.10133) describes three connected views: **cognitive** (observable model interactions and decisions), **operational** (workflow steps, retries, outcomes), and **contextual** (tools, application programming interfaces (APIs), retrieved material, environment). The useful idea is not adopting another tracing product. It is linking those records under one execution identity, so a model call, a stage outcome, and a tool failure can be examined together. Linking does not on its own establish why the failure happened.
 
 Identity alone was not enough. We still had to stop pretending every model call was an agent outcome.
 
@@ -150,13 +150,13 @@ Each stage needs a small, structured outcome contract: identity and status, the 
 
 Persist both. The prose helps operators. The structured record makes workflow steps queryable and testable, allowing a scorecard to check whether a procedure was followed rather than judging writing style alone.
 
-That lesson connects directly to [evidence-gated RCA](/blog/evidence-gated-multiplane-rca/) and the [hypothesis ladder](/blog/hypothesis-ladder/): claims without checkable state are theater.
+That lesson connects directly to [evidence-gated root cause analysis (RCA)](/blog/evidence-gated-multiplane-rca/) and the [hypothesis ladder](/blog/hypothesis-ladder/): claims without checkable state are theater.
 
 ---
 
 ## Provenance Beats a Polished Explanation
 
-[Research on execution provenance](https://arxiv.org/abs/2606.04990) reinforces a lesson SRE teams already know: evaluating only the final answer is insufficient.
+[Research on execution provenance](https://arxiv.org/abs/2606.04990) reinforces a lesson site reliability engineering (SRE) teams already know: evaluating only the final answer is insufficient.
 
 An agent can produce a plausible RCA while querying the wrong service, ignoring a failed tool call, reusing stale memory, inventing a causal bridge, or skipping the procedure entirely. The evaluation has to inspect the path: which evidence was retrieved, which tool result supports each claim, what alternatives were ruled out, which signal plane was unavailable, and whether the stage followed its procedure.
 
@@ -186,7 +186,7 @@ By this point the shape of the fix was clear — identity, classification, contr
 
 A recent [multi-layer survey of AI observability](https://arxiv.org/abs/2604.26152) describes monitoring from model internals and confidence calibration through behavioral monitoring, operational intelligence, and infrastructure tracing. That taxonomy is useful because it clarifies ownership.
 
-An enterprise agent platform can reasonably own behavioral monitoring, workflow and tool provenance, operational scorecards, and application and infrastructure correlation. It usually cannot see proprietary model activations or GPU-kernel behavior from a hosted model provider. Pretending otherwise produces dashboards full of guesses.
+An enterprise agent platform can reasonably own behavioral monitoring, workflow and tool provenance, operational scorecards, and application and infrastructure correlation. It usually cannot see proprietary model activations or graphics processing unit (GPU)-kernel behavior from a hosted model provider. Pretending otherwise produces dashboards full of guesses.
 
 The practical goal is not “observe everything.” It is: know which layer each signal belongs to, connect the layers you can observe, state which layers are blind, and keep confidence within that evidence boundary.
 
@@ -256,9 +256,9 @@ The scorecard was doing arithmetic on records that lacked the identities and eva
 
 ## Related reading
 
-- [PII redaction for AI agents](/blog/pii-redaction-ai-agents/) — preserve authorized debugging without exposing model history
+- [Personally identifiable information (PII) redaction for AI agents](/blog/pii-redaction-ai-agents/) — preserve authorized debugging without exposing model history
 - [You Can't Debug What You Can't See](/blog/observability/) — the foundations of production agent tracing, costs, and audit
-- [LLM Performance Metrics](/blog/web-metrics-to-llm-metrics/) — translating web-performance instincts into token-era metrics
+- [Large Language Model (LLM) Performance Metrics](/blog/web-metrics-to-llm-metrics/) — translating web-performance instincts into token-era metrics
 - [Evidence-Gated Multi-Plane RCA](/blog/evidence-gated-multiplane-rca/) — why claims must not outrun their evidence
 - [The Hypothesis Ladder](/blog/hypothesis-ladder/) — proving and eliminating before narrating
 

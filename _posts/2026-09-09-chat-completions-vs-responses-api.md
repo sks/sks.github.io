@@ -21,7 +21,7 @@ When an investigation takes seven minutes, the endpoint name alone does not expl
 
 Three decisions are often conflated:
 
-1. **Which API** the runtime called (Chat Completions or Responses)
+1. **Which application programming interface (API)** the runtime called (Chat Completions or Responses)
 2. **Which kind of model** ran (a normal chat model or a reasoning model)
 3. **How hard** that model was told to think (reasoning effort)
 
@@ -34,7 +34,7 @@ This post separates those three with language you can reuse in a runbook, plus f
 | What people say | What is usually going on |
 |-----------------|--------------------------|
 | “Responses is slow” | Check reasoning-token use, worker models, retries, and tool wait before assigning a cause |
-| “We used reasoning because the id says `resp_`” | `resp_` only means Responses API. Check whether usage reports **reasoning tokens** |
+| “We used reasoning because the response identifier (ID) says `resp_`” | `resp_` only means Responses API. Check whether usage reports **reasoning tokens** |
 | “Turn thinking up on the newest model” | Check whether that model supports the requested tools and reasoning effort on the selected endpoint |
 | “The trace says operation=`chat`, so this is Completions” | That label is often wrong or too coarse. Prefer the response id prefix |
 
@@ -69,7 +69,7 @@ In the model configuration used for our Go runtime, some tools-plus-reasoning ca
 
 When our Go runtime was Completions-first, we saw:
 
-- clear HTTP 400 errors when someone put a high-thinking model on a tool-heavy worker
+- clear Hypertext Transfer Protocol (HTTP) 400 errors when someone put a high-thinking model on a tool-heavy worker
 - temporary workarounds that used an older model that still accepted tools on Completions
 - occasional extra wait and request overhead: Completions fails, then Responses succeeds; whether the failed request incurs model-token charges depends on the provider’s billing behavior
 
@@ -96,7 +96,7 @@ On a recent investigator export: almost every primary-model hop used Responses (
 
 ## How to read a debug export
 
-Export one run ([how we debug multi-step agents](/blog/best-way-to-debug-multi-step-ai-agent/) · [one zip, one conversation](/blog/one-zip-one-conversation/)). In the LLM call records inside `execution.json`:
+Export one run ([how we debug multi-step agents](/blog/best-way-to-debug-multi-step-ai-agent/) · [one zip, one conversation](/blog/one-zip-one-conversation/)). In the large language model (LLM) call records inside `execution.json`:
 
 | What to look at | Chat Completions | Responses / thinking |
 |-----------------|------------------|----------------------|
@@ -125,7 +125,7 @@ Do not trust `gen_ai.operation.name: chat` alone. We still see that label on Res
 - [Reasoning effort is not a free upgrade](/blog/reasoning-effort-is-not-a-free-upgrade/) — where to spend thinking time  
 - [Reasoning vs generate models for tool-heavy agents](/blog/reasoning-vs-generate-tool-heavy-agents/) — which model class fits a Grafana job  
 - [Hybrid plan: smart planner, generate digs](/blog/hybrid-plan-smart-planner-generate-digs/) — different models for planner and workers  
-- [Best way to debug a multi-step AI agent](/blog/best-way-to-debug-multi-step-ai-agent/) — one golden prompt, one export, fix the host first  
+- [Best way to debug a multi-step artificial intelligence (AI) agent](/blog/best-way-to-debug-multi-step-ai-agent/) — one golden prompt, one export, fix the host first
 
 If the trace shows high reasoning-token use, reduce or relocate that effort and rerun. If most elapsed time is tool wait, changing endpoints or models may do little.
 

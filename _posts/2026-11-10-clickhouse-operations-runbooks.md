@@ -21,12 +21,12 @@ faqs:
 
 Self-managed means you are the operator.
 
-The previous posts in this series covered the architecture of a log analytics platform I run: tiered storage, readers on spot, replication. None of that runs itself. This post is about the simple, boring machinery. It turns a fleet of EC2 machines into something that behaves like a managed service: a golden image, a two-stage bootstrap, a rolling config refresh, and runbooks written before the incident. If that sounds like extra work, compare it with the alternative: you learn all of it during an outage.
+The previous posts in this series covered the architecture of a log analytics platform I run: tiered storage, readers on spot, replication. None of that runs itself. This post is about the simple, boring machinery. It turns a fleet of Amazon Elastic Compute Cloud (EC2) machines into something that behaves like a managed service: a golden image, a two-stage bootstrap, a rolling config refresh, and runbooks written before the incident. If that sounds like extra work, compare it with the alternative: you learn all of it during an outage.
 
 **Key takeaways**
 
-- A Packer-built golden AMI cuts node boot from 8-12 minutes to 2-3; on spot churn that is capacity you keep.
-- EC2 user-data is limited to 16KB, so the real 60KB install script lives in S3 and stage-1 pulls it with the instance role.
+- A Packer-built golden Amazon Machine Image (AMI) cuts node boot from 8-12 minutes to 2-3; on spot churn that is capacity you keep.
+- EC2 user-data is limited to 16 kilobytes (KB), so the real 60 KB install script lives in Amazon Simple Storage Service (S3) and stage-1 pulls it with the instance role.
 - A bucket-notification config refresh rolls readers → backup → keepers → writers, with a DynamoDB debounce collapsing the ~16-event storm into one pass.
 - Plain EC2 skips the Kubernetes operator's safety work; a parity table of what you owe yourself keeps the gaps visible.
 - Alarms carry their remediation in the text, including an idle-shrink alarm so cost falls with load, not just rises.
@@ -36,12 +36,12 @@ The previous posts in this series covered the architecture of a log analytics pl
 
 ## The golden AMI
 
-Think of a hotel. Every room is pre-set: linens, towels, kettle. A guest can check in and use the room in three minutes. Preparing a room from scratch every time would take twelve. Rooms here are EC2 machines, and because readers run on spot, rooms are re-occupied constantly. That is what boot-from-scratch looked like: every node built itself from a plain Ubuntu image (package downloads, ClickHouse install, agent installs, OS tuning), which took 8-12 minutes per boot. On a spot reader replaced at 14:00, that is ten minutes where the reader exists but cannot serve queries. The fleet churns constantly, so the cost repeats.
+Think of a hotel. Every room is pre-set: linens, towels, kettle. A guest can check in and use the room in three minutes. Preparing a room from scratch every time would take twelve. Rooms here are EC2 machines, and because readers run on spot, rooms are re-occupied constantly. That is what boot-from-scratch looked like: every node built itself from a plain Ubuntu image (package downloads, ClickHouse install, agent installs, operating system (OS) tuning), which took 8-12 minutes per boot. On a spot reader replaced at 14:00, that is ten minutes where the reader exists but cannot serve queries. The fleet churns constantly, so the cost repeats.
 
 The fix is a [Packer](https://developer.hashicorp.com/packer/docs) golden AMI. An AMI (Amazon Machine Image) is a disk template for a virtual machine. The golden AMI is Ubuntu 24.04 arm64 with everything pre-installed, the way the hotel pre-sets the room:
 
-- ClickHouse 26.8 LTS, pinned by exact version. "Pinned" means the build always installs this exact version. An unpinned install silently picks whatever is newest. A surprise upgrade at 3am is a bad incident.
-- [clickhouse-backup](https://github.com/Altinity/clickhouse-backup) and the AWS CLI.
+- ClickHouse 26.8 Long Term Support (LTS), pinned by exact version. "Pinned" means the build always installs this exact version. An unpinned install silently picks whatever is newest. A surprise upgrade at 3am is a bad incident.
+- [clickhouse-backup](https://github.com/Altinity/clickhouse-backup) and the Amazon Web Services (AWS) command-line interface (CLI).
 - CloudWatch agent.
 - OS tuning: Transparent Huge Pages (THP) disabled, `ulimit -n 262144`. THP is a kernel feature. The kernel glues small 4KB memory pages into large 2MB ones. That gluing work runs in the foreground, and memory allocators (the code that hands memory to programs, jemalloc inside ClickHouse included) then see sudden latency jumps. ClickHouse's own docs recommend disabling THP.
 
@@ -69,11 +69,11 @@ Stage-1 fits under the 16KB cap. It installs the AWS CLI and pulls stage-2 from 
 
 ## Rolling config refresh
 
-This is the piece people underestimate. ClickHouse config lives in XML files shipped to every node. Changing a TLS certificate means new XML on every writer, reader, keeper, and backup node, plus a restart on the nodes where the file actually changed.
+This is the piece people underestimate. ClickHouse config lives in Extensible Markup Language (XML) files shipped to every node. Changing a Transport Layer Security (TLS) certificate means new XML on every writer, reader, keeper, and backup node, plus a restart on the nodes where the file actually changed.
 
 Imagine a hotel chain that updates its breakfast menu. The chain does not change all hotels at once. It updates one region after another — readers → backup → keepers → writers — and only hotels whose menu actually changed reprint and restart their kitchens. In ClickHouse terms, the hotel chain is the cluster, the menu is the XML config, and the regions are node roles.
 
-Concretely: the files live in S3 under `configs/`. A bucket notification on `configs/*.xml` fires a Lambda (a small AWS function that runs on events). The Lambda rolls a refresh script over SSM (AWS's tool for running commands across many machines) in a fixed order:
+Concretely: the files live in S3 under `configs/`. A bucket notification on `configs/*.xml` fires a Lambda (a small AWS function that runs on events). The Lambda rolls a refresh script over AWS Systems Manager (SSM), AWS's tool for running commands across many machines in a fixed order:
 
 ```
 readers  →  backup  →  keepers  →  writers
@@ -83,7 +83,7 @@ readers  →  backup  →  keepers  →  writers
 
 Readers first because they are disposable. Writers last, so a bad change shows up on the nodes you can afford to have wrong. The script hashes each node's config before and after (compares a short fingerprint of the file) and restarts a node's service only when the config actually changed. A one-file TLS change is therefore one restart on the affected nodes, not a fleet-wide replacement.
 
-One problem remains: a single `terraform apply` emits around 16 S3 events (one per changed file, plus versioning artifacts). A naive listener restarts the fleet 16 times. That is 16 menu-update notices arriving on the same day, and 16 regions reprinting. The fix is a debounce. Picture a sticky note at the head office that says "we are already doing this today." The first notice starts the update; the other 15 see the note and stop. In ClickHouse terms, the sticky note is a DynamoDB lock with a 25-minute TTL. The Lambda takes the lock before it rolls, and later events mark the lock dirty, so the current holder re-runs once after finishing. Without the debounce, a one-file change can mean 16 rolling restarts. With it, always one.
+One problem remains: a single `terraform apply` emits around 16 S3 events (one per changed file, plus versioning artifacts). A naive listener restarts the fleet 16 times. That is 16 menu-update notices arriving on the same day, and 16 regions reprinting. The fix is a debounce. Picture a sticky note at the head office that says "we are already doing this today." The first notice starts the update; the other 15 see the note and stop. In ClickHouse terms, the sticky note is a DynamoDB lock with a 25-minute time-to-live (TTL). The Lambda takes the lock before it rolls, and later events mark the lock dirty, so the current holder re-runs once after finishing. Without the debounce, a one-file change can mean 16 rolling restarts. With it, always one.
 
 ## The runbooks
 
@@ -92,10 +92,10 @@ Airlines write their checklists before the flight, rehearse them, and follow the
 The runbooks this cluster keeps:
 
 - **Node replacement.** One writer at a time. Keepers one at a time with quorum rules. Quorum is the majority that keeps the cluster available: with three keepers, replacing one keeps two voting; replacing two at once is an outage you scheduled yourself.
-- **Backup and restore.** Picture an off-site clerk whose only job is copying the day's ledgers, from a separate building, so a fire at the main office cannot touch the copies. The clerk does not even do her own consolidation (`always_fetch_merged_part`): she receives the finished pages instead of re-doing the work. In ClickHouse terms, the clerk is a dedicated burstable backup replica (a cheap machine type that can briefly borrow extra CPU) excluded from query load balancers, the separate building is a separate backup bucket, and the fire is `terraform destroy` on the data bucket, which never touches the copies. Nightly [clickhouse-backup](https://github.com/Altinity/clickhouse-backup) runs there, and a `backup_missing` alarm fires after 36 quiet hours — an unwatched backup is a backup you learn about during a restore.
-- **Scaling.** Readers scale horizontally by growing the reader ASG (add more machines). Writers and keepers scale vertically (bigger machine type) via planned replacement.
+- **Backup and restore.** Picture an off-site clerk whose only job is copying the day's ledgers, from a separate building, so a fire at the main office cannot touch the copies. The clerk does not even do her own consolidation (`always_fetch_merged_part`): she receives the finished pages instead of re-doing the work. In ClickHouse terms, the clerk is a dedicated burstable backup replica (a cheap machine type that can briefly borrow extra central processing unit (CPU)) excluded from query load balancers, the separate building is a separate backup bucket, and the fire is `terraform destroy` on the data bucket, which never touches the copies. Nightly [clickhouse-backup](https://github.com/Altinity/clickhouse-backup) runs there, and a `backup_missing` alarm fires after 36 quiet hours — an unwatched backup is a backup you learn about during a restore.
+- **Scaling.** Readers scale horizontally by growing the reader Auto Scaling Group (ASG) (add more machines). Writers and keepers scale vertically (bigger machine type) via planned replacement.
 - **Cluster health daily checks**, and a keeper maintenance runbook.
-- **Zero-downtime upgrades.** CI builds the AMI; readers replace automatically (spot churn does the rolling); writers one at a time behind a verification step; keepers one at a time behind another.
+- **Zero-downtime upgrades.** Continuous integration (CI) builds the AMI; readers replace automatically (spot churn does the rolling); writers one at a time behind a verification step; keepers one at a time behind another.
 
 ## What you owe yourself on plain EC2
 

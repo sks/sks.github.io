@@ -22,7 +22,7 @@ We hardened [multi-stage agent workflows](/topics/ai-agent-workflows/) in Aiden,
 
 We used a fixed directed acyclic graph (DAG): a workflow of dependent stages that does not loop back arbitrarily. The large language model (LLM) reasons within each stage; Go code manages state, validates outputs, and decides whether work can move to the next stage. This is a compound system—model plus ordinary software—not a claim that prompts have no role.
 
-This follows [AI-augmented incident triage](/blog/ai-incident-triage-sre/) and [evidence-based verification](/blog/evidence-based-verification/). The examples describe our workflow design, not a controlled comparison of every agent architecture.
+This follows [artificial intelligence (AI)-augmented incident triage](/blog/ai-incident-triage-sre/) and [evidence-based verification](/blog/evidence-based-verification/). The examples describe our workflow design, not a controlled comparison of every agent architecture.
 
 ---
 
@@ -42,13 +42,13 @@ Operators and automated evaluations need checkable artifacts: identities, key pe
 
 ## Pattern 1: Fixed DAG Over Autonomous Loops
 
-We chose a boring, reliable graph for several investigation families (streaming lag, HTTP error-rate, symptom reports):
+We chose a boring, reliable graph for several investigation families (streaming lag, Hypertext Transfer Protocol (HTTP) error-rate, symptom reports):
 
 | Node | Job |
 |------|-----|
 | **Plan / scope** | Parse structured fields. Write a short plan. Forbid root-cause claims. |
 | **Gather evidence** | Run diagnostic branches. Persist machine-checkable evidence tokens. |
-| **Present** | Merge state. Draft the human summary. Format for the UI. |
+| **Present** | Merge state. Draft the human summary. Format for the user interface (UI). |
 
 In these workflows, **one investigator persona** across nodes was easier to manage than a mesh of hyper-specialized micro-agents ("metrics agent" talking to "logs agent"). More specialists add handoffs, duplicate tool discovery, and context overhead; they may still be useful where expertise or independent work justifies that cost.
 
@@ -60,9 +60,9 @@ The LLM still reasons inside a node. The **graph** decides when the node is allo
 
 ## Pattern 2: Structural Evals, Not Semantic Vibes
 
-A gate that matches the phrase `"investigation complete"` will promote hollow runs. We learned this the hard way: English-fragment gates rejected correct answers that used a UUID; shape-only gates accepted empty shells that *looked* like finished reports.
+A gate that matches the phrase `"investigation complete"` will promote hollow runs. We learned this the hard way: English-fragment gates rejected correct answers that used a universally unique identifier (UUID); shape-only gates accepted empty shells that *looked* like finished reports.
 
-Treat the model like an **untrusted third-party API**. Before promoting a payload, run **deterministic guardrails** — structural evals that ask:
+Treat the model like an **untrusted third-party application programming interface (API)**. Before promoting a payload, run **deterministic guardrails** — structural evals that ask:
 
 - Did the primary branch emit a concrete identity (or an explicit "none found after full ladder")?
 - Did presentation include a numeric KPI, not just a heading?
@@ -80,7 +80,7 @@ Navigation nodes that only emit "FINISH / GO_BACK" are great for control flow an
 
 That is a **context-window / state-merging bug**, not an intelligence bug.
 
-We changed the graph so presentation receives **gather output + gate**. The gate decides *whether* to proceed; gather carries *what* to say. Control-flow JSON is not an investigation transcript.
+We changed the graph so presentation receives **gather output + gate**. The gate decides *whether* to proceed; gather carries *what* to say. Control-flow JavaScript Object Notation (JSON) is not an investigation transcript.
 
 The gate carries the decision; gathered evidence carries the facts the summary must use.
 
@@ -126,7 +126,7 @@ We split the playbook:
 - **Human body** — numbered steps, tool plane, expected output, calm senior-engineer markdown (executable runbooks humans still want to edit)
 - **Machine appendix** — tokens, note keys, spawn hygiene, gate phrases
 
-One source of truth; two audiences. The UX pattern is underrated: it keeps humans editing the doc while the runtime still gets a parseable contract.
+One source of truth; two audiences. The user experience (UX) pattern is underrated: it keeps humans editing the doc while the runtime still gets a parseable contract.
 
 ---
 
@@ -138,7 +138,7 @@ Wrong skill load is expensive: the agent diligently runs the wrong playbook and 
 |-------------|----------------------|
 | Topic + consumer group + partition + timeframe | Streaming / lag |
 | Environment + module + symptom + time period | Symptom / bug report |
-| Service + env + API path + timeframe | HTTP error-rate / SLO |
+| Service + env + API path + timeframe | HTTP error-rate / service-level objective (SLO) |
 
 This is classifier hygiene for compound systems: the router is cheap and deterministic; the expensive model only runs inside the chosen subgraph.
 
@@ -146,7 +146,7 @@ This is classifier hygiene for compound systems: the router is cheap and determi
 
 ## What We Deliberately Did Not Automate
 
-- **Closing the loop without a human** — autonomy over incident state erodes trust ([HITL paradox](/blog/hitl-paradox/))
+- **Closing the loop without a human** — autonomy over incident state erodes trust ([human-in-the-loop (HITL) paradox](/blog/hitl-paradox/))
 - **Hardcoded identities in skills** — discover from tools; never bake a customer into the prompt
 - **Unbounded sub-agent swarms** — spawn only bounded parallel lanes with allowlists
 - **Confident narratives without receipts** — every primary claim needs a signal row the gate can see

@@ -17,7 +17,7 @@ faqs:
     answer: "Planning and synthesis stayed on a medium-thinking reasoning preview. Digs, efficiency helpers, and summarizers moved to normal chat models. Dig run times dropped from many minutes to tens of seconds or a couple of minutes."
 ---
 
-[Reasoning effort is not free](/blog/reasoning-effort-is-not-a-free-upgrade/). [Reasoning vs generate](/blog/reasoning-vs-generate-tool-heavy-agents/) asked which *model class* belongs on a tool-heavy job. This post tests a configuration choice: **route planning and tool-query work to different models** within the existing hierarchical mode. A planner chooses subgoals; a dig worker executes queries and returns observations. Confirm workers actually used a normal chat model by checking response ids and reasoning token fields ([Completions vs Responses](/blog/chat-completions-vs-responses-api/)).
+[Reasoning effort is not free](/blog/reasoning-effort-is-not-a-free-upgrade/). [Reasoning vs generate](/blog/reasoning-vs-generate-tool-heavy-agents/) asked which *model class* belongs on a tool-heavy job. This post tests a configuration choice: **route planning and tool-query work to different models** within the existing hierarchical mode. A planner chooses subgoals; a dig worker executes queries and returns observations. Confirm workers actually used a normal chat model by checking response identifiers and reasoning token fields ([Completions vs Responses](/blog/chat-completions-vs-responses-api/)).
 
 Cousins: [hierarchical vs single-agent](/blog/plan-mode-merits-demerits-observability/) · [what is ReAcTree?](/blog/what-is-reactree/).
 
@@ -28,7 +28,7 @@ Cousins: [hierarchical vs single-agent](/blog/plan-mode-merits-demerits-observab
 - Hierarchical plan already separates roles: root = `planning`, digs default = `tool_calling`.
 - An all-reasoning roster ignored that split. Digs correctly requested tools and still ran on a high-effort Responses preview — first digs in the **~8–13 minute** class, multi-million dig tokens on a prior rematch.
 - Hybrid roster: reasoning (medium) for planning / scientific reasoning; generate for digs / efficiency / summarizer.
-- Same burn-rate alert, same Grafana MCP plane: hybrid plan finished in **~6 minutes** with a measured Theory. Dig Expert.Do times landed in the **~12s–2.5m** band. Routing logs showed plan → Responses, digs → generate.
+- Same burn-rate alert, same Grafana Model Context Protocol (MCP) plane: hybrid plan finished in **~6 minutes** with a measured Theory. Dig Expert.Do times landed in the **~12s–2.5m** band. Routing logs showed plan → Responses, digs → generate.
 
 
 ---
@@ -46,7 +46,7 @@ User → plan root (task_type=planning)
 
 The cost came from the model map. Every `good_for_task` entry, including `tool_calling`, selected the same high-effort Responses reasoning model. Thus every dig worker paid for reasoning before its Grafana calls. The runtime correctly followed the configuration; the configuration failed to distinguish planning from measurement.
 
-That is not “reasoning is bad at SRE.” It is **reasoning spent on the wrong turn**.
+That is not “reasoning is bad at site reliability engineering (SRE).” It is **reasoning spent on the wrong turn**.
 
 ---
 
@@ -71,13 +71,13 @@ In this harness, planning and `tool_calling` were already separate task types, s
 
 ## Receipt (obfuscated)
 
-Job: hierarchical plan on a live **API availability burn-rate** card. One Grafana tool plane. Same prompt across seats.
+Job: hierarchical plan on a live **application programming interface (API) availability burn-rate** card. One Grafana tool plane. Same prompt across seats.
 
 | Roster | Wall | Digs | What closed |
 |--------|------|------|-------------|
 | All-generate control | ~0.5m | 1 | Thin undetermined this pass (dig never attached real probes) |
 | All-reasoning high (prior rematch) | ~13m | 2 | Expensive dig tax; multi-million dig tokens |
-| **Hybrid** | **~6m** | **4** | Probable Theory: one hot route all 5xx, matching app error type |
+| **Hybrid** | **~6m** | **4** | Probable Theory: one hot route returning only 5xx server errors, matching application error type |
 
 Hybrid log assertion (the part that matters more than wall):
 
@@ -95,7 +95,7 @@ We stopped a fresh all-reasoning rematch after confirming that its first dig sel
 2. **Keep dig `task_type` off planning.** Host prompts that set digs to `planning` reintroduce the tax even with a good default.
 3. **Remap summarizer and efficiency** too. Fallbacks that inherit the reasoner quietly rebuild the bill.
 4. **Start medium on the planner.** Raise only if Theory quality regresses. High everywhere is how the basement floods.
-5. **Verify from the export.** Worker spans should show a normal chat model (or zero / off thinking). Planner spans may show Responses ids (`resp_…`) plus reasoning tokens ([how to read Completions vs Responses](/blog/chat-completions-vs-responses-api/)).
+5. **Verify from the export.** Worker spans should show a normal chat model (or zero / off thinking). Planner spans may show Responses identifiers (`resp_…`) plus reasoning tokens ([how to read Completions vs Responses](/blog/chat-completions-vs-responses-api/)).
 
 ---
 

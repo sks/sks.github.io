@@ -17,11 +17,11 @@ faqs:
     answer: "Not on absolute wall for a contended six-way Grafana rematch. They did coincide with a hierarchical ReAcTree Responses seat jumping from 0.69 to 1.0 correctness on the same prompt."
 ---
 
-An agent can receive a failed PromQL (Prometheus metric query), change its labels, and issue the same ineffective probe again. If the backend returns HTTP 200 with an application-level `failed` outcome, transport status alone will not tell the runtime to stop.
+An agent can receive a failed Prometheus Query Language (PromQL) query, change its labels, and issue the same ineffective probe again. If the backend returns Hypertext Transfer Protocol (HTTP) 200 with an application-level `failed` outcome, transport status alone will not tell the runtime to stop.
 
 We already had [loop detection](/blog/ai-agent-loop-detection-salvage/) and habits that prefer parent measurement before spawning children ([single vs multi](/blog/single-agent-vs-multi-agent/)). Those controls did not identify repeated terminal observations. We added an observation fingerprint for failed or empty results so the host could detect a repeated response even when the agent changed superficial query arguments. Identical errors can justify a different probe or an explicit Unknown, not an automatic conclusion that the incident signal is absent.
 
-Shapes in the rematch: **single-agent ReAct** vs **hierarchical ReAcTree** ([what is ReAcTree?](/blog/what-is-reactree/) · [PDF](https://arxiv.org/pdf/2511.02424)).
+Shapes in the rematch: **single-agent ReAct (reasoning and acting)** vs **hierarchical ReAcTree** ([what is ReAcTree?](/blog/what-is-reactree/) · [Portable Document Format (PDF)](https://arxiv.org/pdf/2511.02424)).
 
 ---
 
@@ -40,7 +40,7 @@ Shapes in the rematch: **single-agent ReAct** vs **hierarchical ReAcTree** ([wha
 
 On a dual-part alert+logs job, a Responses **hierarchical** seat finished “fast” with:
 
-- corr **0.69**
+- correctness **0.69**
 - both parts **Undetermined**
 - almost no measured Part B numbers
 

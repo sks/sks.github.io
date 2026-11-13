@@ -21,15 +21,15 @@ faqs:
     answer: "No. An S3 gateway endpoint keeps traffic inside the VPC for free. NAT gateway processing costs $0.045/GB, which adds up fast on write-heavy log ingestion."
 ---
 
-S3 is cheap and effectively unlimited. EC2 instances are neither. So all table data in the log analytics platform I run lives in S3, and the ClickHouse nodes are replaceable compute. They cache hot data on local disks, merge parts, and write the results back to the bucket.
+Amazon Simple Storage Service (S3) is cheap and effectively unlimited. Amazon Elastic Compute Cloud (EC2) instances are neither. So all table data in the log analytics platform I run lives in S3, and the ClickHouse nodes are replaceable compute. They cache hot data on local disks, merge parts, and write the results back to the bucket.
 
-Think of an unlimited cheap warehouse outside the city, plus a small shop counter in town where you keep bestsellers. The warehouse holds everything; the counter holds only what customers ask for most. In ClickHouse terms, the warehouse is the S3 bucket, and the counter is the EC2 instance's local disk. That is the same separated-storage idea ClickHouse Cloud is built on, self-managed. Onboarding is the win: a new tenant is an S3 prefix plus a storage policy, not a capacity-planning project. This post covers the storage policy, the insert and read tuning S3 forces on you, and the one EBS volume you cannot lose. Reference: [storing data](https://clickhouse.com/docs/en/operations/storing-data).
+Think of an unlimited cheap warehouse outside the city, plus a small shop counter in town where you keep bestsellers. The warehouse holds everything; the counter holds only what customers ask for most. In ClickHouse terms, the warehouse is the S3 bucket, and the counter is the EC2 instance's local disk. That is the same separated-storage idea ClickHouse Cloud is built on, self-managed. Onboarding is the win: a new tenant is an S3 prefix plus a storage policy, not a capacity-planning project. This post covers the storage policy, the insert and read tuning S3 forces on you, and the one Elastic Block Store (EBS) volume you cannot lose. Reference: [storing data](https://clickhouse.com/docs/en/operations/storing-data).
 
 **Key takeaways**
 
 - All table bytes live in S3. Local disks are a cache and a merge scratchpad, which makes EC2 replaceable.
-- A `tiered` policy lands new parts on local disk and moves cold parts to S3 (`move_factor` 0.1, TTL to the cold volume), with an S3 lifecycle rule to Standard-IA after 30 days.
-- Small inserts are the enemy on S3. `async_insert` with a 100 MB / 10 s batch window and `parts_to_throw_insert` at 3000 keeps ingestion alive.
+- A `tiered` policy lands new parts on local disk and moves cold parts to S3 (`move_factor` 0.1, time-to-live (TTL) to the cold volume), with an S3 lifecycle rule to Standard-Infrequent Access (Standard-IA) after 30 days.
+- Small inserts are the enemy on S3. `async_insert` with a 100-megabyte (MB) / 10-second batch window and `parts_to_throw_insert` at 3000 keeps ingestion alive.
 - The metadata disk — persistent gp3, `delete_on_termination` false — holds the map from tables and rows to S3 objects. Lose it and S3 is an unreadable pile.
 - Never Glacier. Any query must be able to read any part instantly.
 {: .key-takeaways}
@@ -46,7 +46,7 @@ Three places matter:
 |---|---|---|
 | S3 bucket | The bytes of every part | Practically never |
 | Metadata gp3 volume | The map: tables → parts → S3 object keys | Unrecoverable without the daily snapshot |
-| Cache disk (local gp3/NVMe) | Hot file segments pulled from S3 | Not a problem; it refills on demand |
+| Cache disk (local gp3/Non-Volatile Memory Express (NVMe)) | Hot file segments pulled from S3 | Not a problem; it refills on demand |
 
 ## The storage policy
 
@@ -83,8 +83,8 @@ Three places matter:
 What each piece does:
 
 - **`s3` disk**: parts are written as objects to the endpoint in `CH_S3_ENDPOINT`. The platform points that endpoint at a per-tenant prefix inside the bucket. Onboarding a tenant is a prefix and a policy, not new disks.
-- **`use_environment_credentials`**: the instance's IAM role authenticates. No static access keys in any config file.
-- **`s3_cache`**: the shelf behind the shop counter. Recent hot items sit within reach; anything missing is fetched from the warehouse, and the fetched item is placed on the shelf for next time. In ClickHouse terms, the shelf is a cache disk wrapping the s3 disk: reads pull file segments through a local path capped at `max_size` (10 Gi here), so hot queries stay off S3.
+- **`use_environment_credentials`**: the instance's Identity and Access Management (IAM) role authenticates. No static access keys in any config file.
+- **`s3_cache`**: the shelf behind the shop counter. Recent hot items sit within reach; anything missing is fetched from the warehouse, and the fetched item is placed on the shelf for next time. In ClickHouse terms, the shelf is a cache disk wrapping the s3 disk: reads pull file segments through a local path capped at `max_size` (10 gibibytes (GiB) here), so hot queries stay off S3.
 - **Volumes**: `hot` is the local default disk, `cold` is the cached S3 disk. Tables opt in with `storage_policy = 'tiered'`.
 
 ```sql
@@ -98,13 +98,13 @@ New parts always land in the first volume — local disk, where merges are fast.
 
 ## Pair it with an S3 lifecycle rule
 
-The S3 side has one rule. Back to the library: books nobody borrows move to a cheaper archive aisle after 30 days. In ClickHouse terms, the cheaper aisle is the S3 lifecycle rule moving objects to Standard-IA 30 days after creation. S3 Standard is $0.023/GB-month; Standard-IA is $0.0125 ([S3 pricing](https://aws.amazon.com/s3/pricing/)). Parts are immutable, so an object's age tracks its data age exactly — 5 TB of tenant logs costs about $118/mo at Standard and about $64/mo once aged.
+The S3 side has one rule. Back to the library: books nobody borrows move to a cheaper archive aisle after 30 days. In ClickHouse terms, the cheaper aisle is the S3 lifecycle rule moving objects to Standard-IA 30 days after creation. S3 Standard is $0.023/GB-month; Standard-IA is $0.0125 ([S3 pricing](https://aws.amazon.com/s3/pricing/)). Parts are immutable, so an object's age tracks its data age exactly — 5 terabytes (TB) of tenant logs costs about $118/mo at Standard and about $64/mo once aged.
 
 Never Glacier. The archive still lets any clerk fetch any book in seconds. A deep-storage vault would require a three-hour retrieval wait, so every request for an old book would simply fail. In ClickHouse terms, every query must be able to read any part instantly. Glacier retrieval takes minutes to hours, and tiered storage is about cheaper storage, not archiving.
 
 ## The metadata disk holds the address book
 
-Say it plainly: S3 holds the goods; the persistent gp3 disk holds the address book that says which shelf each item is on. Lose the address book, and the warehouse is full of items nobody can find. In ClickHouse terms, the address book is a persistent 512 GB gp3 EBS volume holding the map from tables and rows to S3 object keys. ClickHouse can reconstruct nothing from the bucket alone.
+Say it plainly: S3 holds the goods; the persistent gp3 disk holds the address book that says which shelf each item is on. Lose the address book, and the warehouse is full of items nobody can find. In ClickHouse terms, the address book is a persistent 512-gigabyte (GB) gp3 EBS volume holding the map from tables and rows to S3 object keys. ClickHouse can reconstruct nothing from the bucket alone.
 
 That is why the volume is never deleted on replacement (`delete_on_termination = false`), why replaced instances re-attach it instead of rebuilding, and why it is snapshotted daily. EBS snapshots are incremental at $0.05/GB-month — the one backup in the stack that actually restores tables.
 
@@ -141,7 +141,7 @@ Queries over cold data read S3 through the cache disk. Picture a counter clerk w
 <uncompressed_cache_size>8589934592</uncompressed_cache_size>
 ```
 
-- **Mark cache, 5 GB**: primary key marks held in RAM, so index ranges resolve without disk reads.
+- **Mark cache, 5 GB**: primary key marks held in random-access memory (RAM), so index ranges resolve without disk reads.
 - **Uncompressed cache, 8 GB**: recently decompressed blocks held in RAM for repeated queries.
 - **Hedged requests, limit 5**: on a slow read, ClickHouse opens a second connection and keeps whichever answer arrives first — protection against S3 latency spikes.
 - **Read pools sized for S3**: `asynchronous_read_pull_pool_size` 64, `background_read_pool_size` 32, `remote_read_max_threads` 128. Enough parallel reads to use S3 throughput without queries waiting behind each other.
@@ -150,7 +150,7 @@ Queries over cold data read S3 through the cache disk. Picture a counter clerk w
 
 On storage: S3 Standard at $0.023/GB-month against EBS gp3 at $0.08/GB-month provisioned — the 5 TB above is about $118/mo on S3 versus about $410/mo provisioned, and the S3 side halves again after the 30-day Standard-IA transition. EBS still pays for the metadata volume and cache, but data growth no longer means instance resizing.
 
-On network: an S3 gateway endpoint is free and keeps ClickHouse↔S3 traffic inside the VPC. Without it, that traffic pays NAT gateway processing at $0.045/GB — 5 TB of write churn alone would be $230/mo for nothing.
+On network: an S3 gateway endpoint is free and keeps ClickHouse↔S3 traffic inside the virtual private cloud (VPC). Without it, that traffic pays network address translation (NAT) gateway processing at $0.045/GB — 5 TB of write churn alone would be $230/mo for nothing.
 
 ## The tiered flow on one screen
 

@@ -103,9 +103,9 @@ Part on disk, sorted by timestamp:
     └── primary index: one entry per granule (sparse!)
 ```
 
-This is a *sparse index*: one index entry per 8192 rows, not per row. It is tiny — a few KB per million rows — and always in memory. It tells you which granules are worth opening, not where any single row is. The analogy breaks down on one point: a phone book points you to one name, but a sparse index points to a block of 8192 rows, which ClickHouse then scans. That keeps the index small enough to stay in memory.
+This is a *sparse index*: one index entry per 8192 rows, not per row. It is tiny — a few kilobytes (KB) per million rows — and always in memory. It tells you which granules are worth opening, not where any single row is. The analogy breaks down on one point: a phone book points you to one name, but a sparse index points to a block of 8192 rows, which ClickHouse then scans. That keeps the index small enough to stay in memory.
 
-## Partitioning and TTL: scoping the work
+## Partitioning and time-to-live (TTL): scoping the work
 
 PARTITION BY splits a table into disjoint chunks on disk — one directory per partition — and merging and dropping happen partition by partition. Reference: [custom partitioning key](https://clickhouse.com/docs/en/reference/engines/table-engines/mergetree-family/custom-partitioning-key).
 
@@ -129,7 +129,7 @@ Think of a rule that shreds paper older than 30 days. Nobody schedules the shred
 
 ## Bloom filters for columns the primary index can't help
 
-The sparse primary index covers the ORDER BY key columns. Some columns are not in the sort key but are queried constantly, typically high-cardinality strings such as trace IDs and request IDs. For those we add a *bloom filter*: a probabilistic set that answers "definitely not in this granule" cheaply.
+The sparse primary index covers the ORDER BY key columns. Some columns are not in the sort key but are queried constantly, typically high-cardinality strings such as trace identifiers (IDs) and request IDs. For those we add a *bloom filter*: a probabilistic set that answers "definitely not in this granule" cheaply.
 
 Put a quick checklist on the front of each card-index drawer: "this drawer contains no entries starting with G." You read the label and skip the drawer without opening it. The checklist has one quirk: it can say "maybe" when the item is actually absent (a false yes), but it never says "no" when the item is present. In ClickHouse terms, the checklist is the bloom filter, the drawer is a granule, and a false "maybe" only means a few extra granules get opened.
 
@@ -160,9 +160,9 @@ Back to the warehouse. Suppose trucks deliver one tiny envelope every second. Th
 Merges fold parts at some rate. If inserts outpace merges → part count grows.
 ```
 
-Merge throughput scales with part count and CPU, but it is not infinite. When active parts per partition reaches `parts_to_delay_insert` (1000 by default), the server deliberately slows inserts to protect itself. At `parts_to_throw_insert` (3000 by default), inserts are rejected with the "Too many parts" error — the warehouse refusing the delivery truck at the gate. Check the [merge tree settings](https://clickhouse.com/docs/en/operations/settings/merge-tree-settings) for your version.
+Merge throughput scales with part count and central processing unit (CPU), but it is not infinite. When active parts per partition reaches `parts_to_delay_insert` (1000 by default), the server deliberately slows inserts to protect itself. At `parts_to_throw_insert` (3000 by default), inserts are rejected with the "Too many parts" error — the warehouse refusing the delivery truck at the gate. Check the [merge tree settings](https://clickhouse.com/docs/en/operations/settings/merge-tree-settings) for your version.
 
-Two fixes exist. **Batch in the application:** insert no more than one batch per second per table, and make each batch as large as you can afford. **Use asynchronous inserts:** the platform I run raises the limits and turns on [asynchronous inserts](https://clickhouse.com/docs/en/optimize/asynchronous-inserts). The server buffers small INSERTs from many clients, and a background thread forms one part per buffer flush. In warehouse terms, the warehouse gives all trucks one shared holding bin, and the worker forms one box from each full bin. The buffer flushes when 100 MiB accumulates (`async_insert_max_data_size`) or when the busy timeout elapses (`async_insert_busy_timeout_ms`, default 200 ms — we raise it to 10 s to combine more small sends into one). One part per flush instead of one part per client INSERT.
+Two fixes exist. **Batch in the application:** insert no more than one batch per second per table, and make each batch as large as you can afford. **Use asynchronous inserts:** the platform I run raises the limits and turns on [asynchronous inserts](https://clickhouse.com/docs/en/optimize/asynchronous-inserts). The server buffers small INSERTs from many clients, and a background thread forms one part per buffer flush. In warehouse terms, the warehouse gives all trucks one shared holding bin, and the worker forms one box from each full bin. The buffer flushes when 100 mebibytes (MiB) accumulates (`async_insert_max_data_size`) or when the busy timeout elapses (`async_insert_busy_timeout_ms`, default 200 milliseconds (ms) — we raise it to 10 seconds (s) to combine more small sends into one). One part per flush instead of one part per client INSERT.
 
 ```sql
 SET async_insert = 1,
@@ -180,7 +180,7 @@ All MergeTree-family engines share the part/merge/sparse-index machinery above. 
 | [ReplacingMergeTree](https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/replacingmergetree) | Keep the row with the highest version | Deduplicated upserts, slowly changing state |
 | [AggregatingMergeTree](https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/aggregatingmergetree) | Combine partial aggregate states | Quantiles, distinct counts |
 
-AggregatingMergeTree stores partial states in `AggregateFunction` columns, for example `quantile(0.99)(latency_ms)`, and merges combine those *quantile states* instead of raw rows. Think of a shop assistant who counts the day's receipts into weekly totals, instead of keeping every receipt forever. You can then read a p99 from a rollup table without ever reading the raw logs.
+AggregatingMergeTree stores partial states in `AggregateFunction` columns, for example `quantile(0.99)(latency_ms)`, and merges combine those *quantile states* instead of raw rows. Think of a shop assistant who counts the day's receipts into weekly totals, instead of keeping every receipt forever. You can then read a 99th percentile (p99) from a rollup table without ever reading the raw logs.
 
 This platform uses Summing and Aggregating for pre-aggregated rollup tables: every 60 seconds a scheduled query folds the last hour of raw logs into a rollup table, and dashboards read the rollup, not the raw table. Raw logs stay for the 30-day TTL; rollups carry the long-term history.
 
@@ -188,7 +188,7 @@ One caveat worth knowing on day one: merging is eventually-consistent. Two parts
 
 ## What to read next
 
-The [ClickHouse blog](https://clickhouse.com/blog) covers merge mechanics and insert best practices regularly, and [Altinity's blog](https://altinity.com/blog) is the best practitioner source on operating MergeTree clusters in production. Next in the series: the engine question you cannot avoid on AWS — [SharedMergeTree vs ReplicatedMergeTree](/blog/clickhouse-cloud-vs-self-managed-engines/).
+The [ClickHouse blog](https://clickhouse.com/blog) covers merge mechanics and insert best practices regularly, and [Altinity's blog](https://altinity.com/blog) is the best practitioner source on operating MergeTree clusters in production. Next in the series: the engine question you cannot avoid on Amazon Web Services (AWS) — [SharedMergeTree vs ReplicatedMergeTree](/blog/clickhouse-cloud-vs-self-managed-engines/).
 
 ---
 

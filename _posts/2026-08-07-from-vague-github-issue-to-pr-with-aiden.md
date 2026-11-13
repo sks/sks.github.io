@@ -27,11 +27,11 @@ I tested whether [Aiden](/blog/aiden-platform/) could take a vague GitHub issue 
 
 We dogfooded this on this blog’s repo and a personal GitHub Project. This post is **Aiden the Hard Way**: a flat root of `sg_*` resources with the [StackGen Terraform/OpenTofu provider](/blog/terraform-config/) — every layer you would otherwise hide inside a module. Prefer `module "…"` instead? Read the follow-up, [Aiden the Easy Way](/blog/aiden-the-easy-way/).
 
-> **Note:** Snippets below are teaching shapes (shortened personas/runbooks). Swap URLs, tokens, and column names for your board.
+> **Note:** Snippets below are teaching shapes (shortened personas/runbooks). Swap uniform resource locators (URLs), tokens, and column names for your board.
 
 ---
 
-## Best practices for AI kanban automation
+## Best practices for artificial intelligence (AI) kanban automation
 
 ![GitHub event drives Specify, Research, Plan, and optional review PR, while merge remains a human decision](/assets/images/diagrams/aug-runtime/github-issue-to-pr.svg)
 
@@ -98,7 +98,7 @@ This example uses **OpenTofu** (`tofu`) for `fmt`, `init`, `plan`, and `apply`; 
 
 ---
 
-## Step 1: Configure the LLM provider and models
+## Step 1: Configure the large language model (LLM) provider and models
 
 You only need **one** working model for this demo. We use OpenAI here; attach Anthropic the same way if you prefer Claude.
 
@@ -130,7 +130,7 @@ resource "sg_guild_model" "primary" {
 
 ## Step 2: Integrate GitHub Issues and Projects
 
-A GitHub personal access token (PAT) needs Projects scopes for GraphQL Status reads; without them, those reads fail in opaque ways. Budget time for token scopes before blaming the agent.
+A GitHub personal access token (PAT) needs Projects scopes for Graph Query Language (GraphQL) Status reads; without them, those reads fail in opaque ways. Budget time for token scopes before blaming the agent.
 
 ```hcl
 resource "sg_secret" "github" {
@@ -264,7 +264,7 @@ Start the **workflow**, not a naked agent chat — inputs stay structured.
 
 ## Step 6: Trigger workflows with GitHub webhooks
 
-Register the repo webhook for **Issues** (opened), content type JSON, and secret = `webhook_token`.
+Register the repo webhook for **Issues** (opened), content type JavaScript Object Notation (JSON), and secret = `webhook_token`.
 
 ```hcl
 resource "sg_webhook" "issues" {
@@ -333,7 +333,7 @@ resource "sg_agent_schedule" "status_poll" {
 
 If you hit a wall during your `tofu apply` loop, check these:
 
-* **Dragging a card did nothing:** Repo Issues deliveries only show `opened` and `ping`. Dragging a Projects v2 card is not an `issues` event. The schedule block in Step 7 is the fix for personal boards — eventual, not instant. Match the trigger to the UI gesture.
+* **Dragging a card did nothing:** Repo Issues deliveries only show `opened` and `ping`. Dragging a Projects v2 card is not an `issues` event. The schedule block in Step 7 is the fix for personal boards — eventual, not instant. Match the trigger to the user interface (UI) gesture.
 * **The agent posted `@comment.md` as text:** For `gh api`, a capital **`-F`** expands the `@file`, while a lowercase `-f` sends the literal path string. Make sure your runbook explicitly uses `-F`:
 
 ```bash

@@ -21,7 +21,7 @@ faqs:
     answer: "On our fair run, multi-agent took about 1.6× the wall time (~95s vs ~58s) and about 3.9× the tool calls (27 vs 7), with the same findings — extra cost was coordination and gate retries, not more inspection depth."
 ---
 
-For an AI agent that investigates incidents—software that uses a model to select tools and examine results—one design decision is **single-agent vs multi-agent orchestration**: one loop with tools, or a planner coordinating several loops. More loops can enable parallel work, but they also add handoffs and cost.
+For an artificial intelligence (AI) agent that investigates incidents—software that uses a model to select tools and examine results—one design decision is **single-agent vs multi-agent orchestration**: one loop with tools, or a planner coordinating several loops. More loops can enable parallel work, but they also add handoffs and cost.
 
 We compared the two shapes on one [incident triage](/topics/ai-incident-triage/) job for site reliability engineering (SRE): **same prompt, models, tools, and budgets**; the intended difference was execution shape. One path was a **single parent-first agent**. The other kept a **ReAcTree-style planner** that could spawn children.
 
@@ -32,7 +32,7 @@ This is not a takedown of either. Both paths produced the **same class of findin
 ## What this comparison shows
 
 - **Single-agent** and **multi-agent** are both legitimate production shapes — not a fashion contest.
-- On our **single-plane** triage A/B, multi-agent took **~1.6× longer** (~95s vs ~58s) and **~3.9× more tool calls** (27 vs 7) — and still reached the **same** proposed explanation.
+- On our **single-plane** triage A/B comparison, multi-agent took **~1.6× longer** (~95s vs ~58s) and **~3.9× more tool calls** (27 vs 7) — and still reached the **same** proposed explanation.
 - On **multi-plane / parallel** work, the planner’s strengths — isolation, parallel digs, specialist context — are exactly why trees exist ([ReAcTree in production](/blog/reactree-bugs/)).
 - Choose by **branching need** and measured latency or isolation requirements.
 
@@ -59,7 +59,7 @@ Counting tools does not make a system multi-agent. **Counting cognitive loops** 
 
 We used a **read-only cluster health triage**: inspect nodes and workloads, mark unavailable planes as not applicable, satisfy a completion gate, then write Theory / Impact / Do-this-now with concrete unhealthy names.
 
-That is a **single-plane** job on purpose. It is where orchestration either proves useful — or shows up as pure coordination cost. It is *not* a claim that every SRE investigation looks like this. Multi-plane RCA (metrics + logs + change history) is a different beast ([evidence-gated RCA](/blog/evidence-gated-multiplane-rca/), [hypothesis ladder](/blog/hypothesis-ladder/)).
+That is a **single-plane** job on purpose. It is where orchestration either proves useful — or shows up as pure coordination cost. It is *not* a claim that every SRE investigation looks like this. Multi-plane root cause analysis (RCA) (metrics + logs + change history) is a different beast ([evidence-gated RCA](/blog/evidence-gated-multiplane-rca/), [hypothesis ladder](/blog/hypothesis-ladder/)).
 
 ---
 
@@ -127,7 +127,7 @@ One sequential fair run each after setup was honest. Same prompt, models, tools,
 | Finding quality | Same loci | Same loci | tie |
 | Best fit signal | One plane, short loop | Parallel / multi-skill / isolation | — |
 
-Treat the table as **evidence for a decision framework**, not a global ranking. One A/B is not a latency SLA — it is a concrete “how much tax did orchestration add when branching was not required?”
+Treat the table as **evidence for a decision framework**, not a global ranking. One A/B is not a latency service-level agreement (SLA) — it is a concrete “how much tax did orchestration add when branching was not required?”
 
 ---
 
@@ -140,7 +140,7 @@ Ask these before you pick a shape:
 3. **Do specialists need isolation?** Different budgets, tools, or risk profiles per dig → multi-agent. Same tools for the whole turn → single-agent.
 4. **What is the latency budget?** Human waiting on chat → bias single-agent until branching forces otherwise.
 5. **What must you audit?** Step-level specialist trails → multi-agent. One session narrative → single-agent may be enough.
-6. **Are you fair-testing?** Mis-set budgets, over-redaction, HITL clarify stalls, or completion checks at the wrong altitude can fake a winner ([PII for agents](/blog/pii-redaction-ai-agents/), [completion loops](/blog/is-the-task-actually-done/), [loop salvage](/blog/ai-agent-loop-detection-salvage/)).
+6. **Are you fair-testing?** Mis-set budgets, over-redaction, HITL clarify stalls, or completion checks at the wrong altitude can fake a winner ([Personally identifiable information (PII) for agents](/blog/pii-redaction-ai-agents/), [completion loops](/blog/is-the-task-actually-done/), [loop salvage](/blog/ai-agent-loop-detection-salvage/)).
 
 **Rule of thumb:** start with the simpler shape that can complete the task; test orchestration when independent digs or isolation requirements justify the added coordination.
 
@@ -151,7 +151,7 @@ Ask these before you pick a shape:
 Early runs lied until we fixed setup. Worth naming so your own A/Bs stay honest:
 
 1. **Budgets that do not actually apply** to the path under test
-2. **Redaction that hides tool names and IDs** the model must use
+2. **Redaction that hides tool names and identifiers (IDs)** the model must use
 3. **HITL clarify** on unattended benches (multi-agent especially)
 4. **Completion at the wrong altitude** (child done, root still retries)
 5. **Loop detectors** that punish legitimate batch inspection
@@ -173,7 +173,7 @@ We keep both shapes. This A/B supports using the simpler loop for narrow triage 
 
 ## Where to go next
 
-- [Fair Agent Evals: Tools Must Match](/blog/fair-agent-evals-before-performance/) — eval sequel: fix handoff before you compare modes
+- [Fair Agent Evaluations (Evals): Tools Must Match](/blog/fair-agent-evals-before-performance/) — eval sequel: fix handoff before you compare modes
 - [ReAcTree production bugs](/blog/reactree-bugs/) — why trees need hard depth and shared governance
 - [Is the task actually done?](/blog/is-the-task-actually-done/) — completion that is not prose
 - [What are SRE AI agents?](/blog/what-are-sre-ai-agents/) — triage vs RCA vs remediation
@@ -187,4 +187,4 @@ We keep both shapes. This A/B supports using the simpler loop for narrow triage 
 
 ---
 
-> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).
+> StackGen develops AI tools for SRE, including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

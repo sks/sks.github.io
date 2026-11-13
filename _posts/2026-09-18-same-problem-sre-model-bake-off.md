@@ -21,7 +21,7 @@ faqs:
 
 A continuous-integration (CI) evaluation reran nine times, but each attempt drew a different injected incident. Ranking those attempts by wall time would conflate model behavior with fault difficulty.
 
-Each attempt investigated a **different** injected fault. The cheap seat got a two-call image-tag miss. The expensive Correct seat got a long database-auth miss. The combined efficiency number printed **100** for four different Correct runs because they all finished under the token and wall allowances.
+Each attempt investigated a **different** injected fault. The cheap seat got a two-call image-tag miss. The expensive Correct seat got a long database-authentication miss. The combined efficiency number printed **100** for four different Correct runs because they all finished under the token and wall allowances.
 
 Those results are useful as canaries for whether the investigator can handle varied faults. They are not a controlled head-to-head model comparison.
 
@@ -35,7 +35,7 @@ For a narrower comparison, we fixed the checkout incident and bound **one regist
 - On a checkout outage caused by a payment feature flag set to fail every charge, **claude-fable-5** was the efficient Correct close (113s, 26k new input tokens, 6 model turns / 16 tools, judge 100).
 - **claude-opus-4-8** was reasonably fast and still **Incorrect** (it blamed a sibling catalog CrashLoop). Cheap-and-wrong is last.
 - A combined “session efficiency” score saturated at 100 for every Correct seat under about 1M billed tokens and 3 minutes. Do not use it to pick a model. See [session efficiency should not beat accuracy](/blog/session-efficiency-should-not-beat-accuracy/) and [relative efficiency scores lie](/blog/relative-efficiency-scores-lie/).
-- One model from the earlier random wave was not in the org registry that day. Skip the seat. Do not invent a substitute.
+- One model from the earlier random wave was not in the organization registry that day. Skip the seat. Do not invent a substitute.
 
 
 ---
@@ -46,7 +46,7 @@ The pipeline drew **one random incident per attempt**. One of those attempts hap
 
 | Attempt | Bound model | Incident drawn | Judge |
 |--------:|-------------|---------------|-------|
-| 1 | gpt-5.6-terra | database auth miss | Correct, 8m 29s, 538k new input |
+| 1 | gpt-5.6-terra | database authentication miss | Correct, 8m 29s, 538k new input |
 | 2 | gpt-5.6-terra | policy blocked a workload | Incorrect |
 | 3 | claude-sonnet-5 | checkout / payment failures | Correct |
 | 5 | claude-fable-5-1 | init-container hang | Correct |
@@ -57,7 +57,7 @@ The pipeline drew **one random incident per attempt**. One of those attempts hap
 
 Sorting that table by wall time or dollars would favor the easy wrong-image case for **Fable 5** and the short probe case for **Opus 4.8**. We initially read those attempts as a ranking, but the incident varied along with the model. The next step is a rematch on one prompt, the same rule I already used for [six model×orchestration combos](/blog/six-model-mode-combos-alert-logs-bench/).
 
-A green pipeline still is not a Correct diagnosis. Same lesson as [canary-first investigate evals](/blog/canary-first-sre-investigate-consistency-evals/): the job can finish while the write-up is wrong.
+A green pipeline still is not a Correct diagnosis. Same lesson as [canary-first investigate evaluations](/blog/canary-first-sre-investigate-consistency-evals/): the job can finish while the write-up is wrong.
 
 ---
 
@@ -98,7 +98,7 @@ Same fault: the payment service evaluates a feature flag and throws a synthetic 
 
 Prompt-resend totals (the number many dashboards still call “billed”) followed the same order among Correct seats: 317k → 451k → 658k → 943k. Opus 4.8 used 760k **and was wrong**.
 
-Dollar totals were a **priced subset**. Fable 5.1 had no priced model-call cost at all. So dollars do not pick the winner. That is the same “publish absolutes, label the composite” rule as the [RCA eval checklist](/blog/how-to-evaluate-ai-agent-root-cause-analysis/).
+Dollar totals were a **priced subset**. Fable 5.1 had no priced model-call cost at all. So dollars do not pick the winner. That is the same “publish absolutes, label the composite” rule as the [root cause analysis (RCA) evaluation checklist](/blog/how-to-evaluate-ai-agent-root-cause-analysis/).
 
 "New input" counts prompt tokens not served from cache; "cached input" counts repeated prompt material eligible for provider cache treatment. Cache discounts and prices depend on the provider and contract, so token columns alone do not establish dollar cost. Prompt-resend totals can be much larger than new reads: I have seen a 700k sent-token session with only 100k new-read tokens. Report both; neither alone is a complete dollar figure.
 
@@ -106,7 +106,7 @@ Dollar totals were a **priced subset**. Fable 5.1 had no priced model-call cost 
 
 ## What the write-ups actually said
 
-**Fable 5 / Fable 5.1 / Opus 5 / Sonnet 5** all named the mechanism: payment feature flag enabled at 100% failure, payment throws at charge time, checkout returns failed-to-charge-card. The good closes also noted the config was written after the original deploy, which is the inject fingerprint.
+**Fable 5 / Fable 5.1 / Opus 5 / Sonnet 5** all named the mechanism: payment feature flag enabled at 100% failure, payment throws at charge time, checkout returns failed-to-charge-card. The good closes also noted the configuration was written after the original deploy, which is the inject fingerprint.
 
 **Sonnet 5** still scored 89 instead of 100. It hedged impact at “about 50%” while the traces showed a full charge outage, and it spent 58 tool calls getting there. Correct-but-sloppy is not Incorrect. It is also not the efficiency pick.
 
@@ -151,8 +151,8 @@ The random-wave wrong-image case and the frozen checkout outage are different te
 - [Six model×orchestration combos on one alert+logs job](/blog/six-model-mode-combos-alert-logs-bench/) — same prompt, six seats
 - [Session efficiency should not beat accuracy](/blog/session-efficiency-should-not-beat-accuracy/) — cap composites at Correct
 - [Relative efficiency scores lie](/blog/relative-efficiency-scores-lie/) — medians hide slower labs
-- [Fair agent evals before performance](/blog/fair-agent-evals-before-performance/) — tool parity before mode wars
-- [AI SRE agent benchmarks](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/) — wall, tools, tokens, orchestration tax
+- [Fair agent evaluations before performance](/blog/fair-agent-evals-before-performance/) — tool parity before mode wars
+- [Artificial intelligence (AI) site reliability engineering (SRE) agent benchmarks](/blog/ai-sre-agent-benchmarks-wall-time-tools-tokens/) — wall, tools, tokens, orchestration tax
 - [Reasoning vs generate for tool-heavy agents](/blog/reasoning-vs-generate-tool-heavy-agents/) — do not assume the “bigger” model is the efficient closer
 - [Reasoning effort is not a free upgrade](/blog/reasoning-effort-is-not-a-free-upgrade/) — thinking budget vs tool turns
 

@@ -34,7 +34,7 @@ Agents are different. A single task can add tool schemas, tool results, delegate
 
 Provider caches generally reward a stable prefix. Agent runtimes often produce a turbulent prefix.
 
-That is why a healthy cache strategy starts before the API call. You have to control how the runtime builds context.
+That is why a healthy cache strategy starts before the application programming interface (API) call. You have to control how the runtime builds context.
 
 ---
 
@@ -186,9 +186,9 @@ The cheapest prompt is not merely the shortest one. It is the one whose unchange
 
 ## Related reading
 
-- [LLM tokenomics for production agents](/blog/maintaining-tokenomics-with-aiden/)
+- [Large language model (LLM) tokenomics for production agents](/blog/maintaining-tokenomics-with-aiden/)
 - [Pensieve memory — agents that forget intelligently](/blog/pensieve-memory/)
-- [Observability for AI agents](/blog/observability/)
+- [Observability for artificial intelligence (AI) agents](/blog/observability/)
 - [Go vs Python for AI agents](/blog/why-go/)
 
 ---

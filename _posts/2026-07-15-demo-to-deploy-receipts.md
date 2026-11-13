@@ -10,7 +10,7 @@ tags: [ai-agents, production, sre, evaluation, hitl, workflows, aiden, compound-
 permalink: /blog/demo-to-deploy-receipts/
 ---
 
-An AI agent is software that uses a model to choose steps and call tools. In a demo, it can turn a clean alert into a fluent root-cause analysis (RCA), a report explaining why an incident happened. That is useful, but it does not establish how the same workflow handles missing data, stale instructions, or a failed tool call.
+An artificial intelligence (AI) agent is software that uses a model to choose steps and call tools. In a demo, it can turn a clean alert into a fluent root-cause analysis (RCA), a report explaining why an incident happened. That is useful, but it does not establish how the same workflow handles missing data, stale instructions, or a failed tool call.
 
 For a site reliability engineering (SRE) team—the people responsible for keeping services running—those conditions are routine. While shipping [AI agents for SRE](/topics/ai-agents-sre/), we found it more useful to ask for **receipts**: recorded evidence of what the agent checked and whether each step succeeded. This post maps several failure modes to concrete checks. It is a guide to questions for a pilot, not a claim that any checklist guarantees safe deployment.
 
@@ -22,7 +22,7 @@ Demos assume:
 
 - Telemetry—the measurements and event records used to monitor a system—is complete and labeled as expected
 - The “right” runbook is in context
-- Tool calls finish fast and return tidy JSON
+- Tool calls finish fast and return tidy JavaScript Object Notation (JSON)
 - The stop condition (“investigation complete”) reflects a checked outcome
 - A human will not approve blindly under load
 
@@ -36,7 +36,7 @@ Each mode follows the same shape: **demo illusion**, **production reality**, **r
 
 ### 1. Fluent but wrong
 
-**The demo illusion:** The report looks like an RCA: “The database failed due to high CPU.” That sentence does not say which query was run or how high CPU caused the failure.
+**The demo illusion:** The report looks like an RCA: “The database failed due to high central processing unit (CPU) usage.” That sentence does not say which query was run or how high CPU caused the failure.
 
 **What to check:** A report with all the expected sections can still be wrong. Require evidence before the explanation: predefined stages should record checkable results before a summary is written. See [Evidence-Gated RCA](/blog/evidence-gated-multiplane-rca/) for checks across metrics (numeric measurements), logs (event records), and traces (records of a request across services).
 
@@ -86,7 +86,7 @@ Illustrative gate (shape only):
 
 **The demo illusion:** Requiring approval for every action guarantees meaningful oversight.
 
-**What to check:** Human-in-the-loop (HITL) review can become perfunctory if every harmless query needs approval. Separate read-only queries from actions that change state, and block actions that should never be allowed — [The HITL Paradox](/blog/hitl-paradox/). The right policy depends on the environment and the consequence of a mistake.
+**What to check:** HITL review can become perfunctory if every harmless query needs approval. Separate read-only queries from actions that change state, and block actions that should never be allowed — [The HITL Paradox](/blog/hitl-paradox/). The right policy depends on the environment and the consequence of a mistake.
 
 Illustrative tiering (not a product export):
 
@@ -181,7 +181,7 @@ Elevator version: *“Before relying on the summary, show what the investigation
 - [AI Incident Triage for SREs](/blog/ai-incident-triage-sre/) — shrink the first thirty minutes with parallel context gather
 - [How We Debug Multi-Stage AI Agent Workflows](/blog/bring-up-agent-workflows-like-hardware/) — stage-by-stage golden gates under live variance
 - [The HITL Paradox](/blog/hitl-paradox/) — risk-tiered approvals so review stays real
-- [LLM Tokenomics for Production Agents](/blog/maintaining-tokenomics-with-aiden/) — finish rate and compression as an operating model
+- [Large Language Model (LLM) Tokenomics for Production Agents](/blog/maintaining-tokenomics-with-aiden/) — finish rate and compression as an operating model
 - [The Diary Learning Loop](/blog/diary-learning-loop/) — digests become human-approved workflow/policy changes
 - [The Hypothesis Ladder](/blog/hypothesis-ladder/) — hypothesis-driven debugging: prove first, narrate last
 - Topic hubs: [AI agent workflows](/topics/ai-agent-workflows/) · [AI agents for SRE](/topics/ai-agents-sre/)

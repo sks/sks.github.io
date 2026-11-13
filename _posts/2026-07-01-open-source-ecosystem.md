@@ -19,7 +19,7 @@ We build a proprietary agent product on an open-source Go framework. We merged 1
 
 ## The Dependency Graph
 
-Our agent runtime is built on [trpc-agent-go](https://github.com/trpc-group/trpc-agent-go) — an open-source Go framework for building AI agents. It provides the core abstractions: tool interfaces, wrappers around large language models (LLMs), streaming responses, and memory primitives.
+Our agent runtime is built on [trpc-agent-go](https://github.com/trpc-group/trpc-agent-go) — an open-source Go framework for building artificial intelligence (AI) agents. It provides the core abstractions: tool interfaces, wrappers around large language models (LLMs), streaming responses, and memory primitives.
 
 We extend it heavily — custom middleware, governance layers, memory management, multi-model orchestration — but the foundation is open source. Without it, we'd have spent months building plumbing instead of features.
 
@@ -40,7 +40,7 @@ Our contributions fall into three categories:
 - Rate limiter edge cases with concurrent requests
 
 **Features we needed that benefit everyone:**
-- HTTP client override for server-sent event (SSE) connections (needed for corporate proxies)
+- Hypertext Transfer Protocol (HTTP) client override for server-sent events (SSE) connections (needed for corporate proxies)
 - Enhanced tool metadata for governance (needed for our middleware stack)
 - Memory search filtering by type (needed for our multi-type memory model)
 
@@ -55,8 +55,8 @@ Our pattern: We build features in our private codebase first. When a feature req
 | Project | What We Contributed |
 |---------|-------------------|
 | [Docker MCP Registry](https://github.com/docker/mcp-registry) | Added StackGen to the Model Context Protocol (MCP) server catalog |
-| [A2A JS SDK](https://github.com/a2aproject/a2a-js) | Registry fix for Agent-to-Agent (A2A) protocol |
-| [Kiro Powers](https://github.com/kirodotdev/powers) | Added StackGen IaC power for agent management |
+| [A2A JavaScript (JS) software development kit (SDK)](https://github.com/a2aproject/a2a-js) | Registry fix for Agent-to-Agent (A2A) protocol |
+| [Kiro Powers](https://github.com/kirodotdev/powers) | Added StackGen infrastructure as code (IaC) power for agent management |
 | [mcp-go](https://github.com/mark3labs/mcp-go) | HTTP client override for SSE transport |
 | [dex (OpenID Connect, OIDC)](https://github.com/dexidp/dex) | MCP authentication flow changes |
 | [HashiCorp Terraform MCP Server](https://github.com/hashicorp/terraform-mcp-server) | Reviewed and tested early builds |
@@ -179,4 +179,4 @@ We adopted MCP for tool connections, A2A for inter-agent communication, and AG-U
 
 ---
 
-> We build incident-triage agents at StackGen; the SRE offering is at [ai.stackgen.com](https://ai.stackgen.com).
+> We build incident-triage agents at StackGen; the site reliability engineering (SRE) offering is at [ai.stackgen.com](https://ai.stackgen.com).

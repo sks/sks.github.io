@@ -10,7 +10,7 @@ tags: [ai-agents, pii, privacy, security, observability, audit, aiden, productio
 permalink: /blog/pii-redaction-ai-agents/
 ---
 
-**Personally identifiable information (PII) redaction** replaces sensitive personal values before they enter an AI agent’s working history. We applied it to the context returned to the model, then found that the same protected form reached an operator’s debugging trace.
+**Personally identifiable information (PII) redaction** replaces sensitive personal values before they enter an artificial intelligence (AI) agent’s working history. We applied it to the context returned to the model, then found that the same protected form reached an operator’s debugging trace.
 
 The privacy control did its job. Identifiers became placeholders before the conversation returned to the model. The agent could reason about structure without repeatedly seeing the original value.
 
@@ -55,7 +55,7 @@ The useful abstraction is not “redacted or unredacted.” It is **purpose-boun
 
 | View | Audience | Data state |
 |------|----------|------------|
-| Model | The LLM and agent loop | Stable placeholder — enough to recognize recurrence, no raw value |
+| Model | The large language model (LLM) and agent loop | Stable placeholder — enough to recognize recurrence, no raw value |
 | Operator | Authorized human debugging a run | Original value restored at the presentation boundary for that invocation |
 | Broad audit / analytics | Long-lived, widely queried stores | Remains redacted unless a stronger compliance need justifies restricted storage |
 
@@ -76,7 +76,7 @@ Late rendering keeps the boundary narrow:
 3. The presentation layer restores only values that the viewer may access.
 4. Other consumers continue receiving the protected form.
 
-This is the privacy equivalent of preparing different API responses from one domain object. The stored truth and the displayed view do not have to be identical.
+This is the privacy equivalent of preparing different application programming interface (API) responses from one domain object. The stored truth and the displayed view do not have to be identical.
 
 ---
 
@@ -100,7 +100,7 @@ The safe principle is **minimum useful correlation**:
 - Scoped tightly enough to avoid cross-context tracking
 - Meaningless without access to the protected mapping
 
-In practice that means keeping the mapping behind an access-controlled store, scoping markers to the run or session that needs them, and refusing to mint forever-global stand-ins for every sensitive field. The engineering goal is recurrence within the task — not a second customer ID that travels the platform.
+In practice that means keeping the mapping behind an access-controlled store, scoping markers to the run or session that needs them, and refusing to mint forever-global stand-ins for every sensitive field. The engineering goal is recurrence within the task — not a second customer identifier (ID) that travels the platform.
 
 ---
 
@@ -117,7 +117,7 @@ When a lookup fails, the operator asks:
 
 If every argument is replaced with an opaque marker, the operator cannot distinguish a bad tool from a bad argument.
 
-But showing all raw arguments to every observer is also wrong. Tool calls can contain credentials, customer data, internal URLs, or incident details.
+But showing all raw arguments to every observer is also wrong. Tool calls can contain credentials, customer data, internal uniform resource locators (URLs), or incident details.
 
 The answer is not blanket visibility. It is field-aware, role-aware presentation:
 
@@ -137,7 +137,7 @@ Agent interfaces frequently stream tool arguments in pieces. A protected value m
 That creates awkward failure modes:
 
 - one fragment is restored while another remains hidden,
-- the UI briefly displays a raw prefix before redaction catches up,
+- the user interface (UI) briefly displays a raw prefix before redaction catches up,
 - or the final assembled call differs from what the model history stores.
 
 Apply privacy rules to both incremental events and the completed event; if fragments cannot be checked safely, buffer them before display. Test what the operator sees during the stream, not only the final object.
@@ -197,7 +197,7 @@ Good agent privacy does not make the system impossible to debug. Good agent obse
 - [Observability for AI agents](/blog/observability/)
 - [When your AI agent scorecard lies](/blog/when-agent-observability-lies/)
 - [Defense in depth for tool-wielding agents](/blog/defense-in-depth/)
-- [The HITL paradox](/blog/hitl-paradox/)
+- [The human-in-the-loop (HITL) paradox](/blog/hitl-paradox/)
 
 ---
 

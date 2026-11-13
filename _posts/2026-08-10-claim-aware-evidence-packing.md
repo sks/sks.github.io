@@ -19,7 +19,7 @@ faqs:
     answer: "In integrations or tool wrappers. The shared verifier should stay generic: string membership, budgets, and fail-open policy — not product-specific JSON layouts."
 ---
 
-A **grounding guard** checks whether an AI agent’s claims are supported by captured tool results. A false accusation of invention can make the guard less useful: reviewers may stop trusting its alerts.
+A **grounding guard** checks whether an artificial intelligence (AI) agent’s claims are supported by captured tool results. A false accusation of invention can make the guard less useful: reviewers may stop trusting its alerts.
 
 The trap is subtle: you built a verifier that compares the answer to “what tools returned,” but you only fed the verifier a **budgeted slice** of those returns. Truncate the wrong slice and honest citations look invented.
 
@@ -34,7 +34,7 @@ This post covers the truncation failure, a claim-aware way to select evidence wi
 - Pack around **claim tokens** from the answer, not dump order — and be honest that token extraction is heuristic.
 - Exclude **procedure / how-to** text from the evidence bag — it burns budget and is not observation.
 - If the bag is **truncated**, prefer **unverifiable** over **invented** — but **alarm on chronic truncation** so fail-open does not become a permanent bypass.
-- Put **cheap membership checks** in code; leave paraphrase and soft id variants to a model or to wrappers that emit canonical forms.
+- Put **cheap membership checks** in code; leave paraphrase and soft identifier variants to a model or to wrappers that emit canonical forms.
 - Keep the **shared verifier domain-agnostic**; reshape payloads at the integration boundary.
 
 If the verifier did not receive a tool-result row because it was truncated, absence from the verifier input does not establish that the agent invented the row. Preserve relevant chunks where possible, mark incomplete capture, and investigate recurring truncation.
@@ -43,7 +43,7 @@ If the verifier did not receive a tool-result row because it was truncated, abse
 
 ## Why a hallucination guard is worth the hassle
 
-Tool-using agents are persuasive. They return polished prose with ids, percentages, and “according to the lookup…” framing. Without a check against captured tool output, a polished answer can conceal unsupported entity claims.
+Tool-using agents are persuasive. They return polished prose with identifiers, percentages, and “according to the lookup…” framing. Without a check against captured tool output, a polished answer can conceal unsupported entity claims.
 
 A useful guard asks:
 
@@ -58,7 +58,7 @@ That is narrower than “is the answer good?” or “did the agent dig enough?�
 | Close before homework | Sounded confident without enough tool calls | Dig / curiosity policy |
 | **Torn-notebook accuse** | **Evidence was incomplete, yet we called the answer invented** | **Packing + fail-open policy** |
 
-Mixing those jobs into one “hallucination” button makes the guard noisy. Ops mutes it. You lose the only cheap check you had.
+Mixing those jobs into one “hallucination” button makes the guard noisy. Operations (ops) staff mute it. You lose the only cheap check you had.
 
 Naming the metric helps: track **false invented** separately from true inventions. If operators mute the guard because it cries wolf, the guard is already dead.
 
@@ -77,7 +77,7 @@ What usually sits at the start?
 
 What often sits later?
 
-- The large JSON / table / series that actually contains the id the answer cites.
+- The large JavaScript Object Notation (JSON) / table / series that actually contains the id the answer cites.
 
 Head-first truncation can keep procedural text and drop the relevant observation. The judge sees a short “tool results” section, sees an identifier that is absent, and labels the answer a hallucination. In this case, the verifier lacked the relevant row even though the tool returned it.
 
@@ -132,7 +132,7 @@ Packing quality depends on which claim tokens are extracted; document and test t
 
 A practical natural language processing (NLP) shortcut here is a code extractor that looks like:
 
-1. **Scan the answer** for distinctive shapes: quoted strings, UUIDs, hyphen/underscore ids, dotted names (`svc.api`), long alphanumeric runs.
+1. **Scan the answer** for distinctive shapes: quoted strings, universally unique identifiers (UUIDs), hyphen/underscore identifiers, dotted names (`svc.api`), long alphanumeric runs.
 2. **Drop stopwords and JSON noise** (`the`, `status`, `null`, `true`, `result`, …) so English filler never becomes a “claim.”
 3. **Drop bare numerics / percents** from *hard* membership gates (`90`, `90%`) — ratio↔percent restatements are better left to a model or skipped.
 4. **Lowercase for overlap**, keep the original for display if you surface reasons.
@@ -159,11 +159,11 @@ func extractClaimTokens(answer string) []string {
 | Format drift | Answer says `user-1234`, tool has `"id": "1234"` | Overlap fails → relevant chunk dropped |
 | Soft paraphrase | Answer summarizes a log without repeating the id | Nothing to pack around |
 | Over-extraction | Common words slip past the deny-list | Packing prefers the wrong chunks |
-| Under-extraction | Exotic id shapes your regex never saw | Fallback to “recent chunks” only |
+| Under-extraction | Exotic identifier shapes your regular expression (regex) never saw | Fallback to “recent chunks” only |
 
 **Adopt:** ship the heuristic, **measure false invented vs true invented**, and widen regex / noise lists from real misses.
 
-**Mitigate format drift without teaching the runtime your CRM:**
+**Mitigate format drift without teaching the runtime your customer relationship management (CRM) system:**
 
 - Prefer **distinctive substrings** (keep `1234` only when long enough / rare enough — short digits are poison).
 - Light **normalization** on both sides for overlap only (strip common prefixes like `user-` / `id=` is risky; prefer wrappers emitting a canonical id field the agent must quote).
@@ -208,7 +208,7 @@ Treat chronic truncation as an **ops bug**, not a policy win:
 1. **Alarm** when truncation or unverifiable exceeds a budget (per workflow, not a global shrug).
 2. **Shrink at the edge** — wrappers return compact observations, not raw vendor dumps (this is where domain knowledge belongs).
 3. **Hard caps on capture** earlier in the pipeline so packing is a second line of defense, not the only mop.
-4. **Never silently equate** unverifiable with success in product UX — show “could not verify” when that is what happened.
+4. **Never silently equate** unverifiable with success in product user experience (UX) — show “could not verify” when that is what happened.
 
 Fail-open without telemetry is how you delete the guard while keeping the checkbox.
 
@@ -216,7 +216,7 @@ Fail-open without telemetry is how you delete the guard while keeping the checkb
 
 ## Pattern: cheap gates in code, judgment in the model
 
-Not every check needs another LLM call.
+Not every check needs another large language model (LLM) call.
 
 **Good in code (deterministic, cheap):**
 
@@ -244,12 +244,12 @@ Layering beats a clever monolith.
 | Soft evidence budget | Shared verifier | Every stack hits context limits |
 | Claim token extract + packing | Shared verifier | Generic heuristics; no product parsers |
 | Fail-open on truncation | Shared verifier | Policy, not domain |
-| Truncation / unverifiable SLOs | Shared verifier + ops | Closes the fail-open loophole |
+| Truncation / unverifiable service-level objectives (SLOs) | Shared verifier + ops | Closes the fail-open loophole |
 | Procedure vs observation split | Shared verifier + tool taxonomy | How-to text is not evidence |
 | Hard entity membership | Shared verifier (code) | Cheap, testable |
 | Soft grounding / paraphrase | Model judge | Ambiguous without semantics |
 | Compact / canonical ids in payloads | **Integrations / tool wrappers** | Fixes brittle overlap at the source |
-| Dig playbooks / SOPs | Agents / workflows | Not the grounding engine |
+| Dig playbooks / standard operating procedures (SOPs) | Agents / workflows | Not the grounding engine |
 
 Rule of thumb:
 
@@ -267,7 +267,7 @@ A generic stopword package covers the first half. It does not know your tool env
 
 **Adopt:** a tiny local map you own and review; grow it from false packing hits.
 
-**Do not adopt:** SimHash, HTML strippers, or a multilingual NLP stack inside the hot-path membership filter.
+**Do not adopt:** SimHash, Hypertext Markup Language (HTML) strippers, or a multilingual NLP stack inside the hot-path membership filter.
 
 ---
 
@@ -284,7 +284,7 @@ A generic stopword package covers the first half. It does not know your tool env
 - [ ] Shared verifier has **no** product-specific JSON compactors  
 - [ ] Stopword / noise lists are local and owned  
 
-Shareable cousin: [Evidence-gated RCA checklist](/checklists/evidence-gated-rca/).
+Shareable cousin: [Evidence-gated root cause analysis (RCA) checklist](/checklists/evidence-gated-rca/).
 
 ---
 

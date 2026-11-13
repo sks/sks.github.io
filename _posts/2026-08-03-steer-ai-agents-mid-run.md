@@ -18,7 +18,7 @@ faqs:
     answer: "The runtime applied it too late, after the answer was already formed, or treated receipt as completion. Feedback must create completion debt the agent has to pay before finishing."
 ---
 
-## How do I let users interrupt or redirect an AI agent mid-response?
+## How do I let users interrupt or redirect an artificial intelligence (AI) agent mid-response?
 
 Deliver the correction at the next safe checkpoint between tool calls, keep trusted evidence when the task is still the same, and refuse to mark the run done until the final answer addresses that feedback. A stored comment that never reaches the loop is not mid-run steering.
 
@@ -214,7 +214,7 @@ Human-in-the-loop should mean more than approving a button at the end. A correct
 
 ## Related reading
 
-- [The HITL paradox](/blog/hitl-paradox/)
+- [The human-in-the-loop (HITL) paradox](/blog/hitl-paradox/)
 - [AI agent loop detection — don't throw away the answer](/blog/ai-agent-loop-detection-salvage/)
 - [Is the task actually done?](/blog/is-the-task-actually-done/)
 - [Defense in depth for tool-wielding agents](/blog/defense-in-depth/)

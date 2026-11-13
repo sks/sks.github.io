@@ -17,9 +17,9 @@ faqs:
     answer: "Both preserve useful findings when an agent cannot finish normally. Budget finalization handles resource ceilings; loop-detection salvage handles repetitive execution."
 ---
 
-An AI agent investigating a service incident may reach its maximum number of model calls while querying Grafana, a monitoring dashboard. The site reliability engineering (SRE) responder still needs the findings collected so far. A partial root-cause analysis (RCA)—possible explanation, unknowns, and checks performed—is more useful than a bare `budget_exhausted` marker, provided it is labeled incomplete.
+An artificial intelligence (AI) agent investigating a service incident may reach its maximum number of model calls while querying Grafana, a monitoring dashboard. The site reliability engineering (SRE) responder still needs the findings collected so far. A partial root-cause analysis (RCA)—possible explanation, unknowns, and checks performed—is more useful than a bare `budget_exhausted` marker, provided it is labeled incomplete.
 
-*The incident patterns below are composite and anonymized. Counts are rounded. Names, IDs, and infrastructure details are fictionalized to protect customer confidentiality.*
+*The incident patterns below are composite and anonymized. Counts are rounded. Names, identifiers (IDs), and infrastructure details are fictionalized to protect customer confidentiality.*
 
 ---
 
@@ -31,7 +31,7 @@ An execution ceiling limits model calls, tool iterations, or elapsed time so an 
 
 ## The wrong product behavior
 
-In this composite scenario, a twenty-minute Grafana and deployment-history search hits the maximum large-language-model (LLM) call count (`MaxLLMCalls`). The UI shows a canned exhaustion marker. Everything the agent already collected vanishes behind an apology.
+In this composite scenario, a twenty-minute Grafana and deployment-history search hits the maximum large-language-model (LLM) call count (`MaxLLMCalls`). The user interface (UI) shows a canned exhaustion marker. Everything the agent already collected vanishes behind an apology.
 
 Operators experience that as: “the bot did nothing.” The tool log may still contain useful observations. The product failed to deliver them to the responder.
 

@@ -69,4 +69,4 @@ Distill after the task so analysis doesn't delay the user. Require evidence of s
 
 ---
 
-> **StackGen builds AI-assisted SRE (site reliability engineering) tools.** Our offering at [ai.stackgen.com](https://ai.stackgen.com) supports incident triage, diagnostics, and draft root-cause analyses.
+> **StackGen builds artificial intelligence (AI)-assisted site reliability engineering (SRE) tools.** Our offering at [ai.stackgen.com](https://ai.stackgen.com) supports incident triage, diagnostics, and draft root-cause analyses.

@@ -19,7 +19,7 @@ faqs:
     answer: "The task prompt and expected deliverable. Do not add private tool names solely to make a grader's string search pass."
 ---
 
-We once let the model that wrote an answer score that answer. Its score was generous, but the work did not meet the task. That experience changed how we separate the *agent under test* from the *grader*—the code, model, or person checking its work.
+We once let the artificial intelligence (AI) model that wrote an answer score that answer. Its score was generous, but the work did not meet the task. That experience changed how we separate the *agent under test* from the *grader*—the code, model, or person checking its work.
 
 [From Vibes to Contracts](/blog/from-vibes-to-contracts-agent-evals/) and [How to Evaluate an AI Agent for Root Cause Analysis](/blog/how-to-evaluate-ai-agent-root-cause-analysis/) discuss rubrics and checklists. Here the question is who applies them, and to which run.
 
@@ -33,7 +33,7 @@ We once let the model that wrote an answer score that answer. Its score was gene
 
 [Anthropic's demystifying evals](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) describes code-based, model-based, and human graders. They serve different purposes. A code check can compare an identifier with a record; a model judge can read whether an explanation addresses the user's question; a human can inspect disputed or high-stakes results. A separate judge can still be wrong or share the agent's blind spots, so compare its judgments with human examples before relying on a gate.
 
-In our live trials an external container runner invokes the agent. The agent model and model-based judge are distinct, and CI rejects a configuration that makes them equal. That prevents direct self-grading; it does not prove that the judge is unbiased. A separate analyst model may explain token spend afterward, or fall back to a plain summary when unavailable. Its commentary is not the agent's result or the factual grade.
+In our live trials an external container runner invokes the agent. The agent model and model-based judge are distinct, and continuous integration (CI) rejects a configuration that makes them equal. That prevents direct self-grading; it does not prove that the judge is unbiased. A separate analyst model may explain token spend afterward, or fall back to a plain summary when unavailable. Its commentary is not the agent's result or the factual grade.
 
 This distinction applies to LangGraph, CrewAI, OpenAI Agents, and in-house loops alike: record what did the task and what evaluated it. For facts such as whether a file exists or a number matches a source, use code rather than asking either model to remember.
 

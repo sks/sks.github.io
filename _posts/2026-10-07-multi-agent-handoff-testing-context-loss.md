@@ -19,7 +19,7 @@ faqs:
     answer: "The worker provides a brief and the parent consumes it. Specify and test what that boundary requires, including how the parent behaves if a field or piece of evidence is missing."
 ---
 
-In one run, a worker sent its entire transcript back to the parent agent. The parent exceeded its input limit before it could finish the user's task. The failure was not a missing fact; it was a handoff too large to use. A shorter handoff has the opposite risk: dropping an unresolved question and letting the parent claim the work is complete.
+In one artificial intelligence (AI) agent run, a worker sent its entire transcript back to the parent agent. The parent exceeded its input limit before it could finish the user's task. The failure was not a missing fact; it was a handoff too large to use. A shorter handoff has the opposite risk: dropping an unresolved question and letting the parent claim the work is complete.
 
 A *handoff* is the information passed from a worker agent to the parent that assigned it a subtask. A *brief* is the bounded summary the parent can act on. Discussions by [TestMu](https://www.testmuai.com/blog/agent-handoff-testing/) and [QASkills](https://qaskills.sh/blog/testing-multi-agent-handoff-context-loss) likewise focus on the transfer boundary: checking each agent separately can miss information lost or dumped between them.
 
@@ -60,4 +60,4 @@ These checks have different costs. A unit test can verify fields and bounds quic
 
 The desired outcome is a brief the parent can use, not merely a short one. Size, preserved uncertainty, and correct downstream behavior all matter.
 
-Previous: [How to Test AI Agent Loops](/blog/test-ai-agent-loops-with-evidence/). Next: [AI Agent Evals in CI/CD](/blog/ai-agent-evals-cicd-flakes/).
+Previous: [How to Test AI Agent Loops](/blog/test-ai-agent-loops-with-evidence/). Next: [AI Agent Evals in continuous integration and continuous delivery (CI/CD)](/blog/ai-agent-evals-cicd-flakes/).

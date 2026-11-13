@@ -20,9 +20,9 @@ faqs:
     answer: "The REST attach API accepts priority. The sg_agent_policy_attachment resource today exposes agent_name, policy_id, and enabled."
 ---
 
-Manage AI agent policies as code the same way you manage infrastructure: Rego in git, `plan` before `apply`, attach by UUID.
+Manage artificial intelligence (AI) agent policies as code the same way you manage infrastructure: Rego in git, `plan` before `apply`, attach by universally unique identifier (UUID).
 
-[Authorize with OPA](/blog/authorize-ai-agent-tool-calls-opa/) proved a deny rule locally. This post puts that rule on an agent with the StackGen Terraform/OpenTofu provider. Background on why agent config moved to a provider lives in [Terraform for agent configuration](/blog/terraform-config/).
+[Authorize with Open Policy Agent (OPA)](/blog/authorize-ai-agent-tool-calls-opa/) proved a deny rule locally. This post puts that rule on an agent with the StackGen Terraform/OpenTofu provider. Background on why agent config moved to a provider lives in [Terraform for agent configuration](/blog/terraform-config/).
 
 **Key takeaways**
 
@@ -39,21 +39,21 @@ Manage AI agent policies as code the same way you manage infrastructure: Rego in
 
 ## Architecture: control plane vs enforce path
 
-Terraform (and the Guild API) own the **control plane**:
+Terraform (and the Guild application programming interface (API)) own the **control plane**:
 
 | Resource | Stores | Runtime effect |
 |----------|--------|----------------|
 | `sg_policy` | Rego text, type (`logic` / `intervention` / …), UUID | Available for evaluation |
 | `sg_agent` | Agent identity and config | Target for attachment |
-| `sg_agent_policy_attachment` | `(agent_name, policy_id, enabled)` | PEP includes that Rego for that agent |
+| `sg_agent_policy_attachment` | `(agent_name, policy_id, enabled)` | Policy enforcement point (PEP) includes that Rego for that agent |
 
-Nothing in this path runs the LLM. `tofu apply` only mutates stored policy and links. The **data plane** (factsheet → OPA → allow/deny/ask → tool) is unchanged until a live tool call happens. That split is why you can `opa test` offline, `tofu plan` the attach, and only then enable enforcement.
+Nothing in this path runs the large language model (LLM). `tofu apply` only mutates stored policy and links. The **data plane** (factsheet → OPA → allow/deny/ask → tool) is unchanged until a live tool call happens. That split is why you can `opa test` offline, `tofu plan` the attach, and only then enable enforcement.
 
 Provider docs: [terraform-provider-stackgen](https://appcd-dev.github.io/terraform-provider-stackgen/) (pin **v0.1.48**). Prefer `workspace_id` on the provider; `org_id` / `project_id` are deprecated aliases.
 
 ## Why policy as code for agents?
 
-HashiCorp’s line for AI-driven infrastructure is “agent proposes, control plane governs.” Same split here: the model proposes a tool call; the platform policy decides. Putting Rego only in a UI click means the next incident has no PR to blame and no plan output to review.
+HashiCorp’s line for AI-driven infrastructure is “agent proposes, control plane governs.” Same split here: the model proposes a tool call; the platform policy decides. Putting Rego only in a user interface (UI) click means the next incident has no pull request (PR) to blame and no plan output to review.
 
 OpenShell and gateway products roll rules in **audit** then **enforce**. Aiden’s practical equivalent: prove the rule with `opa test`, create it on a lab agent first, then enable the attachment on production agents.
 
@@ -65,7 +65,7 @@ You can exercise create/attach for free:
 2. Open [Personal access tokens](https://app.stackgen.com/app/settings/personal-access-tokens) and mint a token. That value is `stackgen_token`. Never commit it.
 3. Set `stackgen_url` to `https://app.stackgen.com` and `stackgen_workspace_id` to your workspace UUID from the app.
 
-Without URL, token, and workspace id, `tofu apply` has nowhere to create resources. Same bar as [Aiden the Hard Way](/blog/from-vague-github-issue-to-pr-with-aiden/). Pin the provider to **0.1.48** ([docs](https://appcd-dev.github.io/terraform-provider-stackgen/)).
+Without a uniform resource locator (URL), token, and workspace identifier (id), `tofu apply` has nowhere to create resources. Same bar as [Aiden the Hard Way](/blog/from-vague-github-issue-to-pr-with-aiden/). Pin the provider to **0.1.48** ([docs](https://appcd-dev.github.io/terraform-provider-stackgen/)).
 
 ```hcl
 terraform {
@@ -100,7 +100,7 @@ resource "sg_policy" "deny_secret_write" {
 }
 ```
 
-Honest note on types: provider HTML examples still show `type = "tool_call"` and `decision := "deny"`. Solutions and Hard Way use `package policy` with `allow` / `approval_required` and types `logic` / `intervention`. Teach the live shape.
+Honest note on types: provider Hypertext Markup Language (HTML) examples still show `type = "tool_call"` and `decision := "deny"`. Solutions and Hard Way use `package policy` with `allow` / `approval_required` and types `logic` / `intervention`. Teach the live shape.
 
 ## Create a minimal agent and attach
 

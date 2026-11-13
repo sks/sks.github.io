@@ -21,7 +21,7 @@ faqs:
     answer: "Too many parallel workers, missing completion tools on the synthesis agent, parent-only tools delegated to children, and child completion receipts that the parent never counts."
 ---
 
-**Reasoning effort** is a model setting that allocates more or less internal computation to a response. It can change latency and behavior, but higher effort does not guarantee a better outcome for an AI agent that uses tools.
+**Reasoning effort** is a model setting that allocates more or less internal computation to a response. It can change latency and behavior, but higher effort does not guarantee a better outcome for an artificial intelligence (AI) agent that uses tools.
 
 We compared settings on a [site reliability engineering (SRE) triage](/topics/ai-incident-triage/) job: same alert class, same observability tools, same wall-clock ceiling. The lesson was not “high is smarter.” It was **effort is a scarce budget that competes with tool turns**, and **where you spend it matters more than the global knob**.
 
@@ -31,7 +31,7 @@ This post compares three live configurations — blanket high, blanket low, adap
 
 ## What changed in the test
 
-- On a tool-heavy API-gateway error-rate dig, **blanket low finished**; **blanket high hit the wall clock** without a usable Summary or completion gate.
+- On a tool-heavy application programming interface (API) gateway error-rate dig, **blanket low finished**; **blanket high hit the wall clock** without a usable Summary or completion gate.
 - Letting the parent set effort **per child** worked: collectors got low, synthesis got high — and dug deeper than blanket low.
 - Adaptive still timed out: **spawn fan-out** and a **missing gate tool on the synthesizer** beat the dial.
 - Newer models often refuse **tools + thinking** on Chat Completions; the runtime must call the **Responses API** (or try Completions, then Responses after an error), or you pay for failed requests. On hierarchical plan, still split models: thinking model for the planner, normal chat model for workers ([hybrid plan](/blog/hybrid-plan-smart-planner-generate-digs/) · [Completions vs Responses](/blog/chat-completions-vs-responses-api/)).
@@ -45,7 +45,7 @@ The time ceiling applies to the whole run. Spending more time on each collector 
 
 We used a fixed **API gateway high error-rate** card against a live Grafana/Loki plane: collect locus and shape, falsify tempting dependencies, then close with Theory / Unknowns / Do-this-now behind a completion gate.
 
-That is deliberately **tool-heavy**: Prometheus Query Language (PromQL) and Loki query language (LogQL) calls, plus query repairs, consume much of the wall clock. If reasoning effort only made prose prettier, we would have wasted the A/B. We wanted to know whether the dial helped **finish the method**.
+That is deliberately **tool-heavy**: Prometheus Query Language (PromQL) and Loki query language (LogQL) calls, plus query repairs, consume much of the wall clock. If reasoning effort only made prose prettier, we would have wasted the A/B comparison. We wanted to know whether the dial helped **finish the method**.
 
 ---
 
@@ -55,7 +55,7 @@ Same model family that still accepts tools plus effort on Chat Completions. Same
 
 | Shape | Finished under the ceiling? | Completion gate | Rough feel |
 | --- | --- | --- | --- |
-| **High everywhere** | No — hit the wall | Never called | More exploration turns, slower LLM hops, empty close |
+| **High everywhere** | No — hit the wall | Never called | More exploration turns, slower large language model (LLM) hops, empty close |
 | **Low everywhere** | Yes | Called with a correlated theory | Cleaner Collect → close; usable operator Summary |
 
 **What low got right**
@@ -106,7 +106,7 @@ On the same alert class, the parent actually toggled:
 
 - The parent spawned too many collectors in parallel, then a recovery agent, then high synthesis — effort selection did not cap fan-out
 - The synthesis child sometimes lacked the **completion gate tool**, so there was no receipt to close on
-- Redaction placeholders on trusted alert ids made rule-scoped digs thrash even while metric/log digs continued
+- Redaction placeholders on trusted alert identifiers made rule-scoped digs thrash even while metric/log digs continued
 
 **Finding 3.** Per-child effort changed what the run inspected, but this adaptive run still timed out. Effort selection is **not** a substitute for spawn budgets, tool allowlists, and completion contracts ([is the task actually done?](/blog/is-the-task-actually-done/)).
 
@@ -118,7 +118,7 @@ While probing newer models for the adaptive config, we hit a sharp platform edge
 
 - Some current models reject **tools + thinking** on `/v1/chat/completions`
 - They want the **Responses** API for that combination
-- Completions-only runtimes (ours included, for a while) paid for **HTTP 400 errors**, or a **failed Completions call plus a Responses retry**, before the dig even started
+- Completions-only runtimes (ours included, for a while) paid for **Hypertext Transfer Protocol (HTTP) 400 errors**, or a **failed Completions call plus a Responses retry**, before the dig even started
 
 So the practical mix became two layers. First, **which API**: Responses (or Completions then Responses on refuse) when tools and thinking are both required. Second, **which model**: who is allowed to think hard.
 
@@ -141,7 +141,7 @@ We then removed the supplied alert unique identifier (UID), metric name, label s
 - Connectivity checks before inventing an alert identity
 - Label discovery: one aggregation dimension worked; another returned empty and was abandoned
 - Widening search after no-data instead of cosmetic query thrash
-- Keeping **negative evidence** (healthy auth / API / DB paths) instead of clinging to a favorite villain
+- Keeping **negative evidence** (healthy auth / API / database (DB) paths) instead of clinging to a favorite villain
 - Closing with a **correlated** theory and terminal avenues — uncertainty survived synthesis
 
 **What still hurt**
@@ -184,7 +184,7 @@ Effort is a scheduling and cost choice, not an independent measure of answer qua
 - [ ] Correlated findings cannot recommend production traffic changes without human authority  
 - [ ] New entities are both “change” and “telemetry artifact” until split  
 
-Shareable cousins: [evidence-gated RCA checklist](/checklists/evidence-gated-rca/) · [agent done checklist](/checklists/agent-done/).
+Shareable cousins: [evidence-gated root cause analysis (RCA) checklist](/checklists/evidence-gated-rca/) · [agent done checklist](/checklists/agent-done/).
 
 ---
 
@@ -206,4 +206,4 @@ These runs favor testing effort by role under the actual time ceiling, while mea
 
 ---
 
-> StackGen develops AI tools for site reliability engineering (SRE), including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).
+> StackGen develops AI tools for SRE, including incident triage and diagnostic workflows. Product details are at [ai.stackgen.com](https://ai.stackgen.com).

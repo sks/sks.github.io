@@ -23,13 +23,13 @@ faqs:
 
 In an unattended benchmark run, nobody is available to answer a clarifying question. A worker that reports completion without calling the simulated apps has not shown that it changed their state. Treat both as test-run failures here; in an interactive product, asking the user may be exactly the right behavior.
 
-This is part of our [AI agent evaluation series](/blog/fair-agent-evals-before-performance/) on [AppWorld](https://github.com/stonybrooknlp/appworld) ([paper](https://arxiv.org/abs/2407.18901)) through the **Aiden agent runtime**. Prerequisite: [running AppWorld locally](/blog/running-appworld-locally-genie-agent-eval/). **Next in the pair:** [multi-agent vs single-agent quality and token tax](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/). **Capstone:** [simple vs plan: when to use which](/blog/simple-vs-plan-when-to-use-which/).
+This is part of our [Artificial intelligence (AI) agent evaluation series](/blog/fair-agent-evals-before-performance/) on [AppWorld](https://github.com/stonybrooknlp/appworld) ([paper](https://arxiv.org/abs/2407.18901)) through the **Aiden agent runtime**. Prerequisite: [running AppWorld locally](/blog/running-appworld-locally-genie-agent-eval/). **Next in the pair:** [multi-agent vs single-agent quality and token tax](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/). **Capstone:** [simple vs plan: when to use which](/blog/simple-vs-plan-when-to-use-which/).
 
 ---
 
 ## An example of two different failures
 
-On a Spotify playlist task (`b0a8eae_3`), the coordinator waited roughly **3 minutes** for confirmation against a **4-minute** limit, so the judge never ran. In another path, a worker said the task was complete after **zero app-tool calls**; the simulated Spotify state remained unchanged. The first is a wait-policy failure, the second an execution failure. Deny the question tool in this unattended test and verify app calls and final state separately. Keep those benchmark-specific rules in the test runner (TOML and `AGENTS.md`), not a fork of the general agent runtime.
+On a Spotify playlist task (`b0a8eae_3`), the coordinator waited roughly **3 minutes** for confirmation against a **4-minute** limit, so the judge never ran. In another path, a worker said the task was complete after **zero app-tool calls**; the simulated Spotify state remained unchanged. The first is a wait-policy failure, the second an execution failure. Deny the question tool in this unattended test and verify app calls and final state separately. Keep those benchmark-specific rules in the test runner (Tom’s Obvious Minimal Language (TOML) and `AGENTS.md`), not a fork of the general agent runtime.
 
 ---
 
@@ -39,14 +39,14 @@ On a Spotify playlist task (`b0a8eae_3`), the coordinator waited roughly **3 min
 
 | Mode | Shape | Who calls domain tools |
 |------|-------|------------------------|
-| **Simple** (single-agent) | One agent with the full MCP catalog | Root agent |
+| **Simple** (single-agent) | One agent with the full Model Context Protocol (MCP) catalog | Root agent |
 | **Plan** (multi-agent) | Coordinator + workers | Worker after `create_agent` |
 
 The **judge** is AppWorld’s `/evaluate` endpoint (`success: true` = strict all-tests pass). The transcript is not the gradebook. Same lesson as [evidence-based verification](/blog/evidence-based-verification/).
 
 ---
 
-## Ban clarifying questions in unattended evals
+## Ban clarifying questions in unattended evaluations (evals)
 
 ![Unattended AppWorld eval path from harness clarification policy through worker domain calls to state-based judge and failure classification](/assets/images/diagrams/aug-evals/unattended-eval-gates.svg)
 
@@ -59,7 +59,7 @@ In a four-task plan cohort, **3/4** met the reported pass condition after the un
 | Signal | Harness action |
 |--------|----------------|
 | `ask_clarifying_question` in logs | Force `success = false` even if evaluate later passes |
-| Coordinator blocked on human-in-the-loop | Same — unattended mode must not wait on UI |
+| Coordinator blocked on human-in-the-loop | Same — unattended mode must not wait on a user interface (UI) |
 
 The runtime persona already says “infer from tools, don’t ask.” Benchmark config must **enforce** it:
 
@@ -81,7 +81,7 @@ On the same playlist task, a plan worker logged **“task completed with zero to
 
 What happened:
 
-- Lightweight plan steps defaulted to **structured planning JSON** instead of **tool_calling** when AppWorld tools were on the worker.
+- Lightweight plan steps defaulted to **structured planning JavaScript Object Notation (JSON)** instead of **tool_calling** when AppWorld tools were on the worker.
 - The stage router treated zero-tool prose as **early exit** — later stages never ran.
 
 **Monday-morning rule:** log **domain tool calls per worker** in handoff payloads. If a task requires app mutations and a spawned worker made no domain calls, retry within a bounded budget or fail — do not accept coordinator prose as completion. A legitimate read-only task needs a different check.
@@ -98,7 +98,7 @@ Same errand, same judge, two shapes — **Spotify playlist from workout note** (
 
 | Mode | Score (pre-fix cohort) | Dominant blocker |
 |------|------------------------:|------------------|
-| MCP baseline (direct script) | **60%** | AppWorld `show_song` / `search_songs` HTTP 500s; queue duration eval |
+| MCP baseline (direct script) | **60%** | AppWorld `show_song` / `search_songs` Hypertext Transfer Protocol (HTTP) 500s; queue duration eval |
 | Plan (planner tree) | **0%** | Zero-tool workers, clarify stalls, auth loop traps |
 
 That gap is not “MCP is smarter.” It is **layer separation**:
@@ -124,11 +124,11 @@ Unattended AppWorld policy is easy to put in the wrong layer.
 
 **Do not fork the production agent runtime** for AppWorld-only guards. Product runtime stays general; the benchmark is opinionated. If a knob only exists to make AppWorld green, keep it in the [open-source harness](https://github.com/stackgenhq/genie/tree/main/examples/appworld-routing).
 
-Product code can still grow **generic** gates (handoff size, domain tool counts) when they help every customer. AppWorld task IDs in `pkg/` is the smell.
+Product code can still grow **generic** gates (handoff size, domain tool counts) when they help every customer. AppWorld task identifiers (IDs) in `pkg/` is the smell.
 
 ---
 
-## Langfuse as the A/B layer
+## Langfuse as the A/B comparison layer
 
 Compare simple vs plan on the **same task ID** after the same stack rebuild. We use [Langfuse](https://langfuse.com/) traces side-by-side — peak/total tokens, tool counts, failure class — not slideware screenshots.
 
@@ -161,7 +161,7 @@ Pair with [Anthropic’s agent eval guide](https://www.anthropic.com/engineering
 - [Multi-agent vs single-agent: MCP tool tax + pass@k](/blog/multi-agent-vs-single-agent-mcp-tool-tax-pass-at-k/) — when planning is worth the cost
 - [Simple vs plan: when to use which](/blog/simple-vs-plan-when-to-use-which/) — smoke cohort: both modes stay in the toolkit
 - [Fair agent evals before performance](/blog/fair-agent-evals-before-performance/) — series start
-- [Running AppWorld locally](/blog/running-appworld-locally-genie-agent-eval/) — ops prerequisite
+- [Running AppWorld locally](/blog/running-appworld-locally-genie-agent-eval/) — operations prerequisite
 
 ---
 
@@ -169,4 +169,4 @@ Pair with [Anthropic’s agent eval guide](https://www.anthropic.com/engineering
 
 ---
 
-> 🚀 **We're building AI-powered SRE at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft RCA reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.
+> 🚀 **We're building AI-powered site reliability engineering (SRE) at StackGen.** If you're tired of 3 AM pages and want AI agents that triage incidents, run diagnostics, and draft root cause analysis (RCA) reports — check out [ai.stackgen.com](https://ai.stackgen.com) and try our new SRE offering.

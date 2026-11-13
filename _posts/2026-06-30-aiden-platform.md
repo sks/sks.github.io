@@ -18,7 +18,7 @@ faqs:
 
 A command-line interface (CLI) agent on one developer's machine can assume one user, one set of credentials, and a short-lived task. Those assumptions did not hold when we needed agents for multiple teams, each with its own tools, policies, model choices, budgets, and notifications.
 
-We kept the Go agent runtime—the loop that chooses steps and calls tools—as an embeddable library. We built **Aiden** around it to handle shared operations. For a short introduction to the loop, see [What Is an AI Agent Runtime?](/blog/what-is-an-ai-agent-runtime/) and the [AI agent runtime hub](/topics/ai-agent-runtime/).
+We kept the Go agent runtime—the loop that chooses steps and calls tools—as an embeddable library. We built **Aiden** around it to handle shared operations. For a short introduction to the loop used by artificial intelligence (AI) agents, see [What Is an AI Agent Runtime?](/blog/what-is-an-ai-agent-runtime/) and the [AI agent runtime hub](/topics/ai-agent-runtime/).
 
 ---
 
@@ -40,7 +40,7 @@ The tradeoff is weaker process isolation. A severe failure in one agent's execut
 
 ## Long Tasks Need Resumption
 
-An investigation may run for minutes, make several tool calls, and pause for human approval. A stateless HTTP request does not fit that work well. We use a durable workflow engine to checkpoint progress and resume after a worker crash or approval wait. This avoids redoing some completed steps and paying for their model calls again, though individual external actions still need safe retry behavior; a checkpoint by itself cannot guarantee exactly-once effects. A suspended workflow does not keep a worker thread blocked throughout an approval wait.
+An investigation may run for minutes, make several tool calls, and pause for human approval. A stateless Hypertext Transfer Protocol (HTTP) request does not fit that work well. We use a durable workflow engine to checkpoint progress and resume after a worker crash or approval wait. This avoids redoing some completed steps and paying for their model calls again, though individual external actions still need safe retry behavior; a checkpoint by itself cannot guarantee exactly-once effects. A suspended workflow does not keep a worker thread blocked throughout an approval wait.
 
 ## Two Speeds of Governance
 
