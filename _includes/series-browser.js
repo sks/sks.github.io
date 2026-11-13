@@ -9,15 +9,12 @@
   var status = document.getElementById("series-search-status");
   var empty = document.getElementById("series-empty");
   var emptyReset = document.getElementById("series-empty-reset");
-  var expandBtn = document.getElementById("series-expand");
-  var collapseBtn = document.getElementById("series-collapse");
   var suggestCards = document.getElementById("series-suggest-cards");
   var progress = document.getElementById("series-progress");
   var toArray = function (nodes) {
     return Array.prototype.slice.call(nodes);
   };
 
-  var months = toArray(root.querySelectorAll(".series-month"));
   var items = toArray(root.querySelectorAll(".series-item"));
   if (!items.length) {
     return;
@@ -25,13 +22,15 @@
 
   var entries = items.map(function (el) {
     var order = parseInt(el.getAttribute("data-order"), 10);
+    var date = parseInt(el.getAttribute("data-date"), 10);
     return {
       el: el,
       url: el.getAttribute("data-url") || "",
       title: el.getAttribute("data-title") || "",
       desc: el.getAttribute("data-desc") || "",
-      // Unnumbered posts belong to the series but sit outside the reading order.
+      // Related unnumbered posts follow the numbered reading path.
       order: isNaN(order) ? Number.MAX_SAFE_INTEGER : order,
+      date: isNaN(date) ? 0 : date,
       haystack: el.getAttribute("data-search") || ""
     };
   });
@@ -41,22 +40,12 @@
   });
 
   var chips = toArray(root.querySelectorAll(".series-chip"));
-  var defaultOpen = months.map(function (m) {
-    return m.open;
-  });
   var activeQuery = "";
-
-  function setStatus(text) {
-    if (status) {
-      status.textContent = text;
-    }
-  }
 
   function applyQuery(raw) {
     var query = (raw || "").trim().toLowerCase();
     var tokens = query ? query.split(/\s+/) : [];
     var active = tokens.length > 0;
-    var wasActive = activeQuery !== "";
     var matched = 0;
 
     entries.forEach(function (entry) {
@@ -69,30 +58,15 @@
       }
     });
 
-    months.forEach(function (month, index) {
-      var visible = toArray(month.querySelectorAll(".series-item")).filter(function (el) {
-        return !el.hidden;
-      }).length;
-      var count = month.querySelector(".series-month__count");
-      var total = count ? count.getAttribute("data-total") : "";
-      month.hidden = active && visible === 0;
-      if (count) {
-        count.textContent = active ? visible + " of " + total : total + " posts";
-      }
-      if (active) {
-        month.open = visible > 0;
-      } else if (wasActive) {
-        month.open = defaultOpen[index];
-      }
-    });
-
     activeQuery = query;
     chips.forEach(function (chip) {
       chip.setAttribute("aria-pressed", chip.getAttribute("data-query") === query ? "true" : "false");
     });
-    setStatus(active
-      ? matched + (matched === 1 ? " post matches “" : " posts match “") + query + "”."
-      : entries.length + " posts across " + months.length + " months.");
+    if (status) {
+      status.textContent = active
+        ? matched + (matched === 1 ? " post matches “" : " posts match “") + query + "”."
+        : entries.length + " posts in this series.";
+    }
 
     if (empty) {
       empty.hidden = matched !== 0;
@@ -141,22 +115,6 @@
       search(activeQuery === query ? "" : query, true);
     });
   });
-
-  if (expandBtn) {
-    expandBtn.addEventListener("click", function () {
-      months.forEach(function (month) {
-        month.open = true;
-      });
-    });
-  }
-
-  if (collapseBtn) {
-    collapseBtn.addEventListener("click", function () {
-      months.forEach(function (month) {
-        month.open = false;
-      });
-    });
-  }
 
   document.addEventListener("keydown", function (event) {
     if (event.key !== "/" || event.metaKey || event.ctrlKey || event.altKey) {
@@ -233,10 +191,12 @@
       add("Start here", byOrder[0]);
     }
 
-    var newest = entries[0];
+    var newest = entries.slice().sort(function (a, b) {
+      return b.date - a.date;
+    })[0];
     add(read[newest.url] ? "Latest post" : "New since your last visit", newest);
 
-    // Rotates once a day so repeat visitors see a different deep cut.
+    // Rotate once a day so repeat visitors see a different unread deep cut.
     var pool = unread.length ? unread : byOrder;
     var day = Math.floor(Date.now() / 86400000);
     for (var i = 0; i < pool.length && picks.length < 3; i += 1) {

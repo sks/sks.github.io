@@ -3,7 +3,7 @@ layout: post
 title: "A Field Map of ClickHouse Storage: Disks, Object Stores, and Metadata in the Source"
 date: 2026-11-15 11:09:00 -0800
 series: "ClickHouse on AWS: Self-Managed from First Principles"
-series_order: 14
+series_order: 15
 mermaid: true
 description: "After the silent key_prefix bug, I stopped guessing and read ClickHouse's disk registry in the source. Four registrations, three choices per disk, and the default [a-z]{3}/[a-z]{29} key template that explains exactly where the bucket-root prefixes came from. Every claim has a permalink."
 image: /assets/images/og-default.png

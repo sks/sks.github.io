@@ -1,0 +1,59 @@
+{% assign archive_posts = site.posts | where: "series", include.series_name %}
+{% assign ordered_posts = archive_posts | where_exp: "post", "post.series_order" | sort: "series_order" %}
+{% assign unnumbered_posts = archive_posts | where_exp: "post", "post.series_order == nil" %}
+{% assign archive_tags = archive_posts | map: "tags" | join: "," | split: "," %}
+{% assign tag_counts = archive_tags | group_by_exp: "tag", "tag" | sort: "size" | reverse %}
+
+<section class="series-browser" id="series-browser" aria-label="{{ include.series_name | escape }} archive">
+  <div class="series-suggest" id="series-suggest">
+    <h2 class="series-suggest__heading">Your next reads</h2>
+    <ul class="series-suggest__cards" id="series-suggest-cards">
+      {% for post in ordered_posts limit: 3 %}
+      <li class="series-suggest__card">
+        <span class="series-suggest__label">{% if forloop.first %}Start here{% else %}Then read{% endif %}</span>
+        <a class="series-suggest__link" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+        <p class="series-suggest__desc">{{ post.description | strip_html | truncate: 110 }}</p>
+      </li>
+      {% endfor %}
+    </ul>
+    <p class="series-suggest__progress" id="series-progress" hidden></p>
+  </div>
+
+  <div class="series-reading-heading">
+    <h2 class="series-browser__heading">Read in order</h2>
+    <p>Start at post 1 or choose a topic. At the end of each article, use <strong>Next in series</strong> to continue without returning to this page.</p>
+  </div>
+
+  <div class="series-search" data-js-only hidden>
+    <label class="series-search__label" for="series-search-input">Find a post in this series</label>
+    <div class="series-search__row">
+      <input class="series-search__input" id="series-search-input" type="search" autocomplete="off" placeholder="{{ include.search_placeholder | default: 'Search by title, topic, or tag…' | escape }}" aria-describedby="series-search-status">
+      <button class="series-search__clear" id="series-search-clear" type="button" hidden>Clear</button>
+    </div>
+    <ul class="series-chips" id="series-chips" aria-label="Popular topics">
+      {% for tag in tag_counts limit: 8 %}{% if tag.name != "" %}
+      <li><button class="series-chip" type="button" aria-pressed="false" data-query="{{ tag.name }}">{{ tag.name }} <span class="series-chip__count">{{ tag.size }}</span></button></li>
+      {% endif %}{% endfor %}
+    </ul>
+    <p class="series-search__status" id="series-search-status" role="status" aria-live="polite">{{ archive_posts.size }} posts in this series.</p>
+  </div>
+
+  <ol class="series-list series-list--ordered">
+    {% for post in ordered_posts %}
+    {% include series-archive-item.html post=post %}
+    {% endfor %}
+  </ol>
+
+  {% if unnumbered_posts.size > 0 %}
+  <h3 class="series-related__heading">More from this series</h3>
+  <ul class="series-list series-list--related">
+    {% for post in unnumbered_posts %}
+    {% include series-archive-item.html post=post %}
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <p class="series-empty" id="series-empty" hidden>No posts match that search. Try a broader term, or <button class="series-empty__reset" id="series-empty-reset" type="button">clear the search</button>.</p>
+</section>
+
+<script>{% include series-browser.js %}</script>

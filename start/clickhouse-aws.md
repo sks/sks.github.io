@@ -2,7 +2,7 @@
 layout: page
 title: ClickHouse on AWS starter pack
 permalink: /start/clickhouse-aws/
-description: "Thirteen production notes on self-managed ClickHouse on AWS — MergeTree internals, engine choices, cluster topology, S3 storage, spot readers, operations, cost, replica identity, and tenant tuning from the source."
+description: "Sixteen production notes on self-managed ClickHouse on AWS — MergeTree internals, engines, topology, S3 storage, operations, cost, boot contracts, tenant tuning, and safe replacement."
 faqs:
   - question: "I'm new to ClickHouse. Where should I start?"
     answer: "Read in order. Post 1 explains the MergeTree storage model from zero; each later post defines its terms and links the official docs it builds on. No prior ClickHouse or Kubernetes knowledge is assumed."
@@ -28,7 +28,10 @@ A short path into self-managed ClickHouse on AWS. The posts are in reading order
 10. **[ClickHouse Config Is Not YAML: What One Re-Render Taught Me About Replica Identity](/blog/clickhouse-replica-identity-config-render/)** — the macros, Keeper paths, and raft IDs that name a node — and the re-render that re-keyed them  
 11. **[The S3 Path Bug Nobody Sees: Silent Config, Shattered Tenants, and a CAS-Ready Fix](/blog/clickhouse-s3-key-prefix-silent-config-bug/)** — a config element ClickHouse silently ignored, proven live with an insert and an `aws s3 ls`  
 12. **[Operating ClickHouse Without Kubernetes](/blog/clickhouse-operate-without-kubernetes/)** — the operator's domain code, packaged as a single binary, against EC2  
-13. **[Dead Projections and Useless FINAL: Tuning ClickHouse Tenant Databases by Reading the Source](/blog/clickhouse-tenant-tuning-from-source/)** — a projection that doubled storage but never ran, a FINAL that cost 20 seconds a query, and the `{database}` keeper-path macro that makes per-database tenancy work  
+13. **[Boot Sequence as a Contract: How a Self-Managed ClickHouse Node Comes Up (and How It Fails)](/blog/clickhouse-boot-sequence-contract/)** — the ordered checks and failure boundaries that make bootstrap and restart behavior inspectable
+14. **[Dead Projections and Useless FINAL: Tuning ClickHouse Tenant Databases by Reading the Source](/blog/clickhouse-tenant-tuning-from-source/)** — a projection that doubled storage but never ran, a FINAL that cost 20 seconds a query, and the `{database}` keeper-path macro that makes per-database tenancy work
+15. **[A Field Map of ClickHouse Storage: Disks, Object Stores, and Metadata in the Source](/blog/clickhouse-storage-classification-source/)** — disk types, object-storage backends, metadata choices, and the key template behind S3 object layout
+16. **[Destroy, Then Create: The Ordering Rule That Keeps Static-IP ClickHouse Replaceable](/blog/clickhouse-destroy-then-create-static-ips/)** — Terraform replacement ordering, exclusive static IPs, volume identity, and Keeper quorum safety
 
 ## Next
 

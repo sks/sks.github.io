@@ -1,0 +1,21 @@
+{% assign post = include.post %}
+{% capture post_tags %}{{ post.tags | join: " " }}{% endcapture %}
+<li class="series-item"
+    data-url="{{ post.url | relative_url }}"
+    data-order="{{ post.series_order }}"
+    data-date="{{ post.date | date: '%s' }}"
+    data-title="{{ post.title | escape }}"
+    data-desc="{{ post.description | strip_html | escape }}"
+    data-search="{{ post.title | append: ' ' | append: post.description | append: ' ' | append: post_tags | strip_html | downcase | escape }}">
+  <div class="series-item__head">
+    {% if post.series_order %}<span class="series-item__order" aria-label="Post {{ post.series_order }}">{{ post.series_order }}</span>{% endif %}
+    <a class="series-item__link" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+    <span class="series-item__read" hidden>Read</span>
+  </div>
+  <p class="series-item__desc">{{ post.description }}</p>
+  <p class="series-item__meta">
+    <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time>
+    {% assign visible_tags = post.tags | slice: 0, 3 %}
+    {% if visible_tags.size > 0 %} · {{ visible_tags | join: ", " }}{% endif %}
+  </p>
+</li>
