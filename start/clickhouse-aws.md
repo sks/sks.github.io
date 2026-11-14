@@ -2,7 +2,7 @@
 layout: page
 title: ClickHouse on AWS starter pack
 permalink: /start/clickhouse-aws/
-description: "Twenty production notes on self-managed ClickHouse on AWS — MergeTree internals, engines, topology, S3 storage, operations, cost, boot contracts, tenant tuning, safe replacement, and the chinit bootstrapper arc."
+description: "Twenty-five production notes on self-managed ClickHouse on AWS — MergeTree internals, engines, topology, S3 storage, operations, cost, the chinit bootstrapper arc, and the CAS zero-copy arc."
 faqs:
   - question: "I'm new to ClickHouse. Where should I start?"
     answer: "Read in order. Post 1 explains the MergeTree storage model from zero; each later post defines its terms and links the official docs it builds on. No prior ClickHouse or Kubernetes knowledge is assumed."
@@ -36,6 +36,11 @@ A short path into self-managed ClickHouse on AWS. The posts are in reading order
 18. **[Dissolving the Second Binary: How chinit Absorbed Its Own Companion CLI](/blog/chinit-dissolve-second-binary/)** — the process boundary as a liability, the typed port that replaced argv, and the release-tag lesson that broke the gates twice
 19. **[Who Decides What a Node Is Called? Lease Identity for an Ephemeral Stateful Fleet](/blog/chinit-lease-identity-ephemeral-fleet/)** — one conditional write, a TTL lease, a drain protocol, and stateless replacement as the repair strategy
 20. **[Adopting the Pattern: A Migration Guide for Declarative Node Bootstrap and Lease Identity](/blog/chinit-adopt-pattern-fleet/)** — the staged order, the traps that cost live cutovers, what not to port, and the five questions that say you are done
+21. **[ClickHouse zero-copy replication is dead: what actually replaced it](/blog/clickhouse-zero-copy-replication-dead/)** — why upstream deprecated it, how the garbage collection broke, and the two successors
+22. **[Content-Addressed Storage in ClickHouse: The Object Model That Replaces Zero-Copy](/blog/clickhouse-cas-object-model/)** — blobs, manifests, ref logs, mount leases, and why Keeper is not on the data path
+23. **[Touching CAS Without Betting the Cluster: A Hands-On Staging Walkthrough](/blog/clickhouse-cas-on-aws-walkthrough/)** — bucket preconditions, the Antalya build, the disk XML, per-partition adoption, and the queries that prove it works
+24. **[What Breaks with ClickHouse CAS: Failure Modes, GC, and the Blast Radius](/blog/clickhouse-cas-failure-modes/)** — mount refusal, identity drift, GC wedges, mixed fleets, and the checks that catch them
+25. **[CAS, SharedMergeTree, or Plain Replication: How to Actually Decide](/blog/clickhouse-cas-vs-shared-mergetree-decision/)** — a decision framework with exit costs, not a vendor pitch
 
 ## Next
 

@@ -37,5 +37,10 @@ For the AI-agent SRE work that this cluster serves, see [AI agents for SRE](/top
 | [After ReplicatedMergeTree: CAS, Iceberg, and When to Just Buy ClickHouse Cloud](/blog/clickhouse-whats-next-cas-iceberg/) | CAS content-addressed storage, Apache Iceberg, and the honest buy-versus-build checklist |
 | [Why I Draw ClickHouse Data Flows (and Why EC2 Beat Kubernetes for This Cluster)](/blog/clickhouse-ec2-vs-k8s-mermaid-data-flow/) | Mermaid data-flow diagrams of the whole cluster, and why plain EC2 beat the Kubernetes operator here |
 | [Dead Projections and Useless FINAL: Tuning ClickHouse Tenant Databases by Reading the Source](/blog/clickhouse-tenant-tuning-from-source/) | A projection that doubled storage but never ran, why SUM(count) over SummingMergeTree never needs FINAL, the {database} keeper-path macro for per-database tenancy, and the system-log TTL trap |
+| [ClickHouse zero-copy replication is dead: what actually replaced it](/blog/clickhouse-zero-copy-replication-dead/) | Why zero-copy was deprecated, how its GC broke, and the two designs that replaced it |
+| [Content-Addressed Storage in ClickHouse: The Object Model That Replaces Zero-Copy](/blog/clickhouse-cas-object-model/) | Blobs, manifests, ref logs, mount leases, and why Keeper is not on the data path |
+| [Touching CAS Without Betting the Cluster: A Hands-On Staging Walkthrough](/blog/clickhouse-cas-on-aws-walkthrough/) | Bucket preconditions, the Antalya build, the disk XML, per-partition adoption |
+| [What Breaks with ClickHouse CAS: Failure Modes, GC, and the Blast Radius](/blog/clickhouse-cas-failure-modes/) | Mount refusal, identity drift, GC wedges, and the blast radius of a shared pool |
+| [CAS, SharedMergeTree, or Plain Replication: How to Actually Decide](/blog/clickhouse-cas-vs-shared-mergetree-decision/) | A weighted decision framework with exit costs for CAS, SharedMergeTree, and plain replication |
 
 {% include subscribe.html %}
