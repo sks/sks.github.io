@@ -2,7 +2,7 @@
 layout: page
 title: ClickHouse on AWS starter pack
 permalink: /start/clickhouse-aws/
-description: "Sixteen production notes on self-managed ClickHouse on AWS — MergeTree internals, engines, topology, S3 storage, operations, cost, boot contracts, tenant tuning, and safe replacement."
+description: "Twenty production notes on self-managed ClickHouse on AWS — MergeTree internals, engines, topology, S3 storage, operations, cost, boot contracts, tenant tuning, safe replacement, and the chinit bootstrapper arc."
 faqs:
   - question: "I'm new to ClickHouse. Where should I start?"
     answer: "Read in order. Post 1 explains the MergeTree storage model from zero; each later post defines its terms and links the official docs it builds on. No prior ClickHouse or Kubernetes knowledge is assumed."
@@ -32,6 +32,10 @@ A short path into self-managed ClickHouse on AWS. The posts are in reading order
 14. **[Dead Projections and Useless FINAL: Tuning ClickHouse Tenant Databases by Reading the Source](/blog/clickhouse-tenant-tuning-from-source/)** — a projection that doubled storage but never ran, a FINAL that cost 20 seconds a query, and the `{database}` keeper-path macro that makes per-database tenancy work
 15. **[A Field Map of ClickHouse Storage: Disks, Object Stores, and Metadata in the Source](/blog/clickhouse-storage-classification-source/)** — disk types, object-storage backends, metadata choices, and the key template behind S3 object layout
 16. **[Destroy, Then Create: The Ordering Rule That Keeps Static-IP ClickHouse Replaceable](/blog/clickhouse-destroy-then-create-static-ips/)** — Terraform replacement ordering, exclusive static IPs, volume identity, and Keeper quorum safety
+17. **[One Binary to Bootstrap a Node: Why chinit Replaced 3,600 Lines of Bash](/blog/chinit-one-binary-node-bootstrap/)** — the boot script as a state machine, the typed spec that replaces template variables, and how to know your fleet is ready
+18. **[Dissolving the Second Binary: How chinit Absorbed Its Own Companion CLI](/blog/chinit-dissolve-second-binary/)** — the process boundary as a liability, the typed port that replaced argv, and the release-tag lesson that broke the gates twice
+19. **[Who Decides What a Node Is Called? Lease Identity for an Ephemeral Stateful Fleet](/blog/chinit-lease-identity-ephemeral-fleet/)** — one conditional write, a TTL lease, a drain protocol, and stateless replacement as the repair strategy
+20. **[Adopting the Pattern: A Migration Guide for Declarative Node Bootstrap and Lease Identity](/blog/chinit-adopt-pattern-fleet/)** — the staged order, the traps that cost live cutovers, what not to port, and the five questions that say you are done
 
 ## Next
 
