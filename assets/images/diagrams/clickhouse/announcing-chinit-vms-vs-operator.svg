@@ -77,6 +77,6 @@
     <!-- FOOTER -->
     <rect x="28" y="538" width="1024" height="50" rx="8" fill="#17283c"/>
     <text x="540" y="560" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">chinit embeds Altinity's clickhouse-operator config &amp; schema libraries in-process &#8212; keeping the brain while skipping the K8s cluster</text>
-    <text x="540" y="578" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#b8d4e8">https://github.com/stackgenhq/chinit  (Apache-2.0 &#183; v0.2.0 &#183; AWS &amp; Azure)</text>
+    <text x="540" y="578" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#b8d4e8">https://github.com/stackgenhq/chinit  (Apache-2.0 &#183; v0.2.4 &#183; AWS &amp; Azure)</text>
   </g>
 </svg>
