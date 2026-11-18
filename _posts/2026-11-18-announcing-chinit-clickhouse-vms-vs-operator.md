@@ -66,7 +66,7 @@ If you want to run open-source ClickHouse in production today, you usually end u
 
 While building the log analytics platform behind [this series](/series/clickhouse-on-aws/), we wanted a third option: **keep the smarts of a Kubernetes operator, but run directly on plain cloud VMs.**
 
-Today, we are open-sourcing that tool under the Apache-2.0 license: **[`stackgenhq/chinit`](https://github.com/stackgenhq/chinit)** (with **[`v0.2.6`](https://github.com/stackgenhq/chinit/releases/tag/v0.2.6)** out now).
+Today, we are open-sourcing that tool under the Apache-2.0 license: **[`stackgenhq/chinit`](https://github.com/stackgenhq/chinit)** (with **[`v0.2.7`](https://github.com/stackgenhq/chinit/releases/tag/v0.2.7)** out now).
 
 `chinit` (pronounced *"c-h-init"*, short for **ClickHouse init**) is a single Go binary, shipped alongside ready-to-run AWS and Azure Terraform modules and Packer machine-image templates. You launch a VM, `chinit` boots it into a healthy ClickHouse cluster member in **2–3 minutes**, and built-in background timers keep the cluster clean when machines scale out, scale in, or die abruptly.
 
@@ -100,7 +100,7 @@ Think of an office with **numbered name badges** hanging on a board at the front
 
 1. **Check-in at boot (`chinit boot`):** When a fresh VM launches, it walks up to the badge board — a tiny serverless table in Amazon DynamoDB or Azure Table Storage — and grabs the lowest free badge (say, `reader-2`). Only *after* it owns that badge does `chinit` mount its disks, fetch passwords from the cloud secret store, generate ClickHouse's XML files, and join the cluster. From empty VM to serving queries takes **2–3 minutes**.
 2. **Checking in every 5 minutes (`chinit lease-renew`):** Every 5 minutes, each live VM taps the board to say *"I still hold `reader-2`"* and refreshes its local address book (`/etc/hosts`, Private DNS, and ClickHouse's peer list). If a machine loses power instantly and never says goodbye, its badge expires after 15 minutes — and the surviving nodes automatically erase its dead DNS record, clean up its old Keeper entries, and move on.
-3. **Handing the badge back on shutdown (`chinit drain-shutdown`):** When an ASG scales in or AWS sends a 2-minute Spot warning, `chinit` pauses replication queues, stops ClickHouse cleanly so its Keeper session closes first, asks a healthy neighbor to unregister the replica, deletes its DNS record, and puts `reader-2` back on the board. (And if a node crashes mid-boot, `v0.2.6` reloads its settled badge straight from `state.json` on resume instead of starting blind.)
+3. **Handing the badge back on shutdown (`chinit drain-shutdown`):** When an ASG scales in or AWS sends a 2-minute Spot warning, `chinit` pauses replication queues, stops ClickHouse cleanly so its Keeper session closes first, asks a healthy neighbor to unregister the replica, deletes its DNS record, and puts `reader-2` back on the board. (And if a node crashes mid-boot, `v0.2.7` reloads its settled badge straight from `state.json` on resume instead of starting blind.)
 
 ```mermaid
 flowchart LR
@@ -115,7 +115,7 @@ flowchart LR
     style E fill:#fdf2f2,stroke:#b43c3c,color:#17283c
 ```
 
-Best of all, `chinit` doesn't invent its own half-baked XML templates. Because both projects are written in Go, `chinit` (`v0.2.6`) embeds the `0.28.0` configuration generator, `clickhouse-backup` config builder, live server-version detector, and schema syncer straight from Altinity's [`clickhouse-operator`](https://github.com/Altinity/clickhouse-operator). You get the same battle-tested ClickHouse configs without running Kubernetes underneath.
+Best of all, `chinit` doesn't invent its own half-baked XML templates. Because both projects are written in Go, `chinit` (`v0.2.7`) embeds the `0.28.0` configuration generator, `clickhouse-backup` config builder, live server-version detector, and schema syncer straight from Altinity's [`clickhouse-operator`](https://github.com/Altinity/clickhouse-operator). You get the same battle-tested ClickHouse configs without running Kubernetes underneath.
 
 ---
 
@@ -134,7 +134,7 @@ When you store ClickHouse data in Amazon Simple Storage Service (`S3`) or Azure 
 
 On Kubernetes, mixing persistent `EBS` volumes with disposable node-local `NVMe` drives is surprisingly clunky. Standard Kubernetes `StatefulSet` storage templates expect network disks that follow a pod from host to host. Using a physical host's local NVMe requires `hostPath` mounts or extra local-storage drivers that glue pods to specific physical machines — and if you scale up to a bigger VM with a larger NVMe drive, hardcoded cache sizes in your XML either waste space or crash ClickHouse at startup.
 
-In `chinit` (`v0.2.6`), this works out of the box:
+In `chinit` (`v0.2.7`), this works out of the box:
 - **It checks the actual hardware label and model.** Even if AWS enumerates a `474 GB` disposable NVMe drive ahead of your `64 GB` EBS disk, `chinit` recognizes the hardware model (`Amazon EC2 NVMe Instance Storage` / `Microsoft NVMe Direct Disk`) and **never** puts your table metadata or Keeper logs on a drive that vanishes on stop.
 - **It stripes multiple NVMe drives automatically.** Boot a larger VM with two or four local NVMe drives and `chinit` merges them into one fast `RAID-0` cache volume automatically.
 - **It sizes the cache to the machine.** At boot, `chinit` measures the mounted cache disk and sets ClickHouse's cache ceiling to 90% of that drive automatically — so scaling from a `2xlarge` to a `4xlarge` requires zero config edits.
@@ -160,7 +160,7 @@ Historically, skipping Kubernetes meant giving up self-healing. `chinit` builds 
 
 - **Automatic disk growth:** Before ClickHouse runs out of merge headroom, `chinit` expands the EBS volume and resizes the filesystem online with zero downtime (or moves older partitions to S3 if the disk hits your size cap).
 - **No stuck `ON CLUSTER` queries or blocked syncs:** When higher-numbered nodes scale in, `chinit` sweeps their leftover DNS records, prunes dead entries from Keeper's distributed query queue, and runs lightweight replica syncs (`SYSTEM SYNC REPLICA ... LIGHTWEIGHT`) so healing never times out behind a heavy background merge.
-- **Shared S3 cold storage (`CAS`) that survives fresh disks:** Out of the box, `chinit` (`v0.2.6`) supports Altinity Antalya's Content-Addressed Storage (`cas_enabled = true`), keeping **one shared copy** of cold data in S3 across all replicas instead of `N` duplicates (you can run your own numbers in our [interactive Non-CAS vs. CAS cold-storage calculator](/blog/clickhouse-fleet-evolution-non-cas-to-cas-blueprint/#interactive-non-cas-vs-cas-cold-storage-calculator)). Even when an ASG replaces a VM with a brand-new EBS disk, `chinit` pins a deterministic server UUID and CAS root identity from the node's badge so CAS mounts cleanly without ownership collisions — while gating load-balancer `:8123/replicas_status` checks until new readers catch up, shipping OpenTelemetry boot and query spans (`chinit span-ship`), and exposing Prometheus health metrics for the CAS garbage collector.
+- **Shared S3 cold storage (`CAS`) that survives fresh disks:** Out of the box, `chinit` (`v0.2.7`) supports Altinity Antalya's Content-Addressed Storage (`cas_enabled = true`), keeping **one shared copy** of cold data in S3 across all replicas instead of `N` duplicates (you can run your own numbers in our [interactive Non-CAS vs. CAS cold-storage calculator](/blog/clickhouse-fleet-evolution-non-cas-to-cas-blueprint/#interactive-non-cas-vs-cas-cold-storage-calculator)). Even when an ASG replaces a VM with a brand-new EBS disk, `chinit` pins a deterministic server UUID and CAS root identity from the node's badge so CAS mounts cleanly without ownership collisions — while gating load-balancer `:8123/replicas_status` checks until new readers catch up, shipping OpenTelemetry boot and query spans (`chinit span-ship`), and exposing Prometheus health metrics for the CAS garbage collector.
 
 ---
 
@@ -171,7 +171,7 @@ No tool wins everywhere. Here is where **`clickhouse-operator` on Kubernetes is 
 1. **Packing lots of small clusters onto shared hardware:** If your company already has a Kubernetes platform team and you run 30 small ClickHouse clusters (`20–200 GB` each) for different teams or small tenants, Kubernetes lets you pack many pods onto a few big machines. `chinit` runs one ClickHouse role per VM — dedicating four VMs to a tiny database wastes money.
 2. **Multi-shard clusters:** `chinit` keeps things simple by running a single shard (`01`) and scaling out with separate writers and readers over S3. For 90% of log, trace, and telemetry workloads (even at tens of terabytes a day), one shard backed by S3 is plenty. But if your workload splits writes across 8 or 16 shards, `clickhouse-operator` handles multi-shard layouts natively.
 3. **Instant GitOps pushes:** Kubernetes controllers watch the API server and react in under a second when ArgoCD or Flux updates a YAML manifest. Because `chinit` has no central control server, VMs check for updates on short background timers (every 2–10 minutes), unless you trigger an immediate refresh (`chinit boot --refresh`).
-4. **GCP and on-prem bare metal:** `clickhouse-operator` runs anywhere Kubernetes runs — AWS, Azure, GCP, or bare-metal racks. `chinit` `v0.2.6` ships with **AWS**, **Azure**, and a local **Docker Compose** provider (`-cloud compose` in [`deploy/compose/`](https://github.com/stackgenhq/chinit/tree/main/deploy/compose) for local laptop testing and CI); GCP and bare metal require writing a small Go provider adapter.
+4. **GCP and on-prem bare metal:** `clickhouse-operator` runs anywhere Kubernetes runs — AWS, Azure, GCP, or bare-metal racks. `chinit` `v0.2.7` ships with **AWS**, **Azure**, and a local **Docker Compose** provider (`-cloud compose` in [`deploy/compose/`](https://github.com/stackgenhq/chinit/tree/main/deploy/compose) for local laptop testing and CI); GCP and bare metal require writing a small Go provider adapter.
 
 ### Side-by-Side Scorecard
 
@@ -207,7 +207,7 @@ To make the decision easy, here is who gets the biggest win from `chinit`:
 
 Everything is open source under Apache-2.0 at **[github.com/stackgenhq/chinit](https://github.com/stackgenhq/chinit)**:
 
-- **Single Go binary (`v0.2.6`):** Prebuilt static binaries for Linux and macOS (`arm64` and `amd64`) with `SHA256SUMS`, plus a local multi-node Docker Compose cluster (`deploy/compose/`) for testing on your laptop.
+- **Single Go binary (`v0.2.7`):** Prebuilt static binaries for Linux and macOS (`arm64` and `amd64`) with `SHA256SUMS`, plus a local multi-node Docker Compose cluster (`deploy/compose/`) for testing on your laptop.
 - **Packer Golden Images:** Ready-to-build templates in [`images/aws`](https://github.com/stackgenhq/chinit/tree/main/images/aws) and [`images/azure`](https://github.com/stackgenhq/chinit/tree/main/images/azure) (for both upstream ClickHouse LTS and Altinity Antalya `CAS`).
 - **Turnkey Terraform Modules:** Drop [`terraform/aws`](https://github.com/stackgenhq/chinit/tree/main/terraform/aws) or [`terraform/azure`](https://github.com/stackgenhq/chinit/tree/main/terraform/azure) into a VPC and `apply`:
 
@@ -237,3 +237,10 @@ If you run ClickHouse on VMs — or have been wondering whether you *really* nee
 ---
 
 *Related in this series: [One Binary to Bootstrap a Node: Why chinit Replaced 3,600 Lines of Bash](/blog/chinit-one-binary-node-bootstrap/), [Teaching an Operator Without Kubernetes](/blog/clickhouse-operate-without-kubernetes/), [Graviton Roulette: The Day NVMe Device Names Broke Our Boot](/blog/gravitron-nvme-enumeration-boot-disk-guard/), and [The Math of ClickHouse CAS on AWS](/blog/clickhouse-cas-cost-math-s3-deduplication/).*
+
+---
+
+### `v0.2.7` changelog highlights
+
+- `dead-replica-gc` URL-decodes Keeper DDL-queue znodes (`%2D`/`%2E`) — eliminates persistent `DNSResolver` / `DDLWorker` warnings for retired ordinals.
+- `HardwareSizingOverlayXML` caps `background_merges_mutations_concurrency_ratio = 2` on hosts with `<= 12 GiB` RAM regardless of vCPU count — prevents `Code: 241` on 4-vCPU / 8 GiB readers under burst ingest.

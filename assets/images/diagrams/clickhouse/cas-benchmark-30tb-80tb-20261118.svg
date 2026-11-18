@@ -1,0 +1,233 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 680" width="1120" height="680" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#f1f5f9"/>
+    </linearGradient>
+    <linearGradient id="blueArea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2563eb" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#2563eb" stop-opacity="0.02"/>
+    </linearGradient>
+    <linearGradient id="greenArea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#059669" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#059669" stop-opacity="0.02"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1120" height="680" rx="14" fill="url(#bgGrad)" stroke="#cbd5e1" stroke-width="1.5"/>
+
+  <!-- Header -->
+  <text x="40" y="42" font-size="20" font-weight="700" fill="#0f172a">Altinity Antalya CAS Benchmark Telemetry: 30.7 TB/day (1-Hour Soak) &amp; 83.85 TB/day (10-Min Burst)</text>
+  <text x="40" y="66" font-size="13" fill="#475569">Measured on AWS Graviton4 (m8g.4xlarge Writers + c8g.xlarge Readers, 256 GiB 500 MB/s gp3 Hot Tier + 1.00× Shared CAS S3 Cold Pool)</text>
+
+  <!-- ===================================================================== -->
+  <!-- PANEL 1 (TOP LEFT): 1-Hour 30.7 TB/day Row Convergence & Uncomp GiB   -->
+  <!-- ===================================================================== -->
+  <rect x="36" y="88" width="510" height="265" rx="10" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2"/>
+  <text x="56" y="114" font-size="14" font-weight="700" fill="#0f172a">1. 1-Hour 30.7 TB/day Soak — Row Parity Across All 7 Nodes</text>
+  <text x="56" y="132" font-size="11.5" fill="#64748b">6,661 files · 640,470,621 rows (1,424.5 GiB uncomp → 92.1 GiB hot = 15.47× ZSTD)</text>
+
+  <!-- Grid lines Panel 1 (x: 90..515, y: 155..305) -->
+  <g stroke="#e2e8f0" stroke-width="1">
+    <line x1="90" y1="155" x2="515" y2="155"/>
+    <line x1="90" y1="192.5" x2="515" y2="192.5"/>
+    <line x1="90" y1="230" x2="515" y2="230"/>
+    <line x1="90" y1="267.5" x2="515" y2="267.5"/>
+    <line x1="90" y1="305" x2="515" y2="305" stroke="#94a3b8"/>
+  </g>
+  <g font-size="10.5" fill="#64748b" text-anchor="end">
+    <text x="82" y="159">640M</text>
+    <text x="82" y="196">480M</text>
+    <text x="82" y="234">320M</text>
+    <text x="82" y="271">160M</text>
+    <text x="82" y="309">0</text>
+  </g>
+  <g font-size="10.5" fill="#64748b" text-anchor="middle">
+    <text x="90" y="323">0m</text>
+    <text x="161" y="323">11m</text>
+    <text x="232" y="323">22m</text>
+    <text x="303" y="323">33m</text>
+    <text x="373" y="323">43m</text>
+    <text x="444" y="323">59m</text>
+    <text x="515" y="323">64m</text>
+  </g>
+
+  <!-- Area & Line: Writers (640.47M max -> y=155) -->
+  <polygon points="90,305 117,294 161,277 195,266 232,251 268,240 303,224 338,211 373,198 408,185 444,158 515,155 515,305" fill="url(#blueArea)"/>
+  <polyline fill="none" stroke="#2563eb" stroke-width="2.6" points="90,305 117,294 161,277 195,266 232,251 268,240 303,224 338,211 373,198 408,185 444,158 515,155"/>
+  <!-- Line: Readers (4R) -->
+  <polyline fill="none" stroke="#10b981" stroke-width="2.2" stroke-dasharray="5,3" points="90,305 117,294 161,277 195,266 232,251 268,240 303,224 338,211 373,198 408,185 444,159 515,155"/>
+
+  <circle cx="515" cy="155" r="4.5" fill="#2563eb"/>
+  <text x="505" y="148" font-size="10.5" font-weight="700" fill="#1e40af" text-anchor="end">640,470,621 rows (7/7 nodes, lag=0s)</text>
+
+  <!-- Legend Panel 1 -->
+  <line x1="96" y1="340" x2="116" y2="340" stroke="#2563eb" stroke-width="2.6"/>
+  <text x="122" y="344" font-size="11" fill="#334155">Writers (3 × m8g.4xlarge, lag=0s)</text>
+  <line x1="310" y1="340" x2="330" y2="340" stroke="#10b981" stroke-width="2.2" stroke-dasharray="5,3"/>
+  <text x="336" y="344" font-size="11" fill="#334155">Readers (4 × Autoscaled, lag=0–16s → 0s)</text>
+
+  <!-- ===================================================================== -->
+  <!-- PANEL 2 (TOP RIGHT): 10-Min 83.85 TB/day Burst (1-Minute Snapshots)   -->
+  <!-- ===================================================================== -->
+  <rect x="574" y="88" width="510" height="265" rx="10" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2"/>
+  <text x="594" y="114" font-size="14" font-weight="700" fill="#0f172a">2. 10-Min 83.85 TB/day Burst — 1-Minute Snapshot Progression</text>
+  <text x="594" y="132" font-size="11.5" fill="#64748b">2,987 files · 287,257,259 rows (638.9 GiB uncomp → 41.8 GiB hot in 10m 03s @ 476.6k rec/s)</text>
+
+  <!-- Grid lines Panel 2 (x: 628..1053, y: 155..305) -->
+  <g stroke="#e2e8f0" stroke-width="1">
+    <line x1="628" y1="155" x2="1053" y2="155"/>
+    <line x1="628" y1="192.5" x2="1053" y2="192.5"/>
+    <line x1="628" y1="230" x2="1053" y2="230"/>
+    <line x1="628" y1="267.5" x2="1053" y2="267.5"/>
+    <line x1="628" y1="305" x2="1053" y2="305" stroke="#94a3b8"/>
+  </g>
+  <g font-size="10.5" fill="#64748b" text-anchor="end">
+    <text x="620" y="159">300M</text>
+    <text x="620" y="196">225M</text>
+    <text x="620" y="234">150M</text>
+    <text x="620" y="271">75M</text>
+    <text x="620" y="309">0</text>
+  </g>
+  <g font-size="10.5" fill="#64748b" text-anchor="middle">
+    <text x="628" y="323">0m</text>
+    <text x="667" y="323">1m</text>
+    <text x="705" y="323">3.5m</text>
+    <text x="744" y="323">4m</text>
+    <text x="783" y="323">5.5m</text>
+    <text x="821" y="323">6.7m</text>
+    <text x="860" y="323">8m</text>
+    <text x="899" y="323">9m</text>
+    <text x="937" y="323">10m</text>
+    <text x="995" y="323">11.5m</text>
+    <text x="1053" y="323">13m</text>
+  </g>
+
+  <!-- Area & Line: 80 TB/day Writers (0 -> 287.26M at x=937..1053, y=161.4) -->
+  <polygon points="628,305 667,289 705,255 744,246 783,228 821,211 860,194 899,177 937,161 995,161 1053,161 1053,305" fill="url(#greenArea)"/>
+  <polyline fill="none" stroke="#059669" stroke-width="2.6" points="628,305 667,289 705,255 744,246 783,228 821,211 860,194 899,177 937,161 995,161 1053,161"/>
+  <!-- Reader-0 (c8g.xlarge) -->
+  <polyline fill="none" stroke="#d97706" stroke-width="2.1" stroke-dasharray="4,3" points="628,305 667,289 705,255 744,246 783,228 821,212 860,194 899,178 937,161.5 995,161 1053,161"/>
+
+  <circle cx="937" cy="161" r="4.5" fill="#059669"/>
+  <text x="937" y="149" font-size="10.5" font-weight="700" fill="#065f46" text-anchor="middle">DONE+18s: 287,257,259 rows (0s lag)</text>
+
+  <!-- Legend Panel 2 -->
+  <line x1="634" y1="340" x2="654" y2="340" stroke="#059669" stroke-width="2.6"/>
+  <text x="660" y="344" font-size="11" fill="#334155">Writers (100% drained 18s after 83.85 TB/d burst)</text>
+  <line x1="912" y1="340" x2="932" y2="340" stroke="#d97706" stroke-width="2.1" stroke-dasharray="4,3"/>
+  <text x="938" y="344" font-size="11" fill="#334155">Reader (c8g.xlarge, lag ≤4s)</text>
+
+  <!-- ===================================================================== -->
+  <!-- PANEL 3 (BOTTOM LEFT): Active Parts Compaction & CPU % (80 TB/d Run)  -->
+  <!-- ===================================================================== -->
+  <rect x="36" y="375" width="510" height="275" rx="10" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2"/>
+  <text x="56" y="401" font-size="14" font-weight="700" fill="#0f172a">3. Active Parts Compaction &amp; Writer CPU% Under 83.85 TB/day Burst</text>
+  <text x="56" y="419" font-size="11.5" fill="#64748b">Writers peak at 219 parts (threshold 8,000) &amp; compact to 20 parts within 3m of burst end</text>
+
+  <!-- Grid lines Panel 3 (x: 90..515, y: 442..592) -->
+  <g stroke="#e2e8f0" stroke-width="1">
+    <line x1="90" y1="442" x2="515" y2="442"/>
+    <line x1="90" y1="479.5" x2="515" y2="479.5"/>
+    <line x1="90" y1="517" x2="515" y2="517"/>
+    <line x1="90" y1="554.5" x2="515" y2="554.5"/>
+    <line x1="90" y1="592" x2="515" y2="592" stroke="#94a3b8"/>
+  </g>
+  <g font-size="10.5" fill="#64748b" text-anchor="end">
+    <text x="82" y="446">240 parts</text>
+    <text x="82" y="483">180 parts</text>
+    <text x="82" y="521">120 parts</text>
+    <text x="82" y="558">60 parts</text>
+    <text x="82" y="596">0</text>
+  </g>
+  <g font-size="10.5" fill="#64748b" text-anchor="middle">
+    <text x="90" y="610">0m</text>
+    <text x="129" y="610">1m</text>
+    <text x="167" y="610">3.5m</text>
+    <text x="206" y="610">4m</text>
+    <text x="245" y="610">5.5m</text>
+    <text x="283" y="610">6.7m</text>
+    <text x="322" y="610">8m</text>
+    <text x="361" y="610">9m</text>
+    <text x="399" y="610">10m</text>
+    <text x="457" y="610">11.5m</text>
+    <text x="515" y="610">13m</text>
+  </g>
+
+  <!-- Writer Active Parts (max 219 at 9m -> y = 592 - (219/240)*150 = 455) -->
+  <polyline fill="none" stroke="#7c3aed" stroke-width="2.5" points="90,591 129,563 167,524 206,525 245,508 283,498 322,478 361,455 399,493 457,559 486,571 515,579"/>
+  <!-- Writer CPU % (scaled 0..100% -> y 592..442) -->
+  <polyline fill="none" stroke="#ef4444" stroke-width="2.1" stroke-dasharray="5,3" points="90,552 129,498 167,455 206,453 245,444 283,444 322,445 361,444 399,458 457,530 486,557 515,570"/>
+
+  <circle cx="361" cy="455" r="4" fill="#7c3aed"/>
+  <text x="355" y="472" font-size="10" font-weight="600" fill="#6d28d9" text-anchor="end">Peak: 219 parts (98.9% CPU)</text>
+  <circle cx="515" cy="579" r="4" fill="#7c3aed"/>
+  <text x="508" y="571" font-size="10" font-weight="600" fill="#6d28d9" text-anchor="end">Compacted: 20 parts (13% CPU)</text>
+
+  <!-- Legend Panel 3 -->
+  <line x1="96" y1="630" x2="116" y2="630" stroke="#7c3aed" stroke-width="2.5"/>
+  <text x="122" y="634" font-size="11" fill="#334155">Writer Active Parts (219 peak → 20 post-drain)</text>
+  <line x1="355" y1="630" x2="375" y2="630" stroke="#ef4444" stroke-width="2.1" stroke-dasharray="5,3"/>
+  <text x="381" y="634" font-size="11" fill="#334155">Writer CPU % (98% → 13%)</text>
+
+  <!-- ===================================================================== -->
+  <!-- PANEL 4 (BOTTOM RIGHT): S3 API Cost Collapse & Scorecard (7.4 -> 9.4) -->
+  <!-- ===================================================================== -->
+  <rect x="574" y="375" width="510" height="275" rx="10" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2"/>
+  <text x="594" y="401" font-size="14" font-weight="700" fill="#0f172a">4. Fleet S3 API Spend Collapse (-94%) &amp; Production Readiness Scorecard</text>
+  <text x="594" y="419" font-size="11.5" fill="#64748b">Daily S3 API cost dropped from $84.05/day (16.8M Tier-1 ops) to $5.28/day ($0.22/hr @ 30.7 TB/d)</text>
+
+  <!-- Left Sub-Chart: S3 API $/day Bar Comparison -->
+  <text x="600" y="448" font-size="11.5" font-weight="700" fill="#334155">S3 API Request Spend ($/month)</text>
+  <!-- Bar 1: Unoptimized Gen 1 -->
+  <text x="600" y="472" font-size="11" fill="#475569">Gen 1 (64 GiB hot, wide parts)</text>
+  <rect x="600" y="478" width="210" height="18" rx="4" fill="#ef4444"/>
+  <text x="816" y="491" font-size="11" font-weight="700" fill="#b91c1c">$2,550/mo ($84/d)</text>
+
+  <!-- Bar 2: Model Target -->
+  <text x="600" y="516" font-size="11" fill="#475569">GA Target Budget</text>
+  <rect x="600" y="522" width="22" height="18" rx="4" fill="#f59e0b"/>
+  <text x="628" y="535" font-size="11" font-weight="600" fill="#b45309">$220/mo ($7.20/d)</text>
+
+  <!-- Bar 3: Measured CAS 1h Soak -->
+  <text x="600" y="560" font-size="11" fill="#475569">Gen 3 CAS (Measured 1h @ 30.7 TB/d)</text>
+  <rect x="600" y="566" width="16" height="18" rx="4" fill="#10b981"/>
+  <text x="622" y="579" font-size="11" font-weight="700" fill="#047857">$161/mo ($0.22/hr)</text>
+
+  <!-- Bar 4: Measured CAS 80 TB/d Burst -->
+  <text x="600" y="604" font-size="11" fill="#475569">Gen 3 CAS (Measured @ 83.85 TB/d)</text>
+  <rect x="600" y="610" width="24" height="18" rx="4" fill="#2563eb"/>
+  <text x="630" y="623" font-size="11" font-weight="700" fill="#1d4ed8">$255/mo ($0.35/hr)</text>
+
+  <!-- Right Sub-Chart: Scorecard 7.4 -> 9.4 -->
+  <line x1="875" y1="440" x2="875" y2="635" stroke="#e2e8f0" stroke-width="1.2"/>
+  <text x="892" y="448" font-size="11.5" font-weight="700" fill="#334155">Readiness Score (7.4 → 9.4 / 10)</text>
+
+  <g font-size="10.5" fill="#334155">
+    <text x="892" y="472">Ingest &amp; Storage Efficacy</text>
+    <text x="1068" y="472" font-weight="700" fill="#047857" text-anchor="end">9.0 → 9.5</text>
+    <rect x="892" y="477" width="176" height="7" rx="3.5" fill="#e2e8f0"/>
+    <rect x="892" y="477" width="167" height="7" rx="3.5" fill="#10b981"/>
+
+    <text x="892" y="505">CPU Sizing &amp; Balance</text>
+    <text x="1068" y="505" font-weight="700" fill="#047857" text-anchor="end">6.5 → 9.4</text>
+    <rect x="892" y="510" width="176" height="7" rx="3.5" fill="#e2e8f0"/>
+    <rect x="892" y="510" width="165" height="7" rx="3.5" fill="#10b981"/>
+
+    <text x="892" y="538">Memory &amp; Pool Stability</text>
+    <text x="1068" y="538" font-weight="700" fill="#047857" text-anchor="end">7.0 → 9.4</text>
+    <rect x="892" y="543" width="176" height="7" rx="3.5" fill="#e2e8f0"/>
+    <rect x="892" y="543" width="165" height="7" rx="3.5" fill="#10b981"/>
+
+    <text x="892" y="571">Network &amp; Replication</text>
+    <text x="1068" y="571" font-weight="700" fill="#047857" text-anchor="end">7.5 → 9.3</text>
+    <rect x="892" y="576" width="176" height="7" rx="3.5" fill="#e2e8f0"/>
+    <rect x="892" y="576" width="163" height="7" rx="3.5" fill="#10b981"/>
+
+    <text x="892" y="604">NLB /replicas_status Routing</text>
+    <text x="1068" y="604" font-weight="700" fill="#047857" text-anchor="end">7.0 → 9.4</text>
+    <rect x="892" y="609" width="176" height="7" rx="3.5" fill="#e2e8f0"/>
+    <rect x="892" y="609" width="165" height="7" rx="3.5" fill="#10b981"/>
+  </g>
+</svg>

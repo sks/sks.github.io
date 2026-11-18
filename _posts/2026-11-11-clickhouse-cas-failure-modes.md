@@ -133,6 +133,44 @@ With per-replica prefixes, one broken replica costs you its copy. With CAS, one 
 
 Mitigations: separate prefix + explicit IAM allow (not wildcard), no lifecycle expiry on the pool, object-lock *disabled* (required) compensated by out-of-band backups, and a tested restore.
 
+## Failure 6: the 8 GiB reader that passed the soak and died in the burst
+
+The `health gate` on our readers reported "degraded: table default.events readonly"
+mid-roll during a `30 TB/day` soak. The reason was not CAS and not replication — it
+was a brand-new `c8g.xlarge` (`4 vCPU / 8 GiB`) that had been sized by CPU headroom
+alone while carrying the full `8 × concurrency 4 = 32` background merge budget meant
+for a `64 GiB` writer.
+
+What the soak hid and a 10-minute burst exposed:
+
+- `max_server_memory_usage_to_ram_ratio = 0.9` on 8 GiB means a `~6.0 GiB` server cap.
+- `background_pool_size = 8` × `background_merges_mutations_concurrency_ratio = 4` =
+  up to **32 concurrent merges** in flight, each reserving hundreds of MiB of merge
+  scratch. One 8 GiB reader ran **28 concurrent merges and 24 concurrent fetches**
+  at once and logged `Code: 241 MEMORY_LIMIT_EXCEEDED` (1,537 occurrences in one
+  30-minute window) while reporting `0` logical errors.
+- The fix is mechanical, not architectural: cap `background_merges_mutations_concurrency_ratio`
+  at `2` for any host at or below ~12 GiB RAM (`2 × 8 = 16` concurrent merges maximum,
+  `12` when `vcpus <= 2`), and size readers at **≥16 GiB** whenever they must also
+  fetch and merge parts on a shared pool.
+
+Two adjacent lessons from the same burst, both now enforced in `chinit v0.2.7`:
+
+- **Percent-encoded Keeper znodes defeat `strings.HasPrefix` reapers.** ClickHouse writes
+  `/clickhouse/<cluster>/task_queue/replicas` children as URL-encoded names
+  (`writer%2D4%2Ech%2Dint%2Ddev%2Eclickhouse%2Einternal:9440`). A reaper that compares
+  raw strings never matches `writer-` and never removes the entry, so DDL workers and
+  `DNSResolver` log "Cannot resolve host" forever for ordinals that left the fleet weeks
+  ago. Unescape before matching; the entries were drained by hand and now self-clean.
+- **`opentelemetry_span_log` is not like every other system log.** Its stock `<engine>`
+  block ships in `config.xml`, so setting `partition_by`/`ttl` alongside it is a fatal
+  config error (`Code: 36`), not a no-op warning. Put the TTL *inside* the `engine=`
+  string or the server does not start.
+
+The one-line rule from this failure: **size readers for the *worst-case merge burst*, not
+the steady-state ingest rate, and test with bursts short enough that queue depth hides
+nothing.**
+
 ## Failure 6: the verification gap
 
 The most expensive failure is declaring success because the server started. Minimum bar before calling CAS healthy:

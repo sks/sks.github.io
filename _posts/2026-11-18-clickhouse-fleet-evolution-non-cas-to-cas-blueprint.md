@@ -8,7 +8,7 @@ description: >-
   We evolved a 30 TB/day self-managed ClickHouse cluster on AWS through three
   distinct architectures: naive S3-tiered ReplicatedMergeTree, tuned upstream
   26.8 LTS without Content-Addressed Storage (CAS), and a source-tuned CAS fleet
-  on Altinity Antalya + chinit v0.2.3. Here is the unbiased side-by-side
+  on Altinity Antalya + chinit v0.2.7. Here is the unbiased side-by-side
   comparison with live benchmark telemetry, the real pros and cons of CAS
   (including Code 246 UUID collisions, Code 48 suspended-versioning traps,
   asymmetrical reader merge storms, and shared-bucket blast radius), and a
@@ -80,7 +80,7 @@ through **three distinct fleet generations**:
    — proven across a 1-hour soak (`792.4M` rows / `1.6 TB`, `0` failed batches,
    `0–1s` lag), yet structurally capped by `R×` cold S3 copies and
    Single-Availability-Zone (`Single-AZ`) lock-in.
-3. **Generation 3 — Shared-Pool CAS (`26.6.8.20004.altinityantalya` + `chinit v0.2.3+`):**
+3. **Generation 3 — Shared-Pool CAS (`26.6.8.20004.altinityantalya` + `chinit v0.2.7+`):**
    Altinity Antalya's experimental **Content-Addressed Storage (`CAS`)** cold
    pool — collapsing cold S3 storage to **`1.00×`** and cold reader backfills to
    **`2.3–3.5 seconds`**, while exposing seven real operational trade-offs we
@@ -178,7 +178,7 @@ cross-AZ part-fetch charges.
 
 ---
 
-### Generation 3: The Shared-Pool CAS Fleet (`26.6.8.20004.altinityantalya` + `chinit v0.2.3+`)
+### Generation 3: The Shared-Pool CAS Fleet (`26.6.8.20004.altinityantalya` + `chinit v0.2.7+`)
 
 Generation 3 flips one Terraform variable: `cas_config = { enabled = true }`.
 Terraform and `chinit` coordinate five automatic changes:
@@ -193,7 +193,7 @@ Terraform and `chinit` coordinate five automatic changes:
 3. **Three-Volume `tiered_cas` Bridge Policy:** Pairs `hot` (`256 GiB` `gp3`),
    `cold` (`cas_cache` → `cas`), and `cold_legacy` (`s3_cache` for zero-downtime
    in-place migration), while doubling the cache disk floor (`32 → 64 GiB`).
-4. **Deterministic 36-Byte Server Identity:** `chinit v0.2.3+` derives an exact
+4. **Deterministic 36-Byte Server Identity:** `chinit v0.2.7+` derives an exact
    36-byte `/var/lib/clickhouse/uuid` and `CH_CAS_SERVER_ROOT_ID` from
    `(cluster_name, claimed_ordinal)` so fresh-EBS ASG replacements reclaim their
    CAS slot cleanly.
@@ -225,11 +225,15 @@ copied**.
 
 ## Live Benchmark Telemetry: Non-CAS vs. Untuned CAS vs. Source-Tuned CAS
 
+![Altinity Antalya CAS Benchmark Telemetry: 30.7 TB/day 1-Hour Soak and 83.85 TB/day 10-Min Burst](/assets/images/diagrams/clickhouse/cas-benchmark-30tb-80tb-20261118.svg)
+
+*Measured 4-panel telemetry from the 1-hour `30.7 TB/day` soak (`640,470,621` rows across 7 nodes, `$0.2467` total S3 API cost) and the 10-minute `83.85 TB/day` burst (`287,257,259` rows in `10m 03s` drained with `0s` lag).*
+
 Here is how Generation 2, our initial untuned CAS deployment (Gen 3a), and our
 source-tuned CAS deployment (Gen 3b) performed under sustained `30–38 TB/day`
 `S3Queue` + 3-MV load:
 
-| Measured Telemetry | Gen 2: Tuned Non-CAS (`26.8.36.3` LTS) | Gen 3a: Initial CAS (Untuned Defaults) | Gen 3b: Source-Tuned CAS (`Antalya` + `chinit v0.2.3+`, 1h Soak) |
+| Measured Telemetry | Gen 2: Tuned Non-CAS (`26.8.36.3` LTS) | Gen 3a: Initial CAS (Untuned Defaults) | Gen 3b: Source-Tuned CAS (`Antalya` + `chinit v0.2.7+`, 1h Soak) |
 |---|---|---|---|
 | **Sustained Ingest Pace** | `220,022 rows/s` (`38.4 TB/day`, `1.6 TB` / `1h`) | `212,177 rows/s` (`37.3 TB/day`, `777 GB` / `30m`) | **`177,821 rows/s` (`30.7 TB/day`, `1,424.5 GiB` uncomp in `1h`)** |
 | **Convergence & Staging Lag** | `100%` (`792.4M` rows), `0–1s` lag, `0` failures | `100%` (`382.5M` rows, 7 nodes), `0` backlog | **`100%` (`640,470,621` rows across 7 nodes), `0s` writer lag** |
@@ -237,7 +241,7 @@ source-tuned CAS deployment (Gen 3b) performed under sustained `30–38 TB/day`
 | **Cold Scale-Out Backfill** | Full S3 download + re-upload to new `{replica}/` | **`2.29s – 3.47s` metadata relink (`0` bytes)** | **`2.29s – 3.47s` metadata relink (`0` bytes)** |
 | **Full-Hour Fleet S3 API Cost** | `~$0.25–$0.30/hr` (post hot-disk tuning) | `~$0.45/hr` (`60s` GC + `10s` lease renewals) | **`$0.2467` total for 1h (`35,265` Tier-1 + `176,023` Tier-2 = `~$161/mo`)** |
 | **Writer CPU & RAM Usage** | `65–90%` on `8-vCPU` `m8g.2xlarge` | `35–55%` CPU on `16-vCPU` `m8g.4xlarge` | **`22–53%` CPU, `8.44 / 61.64 GiB` RAM (`13.7%`) → `m8g.2xlarge` floor** |
-| **Reader Merge Behavior** | Local hot merges (`20–45s`) | **`63–110s` avg (`1,098s` max)** — `57%` hashed to readers | **`prefer_fetch_merged_part = 180s / 1 MiB` + `4-vCPU` `c8g.xlarge`** |
+| **Reader Merge Behavior** | Local hot merges (`20–45s`) | **`63–110s` avg (`1,098s` max)** — `57%` hashed to readers | **`prefer_fetch_merged_part = 180s / 1 MiB` + readers at `≥16 GiB` RAM (`m8g.xlarge` class, `concurrencyRatio = 2` at `≤12 GiB`)** |
 | **`systemctl restart` Time** | `~5–7s` | **`40–89s`** (waits out prior mount lease TTL) | **`7s`** (`cas_unsafe_remount_no_delay = true` on own UUID) |
 | **Fresh-EBS ASG Roll** | Clean (`{replica}` macro) | **Crash-looped (`Code: 246` / `Code: 27`)** | **Clean (`36`-byte deterministic UUID + `CH_CAS_SERVER_ROOT_ID`)** |
 
@@ -319,7 +323,7 @@ producer staging `PUT`s.)*
      Writing `uuid + "\n"` (`37` bytes) throws **`Code: 27
      CANNOT_PARSE_INPUT_ASSERTION_FAILED`** and **silently overwrites the file
      with a random `UUIDv4`** — priming a delayed `Code: 246` crash on the next
-     ASG roll until `chinit v0.2.3` wrote exact 36-byte files.
+     ASG roll until `chinit v0.2.3` wrote exact 36-byte files (the newline-bug fix remains load-bearing today — `chinit v0.2.7` keeps `ServerUUID::load` tolerant of trailing newlines).
 3. **S3 `"Suspended"` versioning still fails (`Code: 48`), and blast radius is shared.**
    If a bucket *ever* had S3 Versioning enabled — even after setting
    `Status="Suspended"` — S3 permanently creates `null` delete markers on
@@ -434,7 +438,7 @@ SETTINGS
    that every subnet route table attaches to the regional S3 Gateway Endpoint.
 4. **Strict writer/reader isolation + `/replicas_status` NLB gate:** Drop
    `S3Queue` immediately after `SyncSchema` on non-writers, run non-burstable
-   `4-vCPU` `c8g.xlarge` readers, and check `HTTP :8123/replicas_status`
+   `4-vCPU` non-burstable Graviton4 readers sized at **≥ 16 GiB** RAM (e.g. `m8g.xlarge`; `c8g.xlarge`'s 8 GiB was the source of the reader `Code: 241`), with `concurrencyRatio = 2` under `12 GiB`, and check `HTTP :8123/replicas_status`
    (`delay ≤ 300s`, `deregistration_delay = 30s`) on NLB target groups.
 5. **Nightly blast-radius isolation:** Wake an off-quorum `backup-0` replica
    nightly (`~$1.50/mo` compute) to archive `clickhouse-backup` snapshots into a
@@ -451,11 +455,23 @@ surfaced four subtle bottlenecks that short smoke tests miss — all closed in
 | Dimension | Initial Score | Remediated | What the 1-Hour 30.7 TB/day Soak Exposed & Fixed |
 |---|---|---|---|
 | **1. Ingest & Storage Efficacy** | `9.0 / 10` | **`9.5 / 10`** | `6,661` files / `640.47M` rows (`1,424.5 GiB` → `92.1 GiB` = `15.47×` ZSTD) at `0s` lag and **`$0.2467` total S3 API cost/hr** (`~$161/mo`); shortened cold TTL to `1–2d`. |
-| **2. CPU Sizing & Balance** | `6.5 / 10` | **`9.4 / 10`** | `m8g.4xlarge` writers ran at `22–53%` CPU while `2-vCPU` `t4g.large` readers hit `100%`; right-sized baseline writers to `m8g.2xlarge` and readers to `4-vCPU` `c8g.xlarge` (`-$630/mo` net). |
-| **3. Memory Stability** | `7.0 / 10` | **`9.4 / 10`** | Writers peaked at `13.7%` RAM (`8.44 GiB`), while new `8 GiB` readers hit `Code: 241` before `S3Queue` drop; fixed `chinit` to run role-scoped DDL immediately after `SyncSchema`. |
-| **4. Network & Replication** | `7.5 / 10` | **`9.3 / 10`** | `200–444 MB/s` burst over `:9010` + free S3 Gateway Endpoint; added DNS/hosts refresh inside `health_gate` and guarded `remote_fs_execute_merges...` on `isContentAddressed()`. |
+| **2. CPU Sizing & Balance** | `6.5 / 10` | **`9.4 / 10`** | `m8g.4xlarge` writers ran at `22–53%` CPU while `2-vCPU` `t4g.large` readers hit `100%`; baseline writers right-sized to `m8g.2xlarge` with a vertical-autoscale ladder, readers upgraded off burstable credits to `4-vCPU` Graviton4. |
+| **3. Memory Stability** | `7.0 / 10` | **`9.4 / 10`** | Writers peaked at `13.7%` RAM (`8.44 GiB`); new `8 GiB` readers hit `Code: 241` because `background_merges_mutations_concurrency_ratio = 4` allowed `32` concurrent merges against a `~6 GiB` server cap. Fix in `chinit v0.2.7`: `HardwareSizingOverlayXML` now caps `concurrencyRatio = 2` whenever `memBytes <= 12 GiB`, and compute-reader floors were raised to `≥16 GiB`. |
+| **4. Network & Replication** | `7.5 / 10` | **`9.3 / 10`** | `200–444 MB/s` burst over `:9010` + free S3 Gateway Endpoint. Live logs showed stale Keeper DDL-queue znodes (`%2D`/`%2E`-encoded) for decommissioned ASGs; `dead-replica-gc` now URL-decodes them (`chinit v0.2.7`), and `health_gate` re-converges `/etc/hosts` + DNS + `remote_servers` between retries. |
 | **5. Load Balancing & Routing** | `7.0 / 10` | **`9.4 / 10`** | Switched NLB target groups from `TCP :8123` to `HTTP :8123/replicas_status` (`300s / 120s` lag thresholds) and cut `deregistration_delay` `300s → 30s`. |
 | **Overall Fleet Readiness** | **`7.4 / 10`** | **`9.4 / 10`** | **Production-ready for sustained 30+ TB/day ingestion.** |
+
+### What the 10-Minute `83.85 TB/day` Burst Exposed After the Soak
+
+The follow-up burst (`2,987` files, `287,257,259` rows, `476,598 rec/s`, `10m 03s`) re-confirmed the fixes against a harder target — and caught one more:
+
+- **`Code: 241` on `8 GiB` readers is a *concurrency* bug, not a capacity bug.** The sampler showed `28` concurrent merges + `24` fetches on `reader-0`; `background_pool_size × background_merges_mutations_concurrency_ratio` was `8 × 4 = 32` on a box whose `max_server_memory_usage_to_ram_ratio = 0.9` caps it at `~6.0 GiB`. `chinit v0.2.7` caps the ratio at `2` below `12 GiB` physical RAM.
+- **`%2D`/`%2E` Keeper znodes accumulate silently in `/clickhouse/<cluster>/task_queue/replicas`.** `DDLWorker` and `DNSResolver` logged warnings for hosts retired weeks earlier because the reaper compared raw entries without URL-decoding ClickHouse's percent-encoded path segments. `dead-replica-gc` in `chinit v0.2.7` decodes them; 21 stale znodes were removed by hand on `writer-0` to confirm the class was gone.
+- **`opentelemetry_span_log` crashed fresh nodes (`Code: 36`)** because `system.opentelemetry_span_log` ships with an explicit `<engine>` block in the stock `config.xml`; setting `opentelemetry_span_log/partition_by` + `ttl` alongside it is illegal. The engine belongs inline in the `engine=` string — fixed in both `chi.yaml.tftpl` flavors in `chinit v0.2.6`/`v0.2.7` and in the live template.
+- **Writers hit `92–99%` CPU and `13–21 GiB` RAM during the burst** — comfortable on `16 vCPU / 64 GiB` `m8g.4xlarge`, but the reason `writer_min_type` stays at `m8g.4xlarge` while steady-state dropped to `m8g.2xlarge` after the soak.
+- **NLB `:8123/replicas_status` + `min_absolute_delay_to_close=300` / `min_relative_delay_to_close=120`** kept lagging autoscaled readers out of rotation without a single client-visible error; `deregistration_delay` dropped `300s → 30s`.
+- **A clean `2fc6bb4` build (`chinit v0.2.7`)** is the tag that carries all of the above (`v0.2.7` cut after the burst, before production promotion).
+
 
 ---
 
@@ -543,7 +559,7 @@ Plug in your own cluster numbers below (or share a direct permalink to any scena
 | Your Situation | Recommended Choice | Why |
 |---|---|---|
 | **Ingest `< 2–5 TB/day`, `2–3` replicas in one AZ, strict LTS or S3-versioning mandate** | **Gen 2: Tuned Non-CAS (`26.8` LTS + `chinit`)** | Cold S3 is only `$150–$600/mo`; `500 MB/s` `gp3` + `1 GiB` compact parts deliver GA stability, S3 versioning, and isolated per-replica blast radius. |
-| **Ingest `10–100+ TB/day`, BYOC VPCs, elastic `4–10+` Spot readers, or cross-AZ cold serving** | **Gen 3: Source-Tuned CAS (`Antalya` + `chinit v0.2.3+`)** | Saving `$3,000–$15,000+/mo` in duplicate S3 storage + `2.3–3.5s` zero-copy reader scale-outs justifies pinning Altinity Antalya and running nightly isolated backups. |
+| **Ingest `10–100+ TB/day`, BYOC VPCs, elastic `4–10+` Spot readers, or cross-AZ cold serving** | **Gen 3: Source-Tuned CAS (`Antalya` + `chinit v0.2.7+`)** | Saving `$3,000–$15,000+/mo` in duplicate S3 storage + `2.3–3.5s` zero-copy reader scale-outs justifies pinning Altinity Antalya and running nightly isolated backups. |
 | **No appetite to own Keeper quorums, AMI pipelines, or storage GC runbooks** | **ClickHouse Cloud (`SharedMergeTree`) / Altinity.Cloud** | Shared object storage, stateless compute scaling, and vendor Service-Level Agreements (`SLAs`) out of the box without operating the control or storage planes yourself. |
 
 Self-managed ClickHouse on object storage is crossing an important inflection

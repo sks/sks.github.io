@@ -423,6 +423,30 @@ whereas CAS (`r = 1`) cuts that in half to `$0.0138/GB`.
 
 ---
 
+## 4.1 Measured vs. Modeled: What the `83.85 TB/day` 10-Minute Burst Confirmed (2026-11-18)
+
+After the post above landed, a controlled burst on the internal 30 TB/day validation fleet (`2,987` files,
+`287,257,259` rows, `476,598 rec/s`, `10m 03s`) produced the following against the model:
+
+| Metric | Modeled in this post | Measured (10-min burst) |
+|---|---|---|
+| Writers at saturation | 3 × `m8g.4xlarge` at 60–90% CPU | `92–99%` CPU, `13–21 GiB` RAM (fits) |
+| Reader behavior | "Readers fetch finished parts, never re-merge" | **Held only for `≥16 GiB` readers.** An `8 GiB` `c8g.xlarge` hit `Code: 241` with `32` concurrent merges (`8 × concurrency 4`); fixed by `concurrencyRatio = 2` at `≤12 GiB` RAM and by requiring `≥16 GiB` readers. |
+| Cold-tier S3 API `$/day` (CAS) | `$/TB × V × r` with `r = 1` | **`$0.25–0.36/hr` (`$6–9/day`)** — consistent with the `~$161/mo` figure measured during the 1-hour soak |
+| `cas/` bucket growth during burst | near-zero (hot parts) | `3.95 GB` (unchanged; `41.8 GiB` stayed in hot `gp3`) |
+| S3 API spend for entire burst | n/a | **`$0.0694` total** (`Tier1=8,005`, `Tier2=71,125`) |
+| Staging backlog behavior | "grows then drains" | **Drained to zero** before the generator stopped; 186 staging objects at burst end |
+
+Two deltas are worth acting on in future post revisions:
+
+1. **Readers are not free.** The model treats readers as negligible in RAM terms; the
+   burst OOM shows the binding constraint is merge concurrency headroom, not CPU. Size
+   readers at `≥16 GiB` and cap `concurrencyRatio` by physical RAM, not vCPU.
+2. **Burst > soak for cost validation.** A 7-day soak at `30 TB/day` never stressed the
+   same code paths as `83.85 TB/day` for 10 minutes (which hit RAM and Keeper DDL-znode
+   paths the steady state never touched). Include burst tests in the model's validation
+   checklist for future quarterly refreshes.
+
 ## 5. End-to-End 30 TB/day Company COGS: All Four Operating Postures
 
 Putting upstream ingest (`Lambda + SQS + 3-day raw S3 backstop = $708/mo`),
