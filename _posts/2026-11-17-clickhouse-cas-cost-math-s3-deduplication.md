@@ -5,7 +5,6 @@ date: 2026-11-17 22:30:00 -0800
 series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 42
 mermaid: true
-math: true
 description: >-
   An S3 Gateway Endpoint makes the network wire between your VPC and S3 free
   ($0/hr, $0/GB) — once you close every missing route table and region-less CLI
@@ -95,7 +94,7 @@ This post lays out the exact mathematics of that multiplier at **30 TB/day
 can still leak past the Gateway Endpoint or multiply S3 API charges in a
 real stack, and then walks through how **Altinity Antalya's
 Content-Addressed Storage (CAS, `metadata_type = cas`)** collapses cold
-storage from $R\times$ to $1\times$ — taking our end-to-end log platform
+storage from `R×` to `1×` — taking our end-to-end log platform
 COGS down to **`$0.0026/GB` (`0.26¢/GB`)** at 7-day retention and
 **`$0.0038/GB` (`0.38¢/GB`)** at 33-day retention.
 
@@ -171,7 +170,7 @@ determines whether your S3 bill is **`$318/month`** or **`$14,359/month`**.
 
 ---
 
-## 2. The $R\times$ Cold-Storage Problem in Stock ClickHouse
+## 2. The `R×` Cold-Storage Problem in Stock ClickHouse
 
 In our [tiered storage layout](/blog/clickhouse-s3-tiered-storage/), new
 inserts land on the local hot `gp3` volume (`default`, `256 GiB`), merge
@@ -223,60 +222,93 @@ copies buy **zero** additional durability — they are pure storage waste.
 
 ---
 
-## 3. The Exact Cost Math: Stock $R\times$ vs. Sharding vs. CAS $1\times$
+## 3. The Exact Cost Math: Stock `R×` vs. Sharding vs. CAS `1×`
 
 Let's write down the exact equations from our verified `us-west-2` billing
-model so you can plug in your own daily volume $V$, compression ratio $c$,
-retention days $D$, shard count $S$, and total data-bearing nodes $R$.
+model so you can plug in your own daily volume `V`, compression ratio `c`,
+retention days `D`, shard count `S`, and total data-bearing nodes `R`.
 
 ### Step 1: Daily Compressed Volume Entering ClickHouse
 
 Let:
-- $V = 30\text{ TB/day}$ (`912,000 GB/month` over a $30.4$-day month) of raw uncompressed normalized logs.
-- $c = 15.2\times$ measured ClickHouse ZSTD compression ratio (`Delta(8) + ZSTD(1)` on timestamps, `ZSTD(3)` on `Map(String, String)` attributes).
+- `V = 30 TB/day` (`912,000 GB/month` over a `30.4`-day month) of raw uncompressed normalized logs.
+- `c = 15.2×` measured ClickHouse ZSTD compression ratio (`Delta(8) + ZSTD(1)` on timestamps, `ZSTD(3)` on `Map(String, String)` attributes).
 
 Then the compressed volume written per day for **one** complete copy of
 the dataset is:
 
-$$\text{comp\_tb\_day} = \frac{V}{c} = \frac{30\text{ TB/day}}{15.2} = 1.974\text{ TB/day}$$
+<div class="pn-formula-card" role="math" aria-label="Compressed TB per day equals V divided by c equals 30 TB per day divided by 15.2 equals 1.974 TB per day">
+  <div class="pn-formula-eq">
+    <span>comp_tb_day</span>
+    <span>=</span>
+    <span class="pn-frac"><span class="pn-frac__num">V</span><span class="pn-frac__den">c</span></span>
+    <span>=</span>
+    <span class="pn-frac"><span class="pn-frac__num">30 TB/day</span><span class="pn-frac__den">15.2</span></span>
+    <span>=</span>
+    <span>1.974 TB/day</span>
+  </div>
+</div>
 
-### Step 2: How Many Physical Copies ($r$) Land in S3?
+### Step 2: How Many Physical Copies (`r`) Land in S3?
 
-In a cluster with $S$ shards and $R$ total data-bearing nodes
-($r = R / S$ replicas per shard):
-- Each shard holds $\frac{1}{S}$ of the dataset, replicated across $r = \frac{R}{S}$ replicas.
-- Therefore, total cold S3 storage across all $S$ shards is:
+In a cluster with `S` shards and `R` total data-bearing nodes
+(`r = R / S` replicas per shard):
+- Each shard holds `1 / S` of the dataset, replicated across `r = R / S` replicas.
+- Therefore, total cold S3 storage across all `S` shards is:
 
-$$\text{Total S3 Copies} = S \times \left(\frac{1}{S} \times r\right) = r = \frac{R}{S}$$
+<div class="pn-formula-card" role="math" aria-label="Total S3 copies equals S times 1 over S times r equals r equals R over S">
+  <div class="pn-formula-eq">
+    <span>Total S3 Copies</span>
+    <span>=</span>
+    <span>S × (1 / S × r)</span>
+    <span>=</span>
+    <span>r</span>
+    <span>=</span>
+    <span class="pn-frac"><span class="pn-frac__num">R</span><span class="pn-frac__den">S</span></span>
+  </div>
+</div>
 
-- **Unsharded ($S = 1$) without CAS**: $r = R$ full copies (`10×` when $R = 10$).
-- **Sharded ($S = 3$) without CAS**:
-  - Zero-lag (`6 writers + 3 readers` = 3 replicas/shard): $r = 3$ full copies (`3×`).
-  - Bounded-lag (`3 writers + 3 readers` = 2 replicas/shard): $r = 2$ full copies (`2×`).
+- **Unsharded (`S = 1`) without CAS**: `r = R` full copies (`10×` when `R = 10`).
+- **Sharded (`S = 3`) without CAS**:
+  - Zero-lag (`6 writers + 3 readers` = 3 replicas/shard): `r = 3` full copies (`3×`).
+  - Bounded-lag (`3 writers + 3 readers` = 2 replicas/shard): `r = 2` full copies (`2×`).
 - **With Altinity Antalya CAS (`metadata_type = cas`)**:
   Every replica of a shard publishes references into **one shared
   content-addressed pool** (`cas/tiered/` or `cas/<tenant>/`), where each
   blob is stored under its content hash:
 
-$$r_{\text{CAS}} = 1 \quad \text{(independent of replica count } R\text{!)}$$
+<div class="pn-formula-card" role="math" aria-label="r sub CAS equals 1 independent of replica count R">
+  <div class="pn-formula-eq">
+    <span>r<sub>CAS</sub> = 1</span>
+    <span>(independent of replica count R!)</span>
+  </div>
+</div>
 
 ### Step 3: Cold S3 Monthly Cost Equation
 
-With S3 Standard priced at $\$23.00/\text{TB-month}$ for days $1\dots30$
-and S3 Standard-IA priced at $\$12.50/\text{TB-month}$ for days $>30$:
+With S3 Standard priced at `$23.00/TB-month` for days `1–30`
+and S3 Standard-IA priced at `$12.50/TB-month` for days `>30`:
 
-$$\text{Cold S3 \$/mo}(r, D) = r \times \frac{V}{c} \times \Big(\min(D, 30) \times \$23.00 + \max(0, D - 30) \times \$12.50\Big)$$
+<div class="pn-formula-card" role="math" aria-label="Cold S3 monthly cost equals r times V over c times min of D and 30 times 23 dollars plus max of 0 and D minus 30 times 12.50 dollars">
+  <div class="pn-formula-eq">
+    <span>Cold S3 $/mo(r, D)</span>
+    <span>=</span>
+    <span>r ×</span>
+    <span class="pn-frac"><span class="pn-frac__num">V</span><span class="pn-frac__den">c</span></span>
+    <span>× [ min(D, 30) × $23.00 + max(0, D − 30) × $12.50 ]</span>
+  </div>
+</div>
 
-Evaluating at $V = 30\text{ TB/day}$ ($\frac{V}{c} = 1.974\text{ TB/day}$):
+Evaluating at `V = 30 TB/day` (`V / c = 1.974 TB/day`):
 
-1. **For $D = 7$ days raw retention** ($\min(7,30) = 7$, $\max(0,-23) = 0$; `lifecycle_days_to_ia = 0` to avoid the 30-day Standard-IA minimum duration charge):
-   $$\text{Cost per copy (7d)} = 1.974\text{ TB/day} \times 7\text{ days} \times \$23.00/\text{TB} = 13.82\text{ TB} \times \$23.00 = \mathbf{\$317.76/\text{month}}$$
-2. **For $D = 33$ days raw retention** ($30$ days Standard + $3$ days Standard-IA):
-   $$\text{Cost per copy (33d)} = 1.974\text{ TB/day} \times \big(30 \times \$23.00 + 3 \times \$12.50\big) = 1.974 \times \$727.50 = \mathbf{\$1,435.86/\text{month}}$$
+1. **For `D = 7` days raw retention** (`min(7, 30) = 7`, `max(0, −23) = 0`; `lifecycle_days_to_ia = 0` to avoid the 30-day Standard-IA minimum duration charge):
+   <div class="pn-formula-card"><div class="pn-formula-eq"><span>Cost per copy (7d) = 1.974 TB/day × 7 days × $23.00/TB = 13.82 TB × $23.00 = <strong>$317.76/month</strong></span></div></div>
+2. **For `D = 33` days raw retention** (`30` days Standard + `3` days Standard-IA):
+   <div class="pn-formula-card"><div class="pn-formula-eq"><span>Cost per copy (33d) = 1.974 TB/day × (30 × $23.00 + 3 × $12.50) = 1.974 × $727.50 = <strong>$1,435.86/month</strong></span></div></div>
 
-Multiply by $r$ across the five real cluster topologies:
+Multiply by `r` across the five real cluster topologies:
 
-| Cluster Topology (@ 30 TB/day) | S3 Copies ($r$) | **7-Day Cold S3 $/mo** | **33-Day Cold S3 $/mo** | **CAS Savings @ 7d** | **CAS Savings @ 33d** |
+| Cluster Topology (@ 30 TB/day) | S3 Copies (`r`) | **7-Day Cold S3 $/mo** | **33-Day Cold S3 $/mo** | **CAS Savings @ 7d** | **CAS Savings @ 33d** |
 |---|---|---|---|---|---|
 | **Unsharded 10-Slot (`6W+3R+1B`, no CAS)** | **`10×`** | `$3,178/mo` | `$14,359/mo` | **`-$2,860/mo` (`-90%`)** | **`-$12,923/mo` (`-90%`)** |
 | **Unsharded Bounded-Lag (`3W+2R+1B`, no CAS)** | **`6×`** | `$1,907/mo` | `$8,615/mo` | **`-$1,589/mo` (`-83%`)** | **`-$7,179/mo` (`-83%`)** |
@@ -288,7 +320,7 @@ Multiply by $r$ across the five real cluster topologies:
 
 ## 4. Three More Cost Wins CAS Unlocks Beyond Storage Bytes
 
-### A. S3 API Request Reduction (`PUT` Once, Relink $R-1$ Times)
+### A. S3 API Request Reduction (`PUT` Once, Relink `R − 1` Times)
 
 Even after applying our [five S3 API storm fixes](/blog/stopping-s3-api-storm-clickhouse-fleet/)
 (`256 GiB` hot `gp3`, `min_bytes_for_wide_part = 1 GiB` cutting objects
@@ -296,7 +328,11 @@ per part from `~35` to `~11`, `ttl_only_drop_parts = 1`, shared S3Queue
 `keeper_path`, and `enable_hash_ring_filtering = 1`), non-CAS replicas
 still pay:
 
-$$\text{Cold Tier-1 PUTs/day} = (\text{parts moved to cold/day}) \times (\approx 11\text{ objects/part}) \times r$$
+<div class="pn-formula-card">
+  <div class="pn-formula-eq">
+    <span>Cold Tier-1 PUTs/day = (parts moved to cold/day) × (~11 objects/part) × r</span>
+  </div>
+</div>
 
 Plus, every time an Auto Scaling Group scales out a fresh reader or
 replaces a spot instance, a non-CAS replica must download all cold parts
@@ -322,10 +358,17 @@ sequenceDiagram
     Note over W,R: Zero blob bytes copied or re-uploaded by reader-1!
 ```
 
-Our empirical S3 API formula at $V\text{ TB/day}$ (assuming $\ge 150\text{ MB}$
-staged files and $\ge 256\text{ GiB}$ hot disks):
+Our empirical S3 API formula at `V TB/day` (assuming `≥ 150 MB`
+staged files and `≥ 256 GiB` hot disks):
 
-$$\text{S3 API \$/mo} \approx \$60 + V \times \begin{cases} \$4.00/\text{TB} & \text{if } r > 1 \text{ (non-CAS: } \$180\text{–}\$220/\text{mo @ 30 TB/d)} \\ \$2.00/\text{TB} & \text{if } r = 1 \text{ (CAS: } \mathbf{\$110\text{–}\$120/\text{mo}}\text{ @ 30 TB/d)} \end{cases}$$
+<div class="pn-formula-card">
+  <div class="pn-formula-eq">
+    <span>S3 API $/mo ≈ $60 + V × $4.00/TB (non-CAS, r &gt; 1: $180–$220/mo @ 30 TB/d)</span>
+  </div>
+  <p class="pn-formula-legend">
+    <strong>With CAS (r = 1):</strong> S3 API $/mo ≈ $60 + V × $2.00/TB = <strong>$110–$120/mo @ 30 TB/day</strong>
+  </p>
+</div>
 
 ### B. Eliminating the `$4,800–$8,000/month` Multi-AZ Cross-AZ Transfer Tax
 
@@ -337,7 +380,7 @@ AWS cross-AZ data-transfer bill, while stock self-managed
 - **Stock `ReplicatedMergeTree` across 3 AZs**: Replicas fetch parts
   peer-to-peer over EC2 TCP port `9010`. AWS charges **`$0.02/GB`
   (`$20/TB`)** for every byte crossing an AZ boundary:
-  $$\text{Cross-AZ Tax} = 1.974\text{ TB/day} \times 30.4\text{ days} \times (4\dots6.7\text{ cross-AZ hops}) \times \$20/\text{TB} = \mathbf{\$4,800\text{ to }\$8,000/\text{month}}$$
+  <div class="pn-formula-card"><div class="pn-formula-eq"><span>Cross-AZ Tax = 1.974 TB/day × 30.4 days × (4…6.7 cross-AZ hops) × $20/TB = <strong>$4,800 to $8,000/month</strong></span></div></div>
 - **Antalya CAS across 3 AZs (`multi_az_config.enabled = true`)**:
   Cold parts are written **once** to regional S3 via the **free S3 Gateway
   Endpoint (`$0/GB`)**, and replicas in other AZs relink the S3 blob via
@@ -355,19 +398,26 @@ AWS cross-AZ data-transfer bill, while stock self-managed
 ### C. Halving Customer Retention Add-On COGS (Protecting Gross Margin on Low-Compressibility Logs)
 
 When pricing a log analytics SaaS product, every extra 30 days of raw log
-retention adds cold S3 cost proportional to $\frac{r}{c}$:
+retention adds cold S3 cost proportional to `r / c`:
 
-$$\text{Extra 30-Day Retention COGS per Raw GB} = \frac{r}{c} \times \$0.023/\text{GB-month}$$
+<div class="pn-formula-card">
+  <div class="pn-formula-eq">
+    <span>Extra 30-Day Retention COGS per Raw GB</span>
+    <span>=</span>
+    <span class="pn-frac"><span class="pn-frac__num">r</span><span class="pn-frac__den">c</span></span>
+    <span>× $0.023/GB-month</span>
+  </div>
+</div>
 
-| Log Payload Profile | Compression Ratio ($c$) | Non-CAS Unsharded ($r=10$) | Non-CAS Sharded ($r=2$) | **Antalya CAS ($r=1$)** |
+| Log Payload Profile | Compression Ratio (`c`) | Non-CAS Unsharded (`r = 10`) | Non-CAS Sharded (`r = 2`) | **Antalya CAS (`r = 1`)** |
 |---|---|---|---|---|
 | **ALB / NLB / Structured NDJSON** | `15.2×` | `+$0.0151 / GB` | `+$0.0030 / GB` | **`+$0.0015 / GB`** |
 | **Kubernetes / Microservice JSON** | `8.0×` | `+$0.0288 / GB` | `+$0.0058 / GB` | **`+$0.0029 / GB`** |
 | **High-Entropy / UUID / Security Traces** | `5.0×` | `+$0.0460 / GB` | `+$0.0092 / GB` | **`+$0.0046 / GB`** |
 
-On high-entropy security logs ($c = 5\times$) retained for 90 days (3 × 30d
-windows), non-CAS even at $r = 2$ costs `$0.0276/GB` in S3 alone —
-whereas CAS ($r = 1$) cuts that in half to `$0.0138/GB`.
+On high-entropy security logs (`c = 5×`) retained for 90 days (3 × 30d
+windows), non-CAS even at `r = 2` costs `$0.0276/GB` in S3 alone —
+whereas CAS (`r = 1`) cuts that in half to `$0.0138/GB`.
 
 ---
 
@@ -378,9 +428,9 @@ Graviton4 compute (`m8g.2xlarge` writers at `$262/mo` OD / `$162/mo` 1-yr
 SP, `c7g.xlarge` readers, `3× t4g.large` Keepers), EBS, S3 API, network,
 and cold S3 together:
 
-| Operating Posture (`30 TB/day = 912,000 GB/mo`) | Cold S3 Copies ($r$) | ClickHouse Cluster $/mo (7d / 33d) | Upstream Ingest $/mo | **Total Company COGS $/mo (7d / 33d)** | **Unit COGS per GB (7d / 33d)** |
+| Operating Posture (`30 TB/day = 912,000 GB/mo`) | Cold S3 Copies (`r`) | ClickHouse Cluster $/mo (7d / 33d) | Upstream Ingest $/mo | **Total Company COGS $/mo (7d / 33d)** | **Unit COGS per GB (7d / 33d)** |
 |---|---|---|---|---|---|
-| **A. Unoptimized Defaults** *(1-shard $r=10$, 45d raw S3, CW `info`, PUT storm)* | `10×` | `~$21,017` | `~$5,538` | **~$26,555/mo** *(+$6.5k if 3-AZ)* | **`2.91¢ / GB`** |
+| **A. Unoptimized Defaults** *(1-shard `r = 10`, 45d raw S3, CW `info`, PUT storm)* | `10×` | `~$21,017` | `~$5,538` | **~$26,555/mo** *(+$6.5k if 3-AZ)* | **`2.91¢ / GB`** |
 | **B. Prod GA · Zero-Lag On-Demand** *(3 shards × 3 replicas, On-Demand)* | `3×` | `$4,380` / `$7,735` | `$708` | **`$5,088/mo`** / **`$8,443/mo`** | **`0.56¢`** / **`0.93¢ / GB`** |
 | **C. Prod GA · Bounded-Lag + 1-yr SP** *(3 shards × 2 replicas, `3W m8g.2xl + 3R + 3K`)* | `2×` | `$2,035` / `$4,271` | `$708` | **`$2,743/mo`** / **`$4,979/mo`** | **`0.30¢`** / **`0.55¢ / GB`** |
 | **D. Target Floor · Antalya CAS + 1-yr SP** *(`metadata_type = cas` shared pool, `m8g.2xl`)* | **`1×`** | **`$1,647`** / **`$2,765`** | **`$708`** | **`$2,355/mo`** / **`$3,473/mo`** | **`0.26¢`** / **`0.38¢ / GB`** |
@@ -473,8 +523,8 @@ cache_wrapper_count = 1 + length(var.tenants) + (var.cas_enabled ? length(var.te
 ```
 
 With 1 tenant (`default`):
-- **CAS off**: `cache_wrapper_count = 2` (`s3_cache` + `cache_default`). On a `32 GiB` cache volume, each wrapper gets $\lfloor 32 \times 0.9 / 2 \rfloor = \mathbf{14\text{ GiB}}$.
-- **CAS on**: `cache_wrapper_count = 4` (`s3_cache`, `cache_default`, `cas_cache`, `cas_cache_default`). On the same `32 GiB` volume, each wrapper drops to $\lfloor 32 \times 0.9 / 4 \rfloor = \mathbf{7\text{ GiB}}$!
+- **CAS off**: `cache_wrapper_count = 2` (`s3_cache` + `cache_default`). On a `32 GiB` cache volume, each wrapper gets `⌊32 × 0.9 / 2⌋ = ` **`14 GiB`**.
+- **CAS on**: `cache_wrapper_count = 4` (`s3_cache`, `cache_default`, `cas_cache`, `cas_cache_default`). On the same `32 GiB` volume, each wrapper drops to `⌊32 × 0.9 / 4⌋ = ` **`7 GiB`**!
 
 Bumping `instance_config.cache_disk_size_gb` from `32` to **`64`** in
 `dev.tfvars` costs **`+$2.56/month` per node** (`32 GiB × $0.08/GiB-mo`)
@@ -511,10 +561,10 @@ otherwise) ensures new tables and converged settings align automatically.
 CAS is the most powerful storage cost lever in open-source ClickHouse,
 but it is not a free lunch:
 
-| Dimension | Sharded Stock ClickHouse (`26.8 LTS`, $S=3, r=2$) | Altinity Antalya CAS (`26.6.8+`, $r=1$) |
+| Dimension | Sharded Stock ClickHouse (`26.8 LTS`, `S = 3, r = 2`) | Altinity Antalya CAS (`26.6.8+`, `r = 1`) |
 |---|---|---|
-| **Cold S3 Copies ($r$)** | `2×` (`$636/mo` @ 7d · `$2,872/mo` @ 33d) | **`1×` (`$318/mo` @ 7d · `$1,436/mo` @ 33d)** |
-| **Single-Shard High Replica Count ($S=1, R=10$)** | Expensive (`10×` S3 = `$14,359/mo` @ 33d) | **Cheap (`1×` S3 = `$1,436/mo` @ 33d)** |
+| **Cold S3 Copies (`r`)** | `2×` (`$636/mo` @ 7d · `$2,872/mo` @ 33d) | **`1×` (`$318/mo` @ 7d · `$1,436/mo` @ 33d)** |
+| **Single-Shard High Replica Count (`S = 1, R = 10`)** | Expensive (`10×` S3 = `$14,359/mo` @ 33d) | **Cheap (`1×` S3 = `$1,436/mo` @ 33d)** |
 | **Multi-AZ Compute Placement** | Prohibitive (`+$4,800–$8,000/mo` cross-AZ TCP) | **Viable (`~$15–$40/mo` via free S3 Gateway Endpoint)** |
 | **Build Maturity** | Upstream LTS GA | **Experimental** (Apache-2.0 Altinity Antalya fork; pin exact versions) |
 | **Cold-Tier Blast Radius** | Per-replica (`data/tiered/writer-0/` loss affects 1 node) | **Shared pool** (`cas/tiered/` corruption affects all replicas; nightly `clickhouse-backup` to a separate versioned/object-locked bucket is mandatory) |
@@ -529,8 +579,8 @@ but it is not a free lunch:
    volumes, `min_bytes_for_wide_part = 1073741824` (1 GiB),
    `ttl_only_drop_parts = 1`, and a shared S3Queue `keeper_path` with
    `enable_hash_ring_filtering = 1`.
-3. **Eliminate the $R\times$ cold-storage multiplier**: Either shard the
-   cluster ($S=3, r=2$) on stock ClickHouse LTS, or deploy the Altinity
+3. **Eliminate the `R×` cold-storage multiplier**: Either shard the
+   cluster (`S = 3, r = 2`) on stock ClickHouse LTS, or deploy the Altinity
    Antalya Golden AMI with `cas_config.enabled = true` to get a true
    **`1×` content-addressed S3 cold pool** and **`0.26¢–0.38¢/GB`**
    end-to-end unit economics.
