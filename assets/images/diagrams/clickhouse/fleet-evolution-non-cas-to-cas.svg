@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 640" role="img" aria-labelledby="title desc">
+  <title id="title">Evolution of a 30 TB/Day Self-Managed ClickHouse Fleet: Gen 1 Naive S3 to Gen 2 Tuned Non-CAS to Gen 3 Shared CAS Blueprint</title>
+  <desc id="desc">Three-stage architectural comparison showing how a 30 TB/day self-managed ClickHouse cluster on AWS evolved from Generation 1 (naive per-replica S3 with 125 MB/s gp3 wall and 10x storage copies), to Generation 2 (tuned non-CAS upstream 26.8 LTS with 500 MB/s gp3, 1 GiB compact parts, and shared S3Queue claims, still bound by R-times cold copies and single-AZ lock-in), to Generation 3 (Altinity Antalya CAS shared 1x cold pool with deterministic server-root identity, NVMe cache, and elastic readers, including honest trade-offs).</desc>
+
+  <rect width="1120" height="640" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="560" y="34" text-anchor="middle" font-size="21" font-weight="700">How a 30 TB/Day ClickHouse Fleet Evolved: Non-CAS vs. Content-Addressed S3 (CAS)</text>
+    <text x="560" y="56" text-anchor="middle" font-size="13" fill="#465a6e">Measured across 100 TB/day &amp; 30 TB/day load soaks &#8212; what each generation fixed, what broke, and what still costs money</text>
+
+    <!-- ==================== PANEL 1: GEN 1 ==================== -->
+    <rect x="22" y="76" width="340" height="482" rx="12" fill="#fdf2f2" stroke="#b43c3c" stroke-width="2"/>
+    <rect x="38" y="92" width="308" height="28" rx="6" fill="#b43c3c"/>
+    <text x="192" y="111" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">GEN 1: NAIVE STOCK S3 (UPSTREAM 26.8)</text>
+
+    <rect x="38" y="132" width="308" height="84" rx="8" fill="#ffffff" stroke="#b43c3c" stroke-width="1.3"/>
+    <text x="192" y="152" text-anchor="middle" font-size="12" font-weight="700" fill="#7a1f1f">Compute &amp; Hot Disk</text>
+    <text x="50" y="171" font-size="11" fill="#2c1d1d">&#8226; 1 Keeper (quorum SPOF &#8594; fleet readonly)</text>
+    <text x="50" y="189" font-size="11" fill="#2c1d1d">&#8226; 64 GiB gp3 @ 125 MB/s (68.8% %iowait wall)</text>
+    <text x="50" y="207" font-size="11" fill="#2c1d1d">&#8226; Per-UUID S3Queue (760k Keeper znodes)</text>
+
+    <rect x="38" y="228" width="308" height="92" rx="8" fill="#ffffff" stroke="#b43c3c" stroke-width="1.3"/>
+    <text x="192" y="248" text-anchor="middle" font-size="12" font-weight="700" fill="#7a1f1f">Cold S3 Tier: R&#215; Copies + API Storm</text>
+    <text x="50" y="268" font-family="Courier, monospace" font-size="10.5" fill="#7a1f1f">s3://data/tiered/{writer-0..reader-3}/</text>
+    <text x="50" y="286" font-size="11" fill="#2c1d1d">&#8226; 10 ASG slots = 10&#215; full S3 copies (11.99 TB)</text>
+    <text x="50" y="304" font-size="11" fill="#2c1d1d">&#8226; 10 MiB wide spills &#8594; ~35 objs/part &#215; R rewrites</text>
+
+    <rect x="38" y="332" width="308" height="210" rx="8" fill="#fbe4e4" stroke="#b43c3c" stroke-width="1.3"/>
+    <text x="192" y="353" text-anchor="middle" font-size="12" font-weight="700" fill="#7a1f1f">What Failed Under 30&#8211;60 TB/Day</text>
+    <text x="50" y="375" font-size="11" fill="#4a1616">&#10007; Code 252 TOO_MANY_PARTS &amp; Code 243 stalls</text>
+    <text x="50" y="395" font-size="11" fill="#4a1616">&#10007; 8 vCPUs stuck at 30% usr / 69% disk iowait</text>
+    <text x="50" y="415" font-size="11" fill="#4a1616">&#10007; 4-minute ASG scale-out / scale-in thrash</text>
+    <text x="50" y="435" font-size="11" fill="#4a1616">&#10007; CloudWatch info logs billed $69.65/day</text>
+    <text x="50" y="455" font-size="11" fill="#4a1616">&#10007; Every reader scale-out copied full S3 table</text>
+    <line x1="50" y1="472" x2="334" y2="472" stroke="#b43c3c" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="192" y="493" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7a1f1f">33d Cold S3 @ 10 Slots: $14,359/mo</text>
+    <text x="192" y="512" text-anchor="middle" font-size="11" fill="#4a1616">Verdict: Not viable past prototype scale</text>
+
+    <!-- ARROW 1 -> 2 -->
+    <polygon points="365,305 385,305 385,298 397,311 385,324 385,317 365,317" fill="#465a6e"/>
+
+    <!-- ==================== PANEL 2: GEN 2 ==================== -->
+    <rect x="400" y="76" width="340" height="482" rx="12" fill="#f2f6fb" stroke="#28597a" stroke-width="2"/>
+    <rect x="416" y="92" width="308" height="28" rx="6" fill="#28597a"/>
+    <text x="570" y="111" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">GEN 2: TUNED NON-CAS (UPSTREAM 26.8 LTS)</text>
+
+    <rect x="416" y="132" width="308" height="84" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.3"/>
+    <text x="570" y="152" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">Compute &amp; Hot Disk (Fixed)</text>
+    <text x="428" y="171" font-size="11" fill="#17283c">&#10003; 3 Keepers + chinit lease/drain lifecycle</text>
+    <text x="428" y="189" font-size="11" fill="#17283c">&#10003; 256 GiB gp3 @ 500 MB/s (0.4% iowait, +$20)</text>
+    <text x="428" y="207" font-size="11" fill="#17283c">&#10003; Shared S3Queue hash-ring (0&#8211;1s lag, 0 fail)</text>
+
+    <rect x="416" y="228" width="308" height="92" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.3"/>
+    <text x="570" y="248" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">Cold S3 Tier: Clean APIs, Still R&#215; Bytes</text>
+    <text x="428" y="268" font-family="Courier, monospace" font-size="10.5" fill="#28597a">s3://data/tiered/{replica}/ (compact &lt;1GiB)</text>
+    <text x="428" y="286" font-size="11" fill="#17283c">&#10003; ttl_only_drop_parts=1 + 1 GiB wide floor</text>
+    <text x="428" y="304" font-size="11" fill="#9b6b24">&#8226; Still writes 1 full S3 copy per replica R</text>
+
+    <rect x="416" y="332" width="308" height="210" rx="8" fill="#e6eff7" stroke="#28597a" stroke-width="1.3"/>
+    <text x="570" y="353" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">Pros &amp; Structural Limits</text>
+    <text x="428" y="375" font-size="11" fill="#17283c">&#10003; 100% stock upstream LTS (battle-tested GA)</text>
+    <text x="428" y="395" font-size="11" fill="#17283c">&#10003; S3 versioning works; isolated blast radius</text>
+    <text x="428" y="415" font-size="11" fill="#17283c">&#10003; Absorbed 1.6 TB/hr soak with 0 data loss</text>
+    <text x="428" y="435" font-size="11" fill="#7a4c14">&#8226; Pinned to Single-AZ ($0.02/GB :9010 tax)</text>
+    <text x="428" y="455" font-size="11" fill="#7a4c14">&#8226; Elastic readers multiply S3 storage &amp; PUTs</text>
+    <line x1="428" y1="472" x2="712" y2="472" stroke="#28597a" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="570" y="493" text-anchor="middle" font-size="11.5" font-weight="700" fill="#143852">33d Cold S3: $4,308 (3&#215;) to $14,359 (10&#215;)</text>
+    <text x="570" y="512" text-anchor="middle" font-size="11" fill="#22384d">Best Fit: &lt;2&#8211;5 TB/day, R&#8804;3, strict LTS policy</text>
+
+    <!-- ARROW 2 -> 3 -->
+    <polygon points="743,305 763,305 763,298 775,311 763,324 763,317 743,317" fill="#1f6f50"/>
+
+    <!-- ==================== PANEL 3: GEN 3 (CAS) ==================== -->
+    <rect x="778" y="76" width="320" height="482" rx="12" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="794" y="92" width="288" height="28" rx="6" fill="#1f6f50"/>
+    <text x="938" y="111" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">GEN 3: SHARED CAS POOL (ANTALYA + CHINIT)</text>
+
+    <rect x="794" y="132" width="288" height="84" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.3"/>
+    <text x="938" y="152" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Compute &amp; Deterministic Identity</text>
+    <text x="806" y="171" font-size="11" fill="#164231">&#10003; 3&#8211;4&#215; m8g.4xlarge writers (50% CPU margin)</text>
+    <text x="806" y="189" font-size="11" fill="#164231">&#10003; Deterministic UUID fixes Code 246 rolls</text>
+    <text x="806" y="207" font-size="11" fill="#164231">&#10003; 64 GiB / NVMe RAID-0 local cache tier</text>
+
+    <rect x="794" y="228" width="288" height="92" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.3"/>
+    <text x="938" y="248" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Cold S3 Tier: 1.00&#215; Shared Hash Pool</text>
+    <text x="806" y="268" font-family="Courier, monospace" font-size="10.5" fill="#1f6f50">s3://data-cas/cas/tiered/blobs/&lt;xxh3&gt;</text>
+    <text x="806" y="286" font-size="11" fill="#164231">&#10003; Live proof: 3.67 GiB &#215; 9 nodes = 3.68 GiB</text>
+    <text x="806" y="304" font-size="11" fill="#164231">&#10003; Replicas relink by hash ($0 cross-AZ S3)</text>
+
+    <rect x="794" y="332" width="288" height="210" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.3"/>
+    <text x="938" y="353" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Honest Pros &amp; Real Trade-Offs</text>
+    <text x="806" y="375" font-size="11" fill="#164231">&#10003; Elastic Spot readers: $0 cold S3 copy (2.3s relink)</text>
+    <text x="806" y="395" font-size="11" fill="#164231">&#10003; $0/GB cross-AZ on cold reads &amp; backfills</text>
+    <text x="806" y="415" font-size="11" fill="#7a4c14">&#8226; Experimental Altinity Antalya build (26.6)</text>
+    <text x="806" y="435" font-size="11" fill="#7a4c14">&#8226; Never-versioned bucket = shared blast radius</text>
+    <text x="806" y="455" font-size="11" fill="#7a4c14">&#8226; Hot-tier CPU, RAM &amp; hot :9010 sync unchanged</text>
+    <line x1="806" y1="472" x2="1070" y2="472" stroke="#1f6f50" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="938" y="493" text-anchor="middle" font-size="11.5" font-weight="700" fill="#164231">33d Cold S3 @ Any R: $1,436/mo (1&#215;)</text>
+    <text x="938" y="512" text-anchor="middle" font-size="11" fill="#164231">Best Fit: 10&#8211;100+ TB/d, R&#8805;4, Multi-AZ/BYOC</text>
+
+    <!-- FOOTER BLUEPRINT -->
+    <rect x="22" y="574" width="1076" height="48" rx="8" fill="#17283c"/>
+    <text x="560" y="595" text-anchor="middle" font-size="12.5" font-weight="700" fill="#ffffff">Future Blueprint: Ephemeral Lease Compute (chinit) + 500 MB/s gp3 Hot Scratch + Local NVMe Cache + 1&#215; Shared Object Pool + Isolated Backups</text>
+    <text x="560" y="613" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#b8d4e8">CAS removes the replica storage &amp; cross-AZ tax &#8212; it does NOT remove hot-tier CPU, memory, or independent backup discipline</text>
+  </g>
+</svg>
