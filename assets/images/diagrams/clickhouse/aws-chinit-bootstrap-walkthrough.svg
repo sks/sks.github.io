@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 660" role="img" aria-labelledby="title desc">
+  <title id="title">From Empty EC2 Box to Cluster Member: The Complete chinit Bootstrap Pipeline</title>
+  <desc id="desc">End-to-end architecture of bootstrapping a self-managed ClickHouse node on AWS: Packer golden AMI, Terraform AWS primitives, and SHA256-pinned S3 config bundle feed a 1.5 KB user-data wrapper that execs chinit boot through 24 typed steps across 6 stages.</desc>
+  <defs>
+    <marker id="arr-w" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+    <marker id="arr-g2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="660" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="23" font-weight="700">From Empty EC2 Box to Cluster Member: How chinit Bootstraps ClickHouse</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Pre-staged AWS artifacts + a 1.5 KB user-data wrapper + one 75 MB Go binary executing 24 typed steps</text>
+
+    <!-- TOP ROW: STAGED BEFORE BOOT -->
+    <rect x="28" y="76" width="1024" height="122" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="46" y="90" width="212" height="24" rx="5" fill="#28597a"/>
+    <text x="152" y="106" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">STAGED BEFORE INSTANCE BOOT</text>
+
+    <rect x="46" y="122" width="314" height="64" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.4"/>
+    <text x="203" y="144" text-anchor="middle" font-size="14" font-weight="700" fill="#143852">1. Packer Golden AMI</text>
+    <text x="203" y="162" text-anchor="middle" font-size="11" fill="#465a6e">Ubuntu 24.04 &#183; ClickHouse 26.8 LTS &#183; OS tuning</text>
+    <text x="203" y="177" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#1f6f50">/usr/local/bin/chinit baked in</text>
+
+    <rect x="383" y="122" width="314" height="64" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.4"/>
+    <text x="540" y="144" text-anchor="middle" font-size="14" font-weight="700" fill="#143852">2. Terraform AWS Primitives</text>
+    <text x="540" y="162" text-anchor="middle" font-size="11" fill="#465a6e">ASGs &#183; EBS volumes &#183; IAM roles &#183; Route53 zone</text>
+    <text x="540" y="177" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#28597a">DynamoDB lease table + Secrets Manager</text>
+
+    <rect x="720" y="122" width="314" height="64" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.4"/>
+    <text x="877" y="144" text-anchor="middle" font-size="14" font-weight="700" fill="#143852">3. S3 Config Bundle + Role Spec</text>
+    <text x="877" y="162" text-anchor="middle" font-size="11" fill="#465a6e">Cluster spec, XML overrides, bootstrap.sql</text>
+    <text x="877" y="177" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#9b6b24">Pinned by sha256 digest in chinit.yaml</text>
+
+    <!-- STAGE 0: WRAPPER -->
+    <path d="M540 198 V220" fill="none" stroke="#1e4e68" stroke-width="2.5" marker-end="url(#arr-w)"/>
+
+    <rect x="230" y="224" width="620" height="52" rx="10" fill="#fff0d1" stroke="#8b5a1e" stroke-width="1.8"/>
+    <text x="540" y="246" text-anchor="middle" font-size="14" font-weight="700" fill="#5e3e0e">Stage 0: EC2 user-data Wrapper (~1.5 KB &#8212; the entire shell surface)</text>
+    <text x="540" y="265" text-anchor="middle" font-family="Courier, monospace" font-size="12" fill="#5e3e0e">aws s3 cp chinit-reader.yaml &#8594; verify /usr/local/bin/chinit &#8594; exec chinit boot -spec chinit.yaml</text>
+
+    <path d="M540 276 V298" fill="none" stroke="#1f6f50" stroke-width="2.5" marker-end="url(#arr-g2)"/>
+
+    <!-- THE 24 STEPS IN 6 PHASES -->
+    <rect x="28" y="302" width="1024" height="292" rx="14" fill="#f7fbf9" stroke="#1f6f50" stroke-width="2"/>
+    <text x="540" y="328" text-anchor="middle" font-size="16" font-weight="700" fill="#164231">Inside chinit boot: 24 Typed, Retry-Aware Steps Grouped into 6 Phases</text>
+
+    <!-- Row 1 of phases -->
+    <rect x="46" y="344" width="316" height="108" rx="10" fill="#ffffff" stroke="#28597a" stroke-width="1.5"/>
+    <rect x="46" y="344" width="316" height="28" rx="10" fill="#28597a"/>
+    <text x="204" y="363" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Phase A &#183; Steps 1–4: Spec &amp; Bundle Gate</text>
+    <text x="204" y="388" text-anchor="middle" font-size="12" fill="#334a60">Validate YAML fields at step 0; fetch S3</text>
+    <text x="204" y="406" text-anchor="middle" font-size="12" fill="#334a60">config bundle; verify <tspan font-family="Courier, monospace" font-weight="700">SHA256</tspan> matches</text>
+    <text x="204" y="424" text-anchor="middle" font-size="12" fill="#334a60">Terraform's hash before touching the OS.</text>
+    <text x="204" y="443" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Mismatch &#8594; fail closed immediately</text>
+
+    <path d="M362 398 H380" fill="none" stroke="#1e4e68" stroke-width="2" marker-end="url(#arr-w)"/>
+
+    <rect x="382" y="344" width="316" height="108" rx="10" fill="#ffffff" stroke="#28597a" stroke-width="1.5"/>
+    <rect x="382" y="344" width="316" height="28" rx="10" fill="#28597a"/>
+    <text x="540" y="363" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Phase B &#183; Steps 5–6: NVMe Disk Guards</text>
+    <text x="540" y="388" text-anchor="middle" font-size="12" fill="#334a60">Attach &amp; mount metadata + cache EBS</text>
+    <text x="540" y="406" text-anchor="middle" font-size="12" fill="#334a60">volumes by <tspan font-family="Courier, monospace" font-weight="700">LABEL=ch-metadata</tspan>;</text>
+    <text x="540" y="424" text-anchor="middle" font-size="12" fill="#334a60">3 guards prevent relabeling root NVMe.</text>
+    <text x="540" y="443" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Survives Graviton device-letter shuffle</text>
+
+    <path d="M698 398 H716" fill="none" stroke="#1e4e68" stroke-width="2" marker-end="url(#arr-w)"/>
+
+    <rect x="718" y="344" width="316" height="108" rx="10" fill="#ffffff" stroke="#9b6b24" stroke-width="1.5"/>
+    <rect x="718" y="344" width="316" height="28" rx="10" fill="#9b6b24"/>
+    <text x="876" y="363" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Phase C &#183; Steps 7–8: Lease Identity &amp; DNS</text>
+    <text x="876" y="388" text-anchor="middle" font-size="12" fill="#5e3e0e">Conditional write to DynamoDB claims</text>
+    <text x="876" y="406" text-anchor="middle" font-size="12" fill="#5e3e0e">lowest free ordinal (<tspan font-family="Courier, monospace" font-weight="700">reader-2</tspan>);</text>
+    <text x="876" y="424" text-anchor="middle" font-size="12" fill="#5e3e0e">upserts Route53 record <tspan font-family="Courier, monospace">reader-2.internal</tspan>.</text>
+    <text x="876" y="443" text-anchor="middle" font-size="11" font-weight="700" fill="#9b6b24">Ephemeral VM gets stable replica name</text>
+
+    <!-- Row 2 of phases -->
+    <rect x="46" y="468" width="316" height="110" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <rect x="46" y="468" width="316" height="28" rx="10" fill="#1f6f50"/>
+    <text x="204" y="487" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Phase D &#183; Steps 9–15: Secrets &amp; Render</text>
+    <text x="204" y="512" text-anchor="middle" font-size="12" fill="#164231">Fetch passwords via Secrets Manager</text>
+    <text x="204" y="530" text-anchor="middle" font-size="12" fill="#164231">(<tspan font-family="Courier, monospace">0600</tspan> files, zero plaintext in spec);</text>
+    <text x="204" y="548" text-anchor="middle" font-size="12" fill="#164231">in-process Altinity operator renders XML.</text>
+    <text x="204" y="567" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Operator-grade config without K8s</text>
+
+    <path d="M362 523 H380" fill="none" stroke="#1f6f50" stroke-width="2" marker-end="url(#arr-g2)"/>
+
+    <rect x="382" y="468" width="316" height="110" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <rect x="382" y="468" width="316" height="28" rx="10" fill="#1f6f50"/>
+    <text x="540" y="487" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Phase E &#183; Steps 16–20: Start &amp; Converge</text>
+    <text x="540" y="512" text-anchor="middle" font-size="12" fill="#164231">Validate XML settings; start ClickHouse;</text>
+    <text x="540" y="530" text-anchor="middle" font-size="12" fill="#164231">apply role-scoped idempotent DDL;</text>
+    <text x="540" y="548" text-anchor="middle" font-size="12" fill="#164231">run <tspan font-family="Courier, monospace" font-weight="700">SYSTEM SYNC REPLICA</tspan> to catch up.</text>
+    <text x="540" y="567" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Serving queries in 2–3 minutes</text>
+
+    <path d="M698 523 H716" fill="none" stroke="#1f6f50" stroke-width="2" marker-end="url(#arr-g2)"/>
+
+    <rect x="718" y="468" width="316" height="110" rx="10" fill="#ffffff" stroke="#5b4b8a" stroke-width="1.5"/>
+    <rect x="718" y="468" width="316" height="28" rx="10" fill="#5b4b8a"/>
+    <text x="876" y="487" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Phase F &#183; Steps 21–24: Day-2 Timers</text>
+    <text x="876" y="512" text-anchor="middle" font-size="12" fill="#3a2e5c">Install 8 <tspan font-family="Courier, monospace">systemd</tspan> timers calling <tspan font-family="Courier, monospace" font-weight="700">chinit</tspan>:</text>
+    <text x="876" y="530" text-anchor="middle" font-size="11" fill="#3a2e5c">lease-renew (5m) &#183; schema-sync (15m)</text>
+    <text x="876" y="548" text-anchor="middle" font-size="11" fill="#3a2e5c">disk-autoscale (5m) &#183; keeper-health (1m)</text>
+    <text x="876" y="567" text-anchor="middle" font-size="11" font-weight="700" fill="#5b4b8a">spot-watch &#183; replica-gc &#183; shutdown-drain</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="606" width="1024" height="38" rx="8" fill="#17283c"/>
+    <text x="540" y="630" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Design Invariant: The unit of repair is a replacement machine &#8212; boot and Day-2 maintenance share one static binary</text>
+  </g>
+</svg>

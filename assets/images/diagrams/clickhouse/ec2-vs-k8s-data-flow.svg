@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620" role="img" aria-labelledby="title desc">
+  <title id="title">Self-Managed ClickHouse on AWS EC2: Topology, Data Flow, and Why EC2 Beat Kubernetes</title>
+  <desc id="desc">Architecture of the self-managed ClickHouse cluster on AWS EC2: ACM-terminated NLBs in the public subnet, isolated writers, 50/50 spot-and-on-demand readers ASG, and 3-node Keeper quorum in the private subnet connected to S3 and DynamoDB, plus the four reasons EC2 beat Kubernetes.</desc>
+  <defs>
+    <marker id="arr-ec" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+    <marker id="arr-ecg" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="620" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Self-Managed ClickHouse on EC2: Topology, Data Paths, &amp; Why EC2 Beat K8s</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Every hop named: ACM TLS termination at NLBs, private-subnet compute roles, free S3 Gateway Endpoint, and DynamoDB leases</text>
+
+    <!-- LEFT: VPC TOPOLOGY & DATA FLOW -->
+    <rect x="28" y="80" width="664" height="464" rx="14" fill="#eef4fb" stroke="#28597a" stroke-width="2"/>
+    <text x="360" y="106" text-anchor="middle" font-size="16" font-weight="700" fill="#143852">AWS VPC Data Flow (Public NLB Tier &#8594; Private Compute &#8594; S3/DynamoDB)</text>
+
+    <!-- Public Subnet -->
+    <rect x="46" y="120" width="628" height="74" rx="10" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.5"/>
+    <text x="360" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">Public Subnet (Appliances Only &#8212; ACM Auto-Renewed TLS Terminates Here)</text>
+    <rect x="74" y="148" width="260" height="36" rx="6" fill="#ffffff" stroke="#9b6b24" stroke-width="1.3"/>
+    <text x="204" y="171" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">Writers NLB (HTTPS :8443 &#8594; :8123)</text>
+    <rect x="386" y="148" width="260" height="36" rx="6" fill="#ffffff" stroke="#9b6b24" stroke-width="1.3"/>
+    <text x="516" y="171" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">Readers NLB (HTTPS :8443 &#8594; :8123)</text>
+
+    <path d="M204 184 V212" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arr-ec)"/>
+    <path d="M516 184 V212" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-ecg)"/>
+
+    <!-- Private Subnet -->
+    <rect x="46" y="216" width="628" height="196" rx="10" fill="#ffffff" stroke="#28597a" stroke-width="1.6"/>
+    <text x="360" y="238" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">Private Subnet (Zero Public IPs &#183; Enforced by Security Groups + &lt;networks&gt; XML)</text>
+
+    <rect x="64" y="250" width="188" height="92" rx="8" fill="#eef4fb" stroke="#28597a" stroke-width="1.4"/>
+    <text x="158" y="272" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">Writers (Fixed IP .10+)</text>
+    <text x="158" y="290" text-anchor="middle" font-size="11" fill="#334a60">async_insert (100MB/10s)</text>
+    <text x="158" y="308" text-anchor="middle" font-size="11" fill="#334a60">Writes hot gp3 + S3</text>
+    <text x="158" y="326" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#28597a">Registers part on :9181</text>
+
+    <rect x="266" y="250" width="188" height="92" rx="8" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.4"/>
+    <text x="360" y="272" text-anchor="middle" font-size="13" font-weight="700" fill="#5e3e0e">Keepers &#215;3 (Fixed .20+)</text>
+    <text x="360" y="290" text-anchor="middle" font-size="11" fill="#5e3e0e">Dedicated 64GB gp3</text>
+    <text x="360" y="308" text-anchor="middle" font-size="11" fill="#5e3e0e">Raft quorum (:9181/:9234)</text>
+    <text x="360" y="326" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#9b6b24">Orders parts &amp; merges</text>
+
+    <rect x="468" y="250" width="188" height="92" rx="8" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="562" y="272" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Readers ASG (50% Spot)</text>
+    <text x="562" y="290" text-anchor="middle" font-size="11" fill="#2c4a3e">Read-only query pool</text>
+    <text x="562" y="308" text-anchor="middle" font-size="11" fill="#2c4a3e">5G mark + 8G uncomp</text>
+    <text x="562" y="326" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#1f6f50">+ NVMe cache disk</text>
+
+    <rect x="64" y="354" width="592" height="44" rx="6" fill="#f3f0fb" stroke="#5b4b8a" stroke-width="1.2"/>
+    <text x="360" y="381" text-anchor="middle" font-size="12" font-weight="700" fill="#3a2e5c">Interserver TLS (:9010) + Dedicated Backup Replica (.30 &#8212; fetches merged parts off query path)</text>
+
+    <!-- Shared AWS Services -->
+    <rect x="46" y="428" width="304" height="98" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="198" y="452" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">S3 Bucket (via Free Gateway Endpoint)</text>
+    <text x="198" y="472" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#164231">data/&lt;tenant&gt;/{replica}/</text>
+    <text x="198" y="492" text-anchor="middle" font-size="11" fill="#2c4a3e">Zero NAT data-processing charges</text>
+    <text x="198" y="510" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Standard &#8594; Standard-IA lifecycle</text>
+
+    <rect x="370" y="428" width="304" height="98" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.5"/>
+    <text x="522" y="452" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">DynamoDB + Secrets Manager + Route53</text>
+    <text x="522" y="472" text-anchor="middle" font-size="11" fill="#334a60">&#8226; DynamoDB: reader-N ordinal lease claims</text>
+    <text x="522" y="492" text-anchor="middle" font-size="11" fill="#334a60">&#8226; Secrets Manager: user SHA256 passwords</text>
+    <text x="522" y="510" text-anchor="middle" font-size="11" font-weight="700" fill="#28597a">&#8226; Route53 Private Zone: internal peer DNS</text>
+
+    <!-- RIGHT: WHY EC2 BEAT KUBERNETES -->
+    <rect x="712" y="80" width="340" height="464" rx="14" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="732" y="98" width="300" height="30" rx="6" fill="#1f6f50"/>
+    <text x="882" y="118" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">WHY EC2 BEAT K8S FOR THIS CLUSTER</text>
+
+    <rect x="732" y="142" width="300" height="86" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="882" y="164" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">1. Spot Identity Without PVC Races</text>
+    <text x="882" y="184" text-anchor="middle" font-size="11" fill="#2c4a3e">One ASG mixes 50% Spot + 50% On-Demand;</text>
+    <text x="882" y="202" text-anchor="middle" font-size="11" fill="#2c4a3e">DynamoDB lease claim beats StatefulSet</text>
+    <text x="882" y="218" text-anchor="middle" font-size="11" fill="#2c4a3e">cross-AZ EBS PVC re-attach delays.</text>
+
+    <rect x="732" y="240" width="300" height="86" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="882" y="262" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">2. Quorum-Gated Keeper Rolls</text>
+    <text x="882" y="282" text-anchor="middle" font-size="11" fill="#2c4a3e">Keepers sit on fixed instances outside</text>
+    <text x="882" y="300" text-anchor="middle" font-size="11" fill="#2c4a3e">ASGs; never evicted by K8s node</text>
+    <text x="882" y="316" text-anchor="middle" font-size="11" fill="#2c4a3e">pressure or fight a pod controller.</text>
+
+    <rect x="732" y="338" width="300" height="86" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="882" y="360" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">3. S3-First Storage Shape</text>
+    <text x="882" y="380" text-anchor="middle" font-size="11" fill="#2c4a3e">Bulk bytes live in S3; readers only</text>
+    <text x="882" y="398" text-anchor="middle" font-size="11" fill="#2c4a3e">need disposable local cache + metadata</text>
+    <text x="882" y="414" text-anchor="middle" font-size="11" fill="#2c4a3e">rebuilt from Keeper, not pet PVCs.</text>
+
+    <rect x="732" y="436" width="300" height="90" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="882" y="458" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">4. Zero EKS Control-Plane Tax</text>
+    <text x="882" y="478" text-anchor="middle" font-size="11" fill="#164231">A 6–9 node database fleet does not</text>
+    <text x="882" y="496" text-anchor="middle" font-size="11" fill="#164231">justify running CNI, CoreDNS, CSI,</text>
+    <text x="882" y="514" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">and cluster upgrades just for 1 app.</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="560" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="586" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Architecture Rule: Draw the sequence diagram first &#8212; any hop you cannot name is an outage waiting for 3 a.m.</text>
+  </g>
+</svg>

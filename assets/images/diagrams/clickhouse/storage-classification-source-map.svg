@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 600" role="img" aria-labelledby="title desc">
+  <title id="title">A Field Map of ClickHouse Storage: Three Orthogonal Choices and the Default S3 Key Template</title>
+  <desc id="desc">How ClickHouse's storage_configuration registry works in the C++ source: every disk combines a Disk Family, an Object Storage Backend, and a Metadata Storage Backend, while default S3 object keys expand from endpoint + endpoint_subpath + [a-z]{3}/[a-z]{29}.</desc>
+  <defs>
+    <marker id="arr-sc" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="600" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">A Field Map of ClickHouse Storage in the C++ Source (src/Disks/)</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Every &lt;disks&gt; entry is three orthogonal choices stacked &#8212; and legacy names like type=s3 are compatibility aliases</text>
+
+    <!-- THREE ORTHOGONAL CHOICES -->
+    <!-- Choice 1 -->
+    <rect x="28" y="82" width="320" height="284" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="46" y="98" width="284" height="30" rx="6" fill="#28597a"/>
+    <text x="188" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Choice 1: Disk Family (registerDisks.cpp)</text>
+
+    <rect x="46" y="142" width="284" height="58" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.3"/>
+    <text x="188" y="164" text-anchor="middle" font-family="Courier, monospace" font-size="13" font-weight="700" fill="#143852">local</text>
+    <text x="188" y="184" text-anchor="middle" font-size="11" fill="#334a60">Direct POSIX filesystem on EBS / NVMe</text>
+
+    <rect x="46" y="212" width="284" height="68" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.3"/>
+    <text x="188" y="234" text-anchor="middle" font-family="Courier, monospace" font-size="13" font-weight="700" fill="#143852">object_storage</text>
+    <text x="188" y="254" text-anchor="middle" font-size="11" fill="#334a60">Pairs Choice 2 (Backend) + Choice 3 (Metadata)</text>
+    <text x="188" y="270" text-anchor="middle" font-size="10" fill="#28597a">(Aliases: s3, s3_plain, azure_blob_storage, hdfs)</text>
+
+    <rect x="46" y="292" width="284" height="58" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.3"/>
+    <text x="188" y="314" text-anchor="middle" font-family="Courier, monospace" font-size="13" font-weight="700" fill="#143852">cache / encrypted (Wrappers)</text>
+    <text x="188" y="334" text-anchor="middle" font-size="11" fill="#334a60">SLRU local file-segment cache wrapping Choice 2</text>
+
+    <path d="M348 224 H374" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arr-sc)"/>
+
+    <!-- Choice 2 -->
+    <rect x="380" y="82" width="320" height="284" rx="12" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.8"/>
+    <rect x="398" y="98" width="284" height="30" rx="6" fill="#9b6b24"/>
+    <text x="540" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Choice 2: Object Backend (Where Bytes Live)</text>
+
+    <rect x="398" y="142" width="284" height="44" rx="6" fill="#ffffff" stroke="#b8883b" stroke-width="1.3"/>
+    <text x="540" y="168" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#5e3e0e">s3 (AWS S3 / MinIO / GCS)</text>
+
+    <rect x="398" y="196" width="284" height="44" rx="6" fill="#ffffff" stroke="#b8883b" stroke-width="1.3"/>
+    <text x="540" y="222" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#5e3e0e">azure_blob_storage</text>
+
+    <rect x="398" y="250" width="284" height="44" rx="6" fill="#ffffff" stroke="#b8883b" stroke-width="1.3"/>
+    <text x="540" y="276" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#5e3e0e">hdfs / web / local_blob_storage</text>
+
+    <text x="540" y="322" text-anchor="middle" font-size="11" font-weight="700" fill="#5e3e0e">Registered in ObjectStorageFactory.cpp</text>
+    <text x="540" y="342" text-anchor="middle" font-size="11" fill="#7a541b">Streams part blobs; knows nothing about part names</text>
+
+    <path d="M700 224 H726" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arr-sc)"/>
+
+    <!-- Choice 3 -->
+    <rect x="732" y="82" width="320" height="284" rx="12" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.8"/>
+    <rect x="750" y="98" width="284" height="30" rx="6" fill="#1f6f50"/>
+    <text x="892" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Choice 3: Metadata Storage (Parts Map)</text>
+
+    <rect x="750" y="142" width="284" height="52" rx="6" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="892" y="162" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#164231">local (Default for type=s3)</text>
+    <text x="892" y="180" text-anchor="middle" font-size="11" fill="#164231">Metadata files on local EBS + blobs_to_remove.log</text>
+
+    <rect x="750" y="202" width="284" height="48" rx="6" fill="#ffffff" stroke="#1f6f50" stroke-width="1.2"/>
+    <text x="892" y="222" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#164231">plain / plain_rewritable</text>
+    <text x="892" y="238" text-anchor="middle" font-size="11" fill="#2c4a3e">Metadata in S3 itself (backups / attachable tables)</text>
+
+    <rect x="750" y="258" width="284" height="48" rx="6" fill="#ffffff" stroke="#1f6f50" stroke-width="1.2"/>
+    <text x="892" y="278" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#164231">cas (Antalya) / keeper (Cloud only)</text>
+    <text x="892" y="294" text-anchor="middle" font-size="11" fill="#2c4a3e">Shared multi-replica metadata without local drift</text>
+
+    <text x="892" y="334" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">keeper throws UNKNOWN in OSS ClickHouse</text>
+
+    <!-- BOTTOM PANEL: WHERE S3 KEYS ACTUALLY LAND -->
+    <rect x="28" y="384" width="1024" height="142" rx="12" fill="#ffffff" stroke="#28597a" stroke-width="1.8"/>
+    <text x="540" y="410" text-anchor="middle" font-size="16" font-weight="700" fill="#143852">Where S3 Bytes Actually Land (ObjectStorageKeyGenerator.cpp)</text>
+
+    <rect x="48" y="424" width="600" height="84" rx="8" fill="#eef4fb" stroke="#28597a" stroke-width="1.4"/>
+    <text x="348" y="448" text-anchor="middle" font-family="Courier, monospace" font-size="13" font-weight="700" fill="#143852">Full S3 Key = &lt;endpoint&gt; + &lt;endpoint_subpath&gt; + [a-z]{3}/[a-z]{29}</text>
+    <text x="348" y="472" text-anchor="middle" font-size="12" fill="#334a60">&#8226; <tspan font-family="Courier, monospace" font-weight="700" fill="#b43c3c">&lt;key_prefix&gt;</tspan> does NOT exist in S3 disk config &#8594; silently ignored!</text>
+    <text x="348" y="492" text-anchor="middle" font-size="12" fill="#334a60">&#8226; Empty subpath drops random 3-letter folders (<tspan font-family="Courier, monospace">szl/</tspan>, <tspan font-family="Courier, monospace">kqm/</tspan>) into the bucket root.</text>
+
+    <rect x="668" y="424" width="364" height="84" rx="8" fill="#fff0d1" stroke="#8b5a1e" stroke-width="1.4"/>
+    <text x="850" y="448" text-anchor="middle" font-size="13" font-weight="700" fill="#5e3e0e">Tiered Policy Source Gotcha (VolumeJBOD.cpp)</text>
+    <text x="850" y="470" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#b43c3c">perform_ttl_move_on_insert defaults to true!</text>
+    <text x="850" y="490" text-anchor="middle" font-size="11" fill="#5e3e0e">Always set <tspan font-family="Courier, monospace" font-weight="700">false</tspan> on cold volume so inserts stay local.</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="542" width="1024" height="40" rx="8" fill="#17283c"/>
+    <text x="540" y="567" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Source-Reading Takeaway: Use &lt;endpoint_subpath&gt;data/&lt;tenant&gt;/{replica}/&lt;/endpoint_subpath&gt; to isolate S3 prefixes</text>
+  </g>
+</svg>

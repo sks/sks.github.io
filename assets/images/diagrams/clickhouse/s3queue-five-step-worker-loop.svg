@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 520" role="img" aria-labelledby="title desc">
+  <title id="title">Inside One S3Queue Worker Cycle and the Four Settings That Govern It</title>
+  <desc id="desc">The five steps of a ClickHouse S3Queue worker loop mapped to the four settings that control discovery cadence, worker parallelism, ordering mode, and post-processing cleanup.</desc>
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="520" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="38" text-anchor="middle" font-size="22" font-weight="700">The Five-Step S3Queue Worker Loop &amp; the Four Knobs That Matter</text>
+    <text x="540" y="62" text-anchor="middle" font-size="14" fill="#465a6e">Every S3Queue tuning setting maps directly to one stage of the dock worker's cycle</text>
+
+    <!-- 5 STEP BOXES -->
+    <rect x="34" y="96" width="184" height="142" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <circle cx="62" cy="124" r="14" fill="#28597a"/>
+    <text x="62" y="129" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">1</text>
+    <text x="134" y="129" text-anchor="middle" font-size="16" font-weight="700">Discover</text>
+    <text x="126" y="158" text-anchor="middle" font-size="12" fill="#334a60">Call S3 ListObjectsV2</text>
+    <text x="126" y="176" text-anchor="middle" font-size="12" fill="#334a60">on staging prefix;</text>
+    <text x="126" y="194" text-anchor="middle" font-size="12" fill="#334a60">filter already-seen keys</text>
+    <text x="126" y="220" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#28597a">S3 LIST API</text>
+
+    <path d="M218 167 H242" fill="none" stroke="#1e4e68" stroke-width="2.4" marker-end="url(#arr)"/>
+
+    <rect x="246" y="96" width="184" height="142" rx="12" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.8"/>
+    <circle cx="274" cy="124" r="14" fill="#9b6b24"/>
+    <text x="274" y="129" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">2</text>
+    <text x="346" y="129" text-anchor="middle" font-size="16" font-weight="700">Claim</text>
+    <text x="338" y="158" text-anchor="middle" font-size="12" fill="#5e3e0e">Atomic create znode</text>
+    <text x="338" y="176" text-anchor="middle" font-size="12" fill="#5e3e0e">in Keeper clipboard;</text>
+    <text x="338" y="194" text-anchor="middle" font-size="12" fill="#5e3e0e">losers skip to next file</text>
+    <text x="338" y="220" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#9b6b24">Keeper /processing</text>
+
+    <path d="M430 167 H454" fill="none" stroke="#1e4e68" stroke-width="2.4" marker-end="url(#arr)"/>
+
+    <rect x="458" y="96" width="184" height="142" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <circle cx="486" cy="124" r="14" fill="#28597a"/>
+    <text x="486" y="129" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">3</text>
+    <text x="558" y="129" text-anchor="middle" font-size="16" font-weight="700">Stream &amp; Parse</text>
+    <text x="550" y="158" text-anchor="middle" font-size="12" fill="#334a60">Download S3 object,</text>
+    <text x="550" y="176" text-anchor="middle" font-size="12" fill="#334a60">gunzip in memory,</text>
+    <text x="550" y="194" text-anchor="middle" font-size="12" fill="#334a60">parse NDJSON/Parquet</text>
+    <text x="550" y="220" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#28597a">0 bytes on local disk</text>
+
+    <path d="M642 167 H666" fill="none" stroke="#1e4e68" stroke-width="2.4" marker-end="url(#arr)"/>
+
+    <rect x="670" y="96" width="184" height="142" rx="12" fill="#e8f5ef" stroke="#1f6f50" stroke-width="1.8"/>
+    <circle cx="698" cy="124" r="14" fill="#1f6f50"/>
+    <text x="698" y="129" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">4</text>
+    <text x="770" y="129" text-anchor="middle" font-size="16" font-weight="700">Shape &amp; Write</text>
+    <text x="762" y="158" text-anchor="middle" font-size="12" fill="#164231">Materialized View</text>
+    <text x="762" y="176" text-anchor="middle" font-size="12" fill="#164231">transforms block into</text>
+    <text x="762" y="194" text-anchor="middle" font-size="12" fill="#164231">MergeTree part</text>
+    <text x="762" y="220" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#1f6f50">1 file &#8594; 1 big part</text>
+
+    <path d="M854 167 H878" fill="none" stroke="#1e4e68" stroke-width="2.4" marker-end="url(#arr)"/>
+
+    <rect x="882" y="96" width="164" height="142" rx="12" fill="#f3f0fb" stroke="#5b4b8a" stroke-width="1.8"/>
+    <circle cx="910" cy="124" r="14" fill="#5b4b8a"/>
+    <text x="910" y="129" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">5</text>
+    <text x="974" y="129" text-anchor="middle" font-size="16" font-weight="700">Mark &amp; Clean</text>
+    <text x="964" y="158" text-anchor="middle" font-size="12" fill="#3a2e5c">Record /processed</text>
+    <text x="964" y="176" text-anchor="middle" font-size="12" fill="#3a2e5c">on clipboard &amp;</text>
+    <text x="964" y="194" text-anchor="middle" font-size="12" fill="#3a2e5c">delete S3 staging file</text>
+    <text x="964" y="220" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#5b4b8a">Dock stays clean</text>
+
+    <!-- THE 4 SETTINGS CARDS BELOW -->
+    <text x="540" y="276" text-anchor="middle" font-size="16" font-weight="700" fill="#17283c">The Four Settings That Control the Loop</text>
+
+    <rect x="34" y="296" width="240" height="190" rx="10" fill="#ffffff" stroke="#28597a" stroke-width="1.6"/>
+    <rect x="34" y="296" width="240" height="32" rx="10" fill="#28597a"/>
+    <text x="154" y="317" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#ffffff">polling_min / max_timeout_ms</text>
+    <text x="154" y="348" text-anchor="middle" font-size="13" font-weight="700">Controls Step 1 (Cadence)</text>
+    <text x="154" y="370" text-anchor="middle" font-size="12" fill="#465a6e">How long the worker naps</text>
+    <text x="154" y="388" text-anchor="middle" font-size="12" fill="#465a6e">when S3 is empty vs busy.</text>
+    <text x="154" y="414" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Too high &#8594; sluggish drain</text>
+    <text x="154" y="432" text-anchor="middle" font-size="11" font-weight="700" fill="#8b5a1e">Too low &#8594; S3 LIST $$$ bill</text>
+    <text x="154" y="462" text-anchor="middle" font-size="11" fill="#1f6f50">Pair with hash_ring_filtering=1</text>
+
+    <rect x="292" y="296" width="240" height="190" rx="10" fill="#ffffff" stroke="#9b6b24" stroke-width="1.6"/>
+    <rect x="292" y="296" width="240" height="32" rx="10" fill="#9b6b24"/>
+    <text x="412" y="317" text-anchor="middle" font-family="Courier, monospace" font-size="13" font-weight="700" fill="#ffffff">mode = 'unordered'</text>
+    <text x="412" y="348" text-anchor="middle" font-size="13" font-weight="700">Controls Step 2 (Claim Rule)</text>
+    <text x="412" y="370" text-anchor="middle" font-size="12" fill="#465a6e">Any free worker grabs any</text>
+    <text x="412" y="388" text-anchor="middle" font-size="12" fill="#465a6e">unclaimed file in parallel.</text>
+    <text x="412" y="414" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Best for logs (timestamp in row)</text>
+    <text x="412" y="432" text-anchor="middle" font-size="11" fill="#465a6e">'ordered' forces strict filename</text>
+    <text x="412" y="450" text-anchor="middle" font-size="11" fill="#465a6e">sequence when order matters</text>
+
+    <rect x="550" y="296" width="240" height="190" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.6"/>
+    <rect x="550" y="296" width="240" height="32" rx="10" fill="#1f6f50"/>
+    <text x="670" y="317" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#ffffff">processing_threads_num</text>
+    <text x="670" y="348" text-anchor="middle" font-size="13" font-weight="700">Controls Steps 3 &amp; 4 (Workers)</text>
+    <text x="670" y="370" text-anchor="middle" font-size="12" fill="#465a6e">Number of concurrent dock</text>
+    <text x="670" y="388" text-anchor="middle" font-size="12" fill="#465a6e">workers per ClickHouse node.</text>
+    <text x="670" y="414" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Default = 1 (single-file straw!)</text>
+    <text x="670" y="432" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Raise to 8–16 to drain backlogs</text>
+    <text x="670" y="462" text-anchor="middle" font-size="11" fill="#465a6e">Scales &#215; N writer nodes</text>
+
+    <rect x="808" y="296" width="238" height="190" rx="10" fill="#ffffff" stroke="#5b4b8a" stroke-width="1.6"/>
+    <rect x="808" y="296" width="238" height="32" rx="10" fill="#5b4b8a"/>
+    <text x="927" y="317" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#ffffff">after_processing = 'delete'</text>
+    <text x="927" y="348" text-anchor="middle" font-size="13" font-weight="700">Controls Step 5 (Cleanup)</text>
+    <text x="927" y="370" text-anchor="middle" font-size="12" fill="#465a6e">Removes staged S3 file</text>
+    <text x="927" y="388" text-anchor="middle" font-size="12" fill="#465a6e">once MergeTree part commits.</text>
+    <text x="927" y="414" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Keeps S3 LIST fast &amp; cheap</text>
+    <text x="927" y="432" text-anchor="middle" font-size="11" fill="#465a6e">Pair with tracked_files_limit</text>
+    <text x="927" y="450" text-anchor="middle" font-size="11" fill="#465a6e">&amp; S3 lifecycle safety net</text>
+  </g>
+</svg>

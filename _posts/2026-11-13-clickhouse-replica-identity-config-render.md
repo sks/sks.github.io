@@ -6,7 +6,7 @@ series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 10
 mermaid: true
 description: "I replaced hand-written ClickHouse cluster XML with the Altinity operator's own config generator. One shard macro later, every table silently re-keyed itself in Keeper. A tour of the identity machinery most ClickHouse posts skip."
-image: /assets/images/og-default.png
+image: /assets/images/diagrams/clickhouse/replica-identity-config-render.svg
 tags: [clickhouse, keeper, altinity-operator, ec2, sre, infrastructure]
 permalink: /blog/clickhouse-replica-identity-config-render/
 faqs:
@@ -52,6 +52,10 @@ ReplicatedMergeTree anywhere, they apply to you.
 {: .key-takeaways}
 
 ## The setup: generated config, at last
+
+![How ClickHouse macros expand into Keeper registration paths and how changing shard from 01 to 0 silently re-keys every table](/assets/images/diagrams/clickhouse/replica-identity-config-render.svg)
+
+*ClickHouse `<macros>` are the filesystem address of your replicated data: changing `<shard>` from `01` to `0` during a config re-render silently registers tables under a new, empty Keeper tree while live data sits orphaned.*
 
 A ClickHouse node's config is a directory of XML fragments —
 `remote_servers.xml` naming every replica in the cluster, `macros.xml`

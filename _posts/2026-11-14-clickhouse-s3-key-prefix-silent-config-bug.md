@@ -5,7 +5,7 @@ date: 2026-11-14 08:00:00 -0800
 series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 11
 description: "ClickHouse silently ignored a storage config element on every boot, and every tenant's parts landed in one shared bucket root. How I proved it live, why zero-copy deprecation makes per-replica paths mandatory, and the policy shape that makes CAS a drop-in later."
-image: /assets/images/og-default.png
+image: /assets/images/diagrams/clickhouse/s3-key-prefix-silent-config-bug.svg
 tags: [clickhouse, s3, storage, cas, debugging, sre, infrastructure]
 permalink: /blog/clickhouse-s3-key-prefix-silent-config-bug/
 faqs:
@@ -55,6 +55,10 @@ default on shared object storage — which upstream deprecated in 2025.
 ---
 
 ## The config that lied
+
+![The silent S3 key_prefix configuration bug dumping parts in the bucket root versus macro-expanded endpoint_subpath](/assets/images/diagrams/clickhouse/s3-key-prefix-silent-config-bug.svg)
+
+*ClickHouse 26.8 silently ignores `<key_prefix>` on S3 disks, mingling all tenants and replicas in the bucket root; moving the path into `<endpoint_subpath>data/<tenant>/{replica}/</endpoint_subpath>` restores per-tenant and per-replica isolation.*
 
 The multi-tenant design was clean on paper. Each tenant got an S3 disk
 with a key prefix:

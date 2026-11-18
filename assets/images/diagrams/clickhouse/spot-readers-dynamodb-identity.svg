@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 560" role="img" aria-labelledby="title desc">
+  <title id="title">Running ClickHouse Readers on Spot: The DynamoDB Ordinal Claimer and 2-Minute Drain</title>
+  <desc id="desc">How Spot-launched ClickHouse readers keep stable replica names (reader-0, reader-1, reader-2) across instance replacements using a DynamoDB conditional PutItem lease, 5-minute heartbeat renewal, and 2-minute EC2 Spot interruption handler.</desc>
+  <defs>
+    <marker id="arr-sp" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+    <marker id="arr-spg" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="560" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Running ClickHouse Readers on Spot (~70% Off): The Stable-Identity Loop</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Temporary workers (Spot instances) staff numbered reception desks (reader-0..2) so Keeper logbooks stay intact</text>
+
+    <!-- THREE LIFECYCLE COLUMNS -->
+    <!-- Col 1: Boot Claim -->
+    <rect x="28" y="84" width="324" height="396" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="46" y="100" width="288" height="32" rx="6" fill="#28597a"/>
+    <text x="190" y="121" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">1. Boot: Atomic Ordinal Claim</text>
+
+    <text x="190" y="152" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">New Spot VM (i-09f8a) Tries Desks 0..N</text>
+    <rect x="46" y="166" width="288" height="96" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.4"/>
+    <text x="190" y="188" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#143852">DynamoDB PutItem(hostname='reader-0')</text>
+    <text x="190" y="208" text-anchor="middle" font-family="Courier, monospace" font-size="10" fill="#1f6f50">ConditionExpression:</text>
+    <text x="190" y="226" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#1f6f50">attribute_not_exists(hostname)</text>
+    <text x="190" y="244" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#1f6f50">OR lease_until &lt; :now</text>
+
+    <rect x="46" y="276" width="288" height="184" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.2"/>
+    <text x="190" y="298" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">What Winning 'reader-0' Unlocks</text>
+    <text x="190" y="322" text-anchor="middle" font-size="11" fill="#334a60">&#10003; Sets <tspan font-family="Courier, monospace">&lt;replica&gt;reader-0&lt;/replica&gt;</tspan> macro</text>
+    <text x="190" y="344" text-anchor="middle" font-size="11" fill="#334a60">&#10003; Re-attaches to existing Keeper path:</text>
+    <text x="190" y="362" text-anchor="middle" font-family="Courier, monospace" font-size="10" fill="#28597a">/clickhouse/tables/01/events/replicas/reader-0</text>
+    <text x="190" y="384" text-anchor="middle" font-size="11" fill="#334a60">&#10003; Reuses <tspan font-family="Courier, monospace">data/tenant/reader-0/</tspan> S3 prefix</text>
+    <text x="190" y="406" text-anchor="middle" font-size="11" fill="#334a60">&#10003; Registers <tspan font-family="Courier, monospace">reader-0.internal</tspan> in Route53</text>
+    <text x="190" y="438" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Zero locks &#183; Zero leader election</text>
+
+    <path d="M352 282 H374" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arr-sp)"/>
+
+    <!-- Col 2: 5-Minute Heartbeat -->
+    <rect x="378" y="84" width="324" height="396" rx="12" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.8"/>
+    <rect x="396" y="100" width="288" height="32" rx="6" fill="#1f6f50"/>
+    <text x="540" y="121" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">2. Steady State: 5-Min Renewal</text>
+
+    <text x="540" y="152" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">15-Minute Lease Renewed Every 5 Minutes</text>
+    <rect x="396" y="166" width="288" height="96" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="540" y="188" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#164231">DynamoDB UpdateItem(reader-0)</text>
+    <text x="540" y="208" text-anchor="middle" font-family="Courier, monospace" font-size="10" fill="#2c4a3e">SET lease_until = :now + 900</text>
+    <text x="540" y="226" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#1f6f50">Condition: instance_id = :my_id</text>
+    <text x="540" y="246" text-anchor="middle" font-size="10" fill="#465a6e">(Stale VM can never extend a new VM's lease)</text>
+
+    <rect x="396" y="276" width="288" height="184" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.2"/>
+    <text x="540" y="298" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Why a Lease Beats a Simple Delete</text>
+    <text x="540" y="322" text-anchor="middle" font-size="11" fill="#2c4a3e">&#8226; Tolerates 2 missed cron ticks (10m) without</text>
+    <text x="540" y="340" text-anchor="middle" font-size="11" fill="#2c4a3e">losing ownership during brief API blips.</text>
+    <text x="540" y="364" text-anchor="middle" font-size="11" fill="#2c4a3e">&#8226; If a machine dies instantly (kernel panic /</text>
+    <text x="540" y="382" text-anchor="middle" font-size="11" fill="#2c4a3e">power loss), <tspan font-family="Courier, monospace">lease_until &lt; :now</tspan> frees</text>
+    <text x="540" y="400" text-anchor="middle" font-size="11" fill="#2c4a3e"><tspan font-family="Courier, monospace">reader-0</tspan> automatically within 15 minutes.</text>
+    <text x="540" y="438" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">50% On-Demand floor guards AZ capacity</text>
+
+    <path d="M702 282 H724" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-spg)"/>
+
+    <!-- Col 3: 2-Minute Spot Warning -->
+    <rect x="728" y="84" width="324" height="396" rx="12" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.8"/>
+    <rect x="746" y="100" width="288" height="32" rx="6" fill="#9b6b24"/>
+    <text x="890" y="121" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">3. Eviction: 2-Min Spot Drain</text>
+
+    <text x="890" y="152" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">IMDSv2 Spot Interruption Notice Poller</text>
+    <rect x="746" y="166" width="288" height="96" rx="8" fill="#ffffff" stroke="#9b6b24" stroke-width="1.4"/>
+    <text x="890" y="188" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#5e3e0e">/latest/meta-data/spot/instance-action</text>
+    <text x="890" y="208" text-anchor="middle" font-size="11" fill="#5e3e0e">Fires 120 seconds before AWS reclaims</text>
+    <text x="890" y="226" text-anchor="middle" font-size="11" fill="#5e3e0e">the Spot instance; triggers graceful</text>
+    <text x="890" y="244" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#9b6b24">chinit drain sequence</text>
+
+    <rect x="746" y="276" width="288" height="184" rx="8" fill="#ffffff" stroke="#9b6b24" stroke-width="1.2"/>
+    <text x="890" y="298" text-anchor="middle" font-size="13" font-weight="700" fill="#5e3e0e">Graceful Checkout Before Termination</text>
+    <text x="890" y="322" text-anchor="middle" font-size="11" fill="#5e3e0e">1. Stop replication fetches &amp; finish active SQL</text>
+    <text x="890" y="344" text-anchor="middle" font-size="11" fill="#5e3e0e">2. Stop <tspan font-family="Courier, monospace">clickhouse-server</tspan> cleanly</text>
+    <text x="890" y="366" text-anchor="middle" font-size="11" fill="#5e3e0e">3. Delete Route53 DNS record for <tspan font-family="Courier, monospace">reader-0</tspan></text>
+    <text x="890" y="388" text-anchor="middle" font-size="11" fill="#5e3e0e">4. <tspan font-family="Courier, monospace">DeleteItem(reader-0)</tspan> where <tspan font-family="Courier, monospace">id==self</tspan></text>
+    <text x="890" y="438" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Replacement claims reader-0 in seconds!</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="498" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="524" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Spot Takeaway: Make compute disposable and replica identity durable &#8212; 70% savings with zero split-brain</text>
+  </g>
+</svg>

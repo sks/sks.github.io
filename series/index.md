@@ -22,8 +22,9 @@ Find a focused learning path or jump straight to the newest field notes. Every s
 
 <div class="series-latest-grid">
 {% for post in latest_posts %}
+  {% assign latest_series_hub = site.pages | where: "nav_title", "Series" | where: "title", post.series | first %}
   <article class="series-latest-card">
-    <p class="series-card__meta"><time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time>{% if post.series %} · {{ post.series }}{% else %} · Standalone note{% endif %}</p>
+    <p class="series-card__meta"><time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time> · {% if post.series %}{% if latest_series_hub %}<a href="{{ latest_series_hub.url | relative_url }}">{{ post.series | split: ":" | first }}</a>{% else %}{{ post.series | split: ":" | first }}{% endif %}{% else %}Standalone note{% endif %}</p>
     <h3><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h3>
     <p>{{ post.description | strip_html | truncate: 150 }}</p>
   </article>

@@ -5,7 +5,7 @@ date: 2026-11-09 09:00:00 -0800
 series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 5
 description: "A DynamoDB ordinal claimer gives spot-launched ClickHouse readers a stable replica name across instance generations."
-image: /assets/images/og-default.png
+image: /assets/images/diagrams/clickhouse/spot-readers-dynamodb-identity.svg
 tags: [clickhouse, aws, spot-instances, dynamodb, sre]
 permalink: /blog/clickhouse-spot-readers-stable-identity/
 faqs:
@@ -36,6 +36,10 @@ The problem is not price. It is identity. Imagine a company with three shared re
 ---
 
 ## Why identity breaks on spot
+
+![DynamoDB ordinal claimer lifecycle for Spot ClickHouse readers: conditional PutItem claim at boot, 5-minute heartbeat renewal, and 2-minute Spot eviction drain](/assets/images/diagrams/clickhouse/spot-readers-dynamodb-identity.svg)
+
+*Spot readers save ~70% while keeping stable replica identities (`reader-0..2`) through a conditional-write DynamoDB lease table, a 5-minute renewal cron, and a 2-minute IMDSv2 Spot interruption drain.*
 
 Every node declares its identity in a macro (a named value in the server's config):
 

@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">The Per-Host Scale-In Alarm Wedge versus Aggregate ASG Scale-In Alarm</title>
+  <desc id="desc">How a per-host CloudWatch low-CPU alarm wired to ASG scale-in destroys its own metric source, stays stuck in ALARM due to treat_missing_data=missing, and kills every subsequent scale-out — fixed by keying scale-in on the aggregate AutoScalingGroupName dimension.</desc>
+  <defs>
+    <marker id="arr-wg" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#b43c3c"/>
+    </marker>
+    <marker id="arr-ok2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">The Self-Terminating Scale-In Alarm: Per-Host Wedge vs. Aggregate ASG Dimension</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">A scale-in alarm must never key on a metric source that its own scale-in action destroys</text>
+
+    <!-- LEFT PANEL: THE PER-HOST WEDGE -->
+    <rect x="28" y="82" width="496" height="426" rx="14" fill="#fdf2f2" stroke="#c05c5c" stroke-width="2"/>
+    <rect x="48" y="98" width="276" height="28" rx="6" fill="#b43c3c"/>
+    <text x="186" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">ANTI-PATTERN: PER-HOST SCALE-IN</text>
+
+    <rect x="48" y="140" width="456" height="58" rx="8" fill="#ffffff" stroke="#c05c5c" stroke-width="1.4"/>
+    <text x="276" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="#7c2323">1. Scale-Out Launches writer-1</text>
+    <text x="276" y="182" text-anchor="middle" font-size="12" fill="#5c3a3a">High load triggers step-up (+1); new instance claims <tspan font-family="Courier, monospace">writer-1</tspan>.</text>
+
+    <path d="M276 198 V216" fill="none" stroke="#b43c3c" stroke-width="2.2" marker-end="url(#arr-wg)"/>
+
+    <rect x="48" y="220" width="456" height="68" rx="8" fill="#ffffff" stroke="#c05c5c" stroke-width="1.4"/>
+    <text x="276" y="242" text-anchor="middle" font-size="13" font-weight="700" fill="#7c2323">2. Per-Host Alarm (host=writer-1) Fires &amp; Kills writer-1</text>
+    <text x="276" y="262" text-anchor="middle" font-size="12" fill="#5c3a3a"><tspan font-family="Courier, monospace">writer-1-cpu-low</tspan> inherits idle history from dead predecessor</text>
+    <text x="276" y="278" text-anchor="middle" font-size="12" fill="#5c3a3a">and executes step-down (-1) &#8594; <tspan font-weight="700" fill="#b43c3c">writer-1 is terminated</tspan>.</text>
+
+    <path d="M276 288 V306" fill="none" stroke="#b43c3c" stroke-width="2.2" marker-end="url(#arr-wg)"/>
+
+    <rect x="48" y="310" width="456" height="74" rx="8" fill="#fbe1e1" stroke="#b43c3c" stroke-width="1.8"/>
+    <text x="276" y="332" text-anchor="middle" font-size="13" font-weight="700" fill="#8f2424">3. Metric Source Dies &#8594; Alarm Freezes in ALARM Forever</text>
+    <text x="276" y="352" text-anchor="middle" font-size="12" fill="#7c2323">Because <tspan font-family="Courier, monospace">writer-1</tspan> is dead, it sends 0 datapoints.</text>
+    <text x="276" y="370" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#8f2424">treat_missing_data = &quot;missing&quot; keeps state = ALARM!</text>
+
+    <path d="M276 384 V402" fill="none" stroke="#b43c3c" stroke-width="2.2" marker-end="url(#arr-wg)"/>
+
+    <rect x="48" y="406" width="456" height="84" rx="8" fill="#8f2424"/>
+    <text x="276" y="430" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">4. The Infinite Seesaw Wedge</text>
+    <text x="276" y="452" text-anchor="middle" font-size="12" fill="#fde8e8">Every time scale-out adds a writer, the stuck <tspan font-family="Courier, monospace">writer-1-cpu-low</tspan></text>
+    <text x="276" y="472" text-anchor="middle" font-size="12" fill="#fde8e8">alarm re-fires after cooldown and kills it 6 minutes later.</text>
+
+    <!-- RIGHT PANEL: THE AGGREGATE ASG FIX -->
+    <rect x="556" y="82" width="496" height="426" rx="14" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="576" y="98" width="290" height="28" rx="6" fill="#1f6f50"/>
+    <text x="721" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">THE FIX: AGGREGATE ASG DIMENSION</text>
+
+    <rect x="576" y="140" width="456" height="86" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="804" y="164" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">Key Scale-In on AutoScalingGroupName</text>
+    <text x="804" y="186" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#28597a">Namespace: AWS/EC2 &#183; Metric: CPUUtilization (Average)</text>
+    <text x="804" y="208" text-anchor="middle" font-family="Courier, monospace" font-size="12" fill="#1f6f50">Dimension: AutoScalingGroupName = writers-asg</text>
+
+    <path d="M804 226 V246" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-ok2)"/>
+
+    <rect x="576" y="250" width="456" height="114" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="804" y="274" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">Why the Aggregate Metric Cannot Wedge</text>
+    <text x="804" y="298" text-anchor="middle" font-size="12" fill="#2c4a3e">&#10003; <tspan font-weight="700">Survives instance death:</tspan> Removing <tspan font-family="Courier, monospace">writer-1</tspan> only changes</text>
+    <text x="804" y="316" text-anchor="middle" font-size="12" fill="#2c4a3e">the denominator; <tspan font-family="Courier, monospace">writer-0</tspan> keeps publishing datapoints.</text>
+    <text x="804" y="338" text-anchor="middle" font-size="12" fill="#2c4a3e">&#10003; <tspan font-weight="700">Clears immediately:</tspan> Remaining busy writers raise the</text>
+    <text x="804" y="354" text-anchor="middle" font-size="12" fill="#2c4a3e">fleet average above threshold &#8594; alarm transitions to <tspan font-family="Courier, monospace" font-weight="700">OK</tspan>.</text>
+
+    <path d="M804 364 V384" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-ok2)"/>
+
+    <rect x="576" y="388" width="456" height="102" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="804" y="412" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">Immune to Cold-Instance Warmup</text>
+    <text x="804" y="434" text-anchor="middle" font-size="12" fill="#164231">A newly launched writer at 5% CPU averages with busy</text>
+    <text x="804" y="452" text-anchor="middle" font-size="12" fill="#164231">peers at 85% CPU (= 45% fleet avg) &#8212; never triggers</text>
+    <text x="804" y="472" text-anchor="middle" font-size="12" font-weight="700" fill="#1f6f50">6-hour scale-in until the entire fleet is genuinely idle.</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="522" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="548" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Autoscaling Law: Use per-host alarms to notify humans; use fleet-aggregate dimensions to drive scaling actions</text>
+  </g>
+</svg>

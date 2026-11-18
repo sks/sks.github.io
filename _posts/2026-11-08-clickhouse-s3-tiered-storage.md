@@ -5,7 +5,7 @@ date: 2026-11-08 09:00:00 -0800
 series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 4
 description: "How I put all ClickHouse table data in S3 with a tiered storage policy, tuned async inserts so small writes don't hit Too many parts, and why the metadata disk is the one EBS volume that matters."
-image: /assets/images/og-default.png
+image: /assets/images/diagrams/clickhouse/s3-tiered-storage-architecture.svg
 tags: [clickhouse, s3, aws, storage-policy, tiered-storage, cost-optimization]
 permalink: /blog/clickhouse-s3-tiered-storage/
 faqs:
@@ -37,6 +37,10 @@ Think of an unlimited cheap warehouse outside the city, plus a small shop counte
 ---
 
 ## Parts, bytes, and the map
+
+![ClickHouse tiered storage architecture on AWS S3: async_insert batching, hot local volume, s3_cache wrapper, S3 Standard-IA tiering, and the persistent metadata gp3 address book](/assets/images/diagrams/clickhouse/s3-tiered-storage-architecture.svg)
+
+*`async_insert` batches small writes into clean parts on the hot local disk before TTL moves them to S3 behind an `s3_cache` wrapper — while the persistent metadata gp3 volume holds the irreplaceable map from table parts to S3 object keys.*
 
 ClickHouse stores a table as immutable parts. A part is a set of files: column data, checksums, a primary key index, and marks. With an S3 disk, those files become S3 objects under a prefix, and the table's parts become pointers, not local files.
 

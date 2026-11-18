@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 600" role="img" aria-labelledby="title desc">
+  <title id="title">Lease Identity for an Ephemeral Stateful Fleet: Claim, Render, Renew, and Drain</title>
+  <desc id="desc">How chinit reconciles horizontal Auto Scaling Groups with stateful ClickHouse replicas: conditional-write ordinal claim before config render, 5-minute lease heartbeat with self-reclaim fallback, graceful shutdown drain, and dead-replica GC.</desc>
+  <defs>
+    <marker id="arr-li" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+    <marker id="arr-lig" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="600" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Who Decides What a Node Is Called? Lease Identity for Ephemeral Replicas</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Hardware is disposable (ip-10-0-1-97), but Keeper paths, S3 prefixes, and macros require a stable name (reader-2)</text>
+
+    <!-- TOP: THE CONTRADICTION & THE LEASE TABLE -->
+    <rect x="28" y="80" width="480" height="156" rx="12" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.8"/>
+    <rect x="46" y="96" width="276" height="26" rx="6" fill="#b43c3c"/>
+    <text x="184" y="114" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">THE EPHEMERAL HOSTNAME TRAP</text>
+    <text x="268" y="142" text-anchor="middle" font-size="13" font-weight="700" fill="#7c2323">Why Platform Hostnames Leak State on Every Scale Event</text>
+    <text x="268" y="164" text-anchor="middle" font-size="12" fill="#5c3a3a">1. Keeper Roster: <tspan font-family="Courier, monospace">/clickhouse/tables/01/events/replicas/&lt;name&gt;</tspan></text>
+    <text x="268" y="184" text-anchor="middle" font-size="12" fill="#5c3a3a">2. S3 Cold Prefix: <tspan font-family="Courier, monospace">s3://bucket/data/&lt;name&gt;/</tspan></text>
+    <text x="268" y="204" text-anchor="middle" font-size="12" fill="#5c3a3a">3. Rendered XML: <tspan font-family="Courier, monospace">&lt;replica&gt;&lt;name&gt;&lt;/replica&gt;</tspan></text>
+    <text x="268" y="224" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Booting as ip-10-0-1-97 orphans all three when the VM is replaced!</text>
+
+    <rect x="536" y="80" width="516" height="156" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="554" y="96" width="296" height="26" rx="6" fill="#28597a"/>
+    <text x="702" y="114" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">THE LEASE TABLE (CONDITIONAL WRITES + TTL)</text>
+    <text x="794" y="140" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">Bounded Ordinal Pool (reader-0 .. reader-3)</text>
+
+    <rect x="554" y="152" width="480" height="24" rx="4" fill="#dff0e8"/>
+    <text x="794" y="168" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#164231">reader-0 | owner=i-0a11 | ip=10.0.1.12 | exp=14:15Z (ACTIVE)</text>
+    <rect x="554" y="180" width="480" height="24" rx="4" fill="#dff0e8"/>
+    <text x="794" y="196" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#164231">reader-1 | owner=i-0b22 | ip=10.0.1.48 | exp=14:15Z (ACTIVE)</text>
+    <rect x="554" y="208" width="480" height="24" rx="4" fill="#fff0d1"/>
+    <text x="794" y="224" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#9b6b24">reader-2 | owner=i-0dead | exp=13:50Z (EXPIRED &#8594; CLAIMABLE!)</text>
+
+    <!-- BOTTOM: THE 4-STAGE LEASE LIFECYCLE -->
+    <rect x="28" y="254" width="1024" height="268" rx="14" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <text x="540" y="282" text-anchor="middle" font-size="16" font-weight="700" fill="#164231">The Four-Part Lease Identity Protocol in chinit</text>
+
+    <!-- Step 1 -->
+    <rect x="44" y="300" width="234" height="202" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.6"/>
+    <rect x="44" y="300" width="234" height="32" rx="10" fill="#1f6f50"/>
+    <text x="161" y="321" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">1. Claim BEFORE Render</text>
+    <text x="161" y="348" text-anchor="middle" font-size="11" fill="#2c4a3e">Scan ordinals <tspan font-family="Courier, monospace">0..max&#8722;1</tspan>;</text>
+    <text x="161" y="366" text-anchor="middle" font-size="11" fill="#2c4a3e">conditional <tspan font-family="Courier, monospace">PutItem</tspan> where</text>
+    <text x="161" y="384" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#164231">not_exists OR exp &lt; now</text>
+    <text x="161" y="408" text-anchor="middle" font-size="11" fill="#2c4a3e">Persist <tspan font-family="Courier, monospace">reader-2</tspan> to</text>
+    <text x="161" y="426" text-anchor="middle" font-family="Courier, monospace" font-size="10">state.json</text>
+    <text x="161" y="444" text-anchor="middle" font-size="11" fill="#2c4a3e">register Route53 DNS,</text>
+    <text x="161" y="462" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">THEN render XML macros.</text>
+
+    <path d="M278 401 H294" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arr-li)"/>
+
+    <!-- Step 2 -->
+    <rect x="298" y="300" width="234" height="202" rx="10" fill="#ffffff" stroke="#28597a" stroke-width="1.6"/>
+    <rect x="298" y="300" width="234" height="32" rx="10" fill="#28597a"/>
+    <text x="415" y="321" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">2. Heartbeat &amp; Re-Claim</text>
+    <text x="415" y="348" text-anchor="middle" font-size="11" fill="#334a60"><tspan font-family="Courier, monospace">chinit lease-renew</tspan> extends</text>
+    <text x="415" y="366" text-anchor="middle" font-size="11" fill="#334a60">TTL (+15m) every 5 minutes.</text>
+    <rect x="312" y="380" width="206" height="52" rx="6" fill="#eef4fb"/>
+    <text x="415" y="400" text-anchor="middle" font-size="11" font-weight="700" fill="#143852">Predecessor Drain Race Fix:</text>
+    <text x="415" y="418" text-anchor="middle" font-size="10" fill="#334a60">If row vanished, re-claim</text>
+    <text x="415" y="448" text-anchor="middle" font-size="11" fill="#334a60">own ordinal <tspan font-family="Courier, monospace" font-weight="700">reader-2</tspan> in place</text>
+    <text x="415" y="466" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">(never switch to reader-3!)</text>
+
+    <path d="M532 401 H548" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arr-li)"/>
+
+    <!-- Step 3 -->
+    <rect x="552" y="300" width="234" height="202" rx="10" fill="#ffffff" stroke="#9b6b24" stroke-width="1.6"/>
+    <rect x="552" y="300" width="234" height="32" rx="10" fill="#9b6b24"/>
+    <text x="669" y="321" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">3. Graceful Drain Hook</text>
+    <text x="669" y="348" text-anchor="middle" font-size="11" fill="#5e3e0e">On Spot 2-min notice or</text>
+    <text x="669" y="366" text-anchor="middle" font-size="11" fill="#5e3e0e"><tspan font-family="Courier, monospace">systemd</tspan> stop unit:</text>
+    <text x="669" y="390" text-anchor="middle" font-size="11" fill="#5e3e0e">1. Stop replication fetches</text>
+    <text x="669" y="410" text-anchor="middle" font-size="11" fill="#5e3e0e">2. Drop Keeper replica via peer</text>
+    <text x="669" y="430" text-anchor="middle" font-size="11" fill="#5e3e0e">3. Delete Route53 A-record</text>
+    <text x="669" y="450" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">4. Release lease row</text>
+    <text x="669" y="472" text-anchor="middle" font-size="10" fill="#7a541b">(Conditional on owner==self!)</text>
+
+    <path d="M786 401 H802" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-lig)"/>
+
+    <!-- Step 4 -->
+    <rect x="806" y="300" width="230" height="202" rx="10" fill="#ffffff" stroke="#5b4b8a" stroke-width="1.6"/>
+    <rect x="806" y="300" width="230" height="32" rx="10" fill="#5b4b8a"/>
+    <text x="921" y="321" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">4. Dead-Man's Switch GC</text>
+    <text x="921" y="348" text-anchor="middle" font-size="11" fill="#3a2e5c">If a node is hard-killed</text>
+    <text x="921" y="366" text-anchor="middle" font-size="11" fill="#3a2e5c">(OOM / hypervisor crash):</text>
+    <text x="921" y="392" text-anchor="middle" font-size="11" fill="#3a2e5c">&#8226; Lease TTL expires in 15m</text>
+    <text x="921" y="414" text-anchor="middle" font-size="11" fill="#3a2e5c">&#8226; Replacement claims slot &amp;</text>
+    <text x="921" y="432" text-anchor="middle" font-size="11" fill="#3a2e5c">drops stale Keeper znode</text>
+    <text x="921" y="454" text-anchor="middle" font-size="11" font-weight="700" fill="#5b4b8a">&#8226; writer-0 GC job cleans</text>
+    <text x="921" y="472" text-anchor="middle" font-size="11" font-weight="700" fill="#5b4b8a">orphaned scale-in names</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="538" width="1024" height="44" rx="8" fill="#17283c"/>
+    <text x="540" y="565" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Ordering Invariant: Claim identity &#8594; Persist to state file &#8594; Register DNS &#8594; Render ClickHouse config &#8594; Start server</text>
+  </g>
+</svg>

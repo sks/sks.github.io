@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">Boot Sequence as a Contract: Four Roles, Ordering Invariants, and Failure Classes</title>
+  <desc id="desc">How a self-managed ClickHouse node boots as a strict contract: four node roles share one binary, three load-bearing ordering invariants prevent identity and config corruption, and steps split into Critical (fail-closed) versus Best-Effort (warn and converge).</desc>
+  <defs>
+    <marker id="arr-bs" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Boot Sequence as a Contract: Roles, Ordering Invariants, and Failure Classes</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Step ordering is load-bearing &#8212; rendering config before claiming identity bakes ephemeral hostnames into durable state</text>
+
+    <!-- TOP: ONE BINARY, FOUR ROLES -->
+    <rect x="28" y="80" width="1024" height="106" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <text x="540" y="104" text-anchor="middle" font-size="15" font-weight="700" fill="#143852">One Binary (chinit), Four Role Specs &#8212; Role Is Data, Never a Separate Script</text>
+
+    <rect x="46" y="116" width="232" height="56" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.4"/>
+    <text x="162" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">writer (Fixed IP .10+)</text>
+    <text x="162" y="158" text-anchor="middle" font-size="11" fill="#334a60">Static identity &#183; Ingest + Merges</text>
+
+    <rect x="298" y="116" width="232" height="56" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="414" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">reader (Spot/OD ASG)</text>
+    <text x="414" y="158" text-anchor="middle" font-size="11" fill="#1f6f50">DynamoDB Lease identity &#183; Queries</text>
+
+    <rect x="550" y="116" width="232" height="56" rx="8" fill="#ffffff" stroke="#9b6b24" stroke-width="1.4"/>
+    <text x="666" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="#5e3e0e">keeper (Fixed IP .20+)</text>
+    <text x="666" y="158" text-anchor="middle" font-size="11" fill="#5e3e0e">Static Raft myid &#183; Never starts server</text>
+
+    <rect x="802" y="116" width="232" height="56" rx="8" fill="#ffffff" stroke="#5b4b8a" stroke-width="1.4"/>
+    <text x="918" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="#3a2e5c">backup (Fixed IP .30)</text>
+    <text x="918" y="158" text-anchor="middle" font-size="11" fill="#3a2e5c">Isolated replica &#183; Out of query pool</text>
+
+    <!-- MIDDLE: THE THREE LOAD-BEARING ORDERING INVARIANTS -->
+    <rect x="28" y="202" width="1024" height="154" rx="12" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.8"/>
+    <text x="540" y="228" text-anchor="middle" font-size="16" font-weight="700" fill="#5e3e0e">Three Load-Bearing Ordering Invariants Enforced by the Pipeline</text>
+
+    <rect x="46" y="244" width="312" height="96" rx="8" fill="#ffffff" stroke="#9b6b24" stroke-width="1.5"/>
+    <text x="202" y="266" text-anchor="middle" font-size="13" font-weight="700" fill="#5e3e0e">Invariant 1: Disks Before Service</text>
+    <text x="202" y="286" text-anchor="middle" font-size="11" fill="#5e3e0e">Mount <tspan font-family="Courier, monospace">LABEL=ch-metadata</tspan> &amp; <tspan font-family="Courier, monospace">ch-cache</tspan></text>
+    <text x="202" y="304" text-anchor="middle" font-size="11" fill="#5e3e0e">and verify ownership before starting</text>
+    <text x="202" y="322" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">clickhouse-server (prevents root fill).</text>
+
+    <path d="M358 292 H380" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arr-bs)"/>
+
+    <rect x="384" y="244" width="312" height="96" rx="8" fill="#ffffff" stroke="#9b6b24" stroke-width="1.5"/>
+    <text x="540" y="266" text-anchor="middle" font-size="13" font-weight="700" fill="#5e3e0e">Invariant 2: Identity Before Render</text>
+    <text x="540" y="286" text-anchor="middle" font-size="11" fill="#5e3e0e">Step 6 (Lease Claim <tspan font-family="Courier, monospace">reader-2</tspan>) MUST</text>
+    <text x="540" y="304" text-anchor="middle" font-size="11" fill="#5e3e0e">settle before Step 8 (Config Render)</text>
+    <text x="540" y="322" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">so &lt;replica&gt; &amp; S3 paths never see ip-*.</text>
+
+    <path d="M696 292 H718" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arr-bs)"/>
+
+    <rect x="722" y="244" width="312" height="96" rx="8" fill="#ffffff" stroke="#9b6b24" stroke-width="1.5"/>
+    <text x="878" y="266" text-anchor="middle" font-size="13" font-weight="700" fill="#5e3e0e">Invariant 3: Secrets Before Render</text>
+    <text x="878" y="286" text-anchor="middle" font-size="11" fill="#5e3e0e">Resolve secret names from AWS Secrets</text>
+    <text x="878" y="304" text-anchor="middle" font-size="11" fill="#5e3e0e">Manager into <tspan font-family="Courier, monospace">0600</tspan> files before</text>
+    <text x="878" y="322" text-anchor="middle" font-size="11" font-weight="700" fill="#143852">hashing <tspan font-family="Courier, monospace">password_sha256_hex</tspan> in XML.</text>
+
+    <!-- BOTTOM: TWO FAILURE CLASSES -->
+    <rect x="28" y="372" width="496" height="136" rx="12" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.8"/>
+    <rect x="48" y="388" width="286" height="26" rx="6" fill="#b43c3c"/>
+    <text x="191" y="406" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">CLASS 1: CRITICAL STEPS (ABORT &amp; REPLACE)</text>
+    <text x="276" y="434" text-anchor="middle" font-size="12" fill="#5c3a3a">Missing binary, SHA256 bundle mismatch, disk mount failure,</text>
+    <text x="276" y="454" text-anchor="middle" font-size="12" fill="#5c3a3a">lease exhaustion, secret resolution failure, invalid XML.</text>
+    <text x="276" y="482" text-anchor="middle" font-size="12" font-weight="700" fill="#b43c3c">&#8594; Exits non-zero immediately so ASG replaces the broken instance</text>
+
+    <rect x="556" y="372" width="496" height="136" rx="12" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.8"/>
+    <rect x="576" y="388" width="320" height="26" rx="6" fill="#1f6f50"/>
+    <text x="736" y="406" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">CLASS 2: BEST-EFFORT STEPS (WARN &amp; CONVERGE)</text>
+    <text x="804" y="434" text-anchor="middle" font-size="12" fill="#2c4a3e">Peer schema sync, <tspan font-family="Courier, monospace">SYSTEM SYNC REPLICA</tspan>, post-boot health</text>
+    <text x="804" y="454" text-anchor="middle" font-size="12" fill="#2c4a3e">during a full-fleet roll when Keeper or peers are still booting.</text>
+    <text x="804" y="482" text-anchor="middle" font-size="12" font-weight="700" fill="#1f6f50">&#8594; Logs loud WARNING, finishes boot, and converges on 15m timer</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="524" width="1024" height="40" rx="8" fill="#17283c"/>
+    <text x="540" y="549" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">State File Guarantee: /var/lib/chinit/state.json records completed steps per bundle SHA256 &#8212; re-runs are idempotent</text>
+  </g>
+</svg>

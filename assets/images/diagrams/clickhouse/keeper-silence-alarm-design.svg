@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">Three Days of Keeper Silence: Why Missing Heartbeats Must Breach</title>
+  <desc id="desc">How three bugs combined to make the ClickHouse Keeper liveness alarm blind for three days: a systemd service shipped without its timer, a dropped PutMetricData call, and CloudWatch treat_missing_data=missing hiding the silence as INSUFFICIENT_DATA.</desc>
+  <defs>
+    <marker id="arr-kp" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Three Days of Keeper Silence: Why Self-Reported Heartbeats Must Breach on Missing Data</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">When the monitored process pushes its own heartbeat, silence is not &quot;insufficient data&quot; &#8212; silence is the failure</text>
+
+    <!-- HEADERS -->
+    <rect x="30" y="82" width="474" height="32" rx="8" fill="#6c7a89"/>
+    <text x="267" y="103" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">HOW THE ALARM WENT BLIND (INSUFFICIENT_DATA)</text>
+
+    <rect x="554" y="82" width="496" height="32" rx="8" fill="#1f6f50"/>
+    <text x="802" y="103" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">THE FAIL-LOUD HEARTBEAT CONTRACT</text>
+
+    <!-- BUG 1: MISSING TIMER -->
+    <rect x="30" y="130" width="474" height="112" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <text x="52" y="156" font-size="15" font-weight="700" fill="#7c2323">Bug 1: A Oneshot Service with No Timer</text>
+    <text x="52" y="178" font-size="12" fill="#5c3a3a">The bash-to-Go port installed <tspan font-family="Courier, monospace">keeper-health.service</tspan></text>
+    <text x="52" y="198" font-size="12" fill="#5c3a3a">but forgot <tspan font-family="Courier, monospace">keeper-health.timer</tspan>. The probe ran once at boot</text>
+    <text x="52" y="216" font-size="12" fill="#5c3a3a">and never executed again.</text>
+    <text x="52" y="233" font-size="11" font-weight="700" fill="#b43c3c">Boot log looked green &#183; Day-2 schedule did not exist</text>
+
+    <path d="M504 186 H548" fill="none" stroke="#1f6f50" stroke-width="2.5" marker-end="url(#arr-kp)"/>
+
+    <rect x="554" y="130" width="496" height="112" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="576" y="156" font-size="15" font-weight="700" fill="#164231">Fix 1: Pair Service + Timer by Construction</text>
+    <text x="576" y="178" font-size="12" fill="#2c4a3e"><tspan font-family="Courier, monospace">chinit</tspan> installs <tspan font-family="Courier, monospace">keeper-health.service</tspan> + <tspan font-family="Courier, monospace">keeper-health.timer</tspan></text>
+    <text x="576" y="198" font-size="12" fill="#2c4a3e">(every 1 minute) via the shared unit-pair helper and</text>
+    <text x="576" y="216" font-size="12" fill="#2c4a3e">asserts timer enablement in the role conformance test.</text>
+    <text x="576" y="233" font-size="11" font-weight="700" fill="#1f6f50">Schedules are part of the code contract, not optional metadata</text>
+
+    <!-- BUG 2: EVAPORATED METRIC PUSH -->
+    <rect x="30" y="258" width="474" height="112" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <text x="52" y="284" font-size="15" font-weight="700" fill="#7c2323">Bug 2: The Metric Push Evaporated &amp; Key Drifted</text>
+    <text x="52" y="306" font-size="12" fill="#5c3a3a">The Go probe parsed <tspan font-family="Courier, monospace">mntr</tspan> and logged to journald, but</text>
+    <text x="52" y="326" font-size="12" fill="#5c3a3a">dropped the <tspan font-family="Courier, monospace">PutMetricData(keeper_up)</tspan> call &#8212; and the</text>
+    <text x="52" y="344" font-size="12" fill="#5c3a3a">alarm dimension (<tspan font-family="Courier, monospace">Cluster</tspan> vs <tspan font-family="Courier, monospace">Host</tspan>) had no shared constant.</text>
+    <text x="52" y="361" font-size="11" font-weight="700" fill="#b43c3c">Zero datapoints reached CloudWatch after the rollout</text>
+
+    <path d="M504 314 H548" fill="none" stroke="#1f6f50" stroke-width="2.5" marker-end="url(#arr-kp)"/>
+
+    <rect x="554" y="258" width="496" height="112" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="576" y="284" font-size="15" font-weight="700" fill="#164231">Fix 2: In-Process CloudWatch Publish &amp; Exact Key</text>
+    <text x="576" y="306" font-size="12" fill="#2c4a3e"><tspan font-family="Courier, monospace">chinit keeper-health</tspan> pushes <tspan font-family="Courier, monospace">ClickHouse/Keeper keeper_up=1|0</tspan></text>
+    <text x="576" y="326" font-size="12" fill="#2c4a3e">via the cloud provider SDK with the exact <tspan font-family="Courier, monospace">Cluster</tspan> dimension</text>
+    <text x="576" y="344" font-size="12" fill="#2c4a3e">expected by the Terraform alarm definition.</text>
+    <text x="576" y="361" font-size="11" font-weight="700" fill="#1f6f50">End-to-end verification: alarm must flip to OK on live data</text>
+
+    <!-- BUG 3: TREAT_MISSING_DATA -->
+    <rect x="30" y="386" width="474" height="116" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <text x="52" y="412" font-size="15" font-weight="700" fill="#7c2323">Bug 3: treat_missing_data = &quot;missing&quot; Hid the Outage</text>
+    <text x="52" y="434" font-size="12" fill="#5c3a3a">With default <tspan font-family="Courier, monospace">missing</tspan> semantics, zero datapoints moved</text>
+    <text x="52" y="454" font-size="12" fill="#5c3a3a">the alarm to gray <tspan font-family="Courier, monospace" font-weight="700">INSUFFICIENT_DATA</tspan> instead of <tspan font-family="Courier, monospace">ALARM</tspan>.</text>
+    <text x="52" y="472" font-size="12" fill="#5c3a3a">A dead Keeper cannot push <tspan font-family="Courier, monospace">keeper_up = 0</tspan> either!</text>
+    <text x="52" y="491" font-size="11" font-weight="700" fill="#b43c3c">3 days of total monitoring blindness with zero pages</text>
+
+    <path d="M504 444 H548" fill="none" stroke="#1f6f50" stroke-width="2.5" marker-end="url(#arr-kp)"/>
+
+    <rect x="554" y="386" width="496" height="116" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="576" y="412" font-size="15" font-weight="700" fill="#164231">Fix 3: treat_missing_data = &quot;breaching&quot;</text>
+    <text x="576" y="434" font-size="12" fill="#2c4a3e">For any self-reported heartbeat where the monitored</text>
+    <text x="576" y="454" font-size="12" fill="#2c4a3e">node is the publisher, missing data = <tspan font-family="Courier, monospace" font-weight="700">ALARM</tspan>.</text>
+    <text x="576" y="472" font-size="12" fill="#2c4a3e">Whether Keeper crashes or the publisher breaks, on-call</text>
+    <text x="576" y="491" font-size="11" font-weight="700" fill="#1f6f50">is paged immediately instead of staring at a gray badge</text>
+
+    <!-- FOOTER -->
+    <rect x="30" y="518" width="1020" height="44" rx="8" fill="#17283c"/>
+    <text x="540" y="545" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Alarm Rule: Observer-pushed metric &#8594; treat_missing_data = missing &#183; Self-pushed heartbeat &#8594; treat_missing_data = breaching</text>
+  </g>
+</svg>

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 600" role="img" aria-labelledby="title desc">
+  <title id="title">Auditing chinit for Azure: Four Portability Findings Between AWS and Azure</title>
+  <desc id="desc">A provider interface is only ten percent of cloud portability. Auditing chinit on Azure uncovered four AWS-shaped assumptions in the shared boot pipeline: S3 endpoint env gates, static IP fallbacks, mismatched bundle checksums, and missing capability probes.</desc>
+  <defs>
+    <marker id="arr-az" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="600" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">The Cloud-Neutral Bootstrapper Audit: AWS Assumptions vs. Portable Contracts</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">A provider factory is 10% of portability &#8212; the other 90% is removing one cloud's resource model from shared steps</text>
+
+    <!-- HEADERS -->
+    <rect x="32" y="80" width="474" height="32" rx="8" fill="#8f2424"/>
+    <text x="269" y="101" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">WHAT BROKE ON AZURE (HIDDEN AWS ASSUMPTIONS)</text>
+
+    <rect x="554" y="80" width="494" height="32" rx="8" fill="#1f6f50"/>
+    <text x="801" y="101" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">THE PORTABLE CONTRACT IN CHINIT</text>
+
+    <!-- FINDING 1 -->
+    <rect x="32" y="126" width="474" height="92" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <text x="52" y="150" font-size="15" font-weight="700" fill="#7c2323">1. &quot;Neutral&quot; Step with an AWS-Shaped Heart</text>
+    <text x="52" y="172" font-size="12" fill="#5c3a3a"><tspan font-family="Courier, monospace">configure_server_env</tspan> treated empty <tspan font-family="Courier, monospace">s3_data_bucket</tspan> as Fatal.</text>
+    <text x="52" y="191" font-size="12" fill="#5c3a3a">Azure Blob disks inline account/key in <tspan font-family="Courier, monospace">storage.xml</tspan> &#8212; no env needed.</text>
+    <text x="52" y="208" font-size="11" font-weight="700" fill="#b43c3c">Result: Every Azure boot died at Step 7c</text>
+
+    <path d="M506 172 H548" fill="none" stroke="#1f6f50" stroke-width="2.5" marker-end="url(#arr-az)"/>
+
+    <rect x="554" y="126" width="494" height="92" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="574" y="150" font-size="15" font-weight="700" fill="#164231">Provider-Scoped Step Contract</text>
+    <text x="574" y="172" font-size="12" fill="#2c4a3e">Gate <tspan font-family="Courier, monospace">CH_S3_ENDPOINT</tspan> requirement explicitly on <tspan font-family="Courier, monospace">provider == aws</tspan>;</text>
+    <text x="574" y="191" font-size="12" fill="#2c4a3e">on Azure, empty <tspan font-family="Courier, monospace">s3_data_bucket</tspan> is valid and writes no env file.</text>
+    <text x="574" y="208" font-size="11" font-weight="700" fill="#1f6f50">Optional fields mean &quot;not applicable here,&quot; not &quot;broken&quot;</text>
+
+    <!-- FINDING 2 -->
+    <rect x="32" y="232" width="474" height="92" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <text x="52" y="256" font-size="15" font-weight="700" fill="#7c2323">2. Dynamic VMSS IPs Broke Static Identity Fallback</text>
+    <text x="52" y="278" font-size="12" fill="#5c3a3a">AWS could fall back to a static IP-octet map when lease fields</text>
+    <text x="52" y="297" font-size="12" fill="#5c3a3a">were omitted; Azure VMSS hands out dynamic IPs on every scale-out.</text>
+    <text x="52" y="314" font-size="11" font-weight="700" fill="#b43c3c">Result: Identity fell back to ephemeral platform hostnames</text>
+
+    <path d="M506 278 H548" fill="none" stroke="#1f6f50" stroke-width="2.5" marker-end="url(#arr-az)"/>
+
+    <rect x="554" y="232" width="494" height="92" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="574" y="256" font-size="15" font-weight="700" fill="#164231">First-Class Lease Identity + Self-Healing Renewal</text>
+    <text x="574" y="278" font-size="12" fill="#2c4a3e">Render claim table &amp; ceilings into every role spec; if a lease</text>
+    <text x="574" y="297" font-size="12" fill="#2c4a3e">expires during a transient PartitionKeyblip, <tspan font-family="Courier, monospace">lease-renew</tspan> re-acquires</text>
+    <text x="574" y="314" font-size="11" font-weight="700" fill="#1f6f50">its own ordinal in place instead of leaving the node unclaimed</text>
+
+    <!-- FINDING 3 -->
+    <rect x="32" y="338" width="474" height="92" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <text x="52" y="362" font-size="15" font-weight="700" fill="#7c2323">3. A Checksum Gate with Two Different Formulas</text>
+    <text x="52" y="384" font-size="12" fill="#5c3a3a">Terraform hashed a JSON map of bundle files; Azure's fetcher</text>
+    <text x="52" y="403" font-size="12" fill="#5c3a3a">hashed raw concatenated bytes and added a role-specific file.</text>
+    <text x="52" y="420" font-size="11" font-weight="700" fill="#b43c3c">Result: SHA256 digest could never match on Azure</text>
+
+    <path d="M506 384 H548" fill="none" stroke="#1f6f50" stroke-width="2.5" marker-end="url(#arr-az)"/>
+
+    <rect x="554" y="338" width="494" height="92" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="574" y="362" font-size="15" font-weight="700" fill="#164231">Single Canonical Bundle Digest Across Clouds</text>
+    <text x="574" y="384" font-size="12" fill="#2c4a3e">Both clouds compute the exact same sorted key-digest structure</text>
+    <text x="574" y="403" font-size="12" fill="#2c4a3e">over the shared config bundle; verified by cross-cloud unit tests.</text>
+    <text x="574" y="420" font-size="11" font-weight="700" fill="#1f6f50">A validation gate is only real when both signers run the same math</text>
+
+    <!-- FINDING 4 -->
+    <rect x="32" y="444" width="474" height="86" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <text x="52" y="468" font-size="15" font-weight="700" fill="#7c2323">4. 18-Release Pin Drift &amp; Missing Remedy Probes</text>
+    <text x="52" y="490" font-size="12" fill="#5c3a3a">Azure image stayed pinned at <tspan font-family="Courier, monospace">v0.2.0</tspan> while AWS reached <tspan font-family="Courier, monospace">v0.2.18</tspan>;</text>
+    <text x="52" y="509" font-size="12" fill="#5c3a3a">lease-lister &amp; volume-grower capabilities were untested on Azure.</text>
+
+    <path d="M506 487 H548" fill="none" stroke="#1f6f50" stroke-width="2.5" marker-end="url(#arr-az)"/>
+
+    <rect x="554" y="444" width="494" height="86" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="574" y="468" font-size="15" font-weight="700" fill="#164231">Full Capability Conformance Suite</text>
+    <text x="574" y="490" font-size="12" fill="#2c4a3e">Conformance suite exercises Claims + Lister + DNS + Volume Grower;</text>
+    <text x="574" y="509" font-size="12" fill="#2c4a3e">unsupported remedies fail loudly with named errors instead of silence.</text>
+
+    <!-- FOOTER -->
+    <rect x="32" y="544" width="1016" height="40" rx="8" fill="#17283c"/>
+    <text x="540" y="569" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Portability Rule: An unbooted second cloud will rot at its initial version pin &#8212; test the shared pipeline against both specs in CI</text>
+  </g>
+</svg>

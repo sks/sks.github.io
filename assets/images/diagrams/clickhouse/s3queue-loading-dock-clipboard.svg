@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 680" role="img" aria-labelledby="title desc">
+  <title id="title">The Loading Dock and the Clipboard: How a ClickHouse S3Queue Table Works</title>
+  <desc id="desc">Comparison of naive direct inserts that overwhelm ClickHouse with tiny parts versus the S3Queue loading dock pattern: shippers drop files in S3, Keeper acts as a shared clipboard for atomic single-claim coordination, S3Queue dock workers stream files without local storage, and a Materialized View shapes rows into ReplicatedMergeTree shelves.</desc>
+  <defs>
+    <marker id="arrow-navy" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#b43c3c"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#8b5a1e"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="680" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="23" font-weight="700">The Loading Dock and the Clipboard: How ClickHouse S3Queue Works</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Decouple bursty producers from MergeTree part creation with S3 staging, Keeper claims, and a Materialized View shaper</text>
+
+    <!-- TOP STRIP: THE NAIVE TRAP -->
+    <rect x="30" y="78" width="1020" height="106" rx="12" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.8"/>
+    <rect x="46" y="92" width="188" height="26" rx="6" fill="#c05c5c"/>
+    <text x="140" y="110" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">NAIVE DIRECT INSERT</text>
+    <text x="250" y="109" font-size="14" font-weight="700" fill="#7c2323">Why pushing directly from 500 shippers breaks at 2:00 PM traffic spikes</text>
+
+    <rect x="46" y="128" width="210" height="42" rx="8" fill="#ffffff" stroke="#c05c5c" stroke-width="1.4"/>
+    <text x="151" y="147" text-anchor="middle" font-size="13" font-weight="700">500 App &amp; Vector Pods</text>
+    <text x="151" y="163" text-anchor="middle" font-size="11" fill="#5c3a3a">500 tiny INSERTs / sec</text>
+
+    <path d="M256 149 H338" fill="none" stroke="#b43c3c" stroke-width="2.5" marker-end="url(#arrow-red)"/>
+    <text x="297" y="141" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">500 parts/s</text>
+
+    <rect x="342" y="128" width="290" height="42" rx="8" fill="#fbe1e1" stroke="#b43c3c" stroke-width="1.5"/>
+    <text x="487" y="147" text-anchor="middle" font-size="13" font-weight="700" fill="#7c2323">Merge Janitor Falls Behind</text>
+    <text x="487" y="163" text-anchor="middle" font-size="11" fill="#7c2323">1 INSERT = 1 immutable folder on disk</text>
+
+    <path d="M632 149 H706" fill="none" stroke="#b43c3c" stroke-width="2.5" marker-end="url(#arrow-red)"/>
+
+    <rect x="710" y="126" width="322" height="46" rx="8" fill="#8f2424"/>
+    <text x="871" y="146" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">DB::Exception: Too many parts (300)</text>
+    <text x="871" y="163" text-anchor="middle" font-size="11" fill="#fde8e8">Inserts rejected &#183; Shipper buffers overflow &#183; Logs lost</text>
+
+    <!-- MAIN ARCHITECTURE: THE S3QUEUE PATTERN -->
+    <rect x="30" y="200" width="1020" height="456" rx="14" fill="#f7fbf9" stroke="#2d6a56" stroke-width="2"/>
+    <rect x="46" y="214" width="224" height="28" rx="6" fill="#1f6f50"/>
+    <text x="158" y="233" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">THE S3QUEUE LOADING DOCK</text>
+    <text x="286" y="233" font-size="15" font-weight="700" fill="#164231">Four decoupled actors turn bursty log shippers into calm, fleet-safe warehouse shelves</text>
+
+    <!-- ACTOR 1: SHIPPERS + S3 LOADING DOCK -->
+    <rect x="48" y="260" width="225" height="314" rx="12" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.8"/>
+    <text x="160" y="286" text-anchor="middle" font-size="16" font-weight="700" fill="#5e3e0e">1. The Loading Dock</text>
+    <text x="160" y="304" text-anchor="middle" font-size="12" fill="#7a541b">Amazon S3 Staging Prefix</text>
+
+    <rect x="66" y="318" width="189" height="62" rx="8" fill="#ffffff" stroke="#b8883b" stroke-width="1.4"/>
+    <text x="160" y="339" text-anchor="middle" font-size="13" font-weight="700">Log Shippers (Vector / OTel)</text>
+    <text x="160" y="357" text-anchor="middle" font-size="11" fill="#465a6e">Batch 10 MB or 10 sec</text>
+    <text x="160" y="372" text-anchor="middle" font-size="11" fill="#1f6f50" font-weight="700">Never waits on ClickHouse</text>
+
+    <path d="M160 380 V406" fill="none" stroke="#8b5a1e" stroke-width="2.2" marker-end="url(#arrow-amber)"/>
+    <text x="198" y="397" text-anchor="middle" font-size="11" font-weight="700" fill="#8b5a1e">PUT object</text>
+
+    <!-- S3 Crates -->
+    <rect x="66" y="410" width="189" height="146" rx="10" fill="#fff0d1" stroke="#8b5a1e" stroke-width="1.6"/>
+    <text x="160" y="431" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">s3://bucket/staging/</text>
+    <rect x="80" y="442" width="161" height="28" rx="5" fill="#ffffff" stroke="#b8883b" stroke-width="1.2"/>
+    <text x="160" y="460" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#2c3e50">part-001.ndjson.gz</text>
+    <rect x="80" y="476" width="161" height="28" rx="5" fill="#ffffff" stroke="#b8883b" stroke-width="1.2"/>
+    <text x="160" y="494" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#2c3e50">part-002.ndjson.gz</text>
+    <rect x="80" y="510" width="161" height="28" rx="5" fill="#ffffff" stroke="#b8883b" stroke-width="1.2"/>
+    <text x="160" y="528" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#2c3e50">part-003.ndjson.gz</text>
+
+    <!-- ACTOR 2: THE SHARED CLIPBOARD (KEEPER) -->
+    <rect x="314" y="256" width="440" height="148" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <text x="534" y="280" text-anchor="middle" font-size="16" font-weight="700" fill="#143852">2. The Shared Clipboard (ClickHouse Keeper)</text>
+    <text x="534" y="298" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#28597a">/clickhouse/s3queue/events/ &#183; Atomic single-winner claim</text>
+
+    <rect x="332" y="310" width="194" height="80" rx="8" fill="#ffffff" stroke="#4a7b9d" stroke-width="1.4"/>
+    <text x="429" y="330" text-anchor="middle" font-size="12" font-weight="700" fill="#1f6f50">Atomic Znode Claim</text>
+    <text x="429" y="348" text-anchor="middle" font-family="Courier, monospace" font-size="11">part-001 &#8594; Writer 1 (OK)</text>
+    <text x="429" y="366" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#b43c3c">part-001 &#8594; Writer 2 (BUSY)</text>
+    <text x="429" y="382" text-anchor="middle" font-size="10" fill="#465a6e">Writer 2 moves to part-002</text>
+
+    <rect x="542" y="310" width="194" height="80" rx="8" fill="#ffffff" stroke="#4a7b9d" stroke-width="1.4"/>
+    <text x="639" y="330" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">Completion Ledger</text>
+    <text x="639" y="348" text-anchor="middle" font-family="Courier, monospace" font-size="11">processing/part-002</text>
+    <text x="639" y="366" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#1f6f50">processed/part-001 &#10003;</text>
+    <text x="639" y="382" text-anchor="middle" font-size="10" fill="#465a6e">Crash mid-file? Lease expires &amp; retries</text>
+
+    <!-- ACTOR 3: DOCK WORKERS (S3QUEUE ENGINE) -->
+    <rect x="314" y="424" width="440" height="150" rx="12" fill="#e8f5ef" stroke="#256d54" stroke-width="1.8"/>
+    <text x="534" y="448" text-anchor="middle" font-size="16" font-weight="700" fill="#164231">3. The Dock Workers (ENGINE = S3Queue)</text>
+    <text x="534" y="466" text-anchor="middle" font-size="12" fill="#256d54">Streaming pipe, NOT a storage table (0 bytes on disk &#183; cannot SELECT * later)</text>
+
+    <rect x="332" y="478" width="194" height="80" rx="8" fill="#ffffff" stroke="#256d54" stroke-width="1.4"/>
+    <text x="429" y="499" text-anchor="middle" font-size="13" font-weight="700">Writer Node 1 (raw_queue)</text>
+    <text x="429" y="517" text-anchor="middle" font-size="11" fill="#465a6e">1. LIST S3 &#183; 2. Claim part-001</text>
+    <text x="429" y="534" text-anchor="middle" font-size="11" fill="#465a6e">3. Stream &amp; parse NDJSON</text>
+    <text x="429" y="550" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">5. Mark done &amp; DELETE object</text>
+
+    <rect x="542" y="478" width="194" height="80" rx="8" fill="#ffffff" stroke="#256d54" stroke-width="1.4"/>
+    <text x="639" y="499" text-anchor="middle" font-size="13" font-weight="700">Writer Node 2 (raw_queue)</text>
+    <text x="639" y="517" text-anchor="middle" font-size="11" fill="#465a6e">1. LIST S3 &#183; 2. Claim part-002</text>
+    <text x="639" y="534" text-anchor="middle" font-size="11" fill="#465a6e">3. Stream &amp; parse NDJSON</text>
+    <text x="639" y="550" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">5. Mark done &amp; DELETE object</text>
+
+    <!-- Arrows between S3, Keeper, and Workers -->
+    <path d="M273 485 H310" fill="none" stroke="#1e4e68" stroke-width="2.4" marker-end="url(#arrow-navy)"/>
+    <text x="292" y="475" text-anchor="middle" font-size="10" font-weight="700" fill="#1e4e68">GET</text>
+
+    <path d="M429 424 V406" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arrow-navy)"/>
+    <path d="M639 424 V406" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arrow-navy)"/>
+
+    <!-- ACTOR 4: MATERIALIZED VIEW + MERGETREE SHELVES -->
+    <rect x="792" y="260" width="240" height="314" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <text x="912" y="286" text-anchor="middle" font-size="16" font-weight="700" fill="#143852">4. Shaper &amp; Shelves</text>
+    <text x="912" y="304" text-anchor="middle" font-size="12" fill="#28597a">MV + ReplicatedMergeTree</text>
+
+    <rect x="810" y="318" width="204" height="82" rx="8" fill="#fff0d1" stroke="#8b5a1e" stroke-width="1.5"/>
+    <text x="912" y="339" text-anchor="middle" font-size="13" font-weight="700" fill="#5e3e0e">MATERIALIZED VIEW</text>
+    <text x="912" y="357" text-anchor="middle" font-family="Courier, monospace" font-size="11">TO logs (Destination)</text>
+    <text x="912" y="375" text-anchor="middle" font-size="11" fill="#465a6e">JSONExtractString(raw) &#8594;</text>
+    <text x="912" y="391" text-anchor="middle" font-size="11" fill="#465a6e">typed columns (time, service)</text>
+
+    <path d="M912 400 V426" fill="none" stroke="#1f6f50" stroke-width="2.4" marker-end="url(#arrow-green)"/>
+    <text x="954" y="417" text-anchor="middle" font-size="10" font-weight="700" fill="#1f6f50">Big clean part</text>
+
+    <rect x="810" y="430" width="204" height="126" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="912" y="452" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">logs (ReplicatedMergeTree)</text>
+    <text x="912" y="471" text-anchor="middle" font-size="11" fill="#164231">Sorted columnar warehouse</text>
+    <rect x="826" y="482" width="172" height="24" rx="4" fill="#ffffff" stroke="#256d54" stroke-width="1"/>
+    <text x="912" y="498" text-anchor="middle" font-family="Courier, monospace" font-size="11">ORDER BY (service, time)</text>
+    <rect x="826" y="512" width="172" height="28" rx="4" fill="#1f6f50"/>
+    <text x="912" y="530" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">Fast SELECT queries live here</text>
+
+    <path d="M754 498 H786 V359 H806" fill="none" stroke="#1f6f50" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+    <text x="772" y="486" text-anchor="middle" font-size="10" font-weight="700" fill="#1f6f50">Step 4</text>
+
+    <!-- BOTTOM SUMMARY BAR -->
+    <rect x="48" y="590" width="984" height="50" rx="10" fill="#17283c"/>
+    <text x="540" y="612" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Rule of Thumb: S3 holds the waiting files &#183; Keeper holds the claim clipboard &#183; S3Queue is the dock worker &#183; MergeTree holds the rows</text>
+    <text x="540" y="630" text-anchor="middle" font-size="12" fill="#bfd6ea">Add more writers with the same Keeper path to fan out ingest horizontally with zero duplicate rows</text>
+  </g>
+</svg>

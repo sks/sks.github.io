@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">The MergeTree Mental Model: Columnar Shelves, Immutable Parts, Background Merges, and 8,192-Row Granules</title>
+  <desc id="desc">Foundational guide to ClickHouse MergeTree storage: columnar files read only requested attributes, every INSERT writes a sorted immutable part compacted by background merges, and the ORDER BY key creates a sparse index marking every 8,192-row granule.</desc>
+  <defs>
+    <marker id="arr-mt" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">The MergeTree Mental Model: Columns, Parts, Merges, and Granules</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Three mechanics explain how ClickHouse scans billions of log rows in milliseconds &#8212; and why tiny inserts break it</text>
+
+    <!-- PILLAR 1: COLUMNAR SHELVES -->
+    <rect x="28" y="84" width="324" height="414" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="46" y="100" width="288" height="32" rx="6" fill="#28597a"/>
+    <text x="190" y="121" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">1. Column Shelves (Read Only 2 of 40)</text>
+
+    <text x="190" y="152" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">SELECT status, count() WHERE time &gt; ...</text>
+
+    <rect x="46" y="166" width="136" height="110" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="114" y="188" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#164231">timestamp.bin</text>
+    <text x="114" y="208" text-anchor="middle" font-family="Courier, monospace" font-size="10">10:00:01, 10:00:02</text>
+    <text x="114" y="226" text-anchor="middle" font-size="10" fill="#164231">Delta + ZSTD</text>
+    <rect x="64" y="242" width="100" height="22" rx="4" fill="#1f6f50"/>
+    <text x="114" y="257" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff">SCANNED &#10003;</text>
+
+    <rect x="198" y="166" width="136" height="110" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="266" y="188" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#164231">status.bin</text>
+    <text x="266" y="208" text-anchor="middle" font-family="Courier, monospace" font-size="10">200, 200, 500, 200</text>
+    <text x="266" y="226" text-anchor="middle" font-size="10" fill="#164231">Run-length compressed</text>
+    <rect x="216" y="242" width="100" height="22" rx="4" fill="#1f6f50"/>
+    <text x="266" y="257" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff">SCANNED &#10003;</text>
+
+    <rect x="46" y="290" width="288" height="76" rx="8" fill="#ffffff" stroke="#95a5a6" stroke-width="1.4" stroke-dasharray="5 3"/>
+    <text x="190" y="314" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#6c7a89">Other 38 Columns (body, headers...)</text>
+    <text x="190" y="336" text-anchor="middle" font-size="11" font-weight="700" fill="#7f8c8d">0 Bytes Read from Disk!</text>
+    <text x="190" y="354" text-anchor="middle" font-size="10" fill="#7f8c8d">Row stores must read all 40 columns</text>
+
+    <text x="190" y="400" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">Engine Variants for Rollups:</text>
+    <text x="190" y="422" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#334a60">&#8226; MergeTree: raw immutable logs</text>
+    <text x="190" y="442" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#334a60">&#8226; SummingMergeTree: metric rollups</text>
+    <text x="190" y="462" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#334a60">&#8226; ReplacingMergeTree: dedup versions</text>
+
+    <!-- PILLAR 2: PARTS & MERGES -->
+    <rect x="378" y="84" width="324" height="414" rx="12" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.8"/>
+    <rect x="396" y="100" width="288" height="32" rx="6" fill="#9b6b24"/>
+    <text x="540" y="121" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">2. Sealed Parts &amp; Background Merges</text>
+
+    <text x="540" y="152" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">1 INSERT Statement = 1 Sealed Part Folder</text>
+
+    <rect x="396" y="166" width="84" height="54" rx="6" fill="#ffffff" stroke="#9b6b24" stroke-width="1.3"/>
+    <text x="438" y="188" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">Part 1</text>
+    <text x="438" y="206" text-anchor="middle" font-size="10" fill="#5e3e0e">Sorted</text>
+
+    <rect x="498" y="166" width="84" height="54" rx="6" fill="#ffffff" stroke="#9b6b24" stroke-width="1.3"/>
+    <text x="540" y="188" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">Part 2</text>
+    <text x="540" y="206" text-anchor="middle" font-size="10" fill="#5e3e0e">Sorted</text>
+
+    <rect x="600" y="166" width="84" height="54" rx="6" fill="#ffffff" stroke="#9b6b24" stroke-width="1.3"/>
+    <text x="642" y="188" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">Part 3</text>
+    <text x="642" y="206" text-anchor="middle" font-size="10" fill="#5e3e0e">Sorted</text>
+
+    <path d="M540 222 V250" fill="none" stroke="#1f6f50" stroke-width="2.4" marker-end="url(#arr-mt)"/>
+    <text x="605" y="240" text-anchor="middle" font-size="10" font-weight="700" fill="#1f6f50">Background Merge</text>
+
+    <rect x="396" y="254" width="288" height="58" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="540" y="278" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Merged Part (Repacked &amp; Sorted)</text>
+    <text x="540" y="298" text-anchor="middle" font-size="11" fill="#164231">Old small parts marked inactive &amp; unlinked</text>
+
+    <rect x="396" y="328" width="288" height="150" rx="8" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.4"/>
+    <text x="540" y="350" text-anchor="middle" font-size="13" font-weight="700" fill="#7c2323">Why Tiny Inserts Break ClickHouse</text>
+    <text x="540" y="372" text-anchor="middle" font-size="11" fill="#5c3a3a">1,000 single-row INSERTs/sec = 1,000 parts/sec.</text>
+    <text x="540" y="392" text-anchor="middle" font-size="11" font-weight="700" fill="#9b6b24">&#8226; &gt;1,000 parts/partition: inserts throttled</text>
+    <text x="540" y="412" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">&#8226; &gt;3,000 parts/partition: TOO_MANY_PARTS!</text>
+    <text x="540" y="438" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Fix: Batch 10k–100k rows per INSERT</text>
+    <text x="540" y="456" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">or enable async_insert = 1</text>
+
+    <!-- PILLAR 3: ORDER BY SPARSE INDEX & GRANULES -->
+    <rect x="728" y="84" width="324" height="414" rx="12" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.8"/>
+    <rect x="746" y="100" width="288" height="32" rx="6" fill="#1f6f50"/>
+    <text x="890" y="121" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">3. ORDER BY &amp; 8,192-Row Granules</text>
+
+    <text x="890" y="152" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">The Table's Physical Sort Order IS the Index</text>
+
+    <rect x="746" y="166" width="288" height="146" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="890" y="188" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#143852">ORDER BY (service, timestamp)</text>
+    <rect x="760" y="200" width="260" height="30" rx="4" fill="#f1f5f4"/>
+    <text x="890" y="219" text-anchor="middle" font-family="Courier, monospace" font-size="10" fill="#7f8c8d">Granule 0 (rows 0..8191): auth | 10:00 &#8594; SKIP</text>
+    <rect x="760" y="236" width="260" height="30" rx="4" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.2"/>
+    <text x="890" y="255" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#164231">Granule 1 (rows 8192..16383): pay | 10:05 &#8594; READ</text>
+    <rect x="760" y="272" width="260" height="30" rx="4" fill="#f1f5f4"/>
+    <text x="890" y="291" text-anchor="middle" font-family="Courier, monospace" font-size="10" fill="#7f8c8d">Granule 2 (rows 16384..24575): web | 10:09 &#8594; SKIP</text>
+
+    <rect x="746" y="328" width="288" height="150" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.4"/>
+    <text x="890" y="350" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">Partitions, TTL, &amp; Bloom Skip Indexes</text>
+    <text x="890" y="374" text-anchor="middle" font-size="11" fill="#334a60">&#8226; <tspan font-family="Courier, monospace" font-weight="700">PARTITION BY toYYYYMM(ts):</tspan> Scopes</text>
+    <text x="890" y="392" text-anchor="middle" font-size="11" fill="#334a60">merges &amp; drops whole months instantly.</text>
+    <text x="890" y="416" text-anchor="middle" font-size="11" fill="#334a60">&#8226; <tspan font-family="Courier, monospace" font-weight="700">TTL ts + INTERVAL 30 DAY:</tspan> Auto-expires</text>
+    <text x="890" y="434" text-anchor="middle" font-size="11" fill="#334a60">old rows or moves parts to S3 cold tier.</text>
+    <text x="890" y="458" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">&#8226; Bloom filter skips granules on trace_id</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="516" width="1024" height="44" rx="8" fill="#17283c"/>
+    <text x="540" y="543" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">MergeTree Rule: Batch your inserts so background merges stay ahead, and put your most-filtered columns first in ORDER BY</text>
+  </g>
+</svg>

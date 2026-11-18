@@ -6,12 +6,12 @@ series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 14
 mermaid: true
 description: "A fresh-install optimization pass on a multi-tenant ClickHouse cluster — a projection that doubled storage but could never run, a FINAL that forced 20-second merge-on-read, and the Keeper path that blocks per-database tenancy. Every fix verified in the 26.8 source before it shipped."
-image: /assets/images/og-default.png
+image: /assets/images/diagrams/clickhouse/tenant-tuning-from-source.svg
 tags: [clickhouse, performance, storage, mergetree, optimization, sre]
 permalink: /blog/clickhouse-tenant-tuning-from-source/
 faqs:
   - question: "How do you know a ClickHouse projection is never actually used?"
-    answer: "The planner can only pick a projection whose stored columns cover everything the query reads. My pagination projection stored id, timestamp, and the two payload columns, but the query also read pop — one missing column and the projection is never selected, on any query, while still being written into every part. Verify with EXPLAIN (look at the ReadFromMergeTree node's projection analysis) before assuming a projection earns its storage."
+    answer: "The planner can only pick a projection whose stored columns cover everything the query reads. My pagination projection stored request_id, timestamp, and the two payload columns, but the query also read pop — one missing column and the projection is never selected, on any query, while still being written into every part. Verify with EXPLAIN (look at the ReadFromMergeTree node's projection analysis) before assuming a projection earns its storage."
   - question: "When does a SummingMergeTree query actually need FINAL?"
     answer: "Only when you read non-summed columns of specific rows — the merge keeps the last value of any column that isn't summed. If your query is SELECT key, SUM(count) ... GROUP BY key, or DISTINCT over key columns, it is exact across unmerged parts without FINAL: two partial rows for the same sorting key add to the merged value, and DISTINCT collapses to the same set. FINAL forces a merge-on-read per query, which on my facet queries cost 20-30 seconds each."
   - question: "How do multiple tenant databases share one ClickHouse cluster?"
@@ -74,6 +74,10 @@ four more.
 
 ## The setup: one database per tenant
 
+![Five multi-tenant ClickHouse schema traps and their source-verified fixes in ClickHouse 26.8](/assets/images/diagrams/clickhouse/tenant-tuning-from-source.svg)
+
+*Verifying every optimization against the ClickHouse 26.8 source eliminated a dead projection, removed 25-second `FINAL` merge-on-read penalties, isolated tenant Keeper trees with `{database}`, preserved working map bloom indexes, and bounded system log tables with explicit TTLs.*
+
 The platform is multi-tenant the simple way: each tenant gets its own
 ClickHouse *database* on a shared cluster, and every query is routed
 against the tenant's database. No shared-table row filters, no
@@ -118,25 +122,25 @@ contain.
 The log table's DDL carried a pagination projection:
 
 ```sql
-ALTER TABLE events ADD PROJECTION p_pagination
+ALTER TABLE edge_requests ADD PROJECTION p_pagination
 (
-    SELECT id, timestamp, http_headers, waf_flags
-    ORDER BY timestamp, id
+    SELECT request_id, timestamp, http_headers, waf_flags
+    ORDER BY timestamp, request_id
 );
 ```
 
 The intent was sound: the dominant query in the user interface (UI) is cursor-paginated —
-`WHERE timestamp BETWEEN ... ORDER BY timestamp, id LIMIT n`, resuming
-from `(timestamp, id) > (previous)`. The base table's key led with a
+`WHERE timestamp BETWEEN ... ORDER BY timestamp, request_id LIMIT n`, resuming
+from `(timestamp, request_id) > (previous)`. The base table's key led with a
 different column, so the projection gave that access shape its own
 storage layout.
 
 Except the query also reads `pop`:
 
 ```sql
-SELECT id, timestamp, pop, http_headers, waf_flags
-FROM events
-WHERE timestamp BETWEEN ... ORDER BY timestamp, id LIMIT 1000;
+SELECT request_id, timestamp, pop, http_headers, waf_flags
+FROM edge_requests
+WHERE timestamp BETWEEN ... ORDER BY timestamp, request_id LIMIT 1000;
 ```
 
 And a projection is only ever picked when its stored columns cover
@@ -180,14 +184,14 @@ There were three ways out:
 
 Option three is the one the source walk made obvious, because of what
 the base key was doing: `ORDER BY (toStartOfHour(timestamp),
-pop, timestamp, id)` — an hour-bucket-first layout from an era
+pop, timestamp, request_id)` — an hour-bucket-first layout from an era
 when the queries bucketed by hour. For a cursor query over a raw time
-range, that key buys nothing: the cursor comparison `(timestamp, id) >
-(ts, id)` doesn't match the key prefix, so every part needs sorting at
+range, that key buys nothing: the cursor comparison `(timestamp, request_id) >
+(ts, request_id)` doesn't match the key prefix, so every part needs sorting at
 read time. Re-keying the base table:
 
 ```sql
-ORDER BY (timestamp, id)
+ORDER BY (timestamp, request_id)
 ```
 
 makes the pagination query stream by exact key prefix — no projection,
@@ -214,7 +218,7 @@ per batch. Every consumer of those tables is an aggregate:
 ```sql
 SELECT flag_value, SUM(count) AS count
 FROM hourly_edge_summary
-WHERE flag_key = 'level' AND hour BETWEEN ...
+WHERE flag_key = 'action' AND hour BETWEEN ...
 GROUP BY flag_value;
 ```
 
@@ -330,13 +334,13 @@ Mid-pass I nearly committed a "cleanup": the log table carried bloom
 filter indexes over the attribute map:
 
 ```sql
-INDEX idx_waf_key   mapKeys(waf_flags)   TYPE bloom_filter(0.01) GRANULARITY 1,
+INDEX idx_waf_key   mapKeys(waf_flags)     TYPE bloom_filter(0.01) GRANULARITY 1,
 INDEX idx_waf_value mapValues(waf_flags) TYPE bloom_filter(0.01) GRANULARITY 1
 ```
 
 Folklore says these only accelerate `has()`/`mapExists()`-style
 predicates, and my queries filter with subscripts —
-`waf_flags['level'] = 'error'`. Dead weight, I thought. Write
+`waf_flags['action'] = 'block'`. Dead weight, I thought. Write
 cost on every part, zero read benefit. Delete.
 
 Then I read the bloom filter's condition analyzer
@@ -365,15 +369,15 @@ uses — cheaper than being wrong in production either direction.
 
 ```mermaid
 flowchart LR
-    Q["WHERE waf_flags['level'] = 'error'"] --> LOW["Analyzer lowers to<br/>arrayElement(map, 'level') = 'error'"]
+    Q["WHERE waf_flags['action'] = 'block'"] --> LOW["Analyzer lowers to<br/>arrayElement(map, 'action') = 'block'"]
     LOW --> RES["tryResolveMapInfoFromNode"]
-    RES --> KI["idx_waf_key<br/>mapKeys(...) bloom:<br/>'level' present?"]
-    RES --> VI["idx_waf_value<br/>mapValues(...) bloom:<br/>'error' present?"]
+    RES --> KI["idx_waf_key<br/>mapKeys(...) bloom:<br/>'action' present?"]
+    RES --> VI["idx_waf_value<br/>mapValues(...) bloom:<br/>'block' present?"]
     KI --> PRUNE{"Either says no?"}
     VI --> PRUNE
     PRUNE -->|"skip granule"| SKIP["Read fewer granules"]
     PRUNE -->|"maybe present"| SCAN["Read granule, verify rows"]
-    M["Materialized column<br/>Level = 'error'"] -.->|"plain column — analyzer<br/>cannot resolve to the map index"| SCAN
+    M["Materialized column<br/>Action = 'block'"] -.->|"plain column — analyzer<br/>cannot resolve to the map index"| SCAN
 ```
 
 ## The time column goes first
@@ -381,7 +385,7 @@ flowchart LR
 The rollup tables were keyed service-first:
 
 ```sql
-ORDER BY (pop, minute, attributes)
+ORDER BY (pop, minute, flag)
 ```
 
 Every stats query arrives time-bounded:
@@ -399,7 +403,7 @@ by key prefix — the scan walks every service's granules in the window.
 Re-keying time-first:
 
 ```sql
-ORDER BY (minute, pop, attributes)
+ORDER BY (minute, pop, flag)
 ```
 
 puts the dominant predicate on the leading column, where MergeTree's
@@ -422,8 +426,8 @@ flowchart TD
 
 The SummingMergeTree semantics are untouched by the re-keying: collapse
 happens on *full* sorting-key equality, which is order-independent.
-`(minute, service, attributes)` merges exactly the same rows
-`(service, minute, attributes)` does. Only the read path changes.
+`(minute, pop, flag)` merges exactly the same rows
+`(pop, minute, flag)` does. Only the read path changes.
 
 Two more TTL details from the same pass, both from the source's
 behavior rather than any doc:

@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">The Silent S3 key_prefix Config Bug versus Macro-Expanded endpoint_subpath</title>
+  <desc id="desc">How ClickHouse 26.8 silently ignored the unsupported key_prefix XML element on S3 disks, dumping all tenant parts into the bucket root under random 3-letter folders, and how moving the path to endpoint_subpath with {replica} restored tenant and replica isolation.</desc>
+  <defs>
+    <marker id="arr-kp2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#b43c3c"/>
+    </marker>
+    <marker id="arr-kp2g" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">The S3 Path Bug Nobody Sees: Ignored &lt;key_prefix&gt; vs. &lt;endpoint_subpath&gt;</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">ClickHouse silently ignores unknown XML tags in disk configs &#8212; always verify storage layout with aws s3 ls</text>
+
+    <!-- LEFT PANEL: THE CONFIG THAT LIED -->
+    <rect x="28" y="82" width="496" height="426" rx="14" fill="#fdf2f2" stroke="#c05c5c" stroke-width="2"/>
+    <rect x="48" y="98" width="320" height="28" rx="6" fill="#b43c3c"/>
+    <text x="208" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">BEFORE: &lt;key_prefix&gt; SILENTLY IGNORED</text>
+
+    <rect x="48" y="140" width="456" height="92" rx="8" fill="#ffffff" stroke="#c05c5c" stroke-width="1.5"/>
+    <text x="276" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="#7c2323">What storage.xml Said:</text>
+    <text x="276" y="184" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#5c3a3a">&lt;type&gt;s3&lt;/type&gt;</text>
+    <text x="276" y="202" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#5c3a3a">&lt;endpoint from_env=&quot;CH_S3_ENDPOINT&quot; /&gt;</text>
+    <text x="276" y="220" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#b43c3c">&lt;key_prefix&gt;data/tenant_a/&lt;/key_prefix&gt;  &lt;!-- IGNORED! --&gt;</text>
+
+    <path d="M276 232 V256" fill="none" stroke="#b43c3c" stroke-width="2.4" marker-end="url(#arr-kp2)"/>
+
+    <rect x="48" y="260" width="456" height="110" rx="8" fill="#fbe1e1" stroke="#b43c3c" stroke-width="1.6"/>
+    <text x="276" y="282" text-anchor="middle" font-size="13" font-weight="700" fill="#7c2323">What Actually Landed in s3://clickhouse-data/ Root:</text>
+    <rect x="66" y="294" width="420" height="62" rx="6" fill="#ffffff" stroke="#b43c3c" stroke-width="1.2"/>
+    <text x="276" y="314" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#8f2424">PRE szl/  &#183;  PRE kqm/  &#183;  PRE xab/  (0 objects in data/!)</text>
+    <text x="276" y="334" text-anchor="middle" font-size="11" fill="#5c3a3a">All tenants &amp; all replicas mingled in the bucket root</text>
+    <text x="276" y="350" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Per-tenant IAM policies &amp; S3 lifecycle rules matched nothing!</text>
+
+    <rect x="48" y="384" width="456" height="106" rx="8" fill="#8f2424"/>
+    <text x="276" y="408" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Why Sharing One Prefix Breaks Without Zero-Copy</text>
+    <text x="276" y="430" text-anchor="middle" font-size="12" fill="#fde8e8">Without zero-copy replication, each replica manages its own S3</text>
+    <text x="276" y="448" text-anchor="middle" font-size="12" fill="#fde8e8">objects. Sharing a prefix lets Replica A's merge/TTL delete</text>
+    <text x="276" y="466" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">remove objects Replica B still references &#8594; 404 NoSuchKey!</text>
+
+    <!-- RIGHT PANEL: THE VERIFIED FIX -->
+    <rect x="556" y="82" width="496" height="426" rx="14" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="576" y="98" width="350" height="28" rx="6" fill="#1f6f50"/>
+    <text x="751" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">AFTER: MACRO-EXPANDED &lt;endpoint_subpath&gt;</text>
+
+    <rect x="576" y="140" width="456" height="92" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="804" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">What storage.xml Uses Now:</text>
+    <text x="804" y="184" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#2c4a3e">&lt;type&gt;s3&lt;/type&gt;</text>
+    <text x="804" y="202" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#2c4a3e">&lt;endpoint from_env=&quot;CH_S3_ENDPOINT&quot; /&gt;</text>
+    <text x="804" y="220" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#1f6f50">&lt;endpoint_subpath&gt;data/tenant_a/{replica}/&lt;/endpoint_subpath&gt;</text>
+
+    <path d="M804 232 V256" fill="none" stroke="#1f6f50" stroke-width="2.4" marker-end="url(#arr-kp2g)"/>
+
+    <rect x="576" y="260" width="456" height="110" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="804" y="282" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Verified Live in s3://clickhouse-data/:</text>
+    <rect x="594" y="294" width="420" height="62" rx="6" fill="#ffffff" stroke="#1f6f50" stroke-width="1.2"/>
+    <text x="804" y="314" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#164231">data/tenant_a/writer-0/[a-z]{3}/[a-z]{29}</text>
+    <text x="804" y="332" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#164231">data/tenant_a/reader-1/[a-z]{3}/[a-z]{29}</text>
+    <text x="804" y="350" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">100% Tenant &amp; Replica Isolation &#183; IAM &amp; Lifecycle Rules Match</text>
+
+    <rect x="576" y="384" width="456" height="106" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.5"/>
+    <text x="804" y="408" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">Bonus: The CAS-Ready Two-Volume Policy Shape</text>
+    <text x="804" y="430" text-anchor="middle" font-size="12" fill="#334a60">&#8226; <tspan font-weight="700">Hot Volume (priority 1):</tspan> Local EBS NVMe for fresh inserts &amp; merges.</text>
+    <text x="804" y="450" text-anchor="middle" font-size="12" fill="#334a60">&#8226; <tspan font-weight="700">Cold Volume (priority 2):</tspan> S3 disk with <tspan font-family="Courier, monospace">perform_ttl_move_on_insert=false</tspan>.</text>
+    <text x="804" y="470" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Swapping cold S3 to CAS later changes only &lt;disks&gt;, zero table DDL</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="522" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="548" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Verification Rule: Never trust a storage XML review until you insert 5,000 rows and inspect aws s3 ls</text>
+  </g>
+</svg>

@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">Draining 29,000 S3Queue Files 8x Faster: Five Stages and Their Source Settings</title>
+  <desc id="desc">How tuning five stages of ClickHouse S3Queue — S3 listing cadence, Keeper metadata cache, parallel insert threads, Materialized View block sizes, and MergeTree part thresholds — raised backlog drain speed 8x from 1.7 files/sec to ~14 files/sec.</desc>
+  <defs>
+    <marker id="arr-bd" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Draining 29,000 S3Queue Files ~8&#215; Faster: Every Stage &amp; Setting That Matters</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">The 11-hour backlog was throttled by file discovery cadence and single-thread claim defaults &#8212; not ClickHouse insert speed</text>
+
+    <!-- 5 PIPELINE STAGE COLUMNS -->
+    <!-- Stage 1 -->
+    <rect x="24" y="84" width="196" height="390" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="24" y="84" width="196" height="36" rx="12" fill="#28597a"/>
+    <text x="122" y="107" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">1. S3 Discovery</text>
+
+    <rect x="36" y="134" width="172" height="94" rx="8" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.2"/>
+    <text x="122" y="154" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Defaults (Slow)</text>
+    <text x="122" y="174" text-anchor="middle" font-family="Courier, monospace" font-size="10">batch_size = 1000</text>
+    <text x="122" y="192" text-anchor="middle" font-family="Courier, monospace" font-size="10">min_timeout = 1000ms</text>
+    <text x="122" y="210" text-anchor="middle" font-family="Courier, monospace" font-size="10">backoff = 30000ms</text>
+
+    <rect x="36" y="242" width="172" height="114" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="122" y="262" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Tuned (Fast)</text>
+    <text x="122" y="282" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">batch_size = 5000</text>
+    <text x="122" y="300" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">min_timeout = 500ms</text>
+    <text x="122" y="318" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">backoff = 2000ms</text>
+    <text x="122" y="342" text-anchor="middle" font-size="10" fill="#164231">29k files = 6 LIST calls</text>
+
+    <text x="122" y="388" text-anchor="middle" font-size="11" font-weight="700" fill="#143852">ALTER-safe: YES &#10003;</text>
+    <text x="122" y="410" text-anchor="middle" font-size="10" fill="#465a6e">Eliminates 30s naps</text>
+    <text x="122" y="426" text-anchor="middle" font-size="10" fill="#465a6e">between batch polls</text>
+
+    <path d="M220 279 H232" fill="none" stroke="#1e4e68" stroke-width="2" marker-end="url(#arr-bd)"/>
+
+    <!-- Stage 2 -->
+    <rect x="236" y="84" width="196" height="390" rx="12" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.8"/>
+    <rect x="236" y="84" width="196" height="36" rx="12" fill="#9b6b24"/>
+    <text x="334" y="107" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">2. Keeper Claim</text>
+
+    <rect x="248" y="134" width="172" height="94" rx="8" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.2"/>
+    <text x="334" y="154" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Bottleneck</text>
+    <text x="334" y="174" text-anchor="middle" font-size="10" fill="#5c3a3a">1 znode round-trip per</text>
+    <text x="334" y="192" text-anchor="middle" font-size="10" fill="#5c3a3a">file in unordered mode</text>
+    <text x="334" y="210" text-anchor="middle" font-family="Courier, monospace" font-size="10">cache = 1 GiB</text>
+
+    <rect x="248" y="242" width="172" height="114" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="334" y="262" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Tuned</text>
+    <text x="334" y="282" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">tracked_files_limit</text>
+    <text x="334" y="298" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">= 100000</text>
+    <text x="334" y="318" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">metadata_cache = 2GiB</text>
+    <text x="334" y="342" text-anchor="middle" font-size="10" fill="#164231">Zero duplicate rows</text>
+
+    <text x="334" y="388" text-anchor="middle" font-size="11" font-weight="700" fill="#5e3e0e">ALTER-safe: YES &#10003;</text>
+    <text x="334" y="410" text-anchor="middle" font-size="10" fill="#7a541b">addCheckNotExists</text>
+    <text x="334" y="426" text-anchor="middle" font-size="10" fill="#7a541b">guarantees 1 winner</text>
+
+    <path d="M432 279 H444" fill="none" stroke="#1e4e68" stroke-width="2" marker-end="url(#arr-bd)"/>
+
+    <!-- Stage 3 -->
+    <rect x="448" y="84" width="196" height="390" rx="12" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="448" y="84" width="196" height="36" rx="12" fill="#1f6f50"/>
+    <text x="546" y="107" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">3. Worker Threads</text>
+
+    <rect x="460" y="134" width="172" height="94" rx="8" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.2"/>
+    <text x="546" y="154" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Default (The Straw)</text>
+    <text x="546" y="174" text-anchor="middle" font-family="Courier, monospace" font-size="10">processing_threads = 1</text>
+    <text x="546" y="192" text-anchor="middle" font-size="10" fill="#5c3a3a">task_count =</text>
+    <text x="546" y="210" text-anchor="middle" font-family="Courier, monospace" font-size="9">parallel_inserts ? N : 1</text>
+
+    <rect x="460" y="242" width="172" height="114" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.8"/>
+    <text x="546" y="262" text-anchor="middle" font-size="11" font-weight="700" fill="#164231">The Big Lever (8&#215;)</text>
+    <text x="546" y="282" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">parallel_inserts=true</text>
+    <text x="546" y="302" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">processing_threads=8</text>
+    <text x="546" y="322" text-anchor="middle" font-family="Courier, monospace" font-size="10">files_before_commit=100</text>
+    <text x="546" y="342" text-anchor="middle" font-size="10" font-weight="700" fill="#1f6f50">8 parallel pipelines</text>
+
+    <text x="546" y="388" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">! parallel_inserts is</text>
+    <text x="546" y="406" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">CREATE-time only</text>
+    <text x="546" y="426" text-anchor="middle" font-size="10" fill="#2c4a3e">threads ALTERs live</text>
+
+    <path d="M644 279 H656" fill="none" stroke="#1e4e68" stroke-width="2" marker-end="url(#arr-bd)"/>
+
+    <!-- Stage 4 -->
+    <rect x="660" y="84" width="196" height="390" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="660" y="84" width="196" height="36" rx="12" fill="#28597a"/>
+    <text x="758" y="107" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">4. MV Block Sizing</text>
+
+    <rect x="672" y="134" width="172" height="94" rx="8" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.2"/>
+    <text x="758" y="154" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Risk</text>
+    <text x="758" y="174" text-anchor="middle" font-size="10" fill="#5c3a3a">Fast drain emitting</text>
+    <text x="758" y="192" text-anchor="middle" font-size="10" fill="#5c3a3a">small blocks creates</text>
+    <text x="758" y="210" text-anchor="middle" font-size="10" fill="#5c3a3c">thousands of parts</text>
+
+    <rect x="672" y="242" width="172" height="114" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="758" y="262" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Tuned</text>
+    <text x="758" y="282" text-anchor="middle" font-family="Courier, monospace" font-size="9" font-weight="700">min_insert_block_size</text>
+    <text x="758" y="298" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">_rows_for_mv = 1M</text>
+    <text x="758" y="318" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">deduplication_v2 = 1</text>
+    <text x="758" y="342" text-anchor="middle" font-size="10" fill="#164231">Fewer, larger parts</text>
+
+    <text x="758" y="388" text-anchor="middle" font-size="11" font-weight="700" fill="#143852">ALTER-safe: YES &#10003;</text>
+    <text x="758" y="410" text-anchor="middle" font-size="10" fill="#465a6e">Dedups by</text>
+    <text x="758" y="426" text-anchor="middle" font-family="Courier, monospace" font-size="9" fill="#28597a">etag:chunk_offset</text>
+
+    <path d="M856 279 H868" fill="none" stroke="#1e4e68" stroke-width="2" marker-end="url(#arr-bd)"/>
+
+    <!-- Stage 5 -->
+    <rect x="872" y="84" width="184" height="390" rx="12" fill="#f3f0fb" stroke="#5b4b8a" stroke-width="1.8"/>
+    <rect x="872" y="84" width="184" height="36" rx="12" fill="#5b4b8a"/>
+    <text x="964" y="107" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">5. Merge &amp; Alarm</text>
+
+    <rect x="884" y="134" width="160" height="94" rx="8" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.2"/>
+    <text x="964" y="154" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Merge Debt</text>
+    <text x="964" y="174" text-anchor="middle" font-family="Courier, monospace" font-size="10">delay_insert = 1000</text>
+    <text x="964" y="192" text-anchor="middle" font-family="Courier, monospace" font-size="10">throw_insert = 3000</text>
+    <text x="964" y="210" text-anchor="middle" font-size="10" fill="#5c3a3a">830–1,590 active parts</text>
+
+    <rect x="884" y="242" width="160" height="114" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="964" y="262" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Tuned + Healer</text>
+    <text x="964" y="282" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">delay_insert = 1500</text>
+    <text x="964" y="300" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">throw_insert = 4000</text>
+    <text x="964" y="320" text-anchor="middle" font-size="10" fill="#3a2e5c">Alarm when backlog</text>
+    <text x="964" y="338" text-anchor="middle" font-size="10" font-weight="700" fill="#5b4b8a">&gt; 500 files sustained</text>
+
+    <text x="964" y="388" text-anchor="middle" font-size="11" font-weight="700" fill="#5b4b8a">Self-Heal Loop</text>
+    <text x="964" y="410" text-anchor="middle" font-size="10" fill="#3a2e5c">Verify queue DDL +</text>
+    <text x="964" y="426" text-anchor="middle" font-size="10" fill="#3a2e5c">kick OPTIMIZE TABLE</text>
+
+    <!-- FOOTER -->
+    <rect x="24" y="492" width="1032" height="68" rx="10" fill="#17283c"/>
+    <text x="540" y="518" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Measured Result: Backlog drain jumped ~8&#215; (from ~1.7 files/s to ~14 files/s) while simultaneously ingesting 155k live rows/sec</text>
+    <text x="540" y="542" text-anchor="middle" font-size="12" fill="#bfd6ea">Always set parallel_inserts = true at CREATE TABLE time &#8212; it is the one S3Queue setting you cannot ALTER later in unordered mode</text>
+  </g>
+</svg>

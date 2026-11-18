@@ -16,6 +16,26 @@ description: "Production notes on enterprise AI agent runtimes, SRE agents, and 
   <p class="home-proof"><strong>Featured by CNCF:</strong> <a href="https://www.cncf.io/blog/2026/08/04/you-cant-debug-what-you-cant-see-observability-for-ai-agents/">You Can’t Debug What You Can’t See — Observability for AI Agents</a></p>
 </section>
 
+{%- assign visible_posts = site.posts | where_exp: "post", "post.sitemap != false" -%}
+{%- assign latest_posts = visible_posts | slice: 0, 6 -%}
+
+## Latest production notes
+
+Newest notes first — no archive digging required. The six most recent posts are right here; follow the series label on any card to open its full reading order, or browse [every series](/series/).
+
+<div class="series-latest-grid">
+{% for post in latest_posts %}
+  {%- assign series_hub = site.pages | where: "nav_title", "Series" | where: "title", post.series | first -%}
+  <article class="series-latest-card">
+    <p class="series-card__meta"><time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time> · {% if post.series %}{% if series_hub %}<a href="{{ series_hub.url | relative_url }}">{{ post.series | split: ":" | first }}</a>{% else %}{{ post.series | split: ":" | first }}{% endif %}{% else %}Standalone note{% endif %}</p>
+    <h3><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h3>
+    <p>{{ post.description | strip_html | truncate: 160 }}</p>
+  </article>
+{% endfor %}
+</div>
+
+[Browse the full archive — every series in reading order →](/series/)
+
 ## Start with a production problem
 
 No need to read the whole archive. Pick the problem in front of you and follow a focused path.

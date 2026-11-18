@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620" role="img" aria-labelledby="title desc">
+  <title id="title">Dead Projections and Useless FINAL: Five Multi-Tenant ClickHouse Fixes Verified in the Source</title>
+  <desc id="desc">Five schema and config optimizations for multi-tenant ClickHouse verified against the 26.8 C++ source: dropping unselectable projections, removing FINAL from SummingMergeTree aggregates, adding {database} to Keeper paths, keeping mapKeys/mapValues bloom indexes, and setting TTL on system log tables.</desc>
+  <defs>
+    <marker id="arr-tt" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="620" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Tuning Multi-Tenant ClickHouse by Reading the 26.8 Source</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Five schema and storage findings verified in C++ before shipping to production</text>
+
+    <!-- HEADERS -->
+    <rect x="30" y="78" width="474" height="32" rx="8" fill="#8f2424"/>
+    <text x="267" y="99" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">THE SCHEMA TRAP / FOLKLORE</text>
+
+    <rect x="554" y="78" width="496" height="32" rx="8" fill="#1f6f50"/>
+    <text x="802" y="99" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">WHAT THE 26.8 SOURCE PROVED (THE FIX)</text>
+
+    <!-- ROW 1: DEAD PROJECTION -->
+    <rect x="30" y="122" width="474" height="78" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.5"/>
+    <text x="50" y="146" font-size="14" font-weight="700" fill="#7c2323">1. The Projection That Doubled Storage &amp; Never Ran</text>
+    <text x="50" y="166" font-size="12" fill="#5c3a3a">Pagination projection stored heavy payload columns twice,</text>
+    <text x="50" y="184" font-size="12" fill="#5c3a3a">but omitted <tspan font-family="Courier, monospace">pop</tspan> &#8594; <tspan font-weight="700" fill="#b43c3c">0 queries ever selected it</tspan>.</text>
+
+    <path d="M504 161 H548" fill="none" stroke="#1f6f50" stroke-width="2.4" marker-end="url(#arr-tt)"/>
+
+    <rect x="554" y="122" width="496" height="78" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="574" y="146" font-size="14" font-weight="700" fill="#164231">Drop Dead Projection + Verify with EXPLAIN</text>
+    <text x="574" y="166" font-size="12" fill="#2c4a3e">Planner requires a projection to cover EVERY column read.</text>
+    <text x="574" y="184" font-size="12" fill="#2c4a3e">Lead primary <tspan font-family="Courier, monospace" font-weight="700">ORDER BY</tspan> with <tspan font-family="Courier, monospace">timestamp</tspan> to serve pagination directly.</text>
+
+    <!-- ROW 2: USELESS FINAL -->
+    <rect x="30" y="212" width="474" height="78" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.5"/>
+    <text x="50" y="236" font-size="14" font-weight="700" fill="#7c2323">2. FINAL on SummingMergeTree Facet Queries (20–30s)</text>
+    <text x="50" y="256" font-size="12" fill="#5c3a3a">Facet queries ran <tspan font-family="Courier, monospace">SELECT key, sum(cnt) FROM rollup FINAL</tspan></text>
+    <text x="50" y="274" font-size="12" fill="#5c3a3a"><tspan font-family="Courier, monospace">GROUP BY key</tspan> &#8594; forced single-node merge-on-read every time.</text>
+
+    <path d="M504 251 H548" fill="none" stroke="#1f6f50" stroke-width="2.4" marker-end="url(#arr-tt)"/>
+
+    <rect x="554" y="212" width="496" height="78" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="574" y="236" font-size="14" font-weight="700" fill="#164231">Drop FINAL: GROUP BY + SUM() Is Exact on Unmerged Parts</text>
+    <text x="574" y="256" font-size="12" fill="#2c4a3e">Addition is associative &#8212; <tspan font-family="Courier, monospace">SUM(count) ... GROUP BY key</tspan> and <tspan font-family="Courier, monospace">DISTINCT</tspan></text>
+    <text x="574" y="274" font-size="12" fill="#2c4a3e">produce identical results without <tspan font-family="Courier, monospace">FINAL</tspan> (<tspan font-weight="700" fill="#1f6f50">25s &#8594; sub-second</tspan>).</text>
+
+    <!-- ROW 3: TENANT KEEPER COLLISION -->
+    <rect x="30" y="302" width="474" height="78" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.5"/>
+    <text x="50" y="326" font-size="14" font-weight="700" fill="#7c2323">3. Multi-Tenant Keeper Path Collision</text>
+    <text x="50" y="346" font-size="12" fill="#5c3a3a"><tspan font-family="Courier, monospace">/clickhouse/tables/{shard}/events</tspan> hardcodes the table path;</text>
+    <text x="50" y="364" font-size="12" fill="#5c3a3a">creating <tspan font-family="Courier, monospace">tenant_b.events</tspan> collides with <tspan font-family="Courier, monospace">tenant_a.events</tspan> in Keeper.</text>
+
+    <path d="M504 341 H548" fill="none" stroke="#1f6f50" stroke-width="2.4" marker-end="url(#arr-tt)"/>
+
+    <rect x="554" y="302" width="496" height="78" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="574" y="326" font-size="14" font-weight="700" fill="#164231">Use Built-In {database} Macro (Macros.cpp#L99)</text>
+    <text x="574" y="346" font-size="12" fill="#2c4a3e"><tspan font-family="Courier, monospace" font-weight="700">'/clickhouse/tables/{shard}/{database}/events'</tspan> auto-expands</text>
+    <text x="574" y="364" font-size="12" fill="#2c4a3e">the database name &#8594; one DDL template serves N tenant databases.</text>
+
+    <!-- ROW 4: MAP BLOOM FILTER -->
+    <rect x="30" y="392" width="474" height="78" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.5"/>
+    <text x="50" y="416" font-size="14" font-weight="700" fill="#7c2323">4. Folklore: &quot;Map Bloom Filters Don't Help map['k'] = v&quot;</text>
+    <text x="50" y="436" font-size="12" fill="#5c3a3a">Old blog posts claim bloom indexes on <tspan font-family="Courier, monospace">mapKeys()</tspan>/<tspan font-family="Courier, monospace">mapValues()</tspan></text>
+    <text x="50" y="454" font-size="12" fill="#5c3a3a">only work when queries rewrite predicates to <tspan font-family="Courier, monospace">has()</tspan>.</text>
+
+    <path d="M504 431 H548" fill="none" stroke="#1f6f50" stroke-width="2.4" marker-end="url(#arr-tt)"/>
+
+    <rect x="554" y="392" width="496" height="78" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="574" y="416" font-size="14" font-weight="700" fill="#164231">Keep Them! 26.8 Resolves map['k'] = v Automatically</text>
+    <text x="574" y="436" font-size="12" fill="#2c4a3e"><tspan font-family="Courier, monospace">MergeTreeIndexBloomFilter.cpp#L1239</tspan> matches <tspan font-family="Courier, monospace">arrayElement(map, k)</tspan></text>
+    <text x="574" y="454" font-size="12" fill="#2c4a3e">against both <tspan font-family="Courier, monospace">mapKeys</tspan> &amp; <tspan font-family="Courier, monospace">mapValues</tspan> bloom filter skip indexes.</text>
+
+    <!-- ROW 5: SYSTEM LOGS GROW FOREVER -->
+    <rect x="30" y="482" width="474" height="78" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.5"/>
+    <text x="50" y="506" font-size="14" font-weight="700" fill="#7c2323">5. System Log Tables Grow Without Bound on Local EBS</text>
+    <text x="50" y="526" font-size="12" fill="#5c3a3a"><tspan font-family="Courier, monospace">SystemLogBase::getDefaultTTL()</tspan> returns <tspan font-family="Courier, monospace">&quot;&quot;</tspan>; rotated tables</text>
+    <text x="50" y="544" font-size="12" fill="#5c3a3a">without TTL are frozen readonly and never reclaimed.</text>
+
+    <path d="M504 521 H548" fill="none" stroke="#1f6f50" stroke-width="2.4" marker-end="url(#arr-tt)"/>
+
+    <rect x="554" y="482" width="496" height="78" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="574" y="506" font-size="14" font-weight="700" fill="#164231">Configure Explicit &lt;ttl&gt; &amp; &lt;partition_by&gt; on Every System Log</text>
+    <text x="574" y="526" font-size="12" fill="#2c4a3e">Add 7–14d TTLs to <tspan font-family="Courier, monospace">query_log</tspan>, <tspan font-family="Courier, monospace">part_log</tspan>, <tspan font-family="Courier, monospace">trace_log</tspan>, and disable</text>
+    <text x="574" y="544" font-size="12" fill="#2c4a3e">or tightly cap <tspan font-family="Courier, monospace">query_thread_log</tspan> so metadata disks never fill.</text>
+
+    <!-- FOOTER -->
+    <rect x="30" y="572" width="1020" height="36" rx="8" fill="#17283c"/>
+    <text x="540" y="595" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Engineering Habit: Folklore ages out across ClickHouse releases &#8212; grep src/Storages/MergeTree/ before changing production DDL</text>
+  </g>
+</svg>

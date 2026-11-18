@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">SharedMergeTree versus ReplicatedMergeTree: ClickHouse Cloud versus Self-Managed Open Source</title>
+  <desc id="desc">Comparison of ClickHouse Cloud's proprietary SharedMergeTree engine (one shared basement cabinet in S3) versus the open-source self-managed architecture (ReplicatedMergeTree + ClickHouse Keeper quorum + tiered local/cache/S3 storage policy).</desc>
+  <defs>
+    <marker id="arr-sm" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">SharedMergeTree vs. ReplicatedMergeTree: Cloud Engine vs. Self-Managed OSS</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Why pasting ClickHouse Cloud DDL into open-source ClickHouse throws &quot;Unknown table engine SharedMergeTree&quot;</text>
+
+    <!-- LEFT PANEL: CLICKHOUSE CLOUD (SHAREDMERGETREE) -->
+    <rect x="28" y="82" width="496" height="426" rx="14" fill="#fff8eb" stroke="#9b6b24" stroke-width="2"/>
+    <rect x="48" y="98" width="320" height="28" rx="6" fill="#9b6b24"/>
+    <text x="208" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">CLICKHOUSE CLOUD: SharedMergeTree</text>
+
+    <text x="276" y="148" text-anchor="middle" font-size="14" font-weight="700" fill="#5e3e0e">One Shared Basement Filing Cabinet in S3</text>
+
+    <rect x="56" y="164" width="136" height="56" rx="8" fill="#ffffff" stroke="#9b6b24" stroke-width="1.4"/>
+    <text x="124" y="188" text-anchor="middle" font-size="12" font-weight="700">Compute Node A</text>
+    <text x="124" y="206" text-anchor="middle" font-size="10" fill="#5e3e0e">Stateless worker</text>
+
+    <rect x="208" y="164" width="136" height="56" rx="8" fill="#ffffff" stroke="#9b6b24" stroke-width="1.4"/>
+    <text x="276" y="188" text-anchor="middle" font-size="12" font-weight="700">Compute Node B</text>
+    <text x="276" y="206" text-anchor="middle" font-size="10" fill="#5e3e0e">Stateless worker</text>
+
+    <rect x="360" y="164" width="136" height="56" rx="8" fill="#ffffff" stroke="#9b6b24" stroke-width="1.4"/>
+    <text x="428" y="188" text-anchor="middle" font-size="12" font-weight="700">Compute Node C</text>
+    <text x="428" y="206" text-anchor="middle" font-size="10" fill="#5e3e0e">Stateless worker</text>
+
+    <rect x="56" y="236" width="440" height="62" rx="8" fill="#fff0d1" stroke="#9b6b24" stroke-width="1.6"/>
+    <text x="276" y="260" text-anchor="middle" font-size="13" font-weight="700" fill="#5e3e0e">Single Shared Copy of Parts in S3 + Cloud Keeper</text>
+    <text x="276" y="280" text-anchor="middle" font-size="11" fill="#7a541b">Nodes do not copy parts to each other; scale to zero when idle</text>
+
+    <rect x="48" y="314" width="456" height="176" rx="10" fill="#ffffff" stroke="#9b6b24" stroke-width="1.4"/>
+    <text x="276" y="338" text-anchor="middle" font-size="14" font-weight="700" fill="#5e3e0e">What You Need to Know</text>
+    <text x="276" y="362" text-anchor="middle" font-size="12" fill="#5e3e0e">&#8226; <tspan font-weight="700" fill="#b43c3c">Closed-Source Proprietary Engine:</tspan> Not compiled into</text>
+    <text x="276" y="380" text-anchor="middle" font-size="12" fill="#5e3e0e">open-source <tspan font-family="Courier, monospace">clickhouse-server</tspan> or Altinity operator.</text>
+    <text x="276" y="404" text-anchor="middle" font-size="12" fill="#5e3e0e">&#8226; <tspan font-family="Courier, monospace">SHOW CREATE TABLE</tspan> outputs <tspan font-family="Courier, monospace">SharedMergeTree</tspan>,</text>
+    <text x="276" y="422" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#5e3e0e">SharedSummingMergeTree, SharedReplacingMergeTree.</text>
+    <text x="276" y="450" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Running Cloud DDL on EC2 &#8594; Code 46: Unknown table engine</text>
+    <text x="276" y="472" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Migration = 1:1 engine rename + data export/re-insert</text>
+
+    <!-- RIGHT PANEL: SELF-MANAGED OPEN SOURCE -->
+    <rect x="556" y="82" width="496" height="426" rx="14" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="576" y="98" width="380" height="28" rx="6" fill="#1f6f50"/>
+    <text x="766" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">SELF-MANAGED OSS: ReplicatedMergeTree + S3</text>
+
+    <text x="804" y="148" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">The Production Open-Source Pattern on AWS EC2</text>
+
+    <rect x="576" y="164" width="456" height="48" rx="8" fill="#eef4fb" stroke="#28597a" stroke-width="1.5"/>
+    <text x="804" y="186" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">ClickHouse Keeper Quorum (Head Office Ledger)</text>
+    <text x="804" y="202" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#28597a">ReplicatedMergeTree('/clickhouse/{shard}/events', '{replica}')</text>
+
+    <rect x="576" y="224" width="220" height="74" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="686" y="246" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Replica 1 (writer-0)</text>
+    <text x="686" y="264" text-anchor="middle" font-size="11" fill="#2c4a3e">Hot gp3 + <tspan font-family="Courier, monospace">s3_cache</tspan></text>
+    <text x="686" y="282" text-anchor="middle" font-family="Courier, monospace" font-size="10" fill="#1f6f50">s3://.../tenant/writer-0/</text>
+
+    <rect x="812" y="224" width="220" height="74" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="922" y="246" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Replica 2 (reader-0)</text>
+    <text x="922" y="264" text-anchor="middle" font-size="11" fill="#2c4a3e">Hot gp3 + <tspan font-family="Courier, monospace">s3_cache</tspan></text>
+    <text x="922" y="282" text-anchor="middle" font-family="Courier, monospace" font-size="10" fill="#1f6f50">s3://.../tenant/reader-0/</text>
+
+    <rect x="576" y="314" width="456" height="176" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="804" y="338" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">The 1:1 Engine Translation Table</text>
+
+    <rect x="596" y="352" width="416" height="28" rx="4" fill="#dff0e8"/>
+    <text x="804" y="371" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#164231">SharedMergeTree          &#8594; ReplicatedMergeTree</text>
+
+    <rect x="596" y="386" width="416" height="28" rx="4" fill="#dff0e8"/>
+    <text x="804" y="405" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#164231">SharedSummingMergeTree   &#8594; ReplicatedSummingMergeTree</text>
+
+    <rect x="596" y="420" width="416" height="28" rx="4" fill="#dff0e8"/>
+    <text x="804" y="439" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#164231">SharedReplacingMergeTree &#8594; ReplicatedReplacingMergeTree</text>
+
+    <text x="804" y="472" text-anchor="middle" font-size="11" font-weight="700" fill="#143852">Pair with tiered storage policy (local hot + s3_cache + S3 cold)</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="522" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="548" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Engine Rule: On self-managed ClickHouse, ReplicatedMergeTree + Keeper + S3 tiered storage is the standard foundation</text>
+  </g>
+</svg>

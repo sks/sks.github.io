@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 760" role="img" aria-labelledby="title desc">
+  <title id="title">How Five Interlocking Bugs Kept an S3 API Storm Alive After the First Fix</title>
+  <desc id="desc">An S3 API storm reached $84.05/day (16.8M Tier-1 PUT/LIST calls) despite claim-race and disk-autoscale fixes already being shipped. Five root causes formed an amplification loop: TabSeparated escaped quotes causing S3Queue drop+recreate every 5 minutes, 64 GiB hot gp3 disks spilling at move_factor=0.1 with 10 MiB wide parts (~35 S3 objects/part), EBS ModifyVolume stuck waiting for completed instead of optimizing, Nitro NVMe order swapping 32 GiB cache onto metadata, and unapplied Launch Template changes. Fixing all five drops S3 API spend toward ~$180-$220/mo with zero cold-tier spill.</desc>
+  <defs>
+    <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#b43c3c"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="760" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="34" text-anchor="middle" font-size="22" font-weight="700">Why the First Fix Didn't Stop the S3 API Storm (5 Interlocking Bugs)</text>
+    <text x="540" y="58" text-anchor="middle" font-size="14" fill="#465a6e">16.8M Tier-1 PUT/LIST calls/day ($84.05/day peak) collapsed only after closing every loop from Go parsing to EBS to DDL</text>
+
+    <!-- LEFT: STORM LOOP -->
+    <rect x="30" y="84" width="495" height="640" rx="14" fill="#fdf2f2" stroke="#b43c3c" stroke-width="2"/>
+    <rect x="48" y="98" width="210" height="26" rx="6" fill="#b43c3c"/>
+    <text x="153" y="116" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">BEFORE: $84/DAY STORM LOOP</text>
+
+    <rect x="55" y="142" width="445" height="92" rx="10" fill="#ffffff" stroke="#b43c3c" stroke-width="1.5"/>
+    <text x="72" y="166" font-size="13" font-weight="700" fill="#7d1f1f">1. TabSeparated \' quote-escape false drift</text>
+    <text x="72" y="186" font-size="11.5" fill="#4a2626">clickhouse-client escapes system.tables.engine_full as S3Queue(\'https://...\').</text>
+    <text x="72" y="203" font-size="11.5" fill="#4a2626">Parser sees ok=false every 5m -> DROP + CREATE staging_synth on every writer,</text>
+    <text x="72" y="220" font-size="11.5" fill="#4a2626">wiping the 2 GiB metadata cache and forcing a full prefix S3 LIST storm.</text>
+
+    <rect x="55" y="252" width="445" height="96" rx="10" fill="#ffffff" stroke="#b43c3c" stroke-width="1.5"/>
+    <text x="72" y="276" font-size="13" font-weight="700" fill="#7d1f1f">2. 64 GiB hot gp3 + 10 MiB wide parts = 35x PUTs</text>
+    <text x="72" y="296" font-size="11.5" fill="#4a2626">64 GiB hot disk hits move_factor=0.1 within hours -> unmerged 150-500 MB</text>
+    <text x="72" y="313" font-size="11.5" fill="#4a2626">parts spill to S3. Default min_bytes_for_wide_part=10 MiB writes ~35 objects/part,</text>
+    <text x="72" y="330" font-size="11.5" fill="#4a2626">and cold merges rewrite them 3-5x across replicas.</text>
+
+    <rect x="55" y="366" width="445" height="86" rx="10" fill="#ffffff" stroke="#b43c3c" stroke-width="1.5"/>
+    <text x="72" y="390" font-size="13" font-weight="700" fill="#7d1f1f">3. disk-autoscale blocks on "optimizing"</text>
+    <text x="72" y="410" font-size="11.5" fill="#4a2626">ModifyVolume grows 64 -> 192 GiB, then enters EBS "optimizing" for 40+ min.</text>
+    <text x="72" y="427" font-size="11.5" fill="#4a2626">WaitForModification waits for "completed" -> systemd 600s timeout kills unit</text>
+    <text x="72" y="444" font-size="11.5" fill="#4a2626">before resize2fs runs. OS still sees 63 GiB.</text>
+
+    <rect x="55" y="470" width="445" height="86" rx="10" fill="#ffffff" stroke="#b43c3c" stroke-width="1.5"/>
+    <text x="72" y="494" font-size="13" font-weight="700" fill="#7d1f1f">4. Nitro NVMe enumeration swap (32G vs 64G)</text>
+    <text x="72" y="514" font-size="11.5" fill="#4a2626">First-boot candidate loop picks nvme1n1 (32 GiB cache) for ch-metadata</text>
+    <text x="72" y="531" font-size="11.5" fill="#4a2626">and nvme2n1 (64 GiB metadata) for ch-cache when controller order flips.</text>
+
+    <rect x="55" y="574" width="445" height="86" rx="10" fill="#ffffff" stroke="#b43c3c" stroke-width="1.5"/>
+    <text x="72" y="598" font-size="13" font-weight="700" fill="#7d1f1f">5. Live Launch Templates still pinned 64+32 GiB</text>
+    <text x="72" y="618" font-size="11.5" fill="#4a2626">Config on disk said 256 GiB, but LT v59/v60 + backup-0 DNS conflict</text>
+    <text x="72" y="635" font-size="11.5" fill="#4a2626">left live ASG nodes booting on 64 GiB + chinit 0.2.48.</text>
+
+    <rect x="55" y="674" width="445" height="36" rx="8" fill="#b43c3c"/>
+    <text x="277" y="697" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Result: 16.8M Tier-1 req/day · $84.05/day · 4,500+ hot parts</text>
+
+    <!-- RIGHT: CONVERGED STATE -->
+    <rect x="555" y="84" width="495" height="640" rx="14" fill="#eef7f2" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="573" y="98" width="225" height="26" rx="6" fill="#1f6f50"/>
+    <text x="685" y="116" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">AFTER: ~$180-$220/MO TARGET</text>
+
+    <rect x="580" y="142" width="445" height="92" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="597" y="166" font-size="13" font-weight="700" fill="#164231">1. Normalize \' before parsing engine_full</text>
+    <text x="597" y="186" font-size="11.5" fill="#2d5a46">extractS3QueueEndpoint &amp; extractQuotedSetting normalize TabSeparated escapes.</text>
+    <text x="597" y="203" font-size="11.5" fill="#2d5a46">schema-bootstrap finishes in &lt;1s with 0 drops; 2 GiB queue cache stays warm.</text>
+    <text x="597" y="220" font-size="11.5" fill="#2d5a46">Shared keeper_path + enable_hash_ring_filtering=1 eliminate claim races.</text>
+
+    <rect x="580" y="252" width="445" height="96" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="597" y="276" font-size="13" font-weight="700" fill="#164231">2. 256 GiB hot gp3 + compact parts + whole-day TTL</text>
+    <text x="597" y="296" font-size="11.5" fill="#2d5a46">min_bytes_for_wide_part = 1 GiB (~11 objects/part vs ~35, 3.2x fewer PUTs).</text>
+    <text x="597" y="313" font-size="11.5" fill="#2d5a46">ttl_only_drop_parts = 1 makes expiry a free S3 DELETE ($0).</text>
+    <text x="597" y="330" font-size="11.5" fill="#2d5a46">prefer_not_to_merge=true on cold S3; parts merge locally to 1-150 GiB once.</text>
+
+    <rect x="580" y="366" width="445" height="86" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="597" y="390" font-size="13" font-weight="700" fill="#164231">3. Return on "optimizing" + immediate resize2fs</text>
+    <text x="597" y="410" font-size="11.5" fill="#2d5a46">WaitForModification returns as soon as state reaches "optimizing".</text>
+    <text x="597" y="427" font-size="11.5" fill="#2d5a46">growFilesystem runs NVMe rescan + resize2fs immediately (~10s total).</text>
+
+    <rect x="580" y="470" width="445" height="86" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="597" y="494" font-size="13" font-weight="700" fill="#164231">4. Largest-blank-NVMe selection at first boot</text>
+    <text x="597" y="514" font-size="11.5" fill="#2d5a46">resolveFirstExisting compares lsblk byte sizes across unpartitioned blank</text>
+    <text x="597" y="531" font-size="11.5" fill="#2d5a46">NVMe devices so ch-metadata always claims the 256 GiB volume.</text>
+
+    <rect x="580" y="574" width="445" height="86" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="597" y="598" font-size="13" font-weight="700" fill="#164231">5. Live LT roll + ALTER-first convergence</text>
+    <text x="597" y="618" font-size="11.5" fill="#2d5a46">Imported Route53 conflict, rolled writers/readers to 256+32 GiB gp3,</text>
+    <text x="597" y="635" font-size="11.5" fill="#2d5a46">and applied ALTER TABLE MODIFY SETTING live across the shard.</text>
+
+    <rect x="580" y="674" width="445" height="36" rx="8" fill="#1f6f50"/>
+    <text x="802" y="697" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Measured: 240.9 GiB hot · 0 cold spill · 928 files/10m (0 failed)</text>
+  </g>
+</svg>

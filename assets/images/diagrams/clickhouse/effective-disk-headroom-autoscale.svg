@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">When df Lies: keep_free_space Reservation, Effective Disk Headroom, and Online EBS Autoscaling</title>
+  <desc id="desc">Why df reports 30% free on a 32 GiB ClickHouse disk while merges fail with Code 243 NOT_ENOUGH_SPACE due to a 10 GiB keep_free_space reservation, and the 5-minute chinit disk-autoscale loop that grows EBS and ext4 online.</desc>
+  <defs>
+    <marker id="arr-dk" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">When df Lies: keep_free_space vs. Effective Headroom &amp; Online Volume Growth</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">df reports raw filesystem blocks &#8212; ClickHouse gates merges on system.disks.free_space (after subtracting keep_free_space)</text>
+
+    <!-- LEFT PANEL: WHY DF LIES -->
+    <rect x="28" y="82" width="496" height="426" rx="14" fill="#fdf2f2" stroke="#c05c5c" stroke-width="2"/>
+    <rect x="48" y="98" width="276" height="28" rx="6" fill="#b43c3c"/>
+    <text x="186" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">THE 10 GIB RESERVATION BLIND SPOT</text>
+
+    <text x="276" y="148" text-anchor="middle" font-size="14" font-weight="700" fill="#7c2323">32 GiB Data Volume with &lt;keep_free_space&gt; = 10 GiB</text>
+
+    <!-- Visual Bar of the 32 GiB Disk -->
+    <rect x="48" y="164" width="270" height="54" rx="6" fill="#28597a"/>
+    <text x="183" y="188" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">20.99 GiB Used</text>
+    <text x="183" y="206" text-anchor="middle" font-size="11" fill="#d9e9f7">(Parts + System Logs)</text>
+
+    <rect x="318" y="164" width="146" height="54" rx="0" fill="#f59e0b"/>
+    <text x="391" y="188" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">10 GiB Reserved</text>
+    <text x="391" y="206" text-anchor="middle" font-size="10" fill="#fff8eb">(keep_free_space)</text>
+
+    <rect x="464" y="164" width="40" height="54" rx="6" fill="#b43c3c"/>
+    <text x="484" y="188" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff">1M</text>
+    <text x="484" y="206" text-anchor="middle" font-size="9" fill="#fde8e8">Free</text>
+
+    <!-- Two views comparison -->
+    <rect x="48" y="236" width="220" height="96" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="158" y="258" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">What Linux df Sees</text>
+    <text x="158" y="280" text-anchor="middle" font-family="Courier, monospace" font-size="13" font-weight="700" fill="#1f6f50">11 GiB Free (34%)</text>
+    <text x="158" y="300" text-anchor="middle" font-size="11" fill="#465a6e">OS disk alarm (&lt;15% free):</text>
+    <text x="158" y="318" text-anchor="middle" font-size="12" font-weight="700" fill="#1f6f50">STATUS: OK (GREEN)</text>
+
+    <rect x="284" y="236" width="220" height="96" rx="8" fill="#fbe1e1" stroke="#b43c3c" stroke-width="1.8"/>
+    <text x="394" y="258" text-anchor="middle" font-size="13" font-weight="700" fill="#7c2323">What ClickHouse Sees</text>
+    <text x="394" y="280" text-anchor="middle" font-family="Courier, monospace" font-size="13" font-weight="700" fill="#b43c3c">1.0 MiB Effective Free</text>
+    <text x="394" y="300" text-anchor="middle" font-size="11" fill="#7c2323">system.disks.free_space:</text>
+    <text x="394" y="318" text-anchor="middle" font-size="12" font-weight="700" fill="#b43c3c">Code 243: NOT_ENOUGH_SPACE</text>
+
+    <!-- Cascade -->
+    <rect x="48" y="348" width="456" height="142" rx="10" fill="#ffffff" stroke="#c05c5c" stroke-width="1.4"/>
+    <text x="276" y="372" text-anchor="middle" font-size="14" font-weight="700" fill="#7c2323">The Silent Merge Stall Cascade</text>
+    <text x="276" y="394" text-anchor="middle" font-size="12" fill="#5c3a3a">1. Merges cannot reserve output space &#8594; <tspan font-family="Courier, monospace" font-weight="700">system.merges = 0</tspan>.</text>
+    <text x="276" y="414" text-anchor="middle" font-size="12" fill="#5c3a3a">2. Small inserts still land &#8594; unmerged parts climb past 1,800.</text>
+    <text x="276" y="434" text-anchor="middle" font-size="12" fill="#5c3a3a">3. At 1,000 parts inserts throttle; at 3,000 <tspan font-family="Courier, monospace" font-weight="700">TOO_MANY_PARTS</tspan> rejects all writes.</text>
+    <text x="276" y="454" text-anchor="middle" font-size="12" fill="#5c3a3a">4. <tspan font-family="Courier, monospace">system.part_log</tspan> &amp; <tspan font-family="Courier, monospace">metric_log</tspan> fail to flush telemetry.</text>
+    <text x="276" y="476" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Meanwhile, df used_percent alarm never fires!</text>
+
+    <!-- RIGHT PANEL: SELF-HEALING DISK AUTOSCALE -->
+    <rect x="556" y="82" width="496" height="426" rx="14" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="576" y="98" width="310" height="28" rx="6" fill="#1f6f50"/>
+    <text x="731" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">THE SELF-HEALING LOOP: chinit disk-autoscale</text>
+
+    <text x="804" y="148" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">Runs every 5 minutes via systemd timer &#8212; zero downtime</text>
+
+    <!-- Step 1 -->
+    <rect x="576" y="164" width="456" height="58" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="804" y="186" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Step 1: Probe Effective Free Inside ClickHouse</text>
+    <text x="804" y="206" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#2c4a3e">SELECT free_space FROM system.disks WHERE name = 'default'</text>
+
+    <path d="M804 222 V238" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-dk)"/>
+
+    <!-- Step 2 -->
+    <rect x="576" y="242" width="456" height="58" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="804" y="264" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Step 2: Two-Tier Watermark Ladder</text>
+    <text x="804" y="284" text-anchor="middle" font-size="12" fill="#2c4a3e">Alarm warns at <tspan font-weight="700" fill="#9b6b24">&lt;16 GiB</tspan> &#183; Self-heal triggers at <tspan font-weight="700" fill="#1f6f50">&lt;8 GiB</tspan> (+32 GiB step, 256 GiB cap)</text>
+
+    <path d="M804 300 V316" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-dk)"/>
+
+    <!-- Step 3 -->
+    <rect x="576" y="320" width="456" height="68" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.5"/>
+    <text x="804" y="342" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">Step 3: Online EBS ModifyVolume + NVMe Rescan</text>
+    <text x="804" y="362" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#28597a">ec2:ModifyVolume (+32 GiB) &#8594; echo 1 &gt; /sys/class/nvme/.../rescan</text>
+    <text x="804" y="378" text-anchor="middle" font-size="11" fill="#465a6e">(Forces kernel to refresh cached NVMe block size immediately)</text>
+
+    <path d="M804 388 V404" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-dk)"/>
+
+    <!-- Step 4 -->
+    <rect x="576" y="408" width="456" height="82" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="804" y="430" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Step 4: Online ext4 Resize + Emit Self-Heal Telemetry</text>
+    <text x="804" y="450" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#1f6f50">resize2fs /dev/nvmeXnY &#8594; publish ClickHouse/SelfHeal DiskAutoscaled</text>
+    <text x="804" y="472" text-anchor="middle" font-size="12" fill="#164231">Merges resume immediately &#183; 1,800-part backlog drains to ~10</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="522" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="548" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Monitoring Rule: Alarm and autoscale on system.disks.free_space (effective headroom), never on OS df used_percent</text>
+  </g>
+</svg>

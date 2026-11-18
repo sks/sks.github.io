@@ -6,7 +6,7 @@ series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 15
 mermaid: true
 description: "After the silent key_prefix bug, I stopped guessing and read ClickHouse's disk registry in the source. Four registrations, three choices per disk, and the default [a-z]{3}/[a-z]{29} key template that explains exactly where the bucket-root prefixes came from. Every claim has a permalink."
-image: /assets/images/og-default.png
+image: /assets/images/diagrams/clickhouse/storage-classification-source-map.svg
 tags: [clickhouse, storage, s3, disks, source, sre]
 permalink: /blog/clickhouse-storage-classification-source/
 faqs:
@@ -72,6 +72,10 @@ in the source: `[a-z]{3}/[a-z]{29}`.
 ---
 
 ## The registry is smaller than the docs suggest
+
+![Field map of ClickHouse storage configuration in the C++ source: three orthogonal choices per disk and the default S3 key template](/assets/images/diagrams/clickhouse/storage-classification-source-map.svg)
+
+*Every ClickHouse `<disks>` definition stacks three orthogonal choices — Disk Family, Object Backend, and Metadata Storage — while S3 object keys expand from `<endpoint> + <endpoint_subpath> + [a-z]{3}/[a-z]{29}`.*
 
 Everything starts in
 [`src/Disks/registerDisks.cpp`](https://github.com/ClickHouse/ClickHouse/blob/bb6fa8b5d1561b9928db573fc73d98cb16673c08/src/Disks/registerDisks.cpp#L22-L36).

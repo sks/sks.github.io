@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 560" role="img" aria-labelledby="title desc">
+  <title id="title">Dissolving the Second Binary: From Subprocess CLI to Typed In-Process Operations Port</title>
+  <desc id="desc">Comparison of shipping two binaries on every ClickHouse node (chinit execing a companion chctl CLI via argv flags) versus dissolving the companion CLI into a typed in-process Go interface inside chinit.</desc>
+  <defs>
+    <marker id="arr-db" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#b43c3c"/>
+    </marker>
+    <marker id="arr-dbg" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="560" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Dissolving the Second Binary: Subprocess argv vs. Typed In-Process Port</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">When the only caller of a CLI is your own daemon on the same node, the process boundary is pure liability</text>
+
+    <!-- LEFT PANEL: TWO BINARIES (BEFORE) -->
+    <rect x="28" y="82" width="496" height="408" rx="14" fill="#fdf2f2" stroke="#c05c5c" stroke-width="2"/>
+    <rect x="48" y="98" width="280" height="28" rx="6" fill="#b43c3c"/>
+    <text x="188" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">BEFORE: TWO BINARIES + ARGV SEAM</text>
+
+    <rect x="56" y="146" width="176" height="74" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.5"/>
+    <text x="144" y="172" text-anchor="middle" font-size="14" font-weight="700" fill="#143852">chinit binary</text>
+    <text x="144" y="192" text-anchor="middle" font-size="11" fill="#465a6e">Boot + systemd timers</text>
+
+    <path d="M232 183 H314" fill="none" stroke="#b43c3c" stroke-width="2.5" marker-end="url(#arr-db)"/>
+    <text x="273" y="172" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#b43c3c">exec.Command</text>
+    <text x="273" y="200" text-anchor="middle" font-family="Courier, monospace" font-size="9" fill="#7c2323">-pass $SECRET</text>
+
+    <rect x="320" y="146" width="176" height="74" rx="8" fill="#fbe1e1" stroke="#b43c3c" stroke-width="1.6"/>
+    <text x="408" y="172" text-anchor="middle" font-size="14" font-weight="700" fill="#7c2323">chctl companion CLI</text>
+    <text x="408" y="192" text-anchor="middle" font-size="11" fill="#7c2323">Operator domain code</text>
+
+    <rect x="48" y="242" width="456" height="228" rx="10" fill="#ffffff" stroke="#c05c5c" stroke-width="1.4"/>
+    <text x="276" y="268" text-anchor="middle" font-size="14" font-weight="700" fill="#7c2323">Four Compounding Costs of the Process Boundary</text>
+
+    <text x="68" y="296" font-size="12" fill="#5c3a3a"><tspan font-weight="700" fill="#b43c3c">1. Argv String Plumbing:</tspan> Structs &amp; host maps serialized into</text>
+    <text x="84" y="314" font-size="12" fill="#5c3a3a">repeated <tspan font-family="Courier, monospace">-host name=ip</tspan> flags and re-parsed next door.</text>
+
+    <text x="68" y="342" font-size="12" fill="#5c3a3a"><tspan font-weight="700" fill="#b43c3c">2. Credentials on Command Line:</tspan> Passwords passed via argv</text>
+    <text x="84" y="360" font-size="12" fill="#5c3a3a">show up in <tspan font-family="Courier, monospace">/proc/pid/cmdline</tspan> and failed command error strings.</text>
+
+    <text x="68" y="388" font-size="12" fill="#5c3a3a"><tspan font-weight="700" fill="#b43c3c">3. Brittle String-Matching Tests:</tspan> Unit tests had to inspect</text>
+    <text x="84" y="406" font-size="12" fill="#5c3a3a">recorded argv slices instead of typed request structs.</text>
+
+    <text x="68" y="434" font-size="12" fill="#5c3a3a"><tspan font-weight="700" fill="#b43c3c">4. Double Release Pipeline:</tspan> Two Go binaries to tag, build,</text>
+    <text x="84" y="452" font-size="12" fill="#5c3a3a">checksum-pin in Packer, and keep in lockstep across rolls.</text>
+
+    <!-- RIGHT PANEL: ONE BINARY (AFTER) -->
+    <rect x="556" y="82" width="496" height="408" rx="14" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="576" y="98" width="320" height="28" rx="6" fill="#1f6f50"/>
+    <text x="736" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">AFTER: ONE BINARY + TYPED OPS PORT</text>
+
+    <rect x="576" y="142" width="456" height="84" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.8"/>
+    <text x="804" y="164" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">Single Static Binary: /usr/local/bin/chinit</text>
+    <text x="804" y="186" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#28597a">type OperationsPort interface {</text>
+    <text x="804" y="204" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#1f6f50">  RenderConfig &#183; SyncSchema &#183; SyncReplica &#183; GcReplica &#183; KeeperMntr</text>
+    <text x="804" y="218" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#28597a">}</text>
+
+    <rect x="576" y="242" width="456" height="228" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="804" y="268" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">What Dissolving the Second Binary Bought</text>
+
+    <text x="596" y="296" font-size="12" fill="#2c4a3e"><tspan font-weight="700" fill="#1f6f50">&#10003; Typed Struct Calls:</tspan> <tspan font-family="Courier, monospace">ops.SyncSchema(ctx, SchemaRequest{...})</tspan></text>
+    <text x="612" y="314" font-size="12" fill="#2c4a3e">with compiler-checked fields and native Go error wrapping.</text>
+
+    <text x="596" y="342" font-size="12" fill="#2c4a3e"><tspan font-weight="700" fill="#1f6f50">&#10003; Zero Secrets in Process Args:</tspan> Passwords read from <tspan font-family="Courier, monospace">0600</tspan></text>
+    <text x="612" y="360" font-size="12" fill="#2c4a3e">files stay in memory inside one process address space.</text>
+
+    <text x="596" y="388" font-size="12" fill="#2c4a3e"><tspan font-weight="700" fill="#1f6f50">&#10003; Fake-Port Unit Tests:</tspan> Pipeline tests inject an in-memory</text>
+    <text x="612" y="406" font-size="12" fill="#2c4a3e">recorder implementing <tspan font-family="Courier, monospace">OperationsPort</tspan> &#8212; zero subprocesses.</text>
+
+    <text x="596" y="434" font-size="12" fill="#2c4a3e"><tspan font-weight="700" fill="#1f6f50">&#10003; One Bare-Semver Release Gate:</tspan> Tag <tspan font-family="Courier, monospace">0.2.x</tspan> builds one artifact,</text>
+    <text x="612" y="452" font-size="12" fill="#2c4a3e">pinned once in the AMI and invoked by all systemd units.</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="504" width="1024" height="40" rx="8" fill="#17283c"/>
+    <text x="540" y="529" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Design Rule: Use CLIs for human operators; use typed in-process interfaces for machine-to-machine calls on the same host</text>
+  </g>
+</svg>

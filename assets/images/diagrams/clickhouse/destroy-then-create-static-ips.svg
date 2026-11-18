@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">Destroy, Then Create: Why Static-IP ClickHouse Nodes Fight Terraform Create-Before-Destroy</title>
+  <desc id="desc">How a create_before_destroy lifecycle flag on an ancestor resource propagates via Terraform's ForcedCBDTransformer to flip static-IP ClickHouse nodes to ["create","delete"], causing InvalidIPAddress.InUse — and why exclusive resources (static IP, EBS volume, Keeper quorum seat) require destroy-then-create.</desc>
+  <defs>
+    <marker id="arr-dtc" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#b43c3c"/>
+    </marker>
+    <marker id="arr-dtcg" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Destroy, Then Create: Why Exclusive Database Resources Reject Create-Before-Destroy</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Static IPs, EBS volume attachments, and Keeper quorum seats can belong to only one instance at a time</text>
+
+    <!-- LEFT PANEL: CREATE-BEFORE-DESTROY TRAP -->
+    <rect x="28" y="82" width="496" height="426" rx="14" fill="#fdf2f2" stroke="#c05c5c" stroke-width="2"/>
+    <rect x="48" y="98" width="330" height="28" rx="6" fill="#b43c3c"/>
+    <text x="213" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">WRONG ORDER: CREATE-BEFORE-DESTROY</text>
+
+    <rect x="48" y="140" width="456" height="72" rx="8" fill="#ffffff" stroke="#c05c5c" stroke-width="1.4"/>
+    <text x="276" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="#7c2323">1. Hidden Graph Poison: ForcedCBDTransformer</text>
+    <text x="276" y="182" text-anchor="middle" font-size="11" fill="#5c3a3a">An unused ACM cert (<tspan font-family="Courier, monospace">count = 0</tspan>) had <tspan font-family="Courier, monospace">create_before_destroy = true</tspan>.</text>
+    <text x="276" y="198" text-anchor="middle" font-size="11" fill="#5c3a3a">Terraform propagated CBD to all dependencies &#8594; actions: <tspan font-family="Courier, monospace" font-weight="700">[&quot;create&quot;,&quot;delete&quot;]</tspan></text>
+
+    <path d="M276 212 V232" fill="none" stroke="#b43c3c" stroke-width="2.2" marker-end="url(#arr-dtc)"/>
+
+    <rect x="48" y="236" width="456" height="106" rx="8" fill="#fbe1e1" stroke="#b43c3c" stroke-width="1.6"/>
+    <text x="276" y="258" text-anchor="middle" font-size="13" font-weight="700" fill="#7c2323">2. Old &amp; New Instances Collide on Exclusive Resources</text>
+    <rect x="64" y="270" width="132" height="56" rx="6" fill="#ffffff" stroke="#b43c3c" stroke-width="1.2"/>
+    <text x="130" y="290" text-anchor="middle" font-size="11" font-weight="700" fill="#7c2323">Static IP 10.0.1.10</text>
+    <text x="130" y="308" text-anchor="middle" font-size="10" fill="#b43c3c">Still bound to old ENI!</text>
+
+    <rect x="210" y="270" width="132" height="56" rx="6" fill="#ffffff" stroke="#b43c3c" stroke-width="1.2"/>
+    <text x="276" y="290" text-anchor="middle" font-size="11" font-weight="700" fill="#7c2323">EBS Raft / Metadata</text>
+    <text x="276" y="308" text-anchor="middle" font-size="10" fill="#b43c3c">Cannot dual-attach!</text>
+
+    <rect x="356" y="270" width="132" height="56" rx="6" fill="#ffffff" stroke="#b43c3c" stroke-width="1.2"/>
+    <text x="422" y="290" text-anchor="middle" font-size="11" font-weight="700" fill="#7c2323">Keeper myid Seat</text>
+    <text x="422" y="308" text-anchor="middle" font-size="10" fill="#b43c3c">Split-brain risk!</text>
+
+    <path d="M276 342 V362" fill="none" stroke="#b43c3c" stroke-width="2.2" marker-end="url(#arr-dtc)"/>
+
+    <rect x="48" y="366" width="456" height="124" rx="8" fill="#8f2424"/>
+    <text x="276" y="392" text-anchor="middle" font-family="Courier, monospace" font-size="13" font-weight="700" fill="#ffffff">Error: InvalidIPAddress.InUse (10.0.1.10)</text>
+    <text x="276" y="416" text-anchor="middle" font-size="12" fill="#fde8e8">EC2 rejects RunInstances before the old node is ever touched.</text>
+    <text x="276" y="440" text-anchor="middle" font-size="11" fill="#fde8e8">Debug command to expose the culprit in the plan graph:</text>
+    <text x="276" y="462" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#ffffff">TF_LOG=TRACE tofu plan 2&gt;&amp;1 | grep ForcedCBDTransformer</text>
+
+    <!-- RIGHT PANEL: DESTROY-THEN-CREATE -->
+    <rect x="556" y="82" width="496" height="426" rx="14" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="576" y="98" width="330" height="28" rx="6" fill="#1f6f50"/>
+    <text x="741" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">RIGHT ORDER: DESTROY-THEN-CREATE</text>
+
+    <rect x="576" y="140" width="456" height="68" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="804" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Step 1: Verify Plan JSON Ordering Before Apply</text>
+    <text x="804" y="182" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#1f6f50">tofu show -json plan | jq '.resource_changes[].change.actions'</text>
+    <text x="804" y="198" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#2c4a3e">Must equal [&quot;delete&quot;, &quot;create&quot;] for fixed-IP nodes</text>
+
+    <path d="M804 208 V228" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-dtcg)"/>
+
+    <rect x="576" y="232" width="456" height="72" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="804" y="254" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Step 2: Destroy Old Instance &amp; Release Exclusive State</text>
+    <text x="804" y="274" text-anchor="middle" font-size="12" fill="#2c4a3e">Old instance terminates &#8594; <tspan font-family="Courier, monospace">10.0.1.10</tspan> freed in subnet &#8594;</text>
+    <text x="804" y="292" text-anchor="middle" font-size="12" fill="#2c4a3e">persistent EBS metadata/raft volume detaches intact.</text>
+
+    <path d="M804 304 V324" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-dtcg)"/>
+
+    <rect x="576" y="328" width="456" height="72" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="804" y="350" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Step 3: Create Replacement with Same IP &amp; Volume</text>
+    <text x="804" y="370" text-anchor="middle" font-size="12" fill="#2c4a3e">New golden-AMI instance binds <tspan font-family="Courier, monospace">10.0.1.10</tspan>, mounts existing</text>
+    <text x="804" y="388" text-anchor="middle" font-size="12" fill="#2c4a3e"><tspan font-family="Courier, monospace">LABEL=ch-metadata</tspan> / <tspan font-family="Courier, monospace">myid</tspan>, and rejoins replication/quorum.</text>
+
+    <path d="M804 400 V420" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-dtcg)"/>
+
+    <rect x="576" y="424" width="456" height="66" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="804" y="448" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Step 4: Readers Keep Serving Queries Throughout</text>
+    <text x="804" y="468" text-anchor="middle" font-size="12" fill="#164231">Ephemeral ASG readers use dynamic IPs + lease claims; fixed</text>
+    <text x="804" y="484" text-anchor="middle" font-size="12" fill="#164231">writers and keepers roll cleanly one by one via D-T-C.</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="522" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="548" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Terraform Rule: Never attach create_before_destroy to a subgraph that depends on static IPs or persistent EBS volumes</text>
+  </g>
+</svg>

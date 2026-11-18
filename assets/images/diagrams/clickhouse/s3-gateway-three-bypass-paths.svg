@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 720" role="img" aria-labelledby="title desc">
+  <title id="title">Three Places the S3 Gateway Guarantee Silently Breaks</title>
+  <desc id="desc">The S3 Gateway Endpoint is free only while every S3 byte rides it. Three silent-bypass paths: a route-table edit detaching the endpoint, a staging bucket in the wrong region (the regional endpoint refuses to route it, NAT catches the traffic), and a hardcoded application URL pointing at the wrong bucket. Each with its plan-time guard: route-table attachment in both network modes, a plan-time check resolving the bucket's real region, and a Terraform-rendered URL with runtime drift convergence.</desc>
+  <defs>
+    <marker id="arrow-navy" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#8b5a1e"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="720" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="34" text-anchor="middle" font-size="23" font-weight="700">Free Is a Route, Not a Setting: Guarding All Three Bypass Paths</text>
+    <text x="540" y="58" text-anchor="middle" font-size="14" fill="#465a6e">The endpoint costs $0 — every failure mode below is a silent route change, and each has a plan-time guard that fails the deploy instead</text>
+
+    <!-- BREAK 1: ROUTE TABLE -->
+    <rect x="30" y="86" width="1020" height="188" rx="12" fill="#fdf6ec" stroke="#b8883b" stroke-width="1.8"/>
+    <rect x="46" y="100" width="150" height="26" rx="6" fill="#8b5a1e"/>
+    <text x="121" y="118" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">BYPASS 1 — ROUTES</text>
+    <text x="210" y="117" font-size="14" font-weight="700" fill="#5e3e0e">Someone "cleans up" the route table and the endpoint detaches</text>
+
+    <rect x="60" y="140" width="300" height="118" rx="8" fill="#ffffff" stroke="#b8883b" stroke-width="1.4"/>
+    <text x="210" y="162" text-anchor="middle" font-size="12.5" font-weight="700">How it breaks</text>
+    <text x="210" y="184" text-anchor="middle" font-size="11" fill="#5c4a2e">A shared VPC, a Terraform import, a console</text>
+    <text x="210" y="200" text-anchor="middle" font-size="11" fill="#5c4a2e">edit — the endpoint stops being attached to the</text>
+    <text x="210" y="216" text-anchor="middle" font-size="11" fill="#5c4a2e">nodes' route table. Zero errors. Every byte now</text>
+    <text x="210" y="232" text-anchor="middle" font-size="11" fill="#5c4a2e">matches 0.0.0.0/0 → NAT at $0.045/GB.</text>
+
+    <rect x="390" y="140" width="300" height="118" rx="8" fill="#e8f3ee" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="540" y="162" text-anchor="middle" font-size="12.5" font-weight="700" fill="#164231">The plan-time guard</text>
+    <text x="540" y="184" text-anchor="middle" font-size="11" fill="#2d6a56">The endpoint's route_table_ids is declarative:</text>
+    <text x="540" y="200" text-anchor="middle" font-size="11" fill="#2d6a56">Terraform re-attaches on the next apply, in BOTH</text>
+    <text x="540" y="216" text-anchor="middle" font-size="11" fill="#2d6a56">network modes (created-VPC private RTs, or the</text>
+    <text x="540" y="232" text-anchor="middle" font-size="11" fill="#2d6a56">resolved nodes RT in an existing VPC).</text>
+
+    <rect x="720" y="140" width="300" height="118" rx="8" fill="#ffffff" stroke="#1e4e68" stroke-width="1.4"/>
+    <text x="870" y="162" text-anchor="middle" font-size="12.5" font-weight="700">Detection backstop</text>
+    <text x="870" y="184" text-anchor="middle" font-size="11" fill="#465a6e">CloudWatch alarm on NAT bytes:</text>
+    <text x="870" y="200" text-anchor="middle" font-size="11" fill="#465a6e">a fleet moving TBs/day through S3 shows</text>
+    <text x="870" y="216" text-anchor="middle" font-size="11" fill="#465a6e">$3–8/mo of control-plane egress; a bypass</text>
+    <text x="870" y="232" text-anchor="middle" font-size="11" fill="#465a6e">leaks $89–$306/day ($45/day alarm trips).</text>
+
+    <!-- BREAK 2: REGION -->
+    <rect x="30" y="294" width="1020" height="188" rx="12" fill="#f4f0fb" stroke="#6a4fa3" stroke-width="1.8"/>
+    <rect x="46" y="308" width="150" height="26" rx="6" fill="#6a4fa3"/>
+    <text x="121" y="326" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">BYPASS 2 — REGION</text>
+    <text x="210" y="325" font-size="14" font-weight="700" fill="#3d2a66">The staging bucket lives in another region — the endpoint won't route it</text>
+
+    <rect x="60" y="348" width="300" height="118" rx="8" fill="#ffffff" stroke="#6a4fa3" stroke-width="1.4"/>
+    <text x="210" y="370" text-anchor="middle" font-size="12.5" font-weight="700">How it breaks</text>
+    <text x="210" y="392" text-anchor="middle" font-size="11" fill="#4a3a6e">Gateway endpoints are REGIONAL. A bucket in</text>
+    <text x="210" y="408" text-anchor="middle" font-size="11" fill="#4a3a6e">us-east-1 read from us-west-2 is not covered by</text>
+    <text x="210" y="424" text-anchor="middle" font-size="11" fill="#4a3a6e">any endpoint. S3 traffic exits via NAT and every</text>
+    <text x="210" y="440" text-anchor="middle" font-size="11" fill="#4a3a6e">staged GET bills processing — invisible in code.</text>
+
+    <rect x="390" y="348" width="300" height="118" rx="8" fill="#e8f3ee" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="540" y="370" text-anchor="middle" font-size="12.5" font-weight="700" fill="#164231">The plan-time guard</text>
+    <text x="540" y="392" text-anchor="middle" font-size="11" fill="#2d6a56">A data source resolves the bucket's ACTUAL</text>
+    <text x="540" y="408" text-anchor="middle" font-size="11" fill="#2d6a56">home region at plan; a check block compares</text>
+    <text x="540" y="424" text-anchor="middle" font-size="11" fill="#2d6a56">it to the cluster's region and fails the plan</text>
+    <text x="540" y="440" text-anchor="middle" font-size="11" fill="#2d6a56">with the remediation spelled out.</text>
+
+    <rect x="720" y="348" width="300" height="118" rx="8" fill="#ffffff" stroke="#1e4e68" stroke-width="1.4"/>
+    <text x="870" y="370" text-anchor="middle" font-size="12.5" font-weight="700">The S3 API angle</text>
+    <text x="870" y="392" text-anchor="middle" font-size="11" fill="#465a6e">Cross-region reads also add latency to every</text>
+    <text x="870" y="408" text-anchor="middle" font-size="11" fill="#465a6e">poll: the S3Queue's 500 ms poll cadence</text>
+    <text x="870" y="424" text-anchor="middle" font-size="11" fill="#465a6e">becomes a cross-country round trip — the</text>
+    <text x="870" y="440" text-anchor="middle" font-size="11" fill="#465a6e">drain lags before the bill even arrives.</text>
+
+    <!-- BREAK 3: HARDCODED URL -->
+    <rect x="30" y="502" width="1020" height="188" rx="12" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.8"/>
+    <rect x="46" y="516" width="165" height="26" rx="6" fill="#c05c5c"/>
+    <text x="128" y="534" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">BYPASS 3 — THE URL</text>
+    <text x="225" y="533" font-size="14" font-weight="700" fill="#7c2323">A hardcoded S3 URL points the fleet at the wrong bucket</text>
+
+    <rect x="60" y="556" width="300" height="118" rx="8" fill="#ffffff" stroke="#c05c5c" stroke-width="1.4"/>
+    <text x="210" y="578" text-anchor="middle" font-size="12.5" font-weight="700">How it breaks</text>
+    <text x="210" y="600" text-anchor="middle" font-size="11" fill="#7c2323">The DDL shipped a literal endpoint string. Every</text>
+    <text x="210" y="616" text-anchor="middle" font-size="11" fill="#7c2323">environment drained the same dev bucket —</text>
+    <text x="210" y="632" text-anchor="middle" font-size="11" fill="#7c2323">or after a rename, CREATE IF NOT EXISTS no-ops</text>
+    <text x="210" y="648" text-anchor="middle" font-size="11" fill="#7c2323">and writers drain the OLD bucket forever.</text>
+
+    <rect x="390" y="556" width="300" height="118" rx="8" fill="#e8f3ee" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="540" y="578" text-anchor="middle" font-size="12.5" font-weight="700" fill="#164231">The render fix</text>
+    <text x="540" y="600" text-anchor="middle" font-size="11" fill="#2d6a56">The queue URL is Terraform-rendered from the</text>
+    <text x="540" y="616" text-anchor="middle" font-size="11" fill="#2d6a56">same variables the IAM grants cover — bucket,</text>
+    <text x="540" y="632" text-anchor="middle" font-size="11" fill="#2d6a56">prefix, and region can never drift from the</text>
+    <text x="540" y="648" text-anchor="middle" font-size="11" fill="#2d6a56">access the fleet actually has.</text>
+
+    <rect x="720" y="556" width="300" height="118" rx="8" fill="#ffffff" stroke="#1e4e68" stroke-width="1.4"/>
+    <text x="870" y="578" text-anchor="middle" font-size="12.5" font-weight="700">The convergence fix</text>
+    <text x="870" y="600" text-anchor="middle" font-size="11" fill="#465a6e">Schema bootstrap probes the live table's</text>
+    <text x="870" y="616" text-anchor="middle" font-size="11" fill="#465a6e">engine: if the declared URL (or keeper path)</text>
+    <text x="870" y="632" text-anchor="middle" font-size="11" fill="#465a6e">drifted, the queue is re-created on the new</text>
+    <text x="870" y="648" text-anchor="middle" font-size="11" fill="#465a6e">URL — lossless, the queue holds no data.</text>
+  </g>
+</svg>

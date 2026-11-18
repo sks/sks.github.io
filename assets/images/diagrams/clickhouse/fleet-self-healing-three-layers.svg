@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 600" role="img" aria-labelledby="title desc">
+  <title id="title">The Fleet That Could Not Heal Itself: Three Waves of Invisible Failures and Their Self-Healing Loops</title>
+  <desc id="desc">How a four-hour load soak went from 2,284 errors/hour to zero by closing all three links of the self-healing chain (Detection, Diagnosis, Remedy) across loopback TLS storms, dead DNS entries in remote_servers, and internal CPU overload monitors.</desc>
+  <defs>
+    <marker id="arr-sh" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+    <marker id="arr-shg" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="600" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">What Self-Healing Actually Requires: See It, Name It, Fix It</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">A node passing TCP health checks can still fail 2,284 times an hour &#8212; every failure wave needed detection, diagnosis, and a closed-loop remedy</text>
+
+    <!-- COLUMN HEADERS -->
+    <rect x="30" y="80" width="320" height="32" rx="8" fill="#8f2424"/>
+    <text x="190" y="101" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">1. THE INVISIBLE FAILURE WAVE</text>
+
+    <rect x="380" y="80" width="320" height="32" rx="8" fill="#28597a"/>
+    <text x="540" y="101" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">2. DETECTION &amp; DIAGNOSIS SIGNAL</text>
+
+    <rect x="730" y="80" width="320" height="32" rx="8" fill="#1f6f50"/>
+    <text x="890" y="101" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">3. CLOSED-LOOP REMEDY</text>
+
+    <!-- WAVE 1: TLS STORM -->
+    <rect x="30" y="128" width="320" height="122" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <text x="190" y="152" text-anchor="middle" font-size="15" font-weight="700" fill="#7c2323">Wave 1: Loopback TLS Storm</text>
+    <text x="190" y="174" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#b43c3c">Code 210: tlsv1 alert unknown ca</text>
+    <text x="190" y="194" text-anchor="middle" font-size="12" fill="#5c3a3a">Local agent dialed <tspan font-family="Courier, monospace">127.0.0.1:9440</tspan></text>
+    <text x="190" y="212" text-anchor="middle" font-size="12" fill="#5c3a3a">(self-signed cert) 60&#215;/min = 2,284/hr</text>
+    <text x="190" y="234" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">NLB &amp; EC2 health checks: 100% GREEN</text>
+
+    <path d="M350 189 H376" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arr-sh)"/>
+
+    <rect x="380" y="128" width="320" height="122" rx="10" fill="#eef4fb" stroke="#28597a" stroke-width="1.6"/>
+    <text x="540" y="152" text-anchor="middle" font-size="15" font-weight="700" fill="#143852">Log Metric Filter + Alarm</text>
+    <text x="540" y="174" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#28597a">TCPHandler + Cannot initialize</text>
+    <text x="540" y="194" text-anchor="middle" font-size="12" fill="#334a60">Convert error-log pairs into a</text>
+    <text x="540" y="212" text-anchor="middle" font-size="12" fill="#334a60">CloudWatch metric with the exact</text>
+    <text x="540" y="234" text-anchor="middle" font-size="11" font-weight="700" fill="#143852">peer IP diagnosis command in description</text>
+
+    <path d="M700 189 H726" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-shg)"/>
+
+    <rect x="730" y="128" width="320" height="122" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="890" y="152" text-anchor="middle" font-size="15" font-weight="700" fill="#164231">Stop Unconfigured Local Shippers</text>
+    <text x="890" y="174" text-anchor="middle" font-size="12" fill="#2c4a3e">Only start OTel/Fluent Bit when a</text>
+    <text x="890" y="194" text-anchor="middle" font-size="12" fill="#2c4a3e">remote endpoint is configured; point</text>
+    <text x="890" y="212" text-anchor="middle" font-size="12" fill="#2c4a3e">local probes at plaintext <tspan font-family="Courier, monospace">localhost:9000</tspan></text>
+    <text x="890" y="234" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Result: 2,284 errors/hr &#8594; 0</text>
+
+    <!-- WAVE 2: DEAD DNS IN REMOTE_SERVERS -->
+    <rect x="30" y="268" width="320" height="122" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <text x="190" y="292" text-anchor="middle" font-size="15" font-weight="700" fill="#7c2323">Wave 2: Dead Hosts in Cluster XML</text>
+    <text x="190" y="314" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#b43c3c">Code 198: DNS_ERROR writer-3</text>
+    <text x="190" y="334" text-anchor="middle" font-size="12" fill="#5c3a3a"><tspan font-family="Courier, monospace">remote_servers</tspan> listed ASG max slots</text>
+    <text x="190" y="352" text-anchor="middle" font-size="12" fill="#5c3a3a">(0..4) even when only 1 writer existed.</text>
+    <text x="190" y="374" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Distributed DDL &amp; queries retried ghosts</text>
+
+    <path d="M350 329 H376" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arr-sh)"/>
+
+    <rect x="380" y="268" width="320" height="122" rx="10" fill="#eef4fb" stroke="#28597a" stroke-width="1.6"/>
+    <text x="540" y="292" text-anchor="middle" font-size="15" font-weight="700" fill="#143852">Live Lease Table Discovery</text>
+    <text x="540" y="314" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#28597a">ListActiveClaims(table, role)</text>
+    <text x="540" y="334" text-anchor="middle" font-size="12" fill="#334a60">Query the DynamoDB lease table for</text>
+    <text x="540" y="352" text-anchor="middle" font-size="12" fill="#334a60">currently held ordinals + guard</text>
+    <text x="540" y="374" text-anchor="middle" font-size="11" font-weight="700" fill="#143852">against empty shards (Code 507 crash)</text>
+
+    <path d="M700 329 H726" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-shg)"/>
+
+    <rect x="730" y="268" width="320" height="122" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="890" y="292" text-anchor="middle" font-size="15" font-weight="700" fill="#164231">Dynamic Topology Convergence</text>
+    <text x="890" y="314" text-anchor="middle" font-size="12" fill="#2c4a3e"><tspan font-family="Courier, monospace">chinit</tspan> renders <tspan font-family="Courier, monospace">remote_servers.xml</tspan></text>
+    <text x="890" y="334" text-anchor="middle" font-size="12" fill="#2c4a3e">from live lease holders at boot and</text>
+    <text x="890" y="352" text-anchor="middle" font-size="12" fill="#2c4a3e">refreshes membership as nodes scale.</text>
+    <text x="890" y="374" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Zero phantom hosts in cluster config</text>
+
+    <!-- WAVE 3: INTERNAL CPU MONITOR & SCHEMA DRIFT -->
+    <rect x="30" y="408" width="320" height="122" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <text x="190" y="432" text-anchor="middle" font-size="15" font-weight="700" fill="#7c2323">Wave 3: Deaf Autoscaler &amp; Drift</text>
+    <text x="190" y="454" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#b43c3c">OverloadTracker: 100% busy</text>
+    <text x="190" y="474" text-anchor="middle" font-size="12" fill="#5c3a3a">ClickHouse internal CPU monitor screamed</text>
+    <text x="190" y="492" text-anchor="middle" font-size="12" fill="#5c3a3a">while EC2 average CPU stayed calm;</text>
+    <text x="190" y="514" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">replacement nodes booted without DDL</text>
+
+    <path d="M350 469 H376" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arr-sh)"/>
+
+    <rect x="380" y="408" width="320" height="122" rx="10" fill="#eef4fb" stroke="#28597a" stroke-width="1.6"/>
+    <text x="540" y="432" text-anchor="middle" font-size="15" font-weight="700" fill="#143852">Overload Metric + Schema Audit</text>
+    <text x="540" y="454" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#28597a">HighCPUUsage metric filter</text>
+    <text x="540" y="474" text-anchor="middle" font-size="12" fill="#334a60">Wire ClickHouse's own overload log</text>
+    <text x="540" y="492" text-anchor="middle" font-size="12" fill="#334a60">to CloudWatch + ship DDL in the</text>
+    <text x="540" y="514" text-anchor="middle" font-size="11" font-weight="700" fill="#143852">versioned S3 bootstrap bundle</text>
+
+    <path d="M700 469 H726" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-shg)"/>
+
+    <rect x="730" y="408" width="320" height="122" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="890" y="432" text-anchor="middle" font-size="15" font-weight="700" fill="#164231">Boot + Timer Schema Convergence</text>
+    <text x="890" y="454" text-anchor="middle" font-size="12" fill="#2c4a3e">Every replacement node applies</text>
+    <text x="890" y="474" text-anchor="middle" font-size="12" fill="#2c4a3e">role-scoped DDL at boot and every</text>
+    <text x="890" y="492" text-anchor="middle" font-size="12" fill="#2c4a3e">15 minutes via <tspan font-family="Courier, monospace">chinit schema-sync</tspan>.</text>
+    <text x="890" y="514" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Every manual fix became a boot step</text>
+
+    <!-- FOOTER -->
+    <rect x="30" y="544" width="1020" height="40" rx="8" fill="#17283c"/>
+    <text x="540" y="569" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">SRE Principle: Every recurring manual runbook step is a design confession &#8212; close the loop in the bootstrapper</text>
+  </g>
+</svg>

@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 560" role="img" aria-labelledby="title desc">
+  <title id="title">Touching CAS Without Betting the Cluster: Staged Rollout on AWS</title>
+  <desc id="desc">Five-step staged adoption of Altinity Antalya CAS on AWS: verify S3 bucket preconditions, bake pinned Antalya AMI, mount cas and cas_cache disks alongside existing disks, move one cold partition with ALTER TABLE MOVE PARTITION, and verify via system.cas_mounts.</desc>
+  <defs>
+    <marker id="arr-st" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="560" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Touching CAS Without Betting the Cluster: Five-Step Staged Rollout</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Add CAS as a side-by-side disk and move one cold partition at a time &#8212; reversible with a single ALTER TABLE</text>
+
+    <!-- 5 STAGES -->
+    <rect x="24" y="88" width="194" height="294" rx="12" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.8"/>
+    <rect x="24" y="88" width="194" height="36" rx="12" fill="#9b6b24"/>
+    <text x="121" y="111" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">1. S3 Preconditions</text>
+    <text x="121" y="144" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">Must Hold Before Boot</text>
+    <rect x="38" y="158" width="166" height="36" rx="6" fill="#ffffff" stroke="#b8883b" stroke-width="1.2"/>
+    <text x="121" y="180" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#1f6f50">Versioning: Disabled</text>
+    <rect x="38" y="202" width="166" height="36" rx="6" fill="#ffffff" stroke="#b8883b" stroke-width="1.2"/>
+    <text x="121" y="224" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#1f6f50">Object Lock: None</text>
+    <rect x="38" y="246" width="166" height="36" rx="6" fill="#ffffff" stroke="#b8883b" stroke-width="1.2"/>
+    <text x="121" y="268" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#1f6f50">If-None-Match: Honored</text>
+    <text x="121" y="312" text-anchor="middle" font-size="11" fill="#5e3e0e">+ Multipart abort rule</text>
+    <text x="121" y="330" text-anchor="middle" font-size="11" fill="#5e3e0e">(7d) &amp; per-tenant</text>
+    <text x="121" y="348" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#9b6b24">cas/&lt;tenant&gt;/ prefix</text>
+
+    <path d="M218 235 H232" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-st)"/>
+
+    <!-- Stage 2 -->
+    <rect x="236" y="88" width="194" height="294" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="236" y="88" width="194" height="36" rx="12" fill="#28597a"/>
+    <text x="333" y="111" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">2. Pinned Antalya AMI</text>
+    <text x="333" y="144" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">Homogeneous Binary</text>
+    <rect x="250" y="158" width="166" height="54" rx="6" fill="#ffffff" stroke="#28597a" stroke-width="1.2"/>
+    <text x="333" y="180" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">build_flavor=antalya</text>
+    <text x="333" y="198" text-anchor="middle" font-family="Courier, monospace" font-size="10" fill="#28597a">26.6.8.altinityantalya</text>
+    <text x="333" y="238" text-anchor="middle" font-size="11" fill="#334a60">Bake exact version in</text>
+    <text x="333" y="256" text-anchor="middle" font-size="11" fill="#334a60">Packer golden image.</text>
+    <text x="333" y="286" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Never mix upstream &amp;</text>
+    <text x="333" y="304" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Antalya in one cluster</text>
+    <text x="333" y="348" text-anchor="middle" font-size="11" font-weight="700" fill="#28597a">Existing tables untouched</text>
+
+    <path d="M430 235 H444" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-st)"/>
+
+    <!-- Stage 3 -->
+    <rect x="448" y="88" width="194" height="294" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="448" y="88" width="194" height="36" rx="12" fill="#28597a"/>
+    <text x="545" y="111" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">3. Side-by-Side Disks</text>
+    <text x="545" y="144" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">Add Without Migrating</text>
+    <rect x="462" y="158" width="166" height="44" rx="6" fill="#ffffff" stroke="#28597a" stroke-width="1.2"/>
+    <text x="545" y="177" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">metadata_type: cas</text>
+    <text x="545" y="193" text-anchor="middle" font-family="Courier, monospace" font-size="9" fill="#28597a">root_id = {replica}</text>
+    <rect x="462" y="210" width="166" height="44" rx="6" fill="#ffffff" stroke="#28597a" stroke-width="1.2"/>
+    <text x="545" y="229" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">type: cache</text>
+    <text x="545" y="245" text-anchor="middle" font-family="Courier, monospace" font-size="9" fill="#28597a">disk: cas_default</text>
+    <text x="545" y="282" text-anchor="middle" font-size="11" fill="#334a60">Hot gp3 + existing S3</text>
+    <text x="545" y="300" text-anchor="middle" font-size="11" fill="#334a60">disks stay in place;</text>
+    <text x="545" y="318" text-anchor="middle" font-size="11" fill="#334a60">zero bytes moved yet.</text>
+    <text x="545" y="348" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Revert = XML config roll</text>
+
+    <path d="M642 235 H656" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-st)"/>
+
+    <!-- Stage 4 -->
+    <rect x="660" y="88" width="194" height="294" rx="12" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.8"/>
+    <rect x="660" y="88" width="194" height="36" rx="12" fill="#1f6f50"/>
+    <text x="757" y="111" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">4. Move One Partition</text>
+    <text x="757" y="144" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Opt-In Per Partition</text>
+    <rect x="674" y="158" width="166" height="58" rx="6" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.2"/>
+    <text x="757" y="178" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#164231">ALTER TABLE events</text>
+    <text x="757" y="194" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#164231">MOVE PARTITION '202610'</text>
+    <text x="757" y="209" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#164231">TO DISK 'cas_cache'</text>
+    <text x="757" y="246" text-anchor="middle" font-size="11" fill="#2c4a3e">First replica uploads</text>
+    <text x="757" y="264" text-anchor="middle" font-size="11" fill="#2c4a3e">content-hashed blobs;</text>
+    <text x="757" y="282" text-anchor="middle" font-size="11" fill="#2c4a3e">peers deduplicate to</text>
+    <text x="757" y="300" text-anchor="middle" font-size="11" fill="#2c4a3e">the same S3 keys.</text>
+    <text x="757" y="348" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">1 physical copy on S3</text>
+
+    <path d="M854 235 H868" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-st)"/>
+
+    <!-- Stage 5 -->
+    <rect x="872" y="88" width="184" height="294" rx="12" fill="#f3f0fb" stroke="#5b4b8a" stroke-width="1.8"/>
+    <rect x="872" y="88" width="184" height="36" rx="12" fill="#5b4b8a"/>
+    <text x="964" y="111" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">5. Verify &amp; Exit Gate</text>
+    <text x="964" y="144" text-anchor="middle" font-size="12" font-weight="700" fill="#3a2e5c">Prove It in System Tables</text>
+    <rect x="886" y="158" width="156" height="36" rx="6" fill="#ffffff" stroke="#5b4b8a" stroke-width="1.2"/>
+    <text x="964" y="180" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#1f6f50">cas_mounts: 'live'</text>
+    <rect x="886" y="202" width="156" height="36" rx="6" fill="#ffffff" stroke="#5b4b8a" stroke-width="1.2"/>
+    <text x="964" y="224" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#1f6f50">cas_gc_log: Success</text>
+    <text x="964" y="264" text-anchor="middle" font-size="11" fill="#3a2e5c">Need to roll back?</text>
+    <text x="964" y="284" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#5b4b8a">MOVE PARTITION</text>
+    <text x="964" y="300" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#5b4b8a">TO DISK 's3_plain'</text>
+    <text x="964" y="348" text-anchor="middle" font-size="11" font-weight="700" fill="#5b4b8a">Zero DDL rewrites</text>
+
+    <!-- BOTTOM COMPARISON -->
+    <rect x="24" y="404" width="1032" height="136" rx="12" fill="#17283c"/>
+    <text x="540" y="432" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">Before vs. After on the Cold S3 Tier</text>
+    <rect x="48" y="446" width="468" height="74" rx="8" fill="#283d54"/>
+    <text x="282" y="470" text-anchor="middle" font-size="13" font-weight="700" fill="#fde8e8">Before: Per-Replica S3 Prefixes</text>
+    <text x="282" y="492" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#bfd6ea">data/writer-0/partA + data/reader-1/partA + data/reader-2/partA</text>
+    <text x="282" y="510" text-anchor="middle" font-size="11" font-weight="700" fill="#f59e0b">3&#215; S3 storage bytes &#183; 3&#215; PUT requests</text>
+
+    <rect x="564" y="446" width="468" height="74" rx="8" fill="#164231"/>
+    <text x="798" y="470" text-anchor="middle" font-size="13" font-weight="700" fill="#dff0e8">After: Shared CAS Pool Prefix</text>
+    <text x="798" y="492" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#ffffff">cas/default/blobs/cityhash128/&lt;content-hash&gt;</text>
+    <text x="798" y="510" text-anchor="middle" font-size="11" font-weight="700" fill="#86efac">1&#215; canonical blob copy &#183; Replicas share via immutable manifests</text>
+  </g>
+</svg>

@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">Adopting the Pattern: Five-Stage Migration to Declarative Node Bootstrap and Lease Identity</title>
+  <desc id="desc">Staged migration guide from templated bash boot scripts to declarative node bootstrap: Inventory, YAML Spec, Pipeline Engine with dry-run alongside bash, Lease Identity before config render, In-Process Operations Port, and Dissolve Legacy Scripts.</desc>
+  <defs>
+    <marker id="arr-ad" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Adopting the Pattern: Staged Migration from Bash to Declarative Bootstrap</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Never ship a 3,000-line boot rewrite in one cutover &#8212; roll five independently revertible stages</text>
+
+    <!-- 5 STAGES -->
+    <rect x="24" y="86" width="194" height="270" rx="12" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.8"/>
+    <rect x="24" y="86" width="194" height="36" rx="12" fill="#9b6b24"/>
+    <text x="121" y="109" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Stage 1: The Spec</text>
+    <text x="121" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">Inventory &#8594; YAML</text>
+    <text x="121" y="164" text-anchor="middle" font-size="11" fill="#5e3e0e">Extract all 40 IaC</text>
+    <text x="121" y="182" text-anchor="middle" font-size="11" fill="#5e3e0e">template vars into</text>
+    <text x="121" y="200" text-anchor="middle" font-size="11" fill="#5e3e0e">a typed role YAML:</text>
+    <rect x="38" y="214" width="166" height="54" rx="6" fill="#ffffff" stroke="#b8883b" stroke-width="1.2"/>
+    <text x="121" y="234" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">role, disk labels,</text>
+    <text x="121" y="250" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">secret NAMES, sha256</text>
+    <text x="121" y="294" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Validated at step 0</text>
+    <text x="121" y="314" text-anchor="middle" font-size="10" fill="#7a541b">Port invariants, not</text>
+    <text x="121" y="330" text-anchor="middle" font-size="10" fill="#7a541b">bash sleep folklore</text>
+
+    <path d="M218 221 H232" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arr-ad)"/>
+
+    <rect x="236" y="86" width="194" height="270" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="236" y="86" width="194" height="36" rx="12" fill="#28597a"/>
+    <text x="333" y="109" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Stage 2: The Engine</text>
+    <text x="333" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">Beside Existing Bash</text>
+    <text x="333" y="164" text-anchor="middle" font-size="11" fill="#334a60">Build typed steps,</text>
+    <text x="333" y="182" text-anchor="middle" font-size="11" fill="#334a60">4 retry policies, and</text>
+    <text x="333" y="200" text-anchor="middle" font-size="11" fill="#334a60">SHA-keyed state file.</text>
+    <rect x="250" y="214" width="166" height="54" rx="6" fill="#ffffff" stroke="#28597a" stroke-width="1.2"/>
+    <text x="333" y="234" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#1f6f50">chinit boot --dry-run</text>
+    <text x="333" y="252" text-anchor="middle" font-size="10" fill="#334a60">Prints plan on laptop</text>
+    <text x="333" y="294" text-anchor="middle" font-size="11" font-weight="700" fill="#28597a">Bash still authoritative</text>
+    <text x="333" y="314" text-anchor="middle" font-size="10" fill="#334a60">Zero blast radius while</text>
+    <text x="333" y="330" text-anchor="middle" font-size="10" fill="#334a60">proving step order</text>
+
+    <path d="M430 221 H444" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arr-ad)"/>
+
+    <rect x="448" y="86" width="194" height="270" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="448" y="86" width="194" height="36" rx="12" fill="#28597a"/>
+    <text x="545" y="109" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Stage 3: Identity</text>
+    <text x="545" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">Claim Before Render</text>
+    <text x="545" y="164" text-anchor="middle" font-size="11" fill="#334a60">Cut over lease claim</text>
+    <text x="545" y="182" text-anchor="middle" font-size="11" fill="#334a60">as an engine step</text>
+    <text x="545" y="200" text-anchor="middle" font-size="11" fill="#334a60">before ops migration.</text>
+    <rect x="462" y="214" width="166" height="54" rx="6" fill="#ffffff" stroke="#28597a" stroke-width="1.2"/>
+    <text x="545" y="234" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">1. Claim reader-2</text>
+    <text x="545" y="252" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">2. Render {replica}</text>
+    <text x="545" y="294" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">State file holds name</text>
+    <text x="545" y="314" text-anchor="middle" font-size="10" fill="#334a60">Keepers stay static</text>
+    <text x="545" y="330" text-anchor="middle" font-size="10" fill="#334a60">(never lease Raft logs!)</text>
+
+    <path d="M642 221 H656" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arr-ad)"/>
+
+    <rect x="660" y="86" width="194" height="270" rx="12" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.8"/>
+    <rect x="660" y="86" width="194" height="36" rx="12" fill="#1f6f50"/>
+    <text x="757" y="109" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Stage 4: Operations</text>
+    <text x="757" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Port One Job at a Time</text>
+    <text x="757" y="164" text-anchor="middle" font-size="11" fill="#2c4a3e">Move cron/systemd</text>
+    <text x="757" y="182" text-anchor="middle" font-size="11" fill="#2c4a3e">jobs into <tspan font-family="Courier, monospace">chinit</tspan>:</text>
+    <text x="757" y="200" text-anchor="middle" font-size="11" fill="#2c4a3e">in-process typed port.</text>
+    <rect x="674" y="214" width="166" height="54" rx="6" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.2"/>
+    <text x="757" y="234" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">chinit schema-sync</text>
+    <text x="757" y="252" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">chinit lease-renew</text>
+    <text x="757" y="294" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Reads settled state.json</text>
+    <text x="757" y="314" text-anchor="middle" font-size="10" fill="#2c4a3e">Pair every .service</text>
+    <text x="757" y="330" text-anchor="middle" font-size="10" fill="#2c4a3e">with its .timer unit</text>
+
+    <path d="M854 221 H868" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arr-ad)"/>
+
+    <rect x="872" y="86" width="184" height="270" rx="12" fill="#f3f0fb" stroke="#5b4b8a" stroke-width="1.8"/>
+    <rect x="872" y="86" width="184" height="36" rx="12" fill="#5b4b8a"/>
+    <text x="964" y="109" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Stage 5: Dissolve</text>
+    <text x="964" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#3a2e5c">Delete the Scaffolding</text>
+    <text x="964" y="164" text-anchor="middle" font-size="11" fill="#3a2e5c">Retire the 3,600-line</text>
+    <text x="964" y="182" text-anchor="middle" font-size="11" fill="#3a2e5c">bash template &amp;</text>
+    <text x="964" y="200" text-anchor="middle" font-size="11" fill="#3a2e5c">companion CLI binary.</text>
+    <rect x="886" y="214" width="156" height="54" rx="6" fill="#ffffff" stroke="#5b4b8a" stroke-width="1.2"/>
+    <text x="964" y="234" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#5b4b8a">1.5 KB wrapper +</text>
+    <text x="964" y="252" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#5b4b8a">1 static Go binary</text>
+    <text x="964" y="294" text-anchor="middle" font-size="11" font-weight="700" fill="#5b4b8a">Single release pipeline</text>
+    <text x="964" y="314" text-anchor="middle" font-size="10" fill="#3a2e5c">Keep human CLIs only</text>
+    <text x="964" y="330" text-anchor="middle" font-size="10" fill="#3a2e5c">where humans call them</text>
+
+    <!-- BOTTOM: THE THREE VALIDATION GATES -->
+    <rect x="24" y="378" width="1032" height="126" rx="12" fill="#ffffff" stroke="#1f6f50" stroke-width="1.8"/>
+    <text x="540" y="404" text-anchor="middle" font-size="15" font-weight="700" fill="#164231">The Three Validation Gates That Keep Every Cutover Honest</text>
+
+    <rect x="44" y="420" width="310" height="68" rx="8" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.3"/>
+    <text x="199" y="444" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Gate 1: Table-Driven Unit Tests</text>
+    <text x="199" y="464" text-anchor="middle" font-size="11" fill="#2c4a3e">Test spec validation, step ordering, and</text>
+    <text x="199" y="479" text-anchor="middle" font-size="11" fill="#2c4a3e">retry classification in milliseconds in CI.</text>
+
+    <rect x="385" y="420" width="310" height="68" rx="8" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.3"/>
+    <text x="540" y="444" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Gate 2: Laptop Dry-Run Plan</text>
+    <text x="540" y="464" text-anchor="middle" font-size="11" fill="#2c4a3e"><tspan font-family="Courier, monospace">chinit boot --dry-run</tspan> verifies spec parsing,</text>
+    <text x="540" y="479" text-anchor="middle" font-size="11" fill="#2c4a3e">cloud capability probes, and step graph.</text>
+
+    <rect x="726" y="420" width="310" height="68" rx="8" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.3"/>
+    <text x="881" y="444" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Gate 3: Staged Single-Role Roll</text>
+    <text x="881" y="464" text-anchor="middle" font-size="11" fill="#2c4a3e">Roll readers first, let live findings</text>
+    <text x="881" y="479" text-anchor="middle" font-size="11" fill="#2c4a3e">harden the step, then roll writers.</text>
+
+    <!-- FOOTER -->
+    <rect x="24" y="520" width="1032" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="546" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">What Not to Port: Never lease the identity of stateful Raft coordinators (Keepers) &#8212; keep them on static identity with a quorum gate</text>
+  </g>
+</svg>

@@ -5,7 +5,7 @@ date: 2026-11-06 09:00:00 -0700
 series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 2
 description: "Cloud's SharedMergeTree does not exist in open source: what you get instead with ReplicatedMergeTree, Keeper, and the zero-copy lesson."
-image: /assets/images/og-default.png
+image: /assets/images/diagrams/clickhouse/cloud-sharedmergetree-vs-oss-replicated.svg
 tags: [clickhouse, sharedmergetree, replicatedmergetree, keeper, aws, self-hosted]
 permalink: /blog/clickhouse-cloud-vs-self-managed-engines/
 faqs:
@@ -41,6 +41,10 @@ One running example carries the post: a company with branch offices and a head o
 ---
 
 ## What SharedMergeTree is, and where it lives
+
+![ClickHouse Cloud SharedMergeTree versus self-managed open-source ReplicatedMergeTree with Keeper and tiered S3 storage](/assets/images/diagrams/clickhouse/cloud-sharedmergetree-vs-oss-replicated.svg)
+
+*`SharedMergeTree` is proprietary to ClickHouse Cloud; on self-managed open-source ClickHouse, the 1:1 counterpart is `ReplicatedMergeTree` coordinated by a Keeper quorum and backed by a local-hot + `s3_cache` + S3-cold storage policy.*
 
 SharedMergeTree is a MergeTree variant with one copy of each part, stored in shared object storage such as S3. Every compute node reads that same copy. Replicas do not copy data to each other; they coordinate through the shared storage plus Keeper, ClickHouse's ZooKeeper-compatible coordination service. Reference: [SharedMergeTree in the Cloud docs](https://clickhouse.com/docs/en/cloud/reference/shared-merge-tree).
 

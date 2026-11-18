@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">Teaching an Operator Without Kubernetes: Extracting Altinity Domain Packages for EC2</title>
+  <desc id="desc">How the Altinity clickhouse-operator source splits into a Kubernetes-welded controller layer (left behind) and portable Go domain packages (Normalizer, XML Config Generators, Schemer, and SQL Client) reused on EC2.</desc>
+  <defs>
+    <marker id="arr-op" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+    <marker id="arr-opx" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#b43c3c"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Teaching an Operator to Work Without Kubernetes: What Ports to EC2</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">The Altinity operator's nervous system (Pods/StatefulSets) is welded to K8s &#8212; its brain (Normalizer, XML Generator, Schemer) imports cleanly in Go</text>
+
+    <!-- LEFT: ALTINITY OPERATOR SOURCE TREE -->
+    <rect x="28" y="82" width="460" height="426" rx="14" fill="#eef4fb" stroke="#28597a" stroke-width="2"/>
+    <rect x="48" y="98" width="380" height="28" rx="6" fill="#28597a"/>
+    <text x="238" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">ALTINITY CLICKHOUSE-OPERATOR SOURCE LAYERS</text>
+
+    <rect x="48" y="142" width="420" height="84" rx="8" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <text x="258" y="166" text-anchor="middle" font-size="14" font-weight="700" fill="#7c2323">Layer 1: K8s Controller &amp; Informers (Not Portable)</text>
+    <text x="258" y="186" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#5c3a3a">pkg/controller/chi &#183; Pods &#183; StatefulSets &#183; PVCs</text>
+    <text x="258" y="206" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">&#10007; Left on Kubernetes &#8212; replaced by ASGs + chinit on EC2</text>
+
+    <rect x="48" y="242" width="420" height="80" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="258" y="264" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">Layer 2: Spec Normalizer &amp; XML Config Generator</text>
+    <text x="258" y="284" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#2c4a3e">pkg/model/chi/normalizer &#183; pkg/model/chi/config</text>
+    <text x="258" y="304" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">&#10003; Initialized with chop.New(nil, nil, &quot;&quot;) &#8212; zero K8s cluster needed</text>
+
+    <rect x="48" y="334" width="420" height="76" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="258" y="356" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">Layer 3: The Schemer (Schema &amp; Replica Ops)</text>
+    <text x="258" y="376" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#2c4a3e">pkg/model/chi/schemer &#183; pkg/model/clickhouse</text>
+    <text x="258" y="396" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">&#10003; Pure database/sql &#8212; propagates DDL &amp; drops dead replicas</text>
+
+    <rect x="48" y="422" width="420" height="68" rx="8" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.4"/>
+    <text x="258" y="444" text-anchor="middle" font-size="13" font-weight="700" fill="#5e3e0e">Three Import Gotchas Solved in Our Fork</text>
+    <text x="258" y="464" text-anchor="middle" font-size="11" fill="#5e3e0e">1. Vendored <tspan font-family="Courier, monospace">mergo</tspan> fork &#183; 2. YAML&#8594;JSON unmarshal &#183; 3. Commit pin</text>
+
+    <path d="M488 282 H542" fill="none" stroke="#1f6f50" stroke-width="2.6" marker-end="url(#arr-op)"/>
+    <path d="M488 372 H542" fill="none" stroke="#1f6f50" stroke-width="2.6" marker-end="url(#arr-op)"/>
+
+    <!-- RIGHT: WHAT CHCTL / CHINIT RUNS ON EC2 -->
+    <rect x="548" y="82" width="504" height="426" rx="14" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="568" y="98" width="380" height="28" rx="6" fill="#1f6f50"/>
+    <text x="758" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">WHAT RUNS ON EVERY EC2 NODE (ZERO KUBERNETES)</text>
+
+    <rect x="568" y="142" width="464" height="82" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="800" y="164" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">1. Operator-Grade XML Config Render</text>
+    <text x="800" y="184" text-anchor="middle" font-size="12" fill="#2c4a3e">Renders <tspan font-family="Courier, monospace">remote_servers.xml</tspan>, <tspan font-family="Courier, monospace">macros.xml</tspan>, <tspan font-family="Courier, monospace">zookeeper.xml</tspan>,</text>
+    <text x="800" y="202" text-anchor="middle" font-size="12" fill="#2c4a3e">and <tspan font-family="Courier, monospace">users.d/</tspan> with <tspan font-family="Courier, monospace">passwordFrom</tspan> hashed to <tspan font-family="Courier, monospace">password_sha256_hex</tspan>.</text>
+
+    <rect x="568" y="236" width="464" height="82" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="800" y="258" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">2. Schema Propagation &amp; Replica Hygiene</text>
+    <text x="800" y="278" text-anchor="middle" font-size="12" fill="#2c4a3e">Discovers tables from live peers via <tspan font-family="Courier, monospace">system.tables</tspan>, applies</text>
+    <text x="800" y="296" text-anchor="middle" font-size="12" fill="#2c4a3e">idempotent DDL, runs <tspan font-family="Courier, monospace">SYSTEM SYNC REPLICA</tspan>, and GCs dead replicas.</text>
+
+    <rect x="568" y="330" width="464" height="82" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.5"/>
+    <text x="800" y="352" text-anchor="middle" font-size="14" font-weight="700" fill="#143852">3. Keeper Raft ID Alignment &amp; Quorum Restart Gate</text>
+    <text x="800" y="372" text-anchor="middle" font-size="12" fill="#334a60">Aligns 1-based <tspan font-family="Courier, monospace">raft_configuration</tspan> server IDs with <tspan font-family="Courier, monospace">myid</tspan> on disk</text>
+    <text x="800" y="390" text-anchor="middle" font-size="12" fill="#334a60">(preventing Exit Code 56) and refuses restarts without Raft quorum.</text>
+
+    <rect x="568" y="424" width="464" height="66" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="800" y="448" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">5 Bugs Caught &amp; Fixed Before Production Traffic</text>
+    <text x="800" y="468" text-anchor="middle" font-size="11" fill="#164231">1-based myid &#183; root-level listen_host &#183; YAML&#8594;JSON users &#183; shard macro &#183; SHA256 pin</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="522" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="548" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Takeaway: You don't need Kubernetes to get operator-grade ClickHouse config generation and schema management</text>
+  </g>
+</svg>

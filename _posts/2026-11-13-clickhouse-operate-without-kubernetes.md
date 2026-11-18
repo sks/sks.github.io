@@ -6,7 +6,7 @@ series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 12
 mermaid: true
 description: "Our ClickHouse cluster runs on EC2, not Kubernetes. So we took the Altinity operator's Go source apart, kept the parts that never touched a Pod, and turned them into a CLI that renders configs, syncs schemas, and gates keeper restarts. Here's what was reusable, what wasn't, and the five live bugs the rollout caught."
-image: /assets/images/og-default.png
+image: /assets/images/diagrams/clickhouse/operate-without-kubernetes-chctl.svg
 tags: [clickhouse, altinity-operator, ec2, go, kubernetes, sre, automation, infrastructure]
 permalink: /blog/clickhouse-operate-without-kubernetes/
 faqs:
@@ -29,6 +29,10 @@ describing to other engineers as "we taught the Altinity operator to work
 without Kubernetes," which sounds impossible. Some of it was.
 
 ## Why not just run the operator?
+
+![Splitting the Altinity clickhouse-operator into its Kubernetes-only controller layer and portable domain packages for EC2](/assets/images/diagrams/clickhouse/operate-without-kubernetes-chctl.svg)
+
+*The Altinity operator's controller layer is welded to Kubernetes Pods and StatefulSets, but its Normalizer, XML Config Generators, Schemer, and SQL client import cleanly into Go to run directly on EC2.*
 
 The obvious question. The answer starts with reading the operator's source
 tree as three distinct layers, split by how hard each one leans on the Kubernetes application programming interface (API):

@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 650" role="img" aria-labelledby="title desc">
+  <title id="title">The Roster, the Journal, and the Bookmarks in ClickHouse Keeper</title>
+  <desc id="desc">What happens when you CREATE a ReplicatedMergeTree table: ClickHouse registers three objects in Keeper under /clickhouse/tables/01/events — the Roster of replica names, the append-only Journal of part and merge entries, and each replica's personal Bookmark pointer.</desc>
+  <defs>
+    <marker id="arr-k" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#28597a"/>
+    </marker>
+    <marker id="arr-ok" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+    <marker id="arr-err" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#b43c3c"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="650" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="23" font-weight="700">The Roster, the Journal, and the Bookmarks in ClickHouse Keeper</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">One CREATE TABLE ... ENGINE = ReplicatedMergeTree('/clickhouse/tables/{shard}/events', '{replica}') creates three shared artifacts</text>
+
+    <!-- KEEPER SHARED FOLDER CONTAINER -->
+    <rect x="28" y="80" width="1024" height="338" rx="14" fill="#eef4fb" stroke="#28597a" stroke-width="2"/>
+    <rect x="48" y="96" width="440" height="28" rx="6" fill="#17283c"/>
+    <text x="268" y="115" text-anchor="middle" font-family="Courier, monospace" font-size="13" font-weight="700" fill="#ffffff">Keeper Path: /clickhouse/tables/01/events/</text>
+    <text x="506" y="115" font-size="13" font-weight="700" fill="#28597a">Shared bulletin board &#8212; stores coordination metadata, never row bytes</text>
+
+    <!-- OBJECT 1: THE ROSTER -->
+    <rect x="48" y="138" width="316" height="260" rx="12" fill="#ffffff" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="48" y="138" width="316" height="36" rx="12" fill="#28597a"/>
+    <text x="206" y="161" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">1. The Roster (replicas/)</text>
+    <text x="206" y="190" text-anchor="middle" font-size="12" fill="#465a6e">Who is registered as a copy of this table</text>
+
+    <rect x="66" y="204" width="280" height="36" rx="6" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="206" y="226" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#164231">replicas/writer-0 &#183; is_active=1</text>
+
+    <rect x="66" y="248" width="280" height="36" rx="6" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="206" y="270" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#164231">replicas/reader-0 &#183; is_active=1</text>
+
+    <rect x="66" y="292" width="280" height="44" rx="6" fill="#fdf2f2" stroke="#b43c3c" stroke-width="1.4" stroke-dasharray="5 3"/>
+    <text x="206" y="311" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#b43c3c">replicas/reader-1 (ghost slot)</text>
+    <text x="206" y="328" text-anchor="middle" font-size="10" fill="#7c2323">Dead VM's entry blocks fresh CREATE (Code 253)</text>
+
+    <text x="206" y="362" text-anchor="middle" font-size="11" font-weight="700" fill="#143852">Guardrail: refuses duplicate registration</text>
+    <text x="206" y="380" text-anchor="middle" font-family="Courier, monospace" font-size="10" fill="#1f6f50">Fix: SYSTEM DROP REPLICA 'reader-1'</text>
+
+    <!-- OBJECT 2: THE JOURNAL -->
+    <rect x="382" y="138" width="340" height="260" rx="12" fill="#ffffff" stroke="#9b6b24" stroke-width="1.8"/>
+    <rect x="382" y="138" width="340" height="36" rx="12" fill="#9b6b24"/>
+    <text x="552" y="161" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">2. The Journal (log/)</text>
+    <text x="552" y="190" text-anchor="middle" font-size="12" fill="#5e3e0e">Append-only numbered ledger of every change</text>
+
+    <rect x="400" y="204" width="304" height="42" rx="6" fill="#fff8eb" stroke="#b8883b" stroke-width="1.4"/>
+    <text x="552" y="222" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#5e3e0e">log-0000001: GET_PART 202612_1_1_0</text>
+    <text x="552" y="238" text-anchor="middle" font-size="10" fill="#7a541b">Author: writer-0 &#8594; Peers fetch bytes directly</text>
+
+    <rect x="400" y="254" width="304" height="42" rx="6" fill="#fff8eb" stroke="#b8883b" stroke-width="1.4"/>
+    <text x="552" y="272" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#5e3e0e">log-0000002: GET_PART 202612_2_2_0</text>
+    <text x="552" y="288" text-anchor="middle" font-size="10" fill="#7a541b">Author: writer-0 &#8594; Checksum verified on pull</text>
+
+    <rect x="400" y="304" width="304" height="42" rx="6" fill="#fff0d1" stroke="#8b5a1e" stroke-width="1.5"/>
+    <text x="552" y="322" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#5e3e0e">log-0000003: MERGE_PARTS 1_1 + 2_2 &#8594; 1_2_1</text>
+    <text x="552" y="338" text-anchor="middle" font-size="10" fill="#7a541b">Every replica runs the same deterministic merge</text>
+
+    <text x="552" y="372" text-anchor="middle" font-size="11" font-weight="700" fill="#5e3e0e">Replicas never push to each other &#8212; they read the log</text>
+
+    <!-- OBJECT 3: THE BOOKMARKS -->
+    <rect x="740" y="138" width="292" height="260" rx="12" fill="#ffffff" stroke="#1f6f50" stroke-width="1.8"/>
+    <rect x="740" y="138" width="292" height="36" rx="12" fill="#1f6f50"/>
+    <text x="886" y="161" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">3. The Bookmarks (log_pointer)</text>
+    <text x="886" y="190" text-anchor="middle" font-size="12" fill="#164231">How far each replica has read in the journal</text>
+
+    <rect x="758" y="204" width="256" height="44" rx="6" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="886" y="223" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#164231">writer-0/log_pointer = 3</text>
+    <text x="886" y="240" text-anchor="middle" font-size="11" fill="#1f6f50">Lag: 0 entries (Caught up &#10003;)</text>
+
+    <rect x="758" y="256" width="256" height="44" rx="6" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="886" y="275" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#164231">reader-0/log_pointer = 3</text>
+    <text x="886" y="292" text-anchor="middle" font-size="11" fill="#1f6f50">Lag: 0 entries (Caught up &#10003;)</text>
+
+    <rect x="758" y="308" width="256" height="44" rx="6" fill="#fff0d1" stroke="#9b6b24" stroke-width="1.4"/>
+    <text x="886" y="327" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#5e3e0e">reader-1/log_pointer = 1</text>
+    <text x="886" y="344" text-anchor="middle" font-size="11" fill="#8b5a1e">Lag: 2 entries behind &#8594; replaying</text>
+
+    <text x="886" y="376" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#164231">SYSTEM SYNC REPLICA waits for #3</text>
+
+    <!-- BOTTOM: LOCAL CLICKHOUSE NODES -->
+    <rect x="48" y="446" width="300" height="128" rx="12" fill="#e8f5ef" stroke="#1f6f50" stroke-width="1.8"/>
+    <text x="198" y="472" text-anchor="middle" font-size="15" font-weight="700" fill="#164231">Node: writer-0 (Local Disk)</text>
+    <text x="198" y="494" text-anchor="middle" font-size="12" fill="#465a6e">1. Writes part 202612_1_1_0 locally</text>
+    <text x="198" y="514" text-anchor="middle" font-size="12" fill="#465a6e">2. Posts log-0000001 to Journal</text>
+    <text x="198" y="534" text-anchor="middle" font-size="12" fill="#465a6e">3. Advances its own bookmark</text>
+    <text x="198" y="556" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#1f6f50">Has local table + Roster slot</text>
+
+    <rect x="390" y="446" width="300" height="128" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <text x="540" y="472" text-anchor="middle" font-size="15" font-weight="700" fill="#143852">Node: reader-0 (Local Disk)</text>
+    <text x="540" y="494" text-anchor="middle" font-size="12" fill="#465a6e">1. Watches Journal via Keeper</text>
+    <text x="540" y="514" text-anchor="middle" font-size="12" fill="#465a6e">2. Pulls missing parts from writer-0</text>
+    <text x="540" y="534" text-anchor="middle" font-size="12" fill="#465a6e">3. Updates reader-0/log_pointer</text>
+    <text x="540" y="556" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#28597a">Converges asynchronously</text>
+
+    <rect x="732" y="446" width="300" height="128" rx="12" fill="#fdf2f2" stroke="#b43c3c" stroke-width="1.8"/>
+    <text x="882" y="472" text-anchor="middle" font-size="15" font-weight="700" fill="#7c2323">Replaced Node: reader-1 (Wiped Disk)</text>
+    <text x="882" y="494" text-anchor="middle" font-size="12" fill="#5c3a3a">Reclaims name 'reader-1' from lease</text>
+    <text x="882" y="514" text-anchor="middle" font-size="12" font-weight="700" fill="#b43c3c">Roster has 'reader-1', disk is empty!</text>
+    <text x="882" y="534" text-anchor="middle" font-size="11" fill="#1f6f50" font-weight="700">Drop own stale Roster entry &#8594; CREATE</text>
+    <text x="882" y="556" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#164231">Replays Journal from 0 &#8594; Caught up</text>
+
+    <path d="M198 446 V402" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-ok)"/>
+    <path d="M540 402 V442" fill="none" stroke="#28597a" stroke-width="2.2" marker-end="url(#arr-k)"/>
+    <path d="M882 446 V402" fill="none" stroke="#b43c3c" stroke-width="2.2" stroke-dasharray="5 4" marker-end="url(#arr-err)"/>
+
+    <!-- FOOTER -->
+    <rect x="28" y="590" width="1024" height="44" rx="10" fill="#17283c"/>
+    <text x="540" y="617" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Keeper Outage Rule: Existing tables flip READ-ONLY &#183; New CREATE TABLE fails (Code 999) &#183; SELECT queries keep serving</text>
+  </g>
+</svg>

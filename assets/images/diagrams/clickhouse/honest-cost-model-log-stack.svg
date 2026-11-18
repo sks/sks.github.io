@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620" role="img" aria-labelledby="title desc">
+  <title id="title">The Honest Cost Model for a 30 TB/Day Self-Managed ClickHouse Log Stack on AWS</title>
+  <desc id="desc">Measured monthly AWS costs at 155,000 records/second (30 TB/day raw NDJSON): $380/month EC2 compute, $45/month S3 queue requests, collapsing a $4,600/month staging buffer to $1/month with after_processing=delete, and tiered hot/cold storage with rollup materialized views.</desc>
+  <defs>
+    <marker id="arr-cm" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="620" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">The Honest Cost Model: 30 TB/Day Log Stack on AWS (155k Rows/Sec Measured)</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Compute is tiny ($380/mo) &#8212; the real bill is the staging buffer you forget to delete and the raw retention TTL you choose</text>
+
+    <!-- PILLAR 1: COMPUTE + QUEUE API -->
+    <rect x="28" y="82" width="322" height="464" rx="14" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="48" y="100" width="282" height="30" rx="6" fill="#28597a"/>
+    <text x="189" y="120" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">1. COMPUTE &amp; QUEUE (~$425/mo)</text>
+
+    <rect x="48" y="144" width="282" height="74" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.4"/>
+    <text x="189" y="166" text-anchor="middle" font-size="14" font-weight="700" fill="#143852">Writer (1&#215; t4g.xlarge, 4 vCPU)</text>
+    <text x="189" y="186" text-anchor="middle" font-size="12" fill="#465a6e">Drains S3Queue + INSERT + Merges</text>
+    <text x="189" y="206" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6f50">$126 / month (155k rec/s)</text>
+
+    <rect x="48" y="230" width="282" height="74" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.4"/>
+    <text x="189" y="252" text-anchor="middle" font-size="14" font-weight="700" fill="#143852">Readers (2&#215; t4g.large, 2 vCPU)</text>
+    <text x="189" y="272" text-anchor="middle" font-size="12" fill="#465a6e">Replication + Query serving (1&#8594;3 ASG)</text>
+    <text x="189" y="292" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6f50">$126 / month total</text>
+
+    <rect x="48" y="316" width="282" height="74" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.4"/>
+    <text x="189" y="338" text-anchor="middle" font-size="14" font-weight="700" fill="#143852">Keeper (1&#215; t4g.xlarge, 4 vCPU)</text>
+    <text x="189" y="358" text-anchor="middle" font-size="12" fill="#465a6e">Sized for ~101k S3Queue znodes</text>
+    <text x="189" y="378" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6f50">$126 / month</text>
+
+    <rect x="48" y="402" width="282" height="68" rx="8" fill="#d9e9f7" stroke="#28597a" stroke-width="1.4"/>
+    <text x="189" y="424" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">S3 Queue API Calls (200 MB files)</text>
+    <text x="189" y="444" text-anchor="middle" font-size="11" fill="#334a60">PUT $21 + LIST $20 + GET $2 + DEL $0</text>
+    <text x="189" y="460" text-anchor="middle" font-size="12" font-weight="700" fill="#28597a">~$45 / month ($0.00005 / GB)</text>
+
+    <text x="189" y="502" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">Compute + Queue = $0.00045 / raw GB</text>
+    <text x="189" y="522" text-anchor="middle" font-size="11" fill="#465a6e">(vs ~$9,000/mo Kafka + K8s baseline)</text>
+
+    <!-- PILLAR 2: THE $4,600 STAGING TRAP -->
+    <rect x="374" y="82" width="332" height="464" rx="14" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.8"/>
+    <rect x="394" y="100" width="292" height="30" rx="6" fill="#9b6b24"/>
+    <text x="540" y="120" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">2. THE $4,600/MO STAGING TRAP</text>
+
+    <rect x="394" y="144" width="292" height="128" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <text x="540" y="168" text-anchor="middle" font-size="14" font-weight="700" fill="#7c2323">Default: after_processing = 'keep'</text>
+    <text x="540" y="190" text-anchor="middle" font-size="12" fill="#5c3a3a">Ingested NDJSON files sit in S3 until</text>
+    <text x="540" y="208" text-anchor="middle" font-size="12" fill="#5c3a3a">the 7-day S3 lifecycle rule expires:</text>
+    <text x="540" y="232" text-anchor="middle" font-family="Courier, monospace" font-size="13" font-weight="700" fill="#b43c3c">29 TB/d &#215; 7d = 200 TB held</text>
+    <text x="540" y="256" text-anchor="middle" font-size="15" font-weight="700" fill="#8f2424">$4,600 / month for dead receipts!</text>
+
+    <path d="M540 272 V302" fill="none" stroke="#1f6f50" stroke-width="2.8" marker-end="url(#arr-cm)"/>
+
+    <rect x="394" y="306" width="292" height="142" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.8"/>
+    <text x="540" y="330" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">Fix: after_processing = 'delete'</text>
+    <text x="540" y="352" text-anchor="middle" font-size="12" fill="#2c4a3e">+ grant <tspan font-family="Courier, monospace" font-weight="700">s3:DeleteObject</tspan> to writer IAM role</text>
+    <text x="540" y="372" text-anchor="middle" font-size="12" fill="#2c4a3e">ClickHouse deletes each staged file</text>
+    <text x="540" y="390" text-anchor="middle" font-size="12" fill="#2c4a3e">the instant its insert commits.</text>
+    <rect x="414" y="404" width="252" height="30" rx="6" fill="#1f6f50"/>
+    <text x="540" y="424" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">$4,600/mo &#8594; ~$1/mo steady state</text>
+
+    <text x="540" y="476" text-anchor="middle" font-size="11" font-weight="700" fill="#5e3e0e">S3 Lifecycle TTL is now just the outage cap</text>
+    <text x="540" y="496" text-anchor="middle" font-size="11" fill="#7a541b">Couple staged TTL with tracked_file_ttl_sec</text>
+    <text x="540" y="514" text-anchor="middle" font-size="11" fill="#7a541b">so Keeper dedup outlives any S3 file</text>
+
+    <!-- PILLAR 3: TIERED RETENTION + ROLLUPS -->
+    <rect x="730" y="82" width="322" height="464" rx="14" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.8"/>
+    <rect x="750" y="100" width="282" height="30" rx="6" fill="#1f6f50"/>
+    <text x="891" y="120" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">3. TIERED STORAGE &amp; TTL MATRIX</text>
+
+    <text x="891" y="150" text-anchor="middle" font-size="12" fill="#164231">15&#215; ZSTD compression: 30 TB/d &#8594; 2 TB/d</text>
+
+    <rect x="750" y="164" width="282" height="170" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="891" y="186" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">Hot gp3 ($80/TB) &#8594; Cold S3 ($23/TB)</text>
+    <text x="891" y="210" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#465a6e">3d raw (3d hot, 0d cold):   $550/mo</text>
+    <rect x="762" y="220" width="258" height="28" rx="4" fill="#dff0e8"/>
+    <text x="891" y="239" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#164231">7d raw (3d hot, 4d cold):   $734/mo</text>
+    <text x="891" y="266" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#465a6e">30d raw (3d hot, 27d cold): $1,792/mo</text>
+    <text x="891" y="290" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#b43c3c">33d raw (7d hot, 26d cold): $2,386/mo</text>
+    <text x="891" y="318" text-anchor="middle" font-size="10" fill="#465a6e">(Includes ~$68/mo fleet root/cache/raft EBS)</text>
+
+    <rect x="750" y="348" width="282" height="176" rx="10" fill="#fff0d1" stroke="#8b5a1e" stroke-width="1.5"/>
+    <text x="891" y="372" text-anchor="middle" font-size="14" font-weight="700" fill="#5e3e0e">The Rollup Superpower</text>
+    <text x="891" y="394" text-anchor="middle" font-size="12" fill="#5e3e0e">Split raw debug logs from dashboards:</text>
+    <text x="891" y="416" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">&#8226; Raw events: 7-day TTL ($734/mo)</text>
+    <text x="891" y="438" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">&#8226; Hourly MV Rollups: 90-day TTL ($2/mo)</text>
+    <text x="891" y="464" text-anchor="middle" font-size="11" fill="#7a541b">Dashboards query tiny rollup tables;</text>
+    <text x="891" y="482" text-anchor="middle" font-size="11" fill="#7a541b">saves $1,652/mo without losing history!</text>
+    <text x="891" y="508" text-anchor="middle" font-size="12" font-weight="700" fill="#1f6f50">All-In 7d Stack: ~$1,200 / month</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="560" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="586" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Cost Law: Retention, not transport, is the bill &#8212; delete staged files on ingest and keep long history in rollup tables</text>
+  </g>
+</svg>

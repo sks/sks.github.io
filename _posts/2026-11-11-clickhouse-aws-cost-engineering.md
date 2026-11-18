@@ -5,7 +5,7 @@ date: 2026-11-11 09:00:00 -0800
 series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 7
 description: "The real monthly numbers for self-managed ClickHouse on AWS — Graviton, spot readers, S3 tiering, and the janitor that stopped a $1,700/month orphaned-volume leak."
-image: /assets/images/og-default.png
+image: /assets/images/diagrams/clickhouse/aws-cost-engineering-levers.svg
 tags: [clickhouse, aws, cost-optimization, spot-instances, finops, s3]
 permalink: /blog/clickhouse-aws-cost-engineering/
 faqs:
@@ -35,6 +35,10 @@ First the steady state, then each lever with its number, then the guardrails, th
 ---
 
 ## The steady state
+
+![Six AWS cost levers for self-managed ClickHouse and the janitor Lambda that stopped a $1,700/month orphaned EBS volume leak](/assets/images/diagrams/clickhouse/aws-cost-engineering-levers.svg)
+
+*Graviton arm64, 50% Spot readers, 30-day S3 Standard-IA tiering, instance-store NVMe caching, a free S3 VPC Gateway Endpoint, and standalone tagged EBS volumes with a daily janitor keep the 50 TB production profile around $3,100–$3,500/month.*
 
 us-east-1, November 2026 rates. Keeper is the coordination service ClickHouse uses for the replication log — the shared to-do list replicas copy parts from. It needs its own small hosts.
 

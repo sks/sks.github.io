@@ -6,7 +6,7 @@ series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 9
 mermaid: true
 description: "The three Mermaid diagrams behind a self-managed ClickHouse cluster — network topology, ingest path, query path — and the honest reasons EC2 beat Kubernetes for it."
-image: /assets/images/og-default.png
+image: /assets/images/diagrams/clickhouse/ec2-vs-k8s-data-flow.svg
 tags: [clickhouse, aws, mermaid, architecture, kubernetes, sre]
 permalink: /blog/clickhouse-ec2-vs-k8s-mermaid-data-flow/
 faqs:
@@ -38,6 +38,10 @@ A sequence diagram answers, because you cannot draw one without naming every hop
 ---
 
 ## Why diagrams at all
+
+![Self-managed ClickHouse VPC topology, ingest and query flows, and the four reasons EC2 beat Kubernetes](/assets/images/diagrams/clickhouse/ec2-vs-k8s-data-flow.svg)
+
+*Public ACM-terminated NLBs front private-subnet Writers, a 50/50 Spot/On-Demand Readers ASG, and a 3-node Keeper quorum connected to S3 via a free VPC Gateway Endpoint — beating Kubernetes on Spot identity, Keeper roll safety, S3 storage shape, and control-plane overhead.*
 
 Mermaid is a text format for diagrams — flowcharts, sequence diagrams — written inside a fenced code block in markdown ([mermaid.js.org](https://mermaid.js.org/)). The architecture docs I keep are diagrams-first for three reasons.
 

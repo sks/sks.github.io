@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 760" role="img" aria-labelledby="title desc">
+  <title id="title">The $0.045/GB Trap: S3 Gateway Endpoint vs NAT for a ClickHouse Fleet</title>
+  <desc id="desc">Two identical ClickHouse fleets reading and writing S3. The left path rides the free S3 Gateway Endpoint inside the VPC ($0/GB, in-network). The right path silently exits through the NAT Gateway at $0.045/GB processing — turning a 30 TB/day log pipeline into a $2,700–$9,300/month tax. Shows the route-table mechanism: the endpoint's prefix-list route is more specific than 0.0.0.0/0, so S3 traffic always wins — but only for buckets reachable in the region.</desc>
+  <defs>
+    <marker id="arrow-navy" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#b43c3c"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="760" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="34" text-anchor="middle" font-size="23" font-weight="700">The $0.045/GB Trap: One Route Table Entry, Two Very Different Bills</text>
+    <text x="540" y="58" text-anchor="middle" font-size="14" fill="#465a6e">Same fleet, same bytes, same bucket — the only difference is whether the route table sends S3 traffic to the free gateway endpoint or out the NAT</text>
+
+    <!-- VPC BOX -->
+    <rect x="30" y="80" width="1020" height="560" rx="14" fill="#f4f8fc" stroke="#1e4e68" stroke-width="2"/>
+    <rect x="46" y="94" width="120" height="26" rx="6" fill="#1e4e68"/>
+    <text x="106" y="112" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">YOUR VPC</text>
+    <text x="180" y="112" font-size="13" fill="#465a6e">us-west-2  ·  nodes subnet 10.0.1.0/24  ·  one AZ  ·  3 writers + 3 readers + 3 keepers</text>
+
+    <!-- FLEET -->
+    <rect x="60" y="140" width="240" height="220" rx="12" fill="#ffffff" stroke="#1e4e68" stroke-width="1.8"/>
+    <text x="180" y="166" text-anchor="middle" font-size="15" font-weight="700">ClickHouse Fleet</text>
+    <text x="180" y="186" text-anchor="middle" font-size="11" fill="#465a6e">1.974 TB/day compressed S3 traffic</text>
+    <text x="180" y="216" text-anchor="middle" font-size="12" font-weight="700">S3Queue polls staging prefix</text>
+    <text x="180" y="234" text-anchor="middle" font-size="11" fill="#465a6e">GET staged files ~5 TB/day</text>
+    <text x="180" y="262" text-anchor="middle" font-size="12" font-weight="700">TTL moves hot → cold</text>
+    <text x="180" y="280" text-anchor="middle" font-size="11" fill="#465a6e">PUT merged parts ~2 TB/day</text>
+    <text x="180" y="308" text-anchor="middle" font-size="12" font-weight="700">Replica backfills on churn</text>
+    <text x="180" y="326" text-anchor="middle" font-size="11" fill="#465a6e">peer GET/PUT after ASG rolls</text>
+
+    <!-- ROUTE TABLE -->
+    <rect x="360" y="140" width="300" height="220" rx="12" fill="#ffffff" stroke="#1e4e68" stroke-width="1.8"/>
+    <text x="510" y="166" text-anchor="middle" font-size="15" font-weight="700">The Nodes Route Table</text>
+    <text x="510" y="186" text-anchor="middle" font-size="11" fill="#465a6e">Longest-prefix-match decides. One entry changes everything.</text>
+
+    <!-- route entries -->
+    <rect x="378" y="202" width="264" height="40" rx="6" fill="#e8f3ee" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="510" y="220" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">pl-63a5400b (S3 prefix list) → vpce-08c2…</text>
+    <text x="510" y="234" text-anchor="middle" font-size="10" fill="#2d6a56">the S3 Gateway Endpoint — $0/hr, $0/GB, in-network</text>
+
+    <rect x="378" y="254" width="264" height="40" rx="6" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.5"/>
+    <text x="510" y="272" text-anchor="middle" font-size="12" font-weight="700" fill="#7c2323">0.0.0.0/0 → nat-0a80…</text>
+    <text x="510" y="286" text-anchor="middle" font-size="10" fill="#7c2323">the NAT Gateway — $0.045/hr + $0.045/GB processed</text>
+
+    <text x="510" y="322" text-anchor="middle" font-size="11" fill="#465a6e">S3 traffic matches the prefix list first —</text>
+    <text x="510" y="338" text-anchor="middle" font-size="11" fill="#465a6e">the default route only catches what nothing else claims</text>
+
+    <!-- PATH A: gateway (green) -->
+    <path d="M300 210 C 330 210, 330 222, 372 222" fill="none" stroke="#1f6f50" stroke-width="3" marker-end="url(#arrow-green)"/>
+    <text x="336" y="200" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">endpoint</text>
+
+    <rect x="700" y="140" width="320" height="130" rx="12" fill="#e8f3ee" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="716" y="154" width="140" height="24" rx="6" fill="#1f6f50"/>
+    <text x="786" y="171" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">PATH A — GATEWAY</text>
+    <text x="860" y="192" font-size="13" font-weight="700" fill="#164231">S3 Gateway Endpoint</text>
+    <text x="860" y="210" font-size="11" fill="#2d6a56">AWS private network all the way to the bucket</text>
+    <text x="860" y="228" font-size="11" fill="#2d6a56">No NAT. No data processing fee. No bottleneck.</text>
+    <text x="860" y="250" font-size="13" font-weight="700" fill="#1f6f50">Cost: $0.00/mo — any volume</text>
+
+    <path d="M1020 205 C 1040 205, 1040 260, 860 268 L 700 268" fill="none" stroke="#1f6f50" stroke-width="2" stroke-dasharray="5 4"/>
+    <text x="860" y="288" text-anchor="middle" font-size="11" fill="#1f6f50">reaches ANY S3 bucket in us-west-2 — regional routing</text>
+
+    <!-- PATH B: NAT (red) -->
+    <path d="M300 290 C 330 290, 330 274, 372 274" fill="none" stroke="#b43c3c" stroke-width="3" marker-end="url(#arrow-red)"/>
+    <text x="336" y="312" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">NAT route</text>
+
+    <rect x="700" y="300" width="320" height="150" rx="12" fill="#fdf2f2" stroke="#c05c5c" stroke-width="2"/>
+    <rect x="716" y="314" width="130" height="24" rx="6" fill="#c05c5c"/>
+    <text x="781" y="331" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">PATH B — NAT</text>
+    <text x="860" y="352" font-size="13" font-weight="700" fill="#7c2323">NAT Gateway (the silent default)</text>
+    <text x="860" y="370" font-size="11" fill="#7c2323">Fires only when the endpoint is missing,</text>
+    <text x="860" y="384" font-size="11" fill="#7c2323">detached from this route table, or the bucket</text>
+    <text x="860" y="398" font-size="11" fill="#7c2323">lives in another region (the endpoint won't route it)</text>
+    <text x="860" y="424" font-size="13" font-weight="700" fill="#b43c3c">30 TB/day raw ≈ 6.8 TB/day through NAT</text>
+    <text x="860" y="440" font-size="13" font-weight="700" fill="#b43c3c">= +$9,300/mo (~$2,700/mo cold writes alone)</text>
+
+    <!-- S3 BUCKET -->
+    <rect x="360" y="480" width="300" height="130" rx="12" fill="#fff8eb" stroke="#9b6b24" stroke-width="2"/>
+    <text x="510" y="508" text-anchor="middle" font-size="15" font-weight="700" fill="#5e3e0e">Amazon S3 (us-west-2)</text>
+    <text x="510" y="530" text-anchor="middle" font-size="11" fill="#7a541b">staging prefix: raw-logs/staging/*</text>
+    <text x="510" y="548" text-anchor="middle" font-size="11" fill="#7a541b">cold tier: data/tiered/&lt;replica&gt;/</text>
+    <text x="510" y="566" text-anchor="middle" font-size="11" fill="#7a541b">backups: backups/</text>
+    <text x="510" y="592" text-anchor="middle" font-size="12" font-weight="700" fill="#9b6b24">Every byte this fleet touches lives here</text>
+
+    <path d="M700 210 C 680 210, 680 440, 668 480" fill="none" stroke="#1f6f50" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+    <path d="M700 360 C 690 360, 680 420, 668 480" fill="none" stroke="#b43c3c" stroke-width="2.5" marker-end="url(#arrow-red)"/>
+
+    <!-- THE VERDICT STRIP -->
+    <rect x="30" y="656" width="1020" height="84" rx="12" fill="#17283c"/>
+    <text x="46" y="684" font-size="14" font-weight="700" fill="#ffffff">The engineering punchline</text>
+    <text x="46" y="708" font-size="12.5" fill="#c9d6e4">The endpoint is free — but "free" is only true while every S3 byte actually rides it. Route-table attachment, bucket region, and the URLs your</text>
+    <text x="46" y="726" font-size="12.5" fill="#c9d6e4">application renders are three independent places the guarantee can silently break. Guard all three at plan time, not in a post-mortem.</text>
+  </g>
+</svg>

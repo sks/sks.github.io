@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">What Breaks with ClickHouse CAS: Failure Modes, GC, and Blast Radius</title>
+  <desc id="desc">Four failure layers when operating ClickHouse Content-Addressed Storage (CAS): broken underlying cluster DDL, fail-closed mount refusals on bucket preconditions, identity drift across instance replacements, and GC wedge telemetry.</desc>
+  <defs>
+    <marker id="arr-cf" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">What Breaks with ClickHouse CAS: Fail-Closed Guards &amp; Substrate Failures</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">CAS fails closed rather than corrupting shared blobs &#8212; most production incidents happen one layer below the CAS algorithm</text>
+
+    <!-- 2x2 GRID OF FAILURE MODES + CONTROLS -->
+    <!-- Card 0 -->
+    <rect x="30" y="82" width="500" height="202" rx="12" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.8"/>
+    <rect x="48" y="98" width="464" height="30" rx="6" fill="#b43c3c"/>
+    <text x="280" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Failure 0: The Replication Substrate Underneath Is Broken</text>
+    <text x="280" y="146" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#7c2323">system.distributed_ddl_queue stuck on phantom hosts</text>
+    <text x="280" y="168" text-anchor="middle" font-size="12" fill="#5c3a3a">Static CR hostnames in <tspan font-family="Courier, monospace">remote_servers</tspan> never resolve;</text>
+    <text x="280" y="186" text-anchor="middle" font-size="12" fill="#5c3a3a"><tspan font-family="Courier, monospace">CREATE TABLE ... ON CLUSTER</tspan> hangs before CAS is ever touched.</text>
+    <rect x="48" y="202" width="464" height="66" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="280" y="224" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Operator Control</text>
+    <text x="280" y="244" text-anchor="middle" font-size="11" fill="#2c4a3e">Render <tspan font-family="Courier, monospace">remote_servers</tspan> from live DynamoDB leases + verify</text>
+    <text x="280" y="260" text-anchor="middle" font-size="11" fill="#2c4a3e">plain ReplicatedMergeTree sync before adding a CAS disk.</text>
+
+    <!-- Card 1 -->
+    <rect x="550" y="82" width="500" height="202" rx="12" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.8"/>
+    <rect x="568" y="98" width="464" height="30" rx="6" fill="#9b6b24"/>
+    <text x="800" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Failure 1: Fail-Closed Mount Refusal at Startup</text>
+    <text x="800" y="146" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#5e3e0e">S3 Versioning ON &#183; If-None-Match stripped &#183; CORRUPTED_DATA</text>
+    <text x="800" y="168" text-anchor="middle" font-size="12" fill="#5e3e0e">CAS probes bucket preconditions at open time and refuses to</text>
+    <text x="800" y="186" text-anchor="middle" font-size="12" fill="#5e3e0e">mount if delete markers or duplicate root IDs could corrupt GC.</text>
+    <rect x="568" y="202" width="464" height="66" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="800" y="224" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Operator Control</text>
+    <text x="800" y="244" text-anchor="middle" font-size="11" fill="#2c4a3e">Disable bucket versioning &amp; object lock in Terraform; treat</text>
+    <text x="800" y="260" text-anchor="middle" font-size="11" fill="#2c4a3e">mount refusal as a safety guard, never something to bypass.</text>
+
+    <!-- Card 2 -->
+    <rect x="30" y="302" width="500" height="202" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="48" y="318" width="464" height="30" rx="6" fill="#28597a"/>
+    <text x="280" y="338" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Failure 2: Identity Drift Across ASG Replacements</text>
+    <text x="280" y="366" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#143852">cas_server_root_id vs. DNS &amp; Keeper Replica Identity</text>
+    <text x="280" y="388" text-anchor="middle" font-size="12" fill="#334a60">Two nodes claiming the same <tspan font-family="Courier, monospace">cas_server_root_id</tspan> fence each</text>
+    <text x="280" y="406" text-anchor="middle" font-size="12" fill="#334a60">other; a random ID per boot orphans manifests and stalls GC.</text>
+    <rect x="48" y="422" width="464" height="66" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="280" y="444" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Operator Control</text>
+    <text x="280" y="464" text-anchor="middle" font-size="11" fill="#2c4a3e">Derive <tspan font-family="Courier, monospace">cas_server_root_id</tspan> from the node's leased <tspan font-family="Courier, monospace">{replica}</tspan></text>
+    <text x="280" y="480" text-anchor="middle" font-size="11" fill="#2c4a3e">macro and drain/release the old lease before replacement.</text>
+
+    <!-- Card 3 -->
+    <rect x="550" y="302" width="500" height="202" rx="12" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.8"/>
+    <rect x="568" y="318" width="464" height="30" rx="6" fill="#1f6f50"/>
+    <text x="800" y="338" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Failure 3: GC Wedges &amp; Mixed-Fleet Version Skew</text>
+    <text x="800" y="366" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#164231">Ambiguous reachability &#8594; GC retains blobs &#8594; S3 grows</text>
+    <text x="800" y="388" text-anchor="middle" font-size="12" fill="#2c4a3e">When a mount lease is stale or format versions mismatch,</text>
+    <text x="800" y="406" text-anchor="middle" font-size="12" fill="#2c4a3e">GC refuses to delete blobs (safe for data, bad for S3 bill).</text>
+    <rect x="568" y="422" width="464" height="66" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="800" y="444" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Operator Control</text>
+    <text x="800" y="464" text-anchor="middle" font-size="11" fill="#2c4a3e">Alert on <tspan font-family="Courier, monospace">system.cas_mounts.state != 'live'</tspan> and non-Success</text>
+    <text x="800" y="480" text-anchor="middle" font-size="11" fill="#2c4a3e">outcomes in <tspan font-family="Courier, monospace">system.cas_gc_log</tspan>; never run mixed Antalya builds.</text>
+
+    <!-- FOOTER -->
+    <rect x="30" y="520" width="1020" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="546" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Core Design Property: Ambiguity in CAS costs S3 storage dollars (deferred GC), never silent data loss</text>
+  </g>
+</svg>

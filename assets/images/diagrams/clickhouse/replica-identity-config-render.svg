@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">ClickHouse Config Is Not YAML: How Macros Name Your Data and Re-Key Tables</title>
+  <desc id="desc">How ClickHouse macros ({shard}, {replica}) expand into Keeper registration paths and S3 storage prefixes, why changing shard from 01 to 0 silently re-keys every table to an empty Keeper path, and how Keeper server_id must match myid on disk.</desc>
+  <defs>
+    <marker id="arr-ri" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+    <marker id="arr-rir" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#b43c3c"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Why &lt;macros&gt; Are the Name of Your Data: How One Re-Render Re-Keyed Every Table</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Changing a macro value does not migrate your data &#8212; it silently points your tables at a brand-new, empty Keeper path</text>
+
+    <!-- TOP: THE DDL TEMPLATE -->
+    <rect x="140" y="78" width="800" height="62" rx="10" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <text x="540" y="102" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">The Unchanged Table Definition on Disk:</text>
+    <text x="540" y="124" text-anchor="middle" font-family="Courier, monospace" font-size="13" font-weight="700" fill="#28597a">ENGINE = ReplicatedMergeTree('/clickhouse/tables/{shard}/events', '{replica}')</text>
+
+    <path d="M380 140 L276 174" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arr-ri)"/>
+    <path d="M700 140 L804 174" fill="none" stroke="#b43c3c" stroke-width="2.2" marker-end="url(#arr-rir)"/>
+
+    <!-- LEFT: HAND-WRITTEN MACROS (01) -->
+    <rect x="28" y="178" width="496" height="206" rx="12" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="48" y="194" width="320" height="26" rx="6" fill="#1f6f50"/>
+    <text x="208" y="212" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">ORIGINAL HAND-WRITTEN MACROS.XML</text>
+
+    <rect x="48" y="232" width="456" height="52" rx="6" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="276" y="254" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#164231">&lt;shard&gt;01&lt;/shard&gt;  &#183;  &lt;replica&gt;writer-0&lt;/replica&gt;</text>
+    <text x="276" y="272" text-anchor="middle" font-size="11" fill="#2c4a3e">1-based padded shard convention</text>
+
+    <rect x="48" y="296" width="456" height="72" rx="6" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="276" y="318" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Resolved Keeper Address:</text>
+    <text x="276" y="338" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#1f6f50">/clickhouse/tables/01/events/replicas/writer-0</text>
+    <text x="276" y="356" text-anchor="middle" font-size="11" fill="#164231">Holds live part catalog, replication log, and history</text>
+
+    <!-- RIGHT: UNPINNED GENERATOR MACROS (0) -->
+    <rect x="556" y="178" width="496" height="206" rx="12" fill="#fdf2f2" stroke="#c05c5c" stroke-width="2"/>
+    <rect x="576" y="194" width="340" height="26" rx="6" fill="#b43c3c"/>
+    <text x="746" y="212" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">DEFAULT OPERATOR RENDER (SILENT RE-KEY!)</text>
+
+    <rect x="576" y="232" width="456" height="52" rx="6" fill="#ffffff" stroke="#c05c5c" stroke-width="1.4"/>
+    <text x="804" y="254" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#b43c3c">&lt;shard&gt;0&lt;/shard&gt;   &#183;  &lt;replica&gt;0-0&lt;/replica&gt;</text>
+    <text x="804" y="272" text-anchor="middle" font-size="11" fill="#5c3a3a">0-based shard index &amp; abstract host coordinates</text>
+
+    <rect x="576" y="296" width="456" height="72" rx="6" fill="#fbe1e1" stroke="#b43c3c" stroke-width="1.4"/>
+    <text x="804" y="318" text-anchor="middle" font-size="12" font-weight="700" fill="#7c2323">Resolved Keeper Address (Wrong Tree!):</text>
+    <text x="804" y="338" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#b43c3c">/clickhouse/tables/0/events/replicas/0-0</text>
+    <text x="804" y="356" text-anchor="middle" font-size="11" fill="#7c2323">Registers as brand-new empty replica while /01/ sits orphaned!</text>
+
+    <!-- BOTTOM: THE THREE IDENTITY RULES FOR CONFIG GENERATORS -->
+    <rect x="28" y="402" width="1024" height="108" rx="12" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.8"/>
+    <text x="540" y="426" text-anchor="middle" font-size="15" font-weight="700" fill="#5e3e0e">Three Rules So Generated Config Never Orphans Stateful Data</text>
+
+    <rect x="46" y="438" width="314" height="58" rx="6" fill="#ffffff" stroke="#9b6b24" stroke-width="1.3"/>
+    <text x="203" y="458" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">1. Pin &lt;shard&gt; &amp; &lt;replica&gt; Explicitly</text>
+    <text x="203" y="478" text-anchor="middle" font-size="11" fill="#5e3e0e">Pass <tspan font-family="Courier, monospace">-replica 0-0=writer-0</tspan> &amp; preserve <tspan font-family="Courier, monospace">01</tspan>.</text>
+
+    <rect x="383" y="438" width="314" height="58" rx="6" fill="#ffffff" stroke="#9b6b24" stroke-width="1.3"/>
+    <text x="540" y="458" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">2. Keeper server_id Follows myid</text>
+    <text x="540" y="478" text-anchor="middle" font-size="11" fill="#5e3e0e">Raft disk's <tspan font-family="Courier, monospace">myid</tspan> file is authority across reboots.</text>
+
+    <rect x="720" y="438" width="314" height="58" rx="6" fill="#ffffff" stroke="#9b6b24" stroke-width="1.3"/>
+    <text x="877" y="458" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">3. Root-Level Keeper listen_host</text>
+    <text x="877" y="478" text-anchor="middle" font-size="11" fill="#5e3e0e">Place <tspan font-family="Courier, monospace">&lt;listen_host&gt;</tspan> at XML root, not nested.</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="524" width="1024" height="40" rx="8" fill="#17283c"/>
+    <text x="540" y="549" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Identity Principle: Macros are the filesystem paths of your cluster &#8212; version and test the config generator like the DB engine</text>
+  </g>
+</svg>

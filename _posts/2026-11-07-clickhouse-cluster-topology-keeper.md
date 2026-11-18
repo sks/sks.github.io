@@ -5,7 +5,7 @@ date: 2026-11-07 09:00:00 -0700
 series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 3
 description: "How I split a ClickHouse cluster into writers, readers, and keepers, why Keeper quorum is the one thing that flips replicated tables read-only, and how static node identity keeps instance replacement boring."
-image: /assets/images/og-default.png
+image: /assets/images/diagrams/clickhouse/cluster-topology-writers-readers-keepers.svg
 tags: [clickhouse, keeper, aws, cluster-topology, replication, ec2]
 permalink: /blog/clickhouse-cluster-topology-keeper/
 faqs:
@@ -37,6 +37,10 @@ The answer is any one node. Ingestion, querying, and coordination must be three 
 ---
 
 ## Three node roles, three failure modes
+
+![ClickHouse cluster topology splitting Writers, Readers, and a 3-node Keeper quorum with dedicated gp3 Raft disks](/assets/images/diagrams/clickhouse/cluster-topology-writers-readers-keepers.svg)
+
+*Separating Writers (the kitchen), Readers (the dining room ASG), and Keepers (the head office with dedicated 64 GB gp3 Raft disks) ensures the cluster survives losing any single node at 3 a.m. without starving ingestion.*
 
 Think of a restaurant. The kitchen prepares food; the dining room serves it. A rush of customers never stops the kitchen cooking, and a slow chef makes only his own tables wait. In ClickHouse terms, writers are the kitchen and readers are the dining room.
 

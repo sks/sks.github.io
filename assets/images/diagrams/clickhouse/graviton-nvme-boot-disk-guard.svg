@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">Graviton NVMe Device Enumeration Roulette and the Three Boot Disk Guards</title>
+  <desc id="desc">Why EBS NVMe device names (/dev/nvme0n1, /dev/nvme1n1) shuffle across Graviton instance types and the three boot-time disk guards in chinit: resolve by filesystem superblock label, reject partition-table or root devices, and wait with a 5-minute deadline for async EBS attachments.</desc>
+  <defs>
+    <marker id="arr-nv" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Graviton NVMe Roulette: Why Device Names Shuffle &amp; the Three Boot Guards</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Linux names NVMe controllers in discovery order &#8212; /dev/nvme1n1 is data on one shape and the OS root disk on the next</text>
+
+    <!-- TOP PANEL: THE ROULETTE -->
+    <rect x="30" y="80" width="1020" height="168" rx="12" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.8"/>
+    <rect x="48" y="96" width="234" height="26" rx="6" fill="#b43c3c"/>
+    <text x="165" y="114" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">THE NVME ENUMERATION TRAP</text>
+    <text x="298" y="114" font-size="14" font-weight="700" fill="#7c2323">Same Launch Template, Different Graviton Instance Shape &#8594; Device Names Flip</text>
+
+    <!-- Launch 1 -->
+    <rect x="48" y="134" width="468" height="96" rx="8" fill="#ffffff" stroke="#b8883b" stroke-width="1.4"/>
+    <text x="282" y="156" text-anchor="middle" font-size="13" font-weight="700" fill="#5e3e0e">Launch A (t4g.large) &#8212; What the Script Assumed</text>
+    <rect x="64" y="168" width="136" height="48" rx="6" fill="#eef4fb" stroke="#28597a" stroke-width="1.2"/>
+    <text x="132" y="188" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700">/dev/nvme0n1</text>
+    <text x="132" y="206" text-anchor="middle" font-size="11" fill="#28597a">OS Root Disk (/)</text>
+
+    <rect x="214" y="168" width="136" height="48" rx="6" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.2"/>
+    <text x="282" y="188" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700">/dev/nvme1n1</text>
+    <text x="282" y="206" text-anchor="middle" font-size="11" fill="#164231">64G ch-metadata</text>
+
+    <rect x="364" y="168" width="136" height="48" rx="6" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.2"/>
+    <text x="432" y="188" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700">/dev/nvme2n1</text>
+    <text x="432" y="206" text-anchor="middle" font-size="11" fill="#5e3e0e">100G ch-cache</text>
+
+    <!-- Launch 2 -->
+    <rect x="554" y="134" width="478" height="96" rx="8" fill="#ffffff" stroke="#b43c3c" stroke-width="1.6"/>
+    <text x="793" y="156" text-anchor="middle" font-size="13" font-weight="700" fill="#7c2323">Launch B (t4g.xlarge / r8g.2xlarge) &#8212; Controller Order Flips!</text>
+    <rect x="570" y="168" width="136" height="48" rx="6" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.2"/>
+    <text x="638" y="188" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700">/dev/nvme0n1</text>
+    <text x="638" y="206" text-anchor="middle" font-size="11" fill="#164231">64G ch-metadata</text>
+
+    <rect x="720" y="168" width="144" height="48" rx="6" fill="#8f2424"/>
+    <text x="792" y="188" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#ffffff">/dev/nvme1n1</text>
+    <text x="792" y="206" text-anchor="middle" font-size="11" font-weight="700" fill="#fde8e8">OS ROOT DISK (!) </text>
+
+    <rect x="878" y="168" width="138" height="48" rx="6" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.2"/>
+    <text x="947" y="188" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700">/dev/nvme2n1</text>
+    <text x="947" y="206" text-anchor="middle" font-size="11" fill="#5e3e0e">100G ch-cache</text>
+
+    <!-- BOTTOM PANEL: THE THREE GUARDS -->
+    <rect x="30" y="266" width="1020" height="244" rx="14" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <text x="540" y="294" text-anchor="middle" font-size="17" font-weight="700" fill="#164231">The Three Boot-Time Disk Guards in chinit (mount_data_disks)</text>
+
+    <!-- Guard 1 -->
+    <rect x="48" y="314" width="312" height="176" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.6"/>
+    <rect x="48" y="314" width="312" height="34" rx="10" fill="#1f6f50"/>
+    <text x="204" y="336" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Guard 1: Labels Are Identity</text>
+    <text x="204" y="366" text-anchor="middle" font-size="12" fill="#2c4a3e">Resolve every volume by superblock</text>
+    <text x="204" y="384" text-anchor="middle" font-size="12" fill="#2c4a3e">label first, regardless of device path:</text>
+    <rect x="68" y="398" width="272" height="28" rx="5" fill="#dff0e8"/>
+    <text x="204" y="417" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#164231">blkid -L ch-metadata</text>
+    <text x="204" y="448" text-anchor="middle" font-size="12" fill="#2c4a3e">Write <tspan font-family="Courier, monospace" font-weight="700">LABEL=ch-metadata</tspan> into</text>
+    <text x="204" y="466" text-anchor="middle" font-size="12" fill="#2c4a3e"><tspan font-family="Courier, monospace">/etc/fstab</tspan> so reboots survive flips.</text>
+
+    <path d="M360 402 H380" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-nv)"/>
+
+    <!-- Guard 2 -->
+    <rect x="384" y="314" width="312" height="176" rx="10" fill="#ffffff" stroke="#28597a" stroke-width="1.6"/>
+    <rect x="384" y="314" width="312" height="34" rx="10" fill="#28597a"/>
+    <text x="540" y="336" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Guard 2: Partition-Table &amp; Root Shield</text>
+    <text x="540" y="366" text-anchor="middle" font-size="12" fill="#334a60">When scanning candidate devices on</text>
+    <text x="540" y="384" text-anchor="middle" font-size="12" fill="#334a60">first boot, immediately skip any disk:</text>
+    <rect x="404" y="398" width="272" height="28" rx="5" fill="#eef4fb"/>
+    <text x="540" y="417" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#143852">PTTYPE=gpt/dos OR backing &quot;/&quot;</text>
+    <text x="540" y="448" text-anchor="middle" font-size="12" fill="#334a60">Never run <tspan font-family="Courier, monospace">mkfs</tspan> or <tspan font-family="Courier, monospace">e2label</tspan> on a</text>
+    <text x="540" y="466" text-anchor="middle" font-size="12" fill="#334a60">partitioned OS volume.</text>
+
+    <path d="M696 402 H716" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-nv)"/>
+
+    <!-- Guard 3 -->
+    <rect x="720" y="314" width="312" height="176" rx="10" fill="#ffffff" stroke="#9b6b24" stroke-width="1.6"/>
+    <rect x="720" y="314" width="312" height="34" rx="10" fill="#9b6b24"/>
+    <text x="876" y="336" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Guard 3: Patient Attach Window</text>
+    <text x="876" y="366" text-anchor="middle" font-size="12" fill="#5e3e0e">Async EBS attach on fresh scale-outs</text>
+    <text x="876" y="384" text-anchor="middle" font-size="12" fill="#5e3e0e">can take 90–120 seconds:</text>
+    <rect x="740" y="398" width="272" height="28" rx="5" fill="#fff0d1"/>
+    <text x="876" y="417" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#5e3e0e">5-minute deadline retry loop</text>
+    <text x="876" y="448" text-anchor="middle" font-size="12" fill="#5e3e0e">Waits for slow EBS attachments</text>
+    <text x="876" y="466" text-anchor="middle" font-size="12" fill="#5e3e0e">instead of aborting at 60 seconds.</text>
+
+    <!-- FOOTER -->
+    <rect x="30" y="524" width="1020" height="40" rx="8" fill="#17283c"/>
+    <text x="540" y="549" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Golden Rule: Device names (/dev/nvmeXnY) are controller slots, not disk identity &#8212; always key on filesystem labels</text>
+  </g>
+</svg>

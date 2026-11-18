@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">Writers, Readers, Keepers: Designing a ClickHouse Cluster That Survives Node Loss</title>
+  <desc id="desc">Cluster topology splitting ClickHouse into three isolated node roles: fixed-IP Writers (the kitchen), ASG Readers (the dining room), and a 3-node Keeper Raft quorum with dedicated 64 GB gp3 disks (the head office).</desc>
+  <defs>
+    <marker id="arr-ct" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+    <marker id="arr-ctg" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Writers, Readers, Keepers: Designing a Cluster That Survives Any 3 a.m. Node Loss</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Separate the kitchen (writers), dining room (readers), and head office (keepers) so no single failure starves ingest</text>
+
+    <!-- THREE ROLE COLUMNS -->
+    <!-- Col 1: Writers -->
+    <rect x="28" y="84" width="324" height="312" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="46" y="100" width="288" height="32" rx="6" fill="#28597a"/>
+    <text x="190" y="121" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">1. Writers = The Kitchen (2 Nodes)</text>
+
+    <text x="190" y="150" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">Fixed Private IPs (.10, .11) &#183; Not in ASG</text>
+    <rect x="46" y="164" width="288" height="94" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.4"/>
+    <text x="190" y="186" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">Dedicated to Ingest &amp; Background Merges</text>
+    <text x="190" y="206" text-anchor="middle" font-size="11" fill="#334a60">&#8226; Receives all OTLP / HTTP / Native INSERTs</text>
+    <text x="190" y="224" text-anchor="middle" font-size="11" fill="#334a60">&#8226; Runs zero dashboard or ad-hoc SELECTs</text>
+    <text x="190" y="242" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">&#8226; Heavy queries can never starve ingestion</text>
+
+    <rect x="46" y="272" width="288" height="106" rx="8" fill="#d9e9f7" stroke="#28597a" stroke-width="1.2"/>
+    <text x="190" y="294" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">1 Shard &#183; internal_replication = true</text>
+    <text x="190" y="314" text-anchor="middle" font-size="11" fill="#334a60">Write lands on 1 writer; ReplicatedMergeTree</text>
+    <text x="190" y="332" text-anchor="middle" font-size="11" fill="#334a60">replicates parts to all peers via Keeper.</text>
+    <text x="190" y="356" text-anchor="middle" font-size="11" font-weight="700" fill="#28597a">Lose 1 writer &#8594; Writer NLB routes to survivor</text>
+
+    <!-- Col 2: Keepers -->
+    <rect x="378" y="84" width="324" height="312" rx="12" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.8"/>
+    <rect x="396" y="100" width="288" height="32" rx="6" fill="#9b6b24"/>
+    <text x="540" y="121" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">2. Keepers = Head Office (3 Nodes)</text>
+
+    <text x="540" y="150" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">Fixed IPs (.20..22) + Persistent myid Plaque</text>
+    <rect x="396" y="164" width="288" height="94" rx="8" fill="#ffffff" stroke="#9b6b24" stroke-width="1.4"/>
+    <text x="540" y="186" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">Raft Consensus Quorum (2 of 3 Required)</text>
+    <text x="540" y="206" text-anchor="middle" font-size="11" fill="#5e3e0e">&#8226; 1 Keeper down: 2/3 quorum holds &#8594; healthy</text>
+    <text x="540" y="224" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">&#8226; 2 Keepers down: quorum lost &#8594; ALL tables</text>
+    <text x="540" y="242" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">flip to read-only (is_readonly = 1)!</text>
+
+    <rect x="396" y="272" width="288" height="106" rx="8" fill="#fff0d1" stroke="#9b6b24" stroke-width="1.4"/>
+    <text x="540" y="294" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">Why Keeper Gets a Dedicated 64 GB gp3 Disk</text>
+    <text x="540" y="314" text-anchor="middle" font-size="11" fill="#5e3e0e">Keeper <tspan font-family="Courier, monospace" font-weight="700">fsyncs</tspan> every Raft write. Sharing a disk</text>
+    <text x="540" y="332" text-anchor="middle" font-size="11" fill="#5e3e0e">with ClickHouse merges spikes fsync latency &#8594;</text>
+    <text x="540" y="350" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">missed heartbeats &amp; leader election storms!</text>
+
+    <!-- Col 3: Readers -->
+    <rect x="728" y="84" width="324" height="312" rx="12" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.8"/>
+    <rect x="746" y="100" width="288" height="32" rx="6" fill="#1f6f50"/>
+    <text x="890" y="121" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">3. Readers = Dining Room (ASG Pool)</text>
+
+    <text x="890" y="150" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Auto Scaling Group (50% Spot + 50% OD)</text>
+    <rect x="746" y="164" width="288" height="94" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="890" y="186" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Elastic Query-Serving Replicas</text>
+    <text x="890" y="206" text-anchor="middle" font-size="11" fill="#2c4a3e">&#8226; Serves dashboards, APIs, &amp; ad-hoc SQL</text>
+    <text x="890" y="224" text-anchor="middle" font-size="11" fill="#2c4a3e">&#8226; Expensive 30-day scan only slows 1 reader</text>
+    <text x="890" y="242" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">&#8226; Scales out on CPU &amp; shrinks when idle</text>
+
+    <rect x="746" y="272" width="288" height="106" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.2"/>
+    <text x="890" y="294" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Pure Replicas Are Cheap to Replace</text>
+    <text x="890" y="314" text-anchor="middle" font-size="11" fill="#164231">Claims stable <tspan font-family="Courier, monospace">reader-N</tspan> lease in DynamoDB,</text>
+    <text x="890" y="332" text-anchor="middle" font-size="11" fill="#164231">reads Keeper replication log, and streams</text>
+    <text x="890" y="350" text-anchor="middle" font-size="11" fill="#164231">missing parts from siblings + S3.</text>
+
+    <!-- BOTTOM SUMMARY TABLE -->
+    <rect x="28" y="414" width="1024" height="94" rx="12" fill="#ffffff" stroke="#28597a" stroke-width="1.6"/>
+    <text x="540" y="440" text-anchor="middle" font-size="14" font-weight="700" fill="#143852">What Happens at 3 a.m. When Any Single Node Dies</text>
+    <text x="190" y="468" text-anchor="middle" font-size="12" font-weight="700" fill="#28597a">1 Writer Dies &#8594; Writer 2 absorbs ingest</text>
+    <text x="190" y="488" text-anchor="middle" font-size="11" fill="#465a6e">Zero dropped OTLP batches</text>
+    <text x="540" y="468" text-anchor="middle" font-size="12" font-weight="700" fill="#9b6b24">1 Keeper Dies &#8594; 2/3 Raft quorum holds</text>
+    <text x="540" y="488" text-anchor="middle" font-size="11" fill="#5e3e0e">Tables stay writable; EBS myid re-attaches</text>
+    <text x="890" y="468" text-anchor="middle" font-size="12" font-weight="700" fill="#1f6f50">1 Reader Dies &#8594; NLB drains &amp; ASG replaces</text>
+    <text x="890" y="488" text-anchor="middle" font-size="11" fill="#2c4a3e">Zero human intervention required</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="522" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="548" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Topology Invariant: Keepers and Writers use fixed identity outside ASGs; Readers scale elastically inside an ASG</text>
+  </g>
+</svg>

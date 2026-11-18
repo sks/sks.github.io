@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">The Cost Levers of Self-Managed ClickHouse on AWS and the Orphaned EBS Janitor</title>
+  <desc id="desc">Six cost-engineering levers for self-managed ClickHouse on AWS (Graviton arm64, 50% Spot readers, S3 Standard-IA lifecycle, instance-store NVMe cache, free S3 Gateway Endpoint, and SSM over Bastion) plus the daily janitor Lambda that stopped a $1,700/month orphaned EBS volume leak.</desc>
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">The Cost Levers of Self-Managed ClickHouse on AWS (~$3,100–$3,500/mo Prod)</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Six architectural levers that keep the monthly bill predictable &#8212; plus the janitor that killed a $1,700/mo EBS leak</text>
+
+    <!-- 6 LEVER CARDS (2x3) -->
+    <rect x="28" y="82" width="324" height="132" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <rect x="44" y="96" width="292" height="26" rx="5" fill="#1f6f50"/>
+    <text x="190" y="114" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Lever 1: Graviton arm64 (r8g / t4g)</text>
+    <text x="190" y="142" text-anchor="middle" font-size="12" fill="#2c4a3e">Official ClickHouse arm64 builds run</text>
+    <text x="190" y="160" text-anchor="middle" font-size="12" fill="#2c4a3e"><tspan font-weight="700" fill="#1f6f50">~20% cheaper</tspan> than x86 on AWS and</text>
+    <text x="190" y="178" text-anchor="middle" font-size="12" fill="#2c4a3e">~35% cheaper than comparable Azure VMs.</text>
+    <text x="190" y="200" text-anchor="middle" font-size="11" font-weight="700" fill="#164231">Pair baseline with 1-yr Savings Plan (&#8722;20%)</text>
+
+    <rect x="378" y="82" width="324" height="132" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <rect x="394" y="96" width="292" height="26" rx="5" fill="#1f6f50"/>
+    <text x="540" y="114" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Lever 2: 50% Spot Split on Readers</text>
+    <text x="540" y="142" text-anchor="middle" font-size="12" fill="#2c4a3e"><tspan font-family="Courier, monospace">reader_spot_ratio = 0.5</tspan> books half the</text>
+    <text x="540" y="160" text-anchor="middle" font-size="12" fill="#2c4a3e">query pool at <tspan font-weight="700" fill="#1f6f50">~70% off</tspan> while keeping</text>
+    <text x="540" y="178" text-anchor="middle" font-size="12" fill="#2c4a3e">an on-demand floor against AZ reclaims.</text>
+    <text x="540" y="200" text-anchor="middle" font-size="11" font-weight="700" fill="#164231">DynamoDB lease claim keeps identity stable</text>
+
+    <rect x="728" y="82" width="324" height="132" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <rect x="744" y="96" width="292" height="26" rx="5" fill="#1f6f50"/>
+    <text x="890" y="114" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Lever 3: S3 Standard &#8594; IA at 30 Days</text>
+    <text x="890" y="142" text-anchor="middle" font-size="12" fill="#2c4a3e">Lifecycle moves 30d+ objects from</text>
+    <text x="890" y="160" text-anchor="middle" font-size="12" fill="#2c4a3e"><tspan font-family="Courier, monospace">$0.023</tspan> to <tspan font-family="Courier, monospace" font-weight="700" fill="#1f6f50">$0.0125/GB-mo</tspan> (50 TB drops</text>
+    <text x="890" y="178" text-anchor="middle" font-size="12" fill="#2c4a3e">from $1,180 to ~$650/mo; instant read).</text>
+    <text x="890" y="200" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Never use Glacier (hour-long fetches break SQL)</text>
+
+    <!-- Row 2 -->
+    <rect x="28" y="228" width="324" height="132" rx="10" fill="#eef4fb" stroke="#28597a" stroke-width="1.6"/>
+    <rect x="44" y="242" width="292" height="26" rx="5" fill="#28597a"/>
+    <text x="190" y="260" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Lever 4: Instance-Store NVMe Cache</text>
+    <text x="190" y="288" text-anchor="middle" font-size="12" fill="#334a60"><tspan font-family="Courier, monospace">r8g</tspan> instances include local NVMe</text>
+    <text x="190" y="306" text-anchor="middle" font-size="12" fill="#334a60">at $0 extra. Putting <tspan font-family="Courier, monospace">s3_cache</tspan> on</text>
+    <text x="190" y="324" text-anchor="middle" font-size="12" fill="#334a60">ephemeral NVMe deletes <tspan font-weight="700" fill="#1f6f50">~$465/mo</tspan> of gp3.</text>
+    <text x="190" y="346" text-anchor="middle" font-size="11" font-weight="700" fill="#143852">Durable bytes stay safe in S3 + metadata gp3</text>
+
+    <rect x="378" y="228" width="324" height="132" rx="10" fill="#eef4fb" stroke="#28597a" stroke-width="1.6"/>
+    <rect x="394" y="242" width="292" height="26" rx="5" fill="#28597a"/>
+    <text x="540" y="260" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Lever 5: Free S3 VPC Gateway Endpoint</text>
+    <text x="540" y="288" text-anchor="middle" font-size="12" fill="#334a60">Routes all S3 PUT/GET traffic over</text>
+    <text x="540" y="306" text-anchor="middle" font-size="12" fill="#334a60">AWS's free private gateway instead of</text>
+    <text x="540" y="324" text-anchor="middle" font-size="12" fill="#334a60">the NAT Gateway (<tspan font-family="Courier, monospace">$0.045/GB</tspan> toll road).</text>
+    <text x="540" y="346" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Saves $500–$2,200/mo on 50 TB traffic</text>
+
+    <rect x="728" y="228" width="324" height="132" rx="10" fill="#eef4fb" stroke="#28597a" stroke-width="1.6"/>
+    <rect x="744" y="242" width="292" height="26" rx="5" fill="#28597a"/>
+    <text x="890" y="260" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Lever 6: Zero Bastion + Idle Shrink</text>
+    <text x="890" y="288" text-anchor="middle" font-size="12" fill="#334a60">SSM Session Manager + free ACM certs</text>
+    <text x="890" y="306" text-anchor="middle" font-size="12" fill="#334a60">replace $140/mo bastion hosts; ASG</text>
+    <text x="890" y="324" text-anchor="middle" font-size="12" fill="#334a60">idle alarm scales readers down off-peak.</text>
+    <text x="890" y="346" text-anchor="middle" font-size="11" font-weight="700" fill="#143852">Costs must fall with load, not just rise</text>
+
+    <!-- BOTTOM WAR STORY: THE $1,700/MO ORPHANED EBS LEAK -->
+    <rect x="28" y="376" width="1024" height="132" rx="12" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.8"/>
+    <rect x="48" y="392" width="340" height="26" rx="6" fill="#b43c3c"/>
+    <text x="218" y="410" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">WAR STORY: THE $1,700/MO ORPHANED VOLUME LEAK</text>
+    <text x="404" y="410" font-size="14" font-weight="700" fill="#7c2323">How inline block_device_mappings leaked 38 TB of invisible EBS disks</text>
+
+    <rect x="48" y="428" width="468" height="66" rx="8" fill="#ffffff" stroke="#c05c5c" stroke-width="1.3"/>
+    <text x="282" y="450" text-anchor="middle" font-size="12" font-weight="700" fill="#7c2323">The Leak: Inline EBS + delete_on_termination = false</text>
+    <text x="282" y="470" text-anchor="middle" font-size="11" fill="#5c3a3a">Every replaced instance detached its old volume with <tspan font-weight="700">zero tags</tspan>;</text>
+    <text x="282" y="486" text-anchor="middle" font-size="11" fill="#5c3a3a">Cost Explorer tag filters never saw the 38 TB ($1,700/mo) pileup.</text>
+
+    <rect x="564" y="428" width="468" height="66" rx="8" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="798" y="450" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">The Fix: Tagged aws_ebs_volume + Daily Janitor Lambda</text>
+    <text x="798" y="470" text-anchor="middle" font-size="11" fill="#2c4a3e">Standalone tagged EBS resources for persistent disks + daily Lambda</text>
+    <text x="798" y="486" text-anchor="middle" font-size="11" fill="#2c4a3e">that deletes any <tspan font-family="Courier, monospace">available</tspan> + completely untagged volume &gt;24h old.</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="522" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="548" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">FinOps Rule: Always check unallocated/untagged AWS spend &#8212; tag-filtered dashboards hide untagged resource leaks</text>
+  </g>
+</svg>

@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">One Binary to Bootstrap a Node: Why chinit Replaced 3,600 Lines of Bash</title>
+  <desc id="desc">Comparison of 3,600 lines of Terraform-templated bash boot scripts across writer, reader, and keeper roles versus chinit: a single compiled Go binary driven by a declarative YAML role spec, provider factory, checksum-keyed state file, and typed retry engine.</desc>
+  <defs>
+    <marker id="arr-ob" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Why chinit Replaced 3,600 Lines of Templated Bash</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Bash is a fine interactive shell and a poor state machine &#8212; node bootstrap needs types, retries, and persisted state</text>
+
+    <!-- LEFT PANEL: THE BASH ERA -->
+    <rect x="28" y="82" width="484" height="426" rx="14" fill="#fdf2f2" stroke="#c05c5c" stroke-width="2"/>
+    <rect x="48" y="98" width="290" height="28" rx="6" fill="#b43c3c"/>
+    <text x="193" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">THE BASH ERA (~3,600 LINES OF DRIFT)</text>
+
+    <rect x="48" y="140" width="444" height="54" rx="8" fill="#ffffff" stroke="#c05c5c" stroke-width="1.4"/>
+    <text x="270" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="#7c2323">Terraform templatefile() &#8212; ~40 Interpolated String Vars</text>
+    <text x="270" y="180" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#5c3a3a">${cluster_name}, ${s3_bucket}, ${admin_password}...</text>
+
+    <rect x="48" y="208" width="138" height="68" rx="8" fill="#fbe1e1" stroke="#b43c3c" stroke-width="1.4"/>
+    <text x="117" y="232" text-anchor="middle" font-size="12" font-weight="700" fill="#7c2323">writer-init.sh</text>
+    <text x="117" y="250" text-anchor="middle" font-size="11" fill="#5c3a3a">~1,300 lines</text>
+    <text x="117" y="266" text-anchor="middle" font-size="10" fill="#b43c3c">90% copy-pasted</text>
+
+    <rect x="201" y="208" width="138" height="68" rx="8" fill="#fbe1e1" stroke="#b43c3c" stroke-width="1.4"/>
+    <text x="270" y="232" text-anchor="middle" font-size="12" font-weight="700" fill="#7c2323">reader-init.sh</text>
+    <text x="270" y="250" text-anchor="middle" font-size="11" fill="#5c3a3a">~1,300 lines</text>
+    <text x="270" y="266" text-anchor="middle" font-size="10" fill="#b43c3c">Drifts from writer</text>
+
+    <rect x="354" y="208" width="138" height="68" rx="8" fill="#fbe1e1" stroke="#b43c3c" stroke-width="1.4"/>
+    <text x="423" y="232" text-anchor="middle" font-size="12" font-weight="700" fill="#7c2323">keeper-init.sh</text>
+    <text x="423" y="250" text-anchor="middle" font-size="11" fill="#5c3a3a">~1,000 lines</text>
+    <text x="423" y="266" text-anchor="middle" font-size="10" fill="#b43c3c">Separate cron bash</text>
+
+    <rect x="48" y="292" width="444" height="198" rx="10" fill="#ffffff" stroke="#c05c5c" stroke-width="1.4"/>
+    <text x="270" y="316" text-anchor="middle" font-size="14" font-weight="700" fill="#7c2323">Why Bash Fails as a Bootstrap State Machine</text>
+    <text x="68" y="342" font-size="12" fill="#5c3a3a">&#10007; <tspan font-weight="700">No Types:</tspan> Missing variable silently expands to empty string.</text>
+    <text x="68" y="366" font-size="12" fill="#5c3a3a">&#10007; <tspan font-weight="700">Folklore Retries:</tspan> Ad-hoc <tspan font-family="Courier, monospace">sleep 10</tspan> loops vs unretried calls.</text>
+    <text x="68" y="390" font-size="12" fill="#5c3a3a">&#10007; <tspan font-weight="700">Implicit set -e:</tspan> Best-effort warnings abort the whole boot.</text>
+    <text x="68" y="414" font-size="12" fill="#5c3a3a">&#10007; <tspan font-weight="700">No State File:</tspan> Crash at step 14/20 has no idea what ran.</text>
+    <text x="68" y="438" font-size="12" fill="#5c3a3a">&#10007; <tspan font-weight="700">Zero Unit Tests:</tspan> Only way to test a change is booting a VM.</text>
+    <text x="270" y="472" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Secrets interpolated into user-data &amp; Terraform state</text>
+
+    <!-- RIGHT PANEL: THE CHINIT ENGINE -->
+    <rect x="540" y="82" width="512" height="426" rx="14" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="560" y="98" width="320" height="28" rx="6" fill="#1f6f50"/>
+    <text x="720" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">THE CHINIT ARCHITECTURE (ONE GO BINARY)</text>
+
+    <rect x="560" y="140" width="228" height="76" rx="8" fill="#ffffff" stroke="#9b6b24" stroke-width="1.5"/>
+    <text x="674" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="#5e3e0e">1. Declarative Role Spec</text>
+    <text x="674" y="180" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#5e3e0e">chinit-&lt;role&gt;.yaml</text>
+    <text x="674" y="198" text-anchor="middle" font-size="10" fill="#7a541b">Secret names only + bundle SHA256</text>
+
+    <rect x="804" y="140" width="228" height="76" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.5"/>
+    <text x="918" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">2. Cloud Provider Factory</text>
+    <text x="918" y="180" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#28597a">AWS / Azure / GCP / Local</text>
+    <text x="918" y="198" text-anchor="middle" font-size="10" fill="#334a60">Secrets, Bundle, Leases, DNS, EBS</text>
+
+    <rect x="560" y="230" width="472" height="122" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.8"/>
+    <text x="796" y="254" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">3. Typed Pipeline Engine (24 Steps &#183; 2 Criticality Classes)</text>
+    <text x="796" y="276" text-anchor="middle" font-size="12" fill="#2c4a3e">&#8226; <tspan font-weight="700" fill="#b43c3c">Critical Steps (Fatal):</tspan> Bundle SHA gate, NVMe mount, Lease claim, XML render</text>
+    <text x="796" y="296" text-anchor="middle" font-size="12" fill="#2c4a3e">&#8226; <tspan font-weight="700" fill="#9b6b24">Best-Effort Steps (Warn + Timer):</tspan> Peer schema sync, replica catch-up</text>
+    <text x="796" y="316" text-anchor="middle" font-size="12" fill="#2c4a3e">&#8226; <tspan font-weight="700" fill="#28597a">4 Named Backoff Policies:</tspan> Fast, Standard, StorageMount (5m), Network</text>
+    <text x="796" y="338" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Every step unit-tested against fake providers in milliseconds</text>
+
+    <rect x="560" y="366" width="472" height="124" rx="10" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="796" y="390" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">4. Checksum-Keyed State File (/var/lib/chinit/state.json)</text>
+    <text x="796" y="412" text-anchor="middle" font-size="12" fill="#164231">&#10003; Records completed steps + settled replica identity + bundle SHA256.</text>
+    <text x="796" y="432" text-anchor="middle" font-size="12" fill="#164231">&#10003; Crash mid-boot? Re-run resumes from the exact failed step.</text>
+    <text x="796" y="452" text-anchor="middle" font-size="12" fill="#164231">&#10003; New config bundle SHA? Invalidates prior steps and re-converges.</text>
+    <text x="796" y="474" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Same binary runs boot AND all 8 Day-2 systemd maintenance subcommands</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="522" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="548" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Key Principle: Roles and clouds are data in the YAML spec, not separate bash scripts</text>
+  </g>
+</svg>

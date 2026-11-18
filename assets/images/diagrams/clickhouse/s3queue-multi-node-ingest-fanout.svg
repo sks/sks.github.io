@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">S3Queue Multi-Node Ingest Fan-Out versus Single-Node Bottleneck</title>
+  <desc id="desc">Comparison of a single-writer S3Queue bottleneck where writer-0 is pinned at 100% CPU while four writers idle (masked by a 24% fleet-average CPU metric) versus deploying the identical S3Queue DDL on every writer so Keeper distributes file claims across the fleet.</desc>
+  <defs>
+    <marker id="arr-fo" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+    <marker id="arr-red2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#b43c3c"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">S3Queue Is a Multi-Node Engine: Single-Writer Bottleneck vs. Fleet Fan-Out</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">A node without the S3Queue table drains zero files &#8212; deploy the identical DDL on every writer to scale ingest N&#215;</text>
+
+    <!-- LEFT PANEL: BEFORE (1-NODE BOTTLENECK) -->
+    <rect x="28" y="82" width="496" height="426" rx="14" fill="#fdf2f2" stroke="#c05c5c" stroke-width="2"/>
+    <rect x="48" y="98" width="248" height="28" rx="6" fill="#b43c3c"/>
+    <text x="172" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">BEFORE: 1 WRITER HAS S3QUEUE</text>
+    <text x="312" y="117" font-size="13" font-weight="700" fill="#7c2323">Fleet CPU Avg: 24% (Lying!)</text>
+
+    <rect x="156" y="140" width="240" height="44" rx="8" fill="#fff0d1" stroke="#8b5a1e" stroke-width="1.5"/>
+    <text x="276" y="160" text-anchor="middle" font-size="13" font-weight="700" fill="#5e3e0e">S3 Staging Prefix (30 TB/day)</text>
+    <text x="276" y="176" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#7a541b">file-001, file-002, file-003...</text>
+
+    <path d="M276 184 L124 228" fill="none" stroke="#b43c3c" stroke-width="2.6" marker-end="url(#arr-red2)"/>
+    <text x="174" y="204" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">100% of files</text>
+
+    <!-- Writers in Before -->
+    <rect x="48" y="232" width="152" height="124" rx="10" fill="#fbe1e1" stroke="#b43c3c" stroke-width="2"/>
+    <text x="124" y="254" text-anchor="middle" font-size="14" font-weight="700" fill="#7c2323">writer-0</text>
+    <text x="124" y="274" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Has S3Queue + MV</text>
+    <rect x="62" y="286" width="124" height="24" rx="4" fill="#8f2424"/>
+    <text x="124" y="302" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">CPU: 100% BUSY</text>
+    <text x="124" y="328" text-anchor="middle" font-size="10" fill="#7c2323">600 overload warns</text>
+    <text x="124" y="344" text-anchor="middle" font-size="10" fill="#7c2323">every 10 minutes</text>
+
+    <rect x="216" y="232" width="136" height="124" rx="10" fill="#ffffff" stroke="#b8c4ce" stroke-width="1.5" stroke-dasharray="5 3"/>
+    <text x="284" y="254" text-anchor="middle" font-size="14" font-weight="700" fill="#6c7a89">writer-1..2</text>
+    <text x="284" y="276" text-anchor="middle" font-size="11" fill="#b43c3c">No S3Queue table</text>
+    <text x="284" y="302" text-anchor="middle" font-size="12" font-weight="700" fill="#6c7a89">CPU: ~5% Idle</text>
+    <text x="284" y="330" text-anchor="middle" font-size="11" fill="#6c7a89">0 files drained</text>
+
+    <rect x="368" y="232" width="136" height="124" rx="10" fill="#ffffff" stroke="#b8c4ce" stroke-width="1.5" stroke-dasharray="5 3"/>
+    <text x="436" y="254" text-anchor="middle" font-size="14" font-weight="700" fill="#6c7a89">writer-3..4</text>
+    <text x="436" y="276" text-anchor="middle" font-size="11" fill="#b43c3c">No S3Queue table</text>
+    <text x="436" y="302" text-anchor="middle" font-size="12" font-weight="700" fill="#6c7a89">CPU: ~5% Idle</text>
+    <text x="436" y="330" text-anchor="middle" font-size="11" fill="#6c7a89">0 files drained</text>
+
+    <rect x="48" y="376" width="456" height="114" rx="10" fill="#ffffff" stroke="#c05c5c" stroke-width="1.4"/>
+    <text x="276" y="400" text-anchor="middle" font-size="14" font-weight="700" fill="#7c2323">Why Autoscaling Did Nothing</text>
+    <text x="276" y="422" text-anchor="middle" font-size="12" fill="#5c3a3a">1. Queue DDL was created manually on <tspan font-family="Courier, monospace">writer-0</tspan> only.</text>
+    <text x="276" y="442" text-anchor="middle" font-size="12" fill="#5c3a3a">2. Adding more writers added empty machines with no queue worker.</text>
+    <text x="276" y="462" text-anchor="middle" font-size="12" fill="#5c3a3a">3. Fleet-average CPU (24%) hid the single burning node.</text>
+    <text x="276" y="481" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Throughput ceiling = 1 node's processing_threads_num</text>
+
+    <!-- RIGHT PANEL: AFTER (MULTI-NODE FAN-OUT) -->
+    <rect x="556" y="82" width="496" height="426" rx="14" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="576" y="98" width="268" height="28" rx="6" fill="#1f6f50"/>
+    <text x="710" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">AFTER: IDENTICAL DDL ON ALL WRITERS</text>
+    <text x="858" y="117" font-size="13" font-weight="700" fill="#164231">Even Load &#183; N&#215; Drain</text>
+
+    <rect x="654" y="138" width="300" height="46" rx="8" fill="#eef4fb" stroke="#28597a" stroke-width="1.5"/>
+    <text x="804" y="158" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">S3 Prefix + Keeper Atomic File Claims</text>
+    <text x="804" y="175" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#28597a">/clickhouse/s3queue/events/processed/&lt;file&gt;</text>
+
+    <path d="M740 184 L652 228" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-fo)"/>
+    <path d="M804 184 V228" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-fo)"/>
+    <path d="M868 184 L956 228" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-fo)"/>
+
+    <!-- Writers in After -->
+    <rect x="576" y="232" width="144" height="124" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.8"/>
+    <text x="648" y="254" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">writer-0</text>
+    <text x="648" y="274" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#1f6f50">Claims file-001</text>
+    <rect x="590" y="286" width="116" height="24" rx="4" fill="#dff0e8"/>
+    <text x="648" y="302" text-anchor="middle" font-size="11" font-weight="700" fill="#164231">8 threads active</text>
+    <text x="648" y="328" text-anchor="middle" font-size="11" fill="#465a6e">MV &#8594; events</text>
+    <text x="648" y="344" text-anchor="middle" font-size="10" font-weight="700" fill="#1f6f50">Deletes file-001</text>
+
+    <rect x="732" y="232" width="144" height="124" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.8"/>
+    <text x="804" y="254" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">writer-1</text>
+    <text x="804" y="274" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#1f6f50">Claims file-002</text>
+    <rect x="746" y="286" width="116" height="24" rx="4" fill="#dff0e8"/>
+    <text x="804" y="302" text-anchor="middle" font-size="11" font-weight="700" fill="#164231">8 threads active</text>
+    <text x="804" y="328" text-anchor="middle" font-size="11" fill="#465a6e">MV &#8594; events</text>
+    <text x="804" y="344" text-anchor="middle" font-size="10" font-weight="700" fill="#1f6f50">Deletes file-002</text>
+
+    <rect x="888" y="232" width="144" height="124" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.8"/>
+    <text x="960" y="254" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">writer-2..N</text>
+    <text x="960" y="274" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#1f6f50">Claims file-003</text>
+    <rect x="902" y="286" width="116" height="24" rx="4" fill="#dff0e8"/>
+    <text x="960" y="302" text-anchor="middle" font-size="11" font-weight="700" fill="#164231">8 threads active</text>
+    <text x="960" y="328" text-anchor="middle" font-size="11" fill="#465a6e">MV &#8594; events</text>
+    <text x="960" y="344" text-anchor="middle" font-size="10" font-weight="700" fill="#1f6f50">Deletes file-003</text>
+
+    <rect x="576" y="376" width="456" height="114" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="804" y="400" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">How to Keep Fan-Out Alive Across Churn</text>
+    <text x="804" y="422" text-anchor="middle" font-size="12" fill="#2c4a3e">1. Ship S3Queue + MV DDL in <tspan font-family="Courier, monospace">bootstrap.sql</tspan> (<tspan font-family="Courier, monospace">-- @roles: writer</tspan>).</text>
+    <text x="804" y="442" text-anchor="middle" font-size="12" fill="#2c4a3e">2. Enable <tspan font-family="Courier, monospace">s3queue_enable_hash_ring_filtering = 1</tspan> to cutKeeper contention.</text>
+    <text x="804" y="462" text-anchor="middle" font-size="12" fill="#2c4a3e">3. Alarm on per-node <tspan font-family="Courier, monospace">HighCPUUsage</tspan> log events, not just ASG average.</text>
+    <text x="804" y="481" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Throughput ceiling = N writers &#215; processing_threads_num</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="522" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="548" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Takeaway: S3Queue distributes work automatically when every ingest node has the queue table pointing at the same Keeper path</text>
+  </g>
+</svg>

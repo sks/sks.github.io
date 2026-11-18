@@ -6,7 +6,7 @@ series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 13
 mermaid: true
 description: "The 18-step boot pipeline behind a scalable self-managed ClickHouse cluster — what each step does, which failures abort and which warn, and the production findings that forced the ordering: identity before render, secrets before render, criticality as a first-class property."
-image: /assets/images/og-default.png
+image: /assets/images/diagrams/clickhouse/boot-sequence-contract.svg
 tags: [clickhouse, aws, sre, bootstrapping, cloud-init, mermaid, reliability]
 permalink: /blog/clickhouse-boot-sequence-contract/
 faqs:
@@ -44,6 +44,10 @@ incidents; each one is explained where it appears in the sequence.
 ---
 
 ## The cast: one binary, four roles
+
+![Boot sequence as a contract: four node roles, three load-bearing ordering invariants, and two failure classes](/assets/images/diagrams/clickhouse/boot-sequence-contract.svg)
+
+*One binary serves all four node roles while enforcing three load-bearing ordering invariants (mount disks first, claim identity before config render, resolve secrets before render) and separating critical abort-and-replace steps from best-effort convergence steps.*
 
 Every node boots the same binary and converges against the same shape of
 spec; the role is data, not code. That one decision deletes an entire

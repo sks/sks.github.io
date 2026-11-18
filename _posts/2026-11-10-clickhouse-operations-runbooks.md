@@ -5,7 +5,7 @@ date: 2026-11-10 09:00:00 -0800
 series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 6
 description: "Golden AMIs, two-stage bootstrap, rolling config refresh, and the runbook gaps plain-EC2 ClickHouse owes you versus the Kubernetes operator."
-image: /assets/images/og-default.png
+image: /assets/images/diagrams/clickhouse/operations-golden-ami-runbooks.svg
 tags: [clickhouse, aws, packer, sre, runbooks, terraform]
 permalink: /blog/clickhouse-operations-runbooks/
 faqs:
@@ -36,6 +36,10 @@ The previous posts in this series covered the architecture of a log analytics pl
 
 ## The golden AMI
 
+![Three operational pillars of self-managed ClickHouse on EC2: Packer golden AMI, two-stage bootstrap, and DynamoDB-debounced rolling config refresh](/assets/images/diagrams/clickhouse/operations-golden-ami-runbooks.svg)
+
+*A Packer golden AMI cuts spot reader boot from twelve minutes to two, a two-stage bootstrap stays under EC2's 16 KB `user-data` cap, and a DynamoDB debounce lock collapses S3 config event storms into one blast-radius-ordered SSM roll.*
+
 Think of a hotel. Every room is pre-set: linens, towels, kettle. A guest can check in and use the room in three minutes. Preparing a room from scratch every time would take twelve. Rooms here are EC2 machines, and because readers run on spot, rooms are re-occupied constantly. That is what boot-from-scratch looked like: every node built itself from a plain Ubuntu image (package downloads, ClickHouse install, agent installs, operating system (OS) tuning), which took 8-12 minutes per boot. On a spot reader replaced at 14:00, that is ten minutes where the reader exists but cannot serve queries. The fleet churns constantly, so the cost repeats.
 
 The fix is a [Packer](https://developer.hashicorp.com/packer/docs) golden AMI. An AMI (Amazon Machine Image) is a disk template for a virtual machine. The golden AMI is Ubuntu 24.04 arm64 with everything pre-installed, the way the hotel pre-sets the room:
@@ -49,23 +53,27 @@ Boot goes from 8-12 minutes to 2-3: attach the data disks, join the cluster, don
 
 ## Two-stage bootstrap
 
-Here is a delivery analogy. A shipping label can only be 16 KB. So the label does not carry the whole instruction book. The label only says: "Open locker X." The full instruction book (~60 KB) waits inside the locker. The courier carries the locker key on her own keyring. No key is written on the label. In ClickHouse terms, the label is EC2 user-data — the script EC2 runs at first boot, capped at 16KB ([docs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html)). The locker is an S3 prefix (a folder in Amazon S3), and the real install script is about 60KB. So bootstrap splits in two:
+Here is a delivery analogy. A shipping label can only be 16 KB. So the label does not carry the whole instruction book. The label only says: "Open locker X." The full instruction book waits inside the locker. The courier carries the locker key on her own keyring. No key is written on the label. In ClickHouse terms, the label is EC2 user-data — the script EC2 runs at first boot, capped at 16KB ([docs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html)). The locker is an S3 prefix (a folder in Amazon S3).
+
+This stack shipped with the instruction-book version: a ~60KB stage-2 bash script in the S3 prefix — install ClickHouse, tune the OS, write configs, claim the ordinal, register DNS, join the cluster. It worked, and it taught us why it was the wrong shape: the script was templated by Terraform (every cluster variable an interpolated string), untestable without a live machine, and its retry logic was folklore per step. The three-thousand-line stage-2 plus its stage-1 became [chinit](https://github.com/sks/clickhouse-operator) — a single Go binary — and the two stages became a wrapper and a pipeline:
 
 ```
 ┌───────────────────────────────────────────────┐
-│ stage 1  (inside user-data, <16KB)             │
-│  install AWS CLI → aws s3 cp stage-2 from S3   │
-│  ...using the instance role, no credentials... │
+│ stage 0  (inside user-data, ~1.5KB)            │
+│  aws s3 cp chinit-<role>.yaml                  │
+│  verify baked binary → exec chinit boot        │
 └──────────────────┬────────────────────────────┘
                    ▼
 ┌───────────────────────────────────────────────┐
-│ stage 2  (~60KB, from the configs/ S3 prefix)  │
-│  install ClickHouse → tune OS → write configs  │
-│  claim ordinal → register DNS → join cluster   │
+│ chinit (one binary, 24 typed steps)            │
+│  fetch SHA256-gated bundle → mount disks      │
+│  claim identity → resolve secrets → render     │
+│  start server → install recurring jobs as      │
+│  its own subcommands                          │
 └───────────────────────────────────────────────┘
 ```
 
-Stage-1 fits under the 16KB cap. It installs the AWS CLI and pulls stage-2 from S3 using the instance role. An instance role is a permission attached to the machine itself; the machine inherits it while it runs. No static credentials (passwords or keys written in files) exist anywhere. S3 grants read access to the role. The role is the only path in.
+Stage-0 fits under the 16KB cap by doing almost nothing — it seeds the node's role spec from S3 using the instance role (a permission attached to the machine itself; the machine inherits it while it runs — no static credentials anywhere), verifies the binary the golden AMI baked, and execs it. Everything else lives in the binary and the bundle. The full step-by-step walkthrough — what each of the twenty-four steps does, which failures abort and which warn — is [its own post](/blog/clickhouse-aws-bootstrap-chinit-walkthrough/).
 
 ## Rolling config refresh
 

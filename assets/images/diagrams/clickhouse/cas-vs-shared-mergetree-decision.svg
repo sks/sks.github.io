@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 600" role="img" aria-labelledby="title desc">
+  <title id="title">CAS, SharedMergeTree, or Plain Replication: Decision Framework for ClickHouse on S3</title>
+  <desc id="desc">Comparison of ReplicatedMergeTree on S3, Altinity Antalya CAS, and ClickHouse Cloud SharedMergeTree across storage multiplier, lock-in, maturity, and exit cost, followed by the five ordered decision gates.</desc>
+  <defs>
+    <marker id="arr-dc" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="600" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Plain Replication vs. Antalya CAS vs. SharedMergeTree: How to Decide</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Start with plain ReplicatedMergeTree &#8212; adopt CAS on the cold tier only when the (N&#8722;1) &#215; S3 bill justifies it</text>
+
+    <!-- 3 OPTION CARDS -->
+    <!-- Option 1 -->
+    <rect x="28" y="80" width="324" height="288" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="46" y="96" width="288" height="30" rx="6" fill="#28597a"/>
+    <text x="190" y="116" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">1. ReplicatedMergeTree + S3 (Default)</text>
+
+    <text x="190" y="148" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">Storage: N Copies (1 per Replica)</text>
+    <text x="190" y="172" text-anchor="middle" font-size="12" fill="#334a60">&#8226; <tspan font-weight="700">Source:</tspan> Upstream ClickHouse OSS</text>
+    <text x="190" y="194" text-anchor="middle" font-size="12" fill="#334a60">&#8226; <tspan font-weight="700">Maturity:</tspan> Boring, battle-tested</text>
+    <text x="190" y="216" text-anchor="middle" font-size="12" fill="#334a60">&#8226; <tspan font-weight="700">Coordination:</tspan> Keeper replication log</text>
+    <text x="190" y="238" text-anchor="middle" font-size="12" fill="#334a60">&#8226; <tspan font-weight="700">Lock-in / Exit:</tspan> Zero lock-in</text>
+    <rect x="46" y="256" width="288" height="44" rx="6" fill="#ffffff" stroke="#28597a" stroke-width="1.2"/>
+    <text x="190" y="275" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Trade-off: 3 replicas &#215; 20 TB = 60 TB billed</text>
+    <text x="190" y="292" text-anchor="middle" font-size="11" fill="#1f6f50" font-weight="700">Best for: Greenfield &amp; hot/warm tiers</text>
+    <text x="190" y="346" text-anchor="middle" font-size="12" font-weight="700" fill="#28597a">Operational Risk: LOWEST</text>
+
+    <!-- Option 2 -->
+    <rect x="378" y="80" width="324" height="288" rx="12" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.8"/>
+    <rect x="396" y="96" width="288" height="30" rx="6" fill="#1f6f50"/>
+    <text x="540" y="116" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">2. Altinity Antalya CAS (Self-Managed)</text>
+
+    <text x="540" y="148" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Storage: 1 Copy (Content-Addressed)</text>
+    <text x="540" y="172" text-anchor="middle" font-size="12" fill="#2c4a3e">&#8226; <tspan font-weight="700">Source:</tspan> Antalya OSS (Apache-2.0)</text>
+    <text x="540" y="194" text-anchor="middle" font-size="12" fill="#2c4a3e">&#8226; <tspan font-weight="700">Maturity:</tspan> Experimental; pin builds</text>
+    <text x="540" y="216" text-anchor="middle" font-size="12" fill="#2c4a3e">&#8226; <tspan font-weight="700">DDL:</tspan> Unchanged ReplicatedMergeTree</text>
+    <text x="540" y="238" text-anchor="middle" font-size="12" fill="#2c4a3e">&#8226; <tspan font-weight="700">Exit:</tspan> MOVE PARTITION TO DISK back</text>
+    <rect x="396" y="256" width="288" height="44" rx="6" fill="#ffffff" stroke="#1f6f50" stroke-width="1.2"/>
+    <text x="540" y="275" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Saves (N&#8722;1) &#215; cold S3 bytes (~40 TB of 60 TB)</text>
+    <text x="540" y="292" text-anchor="middle" font-size="11" fill="#8b5a1e" font-weight="700">Requires: cas_gc_log monitoring &amp; staging</text>
+    <text x="540" y="346" text-anchor="middle" font-size="12" font-weight="700" fill="#1f6f50">Reversible Cold-Tier Optimization</text>
+
+    <!-- Option 3 -->
+    <rect x="728" y="80" width="324" height="288" rx="12" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.8"/>
+    <rect x="746" y="96" width="288" height="30" rx="6" fill="#9b6b24"/>
+    <text x="890" y="116" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">3. SharedMergeTree (ClickHouse Cloud)</text>
+
+    <text x="890" y="148" text-anchor="middle" font-size="13" font-weight="700" fill="#5e3e0e">Storage: 1 Copy (Vendor-Managed)</text>
+    <text x="890" y="172" text-anchor="middle" font-size="12" fill="#5e3e0e">&#8226; <tspan font-weight="700">Source:</tspan> Proprietary (Cloud only)</text>
+    <text x="890" y="194" text-anchor="middle" font-size="12" fill="#5e3e0e">&#8226; <tspan font-weight="700">Maturity:</tspan> GA, vendor-operated</text>
+    <text x="890" y="216" text-anchor="middle" font-size="12" fill="#5e3e0e">&#8226; <tspan font-weight="700">Coordination:</tspan> Cloud control plane</text>
+    <text x="890" y="238" text-anchor="middle" font-size="12" fill="#5e3e0e">&#8226; <tspan font-weight="700">Exit:</tspan> Full data export + DDL rewrite</text>
+    <rect x="746" y="256" width="288" height="44" rx="6" fill="#ffffff" stroke="#9b6b24" stroke-width="1.2"/>
+    <text x="890" y="275" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Zero Keeper ops &#183; Stateless scale-to-zero</text>
+    <text x="890" y="292" text-anchor="middle" font-size="11" fill="#b43c3c" font-weight="700">Trade-off: Metered compute + Cloud lock-in</text>
+    <text x="890" y="346" text-anchor="middle" font-size="12" font-weight="700" fill="#9b6b24">Best when Engineering Time &gt; Invoice</text>
+
+    <!-- BOTTOM: 5 ORDERED DECISION GATES -->
+    <rect x="28" y="386" width="1024" height="142" rx="12" fill="#ffffff" stroke="#28597a" stroke-width="1.8"/>
+    <text x="540" y="412" text-anchor="middle" font-size="15" font-weight="700" fill="#143852">The Five Decision Questions, in Order</text>
+
+    <rect x="44" y="428" width="182" height="84" rx="8" fill="#eef4fb" stroke="#28597a" stroke-width="1.3"/>
+    <text x="135" y="448" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">Q1. S3 Bill Dominant?</text>
+    <text x="135" y="468" text-anchor="middle" font-size="11" fill="#334a60">Is (N&#8722;1)&#215;cold bytes</text>
+    <text x="135" y="484" text-anchor="middle" font-size="11" fill="#334a60">worth eng time?</text>
+    <text x="135" y="502" text-anchor="middle" font-size="10" font-weight="700" fill="#b43c3c">No &#8594; Stay on Plain S3</text>
+
+    <path d="M226 470 H240" fill="none" stroke="#1e4e68" stroke-width="2" marker-end="url(#arr-dc)"/>
+
+    <rect x="244" y="428" width="182" height="84" rx="8" fill="#eef4fb" stroke="#28597a" stroke-width="1.3"/>
+    <text x="335" y="448" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">Q2. Substrate Healthy?</text>
+    <text x="335" y="468" text-anchor="middle" font-size="11" fill="#334a60">Are Keeper, DNS, &amp;</text>
+    <text x="335" y="484" text-anchor="middle" font-size="11" fill="#334a60">ON CLUSTER solid?</text>
+    <text x="335" y="502" text-anchor="middle" font-size="10" font-weight="700" fill="#b43c3c">No &#8594; Fix substrate first</text>
+
+    <path d="M426 470 H440" fill="none" stroke="#1e4e68" stroke-width="2" marker-end="url(#arr-dc)"/>
+
+    <rect x="444" y="428" width="182" height="84" rx="8" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.3"/>
+    <text x="535" y="448" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Q3. Experimental Ops?</text>
+    <text x="535" y="468" text-anchor="middle" font-size="11" fill="#2c4a3e">Can you pin Antalya &amp;</text>
+    <text x="535" y="484" text-anchor="middle" font-size="11" fill="#2c4a3e">watch cas_gc_log?</text>
+    <text x="535" y="502" text-anchor="middle" font-size="10" font-weight="700" fill="#1f6f50">Yes &#8594; Pilot CAS Cold Tier</text>
+
+    <path d="M626 470 H640" fill="none" stroke="#1e4e68" stroke-width="2" marker-end="url(#arr-dc)"/>
+
+    <rect x="644" y="428" width="182" height="84" rx="8" fill="#f3f0fb" stroke="#5b4b8a" stroke-width="1.3"/>
+    <text x="735" y="448" text-anchor="middle" font-size="12" font-weight="700" fill="#3a2e5c">Q4. Multi-Engine Read?</text>
+    <text x="735" y="468" text-anchor="middle" font-size="11" fill="#3a2e5c">Must Spark / Trino</text>
+    <text x="735" y="484" text-anchor="middle" font-size="11" fill="#3a2e5c">scan in place?</text>
+    <text x="735" y="502" text-anchor="middle" font-size="10" font-weight="700" fill="#5b4b8a">Yes &#8594; Use Apache Iceberg</text>
+
+    <path d="M826 470 H840" fill="none" stroke="#1e4e68" stroke-width="2" marker-end="url(#arr-dc)"/>
+
+    <rect x="844" y="428" width="192" height="84" rx="8" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.3"/>
+    <text x="940" y="448" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">Q5. Outsource Ops?</text>
+    <text x="940" y="468" text-anchor="middle" font-size="11" fill="#5e3e0e">Rather pay vendor</text>
+    <text x="940" y="484" text-anchor="middle" font-size="11" fill="#5e3e0e">than run Keeper/GC?</text>
+    <text x="940" y="502" text-anchor="middle" font-size="10" font-weight="700" fill="#9b6b24">Yes &#8594; ClickHouse Cloud</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="542" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="568" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Safe Adoption Path: Add CAS as a secondary cold disk and move one partition at a time &#8212; never bet hot ingest on a big-bang cutover</text>
+  </g>
+</svg>

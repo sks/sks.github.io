@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">After ReplicatedMergeTree: Antalya CAS, Apache Iceberg, and ClickHouse Cloud</title>
+  <desc id="desc">How to solve the N-replica photocopy cost of ReplicatedMergeTree on S3: Altinity Antalya CAS shares one object pool inside ClickHouse via content hashes, Apache Iceberg shares open Parquet tables across Spark/Trino/DuckDB, and ClickHouse Cloud runs managed SharedMergeTree.</desc>
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">After ReplicatedMergeTree: CAS, Apache Iceberg, and ClickHouse Cloud</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Three ways to escape the N-replica S3 photocopy bill &#8212; depending on who needs to read the bytes and who runs the cluster</text>
+
+    <!-- TOP BANNER: THE PHOTOCOPY PROBLEM -->
+    <rect x="28" y="78" width="1024" height="72" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <text x="540" y="102" text-anchor="middle" font-size="14" font-weight="700" fill="#7c2323">The Structural Cost of Plain ReplicatedMergeTree (The Photocopy Problem)</text>
+    <text x="540" y="124" text-anchor="middle" font-size="12" fill="#5c3a3a">Each branch office (replica) keeps its own full copy in S3: <tspan font-family="Courier, monospace">s3://bucket/tenant/writer-0/</tspan> + <tspan font-family="Courier, monospace">reader-1/</tspan> + <tspan font-family="Courier, monospace">reader-2/</tspan> = <tspan font-weight="700" fill="#b43c3c">3&#215; S3 storage &amp; PUTs</tspan></text>
+    <text x="540" y="141" text-anchor="middle" font-size="11" fill="#7c2323">(Upstream zero-copy replication died in PR #82250 because per-replica owner refcounts broke garbage collection)</text>
+
+    <!-- THREE PATHS FORWARD -->
+    <!-- Path 1: CAS -->
+    <rect x="28" y="166" width="324" height="340" rx="12" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.8"/>
+    <rect x="46" y="182" width="288" height="30" rx="6" fill="#1f6f50"/>
+    <text x="190" y="202" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">1. Antalya CAS (Share Inside ClickHouse)</text>
+
+    <text x="190" y="232" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#164231">metadata_type = 'cas'</text>
+    <text x="190" y="254" text-anchor="middle" font-size="12" fill="#2c4a3e">Disk backend, NOT a new table engine.</text>
+    <text x="190" y="274" text-anchor="middle" font-size="12" fill="#2c4a3e">Blobs keyed by content fingerprint:</text>
+    <rect x="46" y="288" width="288" height="64" rx="6" fill="#ffffff" stroke="#1f6f50" stroke-width="1.2"/>
+    <text x="190" y="308" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">&#10003; 1&#215; S3 copy across all replicas</text>
+    <text x="190" y="326" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">&#10003; 200M-row replica init in ~14 sec</text>
+    <text x="190" y="344" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">&#10003; TLA+-verified reachability GC</text>
+
+    <text x="190" y="378" text-anchor="middle" font-size="11" fill="#2c4a3e">Zero DDL rewrite &#183; Apache-2.0 OSS</text>
+    <text x="190" y="400" text-anchor="middle" font-size="11" font-weight="700" fill="#8b5a1e">Status: Experimental &#8212; use for</text>
+    <text x="190" y="418" text-anchor="middle" font-size="11" font-weight="700" fill="#8b5a1e">cold TTL tier today, not hot writes</text>
+    <rect x="46" y="446" width="288" height="42" rx="6" fill="#dff0e8"/>
+    <text x="190" y="472" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Drop-in for self-managedMergeTree</text>
+
+    <!-- Path 2: Iceberg -->
+    <rect x="378" y="166" width="324" height="340" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="396" y="182" width="288" height="30" rx="6" fill="#28597a"/>
+    <text x="540" y="202" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">2. Apache Iceberg (Share With Everyone)</text>
+
+    <text x="540" y="232" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#143852">Open Lakehouse Table Format</text>
+    <text x="540" y="254" text-anchor="middle" font-size="12" fill="#334a60">Parquet data + snapshot metadata in S3</text>
+    <text x="540" y="274" text-anchor="middle" font-size="12" fill="#334a60">readable by any lakehouse engine:</text>
+    <rect x="396" y="288" width="288" height="64" rx="6" fill="#ffffff" stroke="#28597a" stroke-width="1.2"/>
+    <text x="540" y="308" text-anchor="middle" font-size="11" font-weight="700" fill="#28597a">&#10003; Spark, Trino, DuckDB read in place</text>
+    <text x="540" y="326" text-anchor="middle" font-size="11" font-weight="700" fill="#28597a">&#10003; Zero vendor or engine lock-in</text>
+    <text x="540" y="344" text-anchor="middle" font-size="11" font-weight="700" fill="#28597a">&#10003; Swarm clustered reads across nodes</text>
+
+    <text x="540" y="378" text-anchor="middle" font-size="11" fill="#334a60">Different table layout + external catalog</text>
+    <text x="540" y="400" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Trade-off: No ClickHouse-native</text>
+    <text x="540" y="418" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Summing/Replacing background merges</text>
+    <rect x="396" y="446" width="288" height="42" rx="6" fill="#d9e9f7"/>
+    <text x="540" y="472" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">Best for multi-engine data lakes</text>
+
+    <!-- Path 3: ClickHouse Cloud -->
+    <rect x="728" y="166" width="324" height="340" rx="12" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.8"/>
+    <rect x="746" y="182" width="288" height="30" rx="6" fill="#9b6b24"/>
+    <text x="890" y="202" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">3. ClickHouse Cloud (Buy, Don't Build)</text>
+
+    <text x="890" y="232" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#5e3e0e">ENGINE = SharedMergeTree</text>
+    <text x="890" y="254" text-anchor="middle" font-size="12" fill="#5e3e0e">Vendor-managed S3 storage + Keeper</text>
+    <text x="890" y="274" text-anchor="middle" font-size="12" fill="#5e3e0e">with elastic compute warehouses:</text>
+    <rect x="746" y="288" width="288" height="64" rx="6" fill="#ffffff" stroke="#9b6b24" stroke-width="1.2"/>
+    <text x="890" y="308" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">&#10003; Zero Keeper, AMI, or GC ops</text>
+    <text x="890" y="326" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">&#10003; ClickPipes managed connectors</text>
+    <text x="890" y="344" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">&#10003; Compute-compute separation</text>
+
+    <text x="890" y="378" text-anchor="middle" font-size="11" fill="#5e3e0e">Closed source &#183; Metered pricing</text>
+    <text x="890" y="400" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Exit cost: Shared* DDL does not exist</text>
+    <text x="890" y="418" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">in OSS &#8594; requires export + DDL rewrite</text>
+    <rect x="746" y="446" width="288" height="42" rx="6" fill="#fff0d1"/>
+    <text x="890" y="472" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">Best for small teams without SREs</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="522" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="548" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Rule of Thumb: CAS = share inside ClickHouse &#183; Iceberg = share with other engines &#183; Cloud = pay someone else to run it</text>
+  </g>
+</svg>

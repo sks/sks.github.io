@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 660" role="img" aria-labelledby="title desc">
+  <title id="title">Postgres Filing Cabinet versus ClickHouse Columnar Warehouse</title>
+  <desc id="desc">Visual comparison of row-oriented Postgres storage (every field of one event stored together in a folder with B-Tree indexes updated on every insert) versus column-oriented ClickHouse MergeTree storage (sorted column boxes, sparse primary index every 8,192 rows, immutable parts, background merges, and monthly partition rooms).</desc>
+  <defs>
+    <marker id="arr-b" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+    <marker id="arr-g" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="660" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="23" font-weight="700">Postgres Was a Filing Cabinet. ClickHouse Is a Warehouse.</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Why row-oriented OLTP and column-oriented MergeTree make opposite trade-offs on reads, writes, and indexes</text>
+
+    <!-- LEFT PANEL: POSTGRES FILING CABINET -->
+    <rect x="28" y="82" width="496" height="500" rx="14" fill="#fff8ee" stroke="#8b5a1e" stroke-width="2"/>
+    <rect x="48" y="100" width="210" height="28" rx="6" fill="#8b5a1e"/>
+    <text x="153" y="119" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">POSTGRES (ROW-ORIENTED)</text>
+    <text x="272" y="119" font-size="16" font-weight="700" fill="#5e3e0e">The Filing Cabinet</text>
+
+    <text x="276" y="148" text-anchor="middle" font-size="13" fill="#5e3e0e">One folder per event &#8212; all columns stored side by side on 8 KB pages</text>
+
+    <!-- Filing Cabinet Folders -->
+    <rect x="48" y="164" width="456" height="44" rx="7" fill="#ffffff" stroke="#b8883b" stroke-width="1.4"/>
+    <rect x="48" y="164" width="82" height="44" rx="7" fill="#fff0d1" stroke="#b8883b" stroke-width="1.4"/>
+    <text x="89" y="191" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">Row #1</text>
+    <text x="292" y="185" text-anchor="middle" font-family="Courier, monospace" font-size="11">12:00:01 | user=42 | <tspan font-weight="700" fill="#b43c3c">status=200</tspan> | /home | 2KB body</text>
+    <text x="292" y="201" text-anchor="middle" font-size="10" fill="#7a541b">Must haul entire 2 KB row off disk just to read 2 columns</text>
+
+    <rect x="48" y="216" width="456" height="44" rx="7" fill="#ffffff" stroke="#b8883b" stroke-width="1.4"/>
+    <rect x="48" y="216" width="82" height="44" rx="7" fill="#fff0d1" stroke="#b8883b" stroke-width="1.4"/>
+    <text x="89" y="243" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">Row #2</text>
+    <text x="292" y="237" text-anchor="middle" font-family="Courier, monospace" font-size="11">12:00:02 | user=99 | <tspan font-weight="700" fill="#b43c3c">status=500</tspan> | /pay  | 2KB body</text>
+    <text x="292" y="253" text-anchor="middle" font-size="10" fill="#7a541b">Mixed types in each page &#8594; poor compression ratio</text>
+
+    <rect x="48" y="268" width="456" height="44" rx="7" fill="#ffffff" stroke="#b8883b" stroke-width="1.4"/>
+    <rect x="48" y="268" width="82" height="44" rx="7" fill="#fff0d1" stroke="#b8883b" stroke-width="1.4"/>
+    <text x="89" y="295" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">Row #3</text>
+    <text x="292" y="289" text-anchor="middle" font-family="Courier, monospace" font-size="11">12:00:03 | user=17 | <tspan font-weight="700" fill="#b43c3c">status=200</tspan> | /api  | 2KB body</text>
+    <text x="292" y="305" text-anchor="middle" font-size="10" fill="#7a541b">500M rows = 500M folders opened for a 7-day aggregation</text>
+
+    <!-- Write side in Postgres -->
+    <rect x="48" y="330" width="456" height="118" rx="10" fill="#fbe6d4" stroke="#9b5424" stroke-width="1.5"/>
+    <text x="276" y="354" text-anchor="middle" font-size="14" font-weight="700" fill="#6e320e">Write Path: Update Every B-Tree Index in Place</text>
+    <text x="276" y="376" text-anchor="middle" font-size="12" fill="#5e3e0e">Every single INSERT Splice-Updates 3–4 B-Trees in random page order:</text>
+    <rect x="64" y="390" width="132" height="42" rx="6" fill="#ffffff" stroke="#9b5424" stroke-width="1.2"/>
+    <text x="130" y="409" text-anchor="middle" font-size="11" font-weight="700">idx_events_pkey</text>
+    <text x="130" y="424" text-anchor="middle" font-size="10" fill="#b43c3c">Random page I/O</text>
+    <rect x="210" y="390" width="132" height="42" rx="6" fill="#ffffff" stroke="#9b5424" stroke-width="1.2"/>
+    <text x="276" y="409" text-anchor="middle" font-size="11" font-weight="700">idx_events_time</text>
+    <text x="276" y="424" text-anchor="middle" font-size="10" fill="#b43c3c">Page split + WAL</text>
+    <rect x="356" y="390" width="132" height="42" rx="6" fill="#ffffff" stroke="#9b5424" stroke-width="1.2"/>
+    <text x="422" y="409" text-anchor="middle" font-size="11" font-weight="700">idx_events_user</text>
+    <text x="422" y="424" text-anchor="middle" font-size="10" fill="#b43c3c">Random page I/O</text>
+
+    <rect x="48" y="464" width="456" height="100" rx="10" fill="#ffffff" stroke="#8b5a1e" stroke-width="1.4"/>
+    <text x="276" y="488" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6f50">Great at: &quot;Fetch or update Order #98172 right now&quot;</text>
+    <text x="276" y="510" text-anchor="middle" font-size="12" fill="#465a6e">Point lookups, ACID row locks, frequent in-place UPDATE / DELETE</text>
+    <text x="276" y="534" text-anchor="middle" font-size="13" font-weight="700" fill="#b43c3c">Painful at: 200k logs/sec + 500M-row group-by scans</text>
+    <text x="276" y="552" text-anchor="middle" font-size="11" fill="#7c2323">DELETE WHERE time &lt; 30d &#8594; dead tuples + hours of VACUUM</text>
+
+    <!-- RIGHT PANEL: CLICKHOUSE WAREHOUSE -->
+    <rect x="556" y="82" width="496" height="500" rx="14" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="576" y="100" width="238" height="28" rx="6" fill="#1f6f50"/>
+    <text x="695" y="119" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">CLICKHOUSE (MERGETREE)</text>
+    <text x="828" y="119" font-size="16" font-weight="700" fill="#164231">The Columnar Warehouse</text>
+
+    <text x="804" y="148" text-anchor="middle" font-size="13" fill="#164231">One sorted box per column &#8212; queries only open the boxes they name</text>
+
+    <!-- Column Boxes -->
+    <rect x="576" y="164" width="106" height="114" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.8"/>
+    <text x="629" y="184" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#164231">time.bin</text>
+    <text x="629" y="204" text-anchor="middle" font-family="Courier, monospace" font-size="11">12:00:01</text>
+    <text x="629" y="220" text-anchor="middle" font-family="Courier, monospace" font-size="11">12:00:02</text>
+    <text x="629" y="236" text-anchor="middle" font-family="Courier, monospace" font-size="11">12:00:03</text>
+    <rect x="586" y="246" width="86" height="22" rx="4" fill="#1f6f50"/>
+    <text x="629" y="261" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff">READ &#10003;</text>
+
+    <rect x="692" y="164" width="106" height="114" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.8"/>
+    <text x="745" y="184" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#164231">status.bin</text>
+    <text x="745" y="204" text-anchor="middle" font-family="Courier, monospace" font-size="11">200, 200</text>
+    <text x="745" y="220" text-anchor="middle" font-family="Courier, monospace" font-size="11">500, 200</text>
+    <text x="745" y="236" text-anchor="middle" font-size="10" fill="#164231">10&#215; ZSTD</text>
+    <rect x="702" y="246" width="86" height="22" rx="4" fill="#1f6f50"/>
+    <text x="745" y="261" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff">READ &#10003;</text>
+
+    <rect x="808" y="164" width="106" height="114" rx="8" fill="#f1f5f4" stroke="#95a5a6" stroke-width="1.4" stroke-dasharray="4 3"/>
+    <text x="861" y="184" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#6c7a89">user.bin</text>
+    <text x="861" y="212" text-anchor="middle" font-size="11" fill="#7f8c8d">42, 99, 17</text>
+    <text x="861" y="256" text-anchor="middle" font-size="10" font-weight="700" fill="#7f8c8d">SKIPPED (0 I/O)</text>
+
+    <rect x="924" y="164" width="108" height="114" rx="8" fill="#f1f5f4" stroke="#95a5a6" stroke-width="1.4" stroke-dasharray="4 3"/>
+    <text x="978" y="184" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700" fill="#6c7a89">body.bin</text>
+    <text x="978" y="212" text-anchor="middle" font-size="11" fill="#7f8c8d">2 KB JSON</text>
+    <text x="978" y="256" text-anchor="middle" font-size="10" font-weight="700" fill="#7f8c8d">SKIPPED (0 I/O)</text>
+
+    <!-- Sparse Index + Granules -->
+    <rect x="576" y="290" width="456" height="72" rx="9" fill="#eef4fb" stroke="#28597a" stroke-width="1.5"/>
+    <text x="804" y="311" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">Sparse Primary Index: 1 Bookmark Tab Every 8,192 Rows (1 Granule)</text>
+    <text x="804" y="330" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#28597a">Mark 0: [200, 00:00] &#183; Mark 1: [200, 00:09] &#183; Mark 2: [500, 00:01]</text>
+    <text x="804" y="349" text-anchor="middle" font-size="11" fill="#465a6e">1 billion rows = only 122,000 index marks &#8594; fits permanently in a few MB of RAM</text>
+
+    <!-- Immutable Parts + Background Janitor -->
+    <rect x="576" y="372" width="456" height="80" rx="9" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="804" y="392" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Write Path: Immutable Parts + Background Merge Janitor</text>
+    <rect x="592" y="402" width="112" height="36" rx="5" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.2"/>
+    <text x="648" y="418" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">202612_1_1_0</text>
+    <text x="648" y="431" text-anchor="middle" font-size="9" fill="#164231">Batch 1</text>
+
+    <text x="714" y="424" text-anchor="middle" font-size="14" font-weight="700">+</text>
+
+    <rect x="724" y="402" width="112" height="36" rx="5" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.2"/>
+    <text x="780" y="418" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700">202612_2_2_0</text>
+    <text x="780" y="431" text-anchor="middle" font-size="9" fill="#164231">Batch 2</text>
+
+    <path d="M842 420 H878" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-g)"/>
+    <text x="860" y="412" text-anchor="middle" font-size="9" font-weight="700" fill="#1f6f50">Merge</text>
+
+    <rect x="884" y="400" width="134" height="40" rx="6" fill="#1f6f50"/>
+    <text x="951" y="418" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#ffffff">202612_1_2_1</text>
+    <text x="951" y="432" text-anchor="middle" font-size="9" fill="#dff0e8">Sorted &amp; compressed</text>
+
+    <!-- Partition Superpower -->
+    <rect x="576" y="464" width="456" height="100" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="804" y="488" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Partition Rooms: PARTITION BY toYYYYMM(time)</text>
+    <text x="804" y="510" text-anchor="middle" font-size="12" fill="#465a6e">Parts never merge across months &#8594; ALTER TABLE DROP PARTITION '202609'</text>
+    <text x="804" y="532" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6f50">Deletes 500M expired rows in milliseconds by unlinking the folder</text>
+    <text x="804" y="552" text-anchor="middle" font-size="11" fill="#465a6e">Order ORDER BY from lowest cardinality (status) to highest (time, user_id)</text>
+
+    <!-- BOTTOM SUMMARY -->
+    <rect x="28" y="596" width="1024" height="46" rx="10" fill="#17283c"/>
+    <text x="540" y="624" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Mental Model: Postgres updates row folders in place &#183; ClickHouse writes sorted column parts once and merges them in the background</text>
+  </g>
+</svg>

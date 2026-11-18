@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 540" role="img" aria-labelledby="title desc">
+  <title id="title">From MergeTree to ReplicatedMergeTree to SharedMergeTree</title>
+  <desc id="desc">Three stages of ClickHouse storage evolution: single-node MergeTree on local disk, self-managed ReplicatedMergeTree storing N copies across N nodes coordinated by Keeper, and cloud SharedMergeTree storing one copy of parts in S3 with stateless compute nodes.</desc>
+  <defs>
+    <marker id="arr-m" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#28597a"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="540" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="38" text-anchor="middle" font-size="22" font-weight="700">Three Generations of MergeTree: Local Disk, N-Copy Replication, and Shared S3</text>
+    <text x="540" y="62" text-anchor="middle" font-size="14" fill="#465a6e">Same columnar part format and sparse index &#8212; three different answers for durability and compute scaling</text>
+
+    <!-- STAGE 1: PLAIN MERGETREE -->
+    <rect x="28" y="88" width="320" height="380" rx="14" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.8"/>
+    <rect x="48" y="106" width="144" height="26" rx="6" fill="#9b6b24"/>
+    <text x="120" y="124" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">1. PLAIN MERGETREE</text>
+    <text x="188" y="152" text-anchor="middle" font-size="16" font-weight="700" fill="#5e3e0e">One Warehouse, One Copy</text>
+
+    <rect x="56" y="172" width="264" height="106" rx="10" fill="#ffffff" stroke="#b8883b" stroke-width="1.5"/>
+    <text x="188" y="196" text-anchor="middle" font-size="14" font-weight="700">Single ClickHouse Node</text>
+    <text x="188" y="216" text-anchor="middle" font-size="12" fill="#465a6e">Writes parts + runs merges</text>
+    <rect x="78" y="230" width="220" height="34" rx="6" fill="#fff0d1" stroke="#9b6b24" stroke-width="1.2"/>
+    <text x="188" y="252" text-anchor="middle" font-family="Courier, monospace" font-size="12" font-weight="700">Local Disk: Parts A, B, C</text>
+
+    <rect x="56" y="300" width="264" height="146" rx="10" fill="#ffffff" stroke="#b8883b" stroke-width="1.2"/>
+    <text x="188" y="324" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6f50">&#10003; Simplest mental model</text>
+    <text x="188" y="346" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6f50">&#10003; Zero coordination overhead</text>
+    <text x="188" y="376" text-anchor="middle" font-size="13" font-weight="700" fill="#b43c3c">&#10007; Machine dies = data gone</text>
+    <text x="188" y="398" text-anchor="middle" font-size="13" font-weight="700" fill="#b43c3c">&#10007; No horizontal read scaling</text>
+    <text x="188" y="428" text-anchor="middle" font-size="11" fill="#7a541b">Use for: scratch tables &amp; local dev</text>
+
+    <!-- STAGE 2: REPLICATEDMERGETREE -->
+    <rect x="380" y="88" width="320" height="380" rx="14" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="400" y="106" width="206" height="26" rx="6" fill="#28597a"/>
+    <text x="503" y="124" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">2. REPLICATEDMERGETREE</text>
+    <text x="540" y="152" text-anchor="middle" font-size="16" font-weight="700" fill="#143852">N Warehouses, N Copies</text>
+
+    <rect x="408" y="168" width="264" height="46" rx="8" fill="#d9e9f7" stroke="#28597a" stroke-width="1.4"/>
+    <text x="540" y="188" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">ClickHouse Keeper (Clipboard)</text>
+    <text x="540" y="204" text-anchor="middle" font-size="11" fill="#28597a">Orders inserts &amp; merges (no row bytes)</text>
+
+    <rect x="408" y="226" width="126" height="68" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.4"/>
+    <text x="471" y="246" text-anchor="middle" font-size="12" font-weight="700">Replica 1</text>
+    <text x="471" y="264" text-anchor="middle" font-family="Courier, monospace" font-size="10">Parts A, B, C</text>
+    <text x="471" y="282" text-anchor="middle" font-size="10" fill="#28597a">(Full Copy #1)</text>
+
+    <rect x="546" y="226" width="126" height="68" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.4"/>
+    <text x="609" y="246" text-anchor="middle" font-size="12" font-weight="700">Replica 2</text>
+    <text x="609" y="264" text-anchor="middle" font-family="Courier, monospace" font-size="10">Parts A, B, C</text>
+    <text x="609" y="282" text-anchor="middle" font-size="10" fill="#28597a">(Full Copy #2)</text>
+
+    <path d="M534 256 H546" fill="none" stroke="#28597a" stroke-width="2" marker-end="url(#arr-m)"/>
+
+    <rect x="408" y="306" width="264" height="140" rx="10" fill="#ffffff" stroke="#28597a" stroke-width="1.2"/>
+    <text x="540" y="328" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6f50">&#10003; Survives node loss seamlessly</text>
+    <text x="540" y="350" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6f50">&#10003; Standard open-source workhorse</text>
+    <text x="540" y="378" text-anchor="middle" font-size="13" font-weight="700" fill="#b43c3c">&#10007; 3 nodes = 3&#215; storage &amp; 3&#215; merges</text>
+    <text x="540" y="400" text-anchor="middle" font-size="13" font-weight="700" fill="#b43c3c">&#10007; New replica must copy all bytes</text>
+    <text x="540" y="428" text-anchor="middle" font-size="11" fill="#28597a">Use for: self-managed EC2 clusters</text>
+
+    <!-- STAGE 3: SHAREDMERGETREE / CAS -->
+    <rect x="732" y="88" width="320" height="380" rx="14" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.8"/>
+    <rect x="752" y="106" width="224" height="26" rx="6" fill="#1f6f50"/>
+    <text x="864" y="124" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">3. SHAREDMERGETREE / CAS</text>
+    <text x="892" y="152" text-anchor="middle" font-size="16" font-weight="700" fill="#164231">Stateless Nodes, One S3 Copy</text>
+
+    <rect x="760" y="168" width="126" height="58" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="823" y="189" text-anchor="middle" font-size="12" font-weight="700">Compute 1</text>
+    <text x="823" y="207" text-anchor="middle" font-size="10" fill="#465a6e">NVMe hot cache</text>
+
+    <rect x="898" y="168" width="126" height="58" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="961" y="189" text-anchor="middle" font-size="12" font-weight="700">Compute 2</text>
+    <text x="961" y="207" text-anchor="middle" font-size="10" fill="#465a6e">NVMe hot cache</text>
+
+    <rect x="760" y="238" width="264" height="56" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="892" y="260" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Shared S3 Object Storage</text>
+    <text x="892" y="279" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#1f6f50">Canonical Parts A, B, C (Stored 1&#215;)</text>
+
+    <rect x="760" y="306" width="264" height="140" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.2"/>
+    <text x="892" y="328" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6f50">&#10003; Pay for S3 bytes once (1&#215;)</text>
+    <text x="892" y="350" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6f50">&#10003; Add readers in seconds (0 copy)</text>
+    <text x="892" y="378" text-anchor="middle" font-size="12" font-weight="700" fill="#8b5a1e">! SharedMergeTree is Cloud-only</text>
+    <text x="892" y="400" text-anchor="middle" font-size="12" font-weight="700" fill="#28597a">&#8594; OSS alternative: Antalya CAS</text>
+    <text x="892" y="428" text-anchor="middle" font-size="11" fill="#164231">Decouples compute from storage</text>
+
+    <!-- Bottom bar -->
+    <rect x="28" y="482" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="508" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Your SQL queries, ORDER BY keys, and partitions stay 100% identical across all three engines</text>
+  </g>
+</svg>

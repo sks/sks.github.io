@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 680" role="img" aria-labelledby="title desc">
+  <title id="title">Three Compression Stages in a 30 TB/day ClickHouse S3 Pipeline</title>
+  <desc id="desc">End-to-end view of compression across three distinct stages of a 30 TB/day log pipeline: Stage 1 raw delivery (.log.gz at ~6x = 5 TB/day, capped by a 3-day S3 lifecycle rule), Stage 2 staged NDJSON for S3Queue (.ndjson.zst at ~12x = 2.5 TB/day via CompressionMethod.cpp ZstdInflatingReadBuffer, avoiding .tgz archive overhead and 30 TB/day uncompressed staging bloat), and Stage 3 MergeTree columnar storage (Delta + ZSTD(1..3) + LowCardinality at 15.2x = 1.97 TB/day in 1 GiB compact parts).</desc>
+  <defs>
+    <marker id="arrow-navy" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#b43c3c"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="680" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">30 TB/day Through Three Compression Stages: Raw Delivery, S3Queue Staging, and MergeTree</text>
+    <text x="540" y="58" text-anchor="middle" font-size="13.5" fill="#465a6e">Each stage has a different bottleneck, a different ClickHouse C++ reader path, and a different cost lever</text>
+
+    <!-- STAGE 1 -->
+    <rect x="30" y="84" width="310" height="390" rx="12" fill="#f4f8fc" stroke="#1e4e68" stroke-width="2"/>
+    <rect x="46" y="98" width="160" height="24" rx="6" fill="#1e4e68"/>
+    <text x="126" y="115" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">STAGE 1 — RAW LANDING</text>
+    <text x="185" y="146" text-anchor="middle" font-size="15" font-weight="700">Upstream Log Delivery</text>
+    <text x="185" y="166" text-anchor="middle" font-size="11.5" fill="#465a6e">ALB / NLB / CloudTrail → S3 (.log.gz, .json.gz)</text>
+
+    <rect x="50" y="184" width="270" height="96" rx="8" fill="#ffffff" stroke="#1e4e68" stroke-width="1.4"/>
+    <text x="185" y="206" text-anchor="middle" font-size="12.5" font-weight="700">Codec: Single-Stream Gzip (Fixed)</text>
+    <text x="185" y="226" text-anchor="middle" font-size="11" fill="#465a6e">30 TB/day raw → ~5 TB/day gzipped (~6×)</text>
+    <text x="185" y="244" text-anchor="middle" font-size="11" fill="#465a6e">Magic bytes: 0x1f 0x8b (or 0x28 0xb5 0x2f 0xfd zstd)</text>
+    <text x="185" y="262" text-anchor="middle" font-size="11" fill="#465a6e">Producer-controlled; re-compressing wastes GET/PUT</text>
+
+    <rect x="50" y="296" width="270" height="74" rx="8" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.4"/>
+    <text x="185" y="318" text-anchor="middle" font-size="12" font-weight="700" fill="#7c2323">Trap: 45-Day Default Retention</text>
+    <text x="185" y="336" text-anchor="middle" font-size="11" fill="#7c2323">5 TB/day × 45d = 225 TB duplicate raw logs</text>
+    <text x="185" y="354" text-anchor="middle" font-size="12" font-weight="700" fill="#b43c3c">Cost: $5,175/month</text>
+
+    <rect x="50" y="384" width="270" height="74" rx="8" fill="#e8f3ee" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="185" y="406" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Fix: 3-Day Replay Lifecycle Rule</text>
+    <text x="185" y="424" text-anchor="middle" font-size="11" fill="#2d6a56">72h backfill buffer + 1d noncurrent/multipart expiry</text>
+    <text x="185" y="442" text-anchor="middle" font-size="12" font-weight="700" fill="#1f6f50">Cost: $345/month (saves $4,830/mo)</text>
+
+    <!-- ARROW 1 -> 2 -->
+    <path d="M340 275 L 380 275" fill="none" stroke="#1e4e68" stroke-width="2.5" marker-end="url(#arrow-navy)"/>
+
+    <!-- STAGE 2 -->
+    <rect x="385" y="84" width="310" height="390" rx="12" fill="#f4f8fc" stroke="#1e4e68" stroke-width="2"/>
+    <rect x="401" y="98" width="175" height="24" rx="6" fill="#1e4e68"/>
+    <text x="488" y="115" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">STAGE 2 — S3QUEUE STAGING</text>
+    <text x="540" y="146" text-anchor="middle" font-size="15" font-weight="700">Import / Export Stream</text>
+    <text x="540" y="166" text-anchor="middle" font-size="11.5" fill="#465a6e">S3Queue('.../staged/*/*', 'NDJSON', 'auto')</text>
+
+    <rect x="405" y="184" width="270" height="96" rx="8" fill="#ffffff" stroke="#1e4e68" stroke-width="1.4"/>
+    <text x="540" y="206" text-anchor="middle" font-size="12.5" font-weight="700">src/IO/CompressionMethod.cpp</text>
+    <text x="540" y="226" text-anchor="middle" font-size="11" fill="#465a6e">Auto-detects trailing suffix (.zst, .gz, .lz4, .xz, .br)</text>
+    <text x="540" y="244" text-anchor="middle" font-size="11" fill="#465a6e">Streams directly via ZstdInflatingReadBuffer</text>
+    <text x="540" y="262" text-anchor="middle" font-size="11" fill="#465a6e">No .tgz archive headers or :: subpath globs needed</text>
+
+    <rect x="405" y="296" width="270" height="74" rx="8" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.4"/>
+    <text x="540" y="318" text-anchor="middle" font-size="12" font-weight="700" fill="#7c2323">Trap: Uncompressed .ndjson or Gzip-9</text>
+    <text x="540" y="336" text-anchor="middle" font-size="11" fill="#7c2323">Uncompressed: 30 TB/day ($690/day outage exposure)</text>
+    <text x="540" y="354" text-anchor="middle" font-size="11" fill="#b43c3c">Gzip-9: 4–5× slower CPU for worse (~6×) ratio</text>
+
+    <rect x="405" y="384" width="270" height="74" rx="8" fill="#e8f3ee" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="540" y="406" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Fix: Stream-Compressed .ndjson.zst</text>
+    <text x="540" y="424" text-anchor="middle" font-size="11" fill="#2d6a56">30 TB/day → ~2.5 TB/day (~12×) + after_processing='delete'</text>
+    <text x="540" y="442" text-anchor="middle" font-size="12" font-weight="700" fill="#1f6f50">~90% fewer S3 staging bytes &amp; outage risk</text>
+
+    <!-- ARROW 2 -> 3 -->
+    <path d="M695 275 L 735 275" fill="none" stroke="#1e4e68" stroke-width="2.5" marker-end="url(#arrow-navy)"/>
+
+    <!-- STAGE 3 -->
+    <rect x="740" y="84" width="310" height="390" rx="12" fill="#f4f8fc" stroke="#1e4e68" stroke-width="2"/>
+    <rect x="756" y="98" width="185" height="24" rx="6" fill="#1e4e68"/>
+    <text x="848" y="115" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">STAGE 3 — MERGETREE PARTS</text>
+    <text x="895" y="146" text-anchor="middle" font-size="15" font-weight="700">Columnar Block Storage</text>
+    <text x="895" y="166" text-anchor="middle" font-size="11.5" fill="#465a6e">src/Compression/ + ReplicatedMergeTree</text>
+
+    <rect x="760" y="184" width="270" height="96" rx="8" fill="#ffffff" stroke="#1e4e68" stroke-width="1.4"/>
+    <text x="895" y="206" text-anchor="middle" font-size="12.5" font-weight="700">Per-Column Codecs + Framing</text>
+    <text x="895" y="226" text-anchor="middle" font-size="11" fill="#465a6e">timestamp: CODEC(Delta(8), ZSTD(1))</text>
+    <text x="895" y="244" text-anchor="middle" font-size="11" fill="#465a6e">service: LowCardinality(String) CODEC(ZSTD(1))</text>
+    <text x="895" y="262" text-anchor="middle" font-size="11" fill="#465a6e">attributes Map: CODEC(ZSTD(3)) → 15.2×–25× ratio</text>
+
+    <rect x="760" y="296" width="270" height="74" rx="8" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.4"/>
+    <text x="895" y="318" text-anchor="middle" font-size="12" font-weight="700" fill="#7c2323">Trap: Wide Parts &amp; 64 GiB Hot Disk</text>
+    <text x="895" y="336" text-anchor="middle" font-size="11" fill="#7c2323">10 MiB wide threshold = ~35 S3 objects/part</text>
+    <text x="895" y="354" text-anchor="middle" font-size="11" fill="#b43c3c">Small hot disk spills unmerged parts → $45+/day PUTs</text>
+
+    <rect x="760" y="384" width="270" height="74" rx="8" fill="#e8f3ee" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="895" y="406" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Fix: 1 GiB Compact Floor + 256 GiB Hot</text>
+    <text x="895" y="424" text-anchor="middle" font-size="11" fill="#2d6a56">min_bytes_for_wide_part = 1 GiB (~11 obj/part)</text>
+    <text x="895" y="442" text-anchor="middle" font-size="12" font-weight="700" fill="#1f6f50">1.97 TB/day on S3 + ~80% fewer PUT requests</text>
+
+    <!-- BOTTOM SUMMARY TABLE -->
+    <rect x="30" y="498" width="1020" height="154" rx="12" fill="#ffffff" stroke="#1e4e68" stroke-width="1.8"/>
+    <text x="540" y="524" text-anchor="middle" font-size="15" font-weight="700">Why Stream Compression (src/IO/CompressionMethod.cpp) Beats Archives (src/IO/Archives/) for S3Queue</text>
+
+    <text x="54" y="556" font-size="12" font-weight="700" fill="#1f6f50">✓ Single-Stream .ndjson.zst (ZstdInflatingReadBuffer):</text>
+    <text x="380" y="556" font-size="11.5" fill="#17283c">Auto-detected by chooseCompressionMethod(..., "auto") on .zst/.zstd; zero seek overhead; ~12× ratio at 3–5× less CPU.</text>
+
+    <text x="54" y="586" font-size="12" font-weight="700" fill="#b43c3c">✗ Archive .tgz / .tar.zst (TarArchiveReader / libarchive):</text>
+    <text x="380" y="586" font-size="11.5" fill="#17283c">Requires archive::entry_glob syntax, header scanning, and 512-byte tar blocks with zero compression gain.</text>
+
+    <text x="54" y="616" font-size="12" font-weight="700" fill="#1e4e68">★ Inside MergeTree (src/Compression/):</text>
+    <text x="380" y="616" font-size="11.5" fill="#17283c">Stream codecs stop at INSERT; MergeTree re-encodes columns in 64 KiB blocks with Delta + ZSTD + checksums.</text>
+  </g>
+</svg>

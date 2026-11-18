@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 640" role="img" aria-labelledby="title desc">
+  <title id="title">The Five-Round Brawl to Make ClickHouse Schema Convergence Automatic</title>
+  <desc id="desc">Five sequential failure modes uncovered while automating ClickHouse schema bootstrap across ephemeral nodes, paired with the exact parser, Keeper, accounting, macro, and systemd timer fixes.</desc>
+  <defs>
+    <marker id="arr-r" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="640" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="23" font-weight="700">The Five-Round Brawl to Automatic Schema Convergence</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Every fix peeled back the next failure layer until schema convergence became a continuous, role-aware loop</text>
+
+    <!-- COLUMN HEADERS -->
+    <rect x="32" y="78" width="470" height="32" rx="8" fill="#8f2424"/>
+    <text x="267" y="99" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">WHAT BROKE AT BOOT (THE 5 ROUNDS)</text>
+
+    <rect x="556" y="78" width="492" height="32" rx="8" fill="#1f6f50"/>
+    <text x="802" y="99" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">THE ENGINEERING FIX IN CHINIT</text>
+
+    <!-- ROUND 1 -->
+    <rect x="32" y="122" width="470" height="82" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <circle cx="62" cy="163" r="18" fill="#c05c5c"/>
+    <text x="62" y="168" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">R1</text>
+    <text x="94" y="146" font-size="15" font-weight="700" fill="#7c2323">The SQL Splitter Shredded the DDL</text>
+    <text x="94" y="167" font-size="12" fill="#5c3a3a">Naive semicolon split glued <tspan font-family="Courier, monospace">-- comments</tspan> onto SQL</text>
+    <text x="94" y="185" font-size="12" fill="#5c3a3a">and cut inside <tspan font-family="Courier, monospace">CODEC(ZSTD(1))</tspan> &#8594; <tspan font-weight="700" fill="#b43c3c">Code: 62 Syntax error</tspan></text>
+
+    <path d="M502 163 H550" fill="none" stroke="#1f6f50" stroke-width="2.5" marker-end="url(#arr-r)"/>
+
+    <rect x="556" y="122" width="492" height="82" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="576" y="146" font-size="15" font-weight="700" fill="#164231">Depth-Aware Statement Parser</text>
+    <text x="576" y="167" font-size="12" fill="#2c4a3e">Strip <tspan font-family="Courier, monospace">--</tspan> comments line-by-line first, track parenthesis</text>
+    <text x="576" y="185" font-size="12" fill="#2c4a3e">depth, and split on <tspan font-family="Courier, monospace">;</tspan> only when <tspan font-family="Courier, monospace" font-weight="700">depth == 0</tspan></text>
+
+    <!-- ROUND 2 -->
+    <rect x="32" y="216" width="470" height="82" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <circle cx="62" cy="257" r="18" fill="#c05c5c"/>
+    <text x="62" y="262" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">R2</text>
+    <text x="94" y="240" font-size="15" font-weight="700" fill="#7c2323">Ghost Replica on the Keeper Roster</text>
+    <text x="94" y="261" font-size="12" fill="#5c3a3a">Recycled name <tspan font-family="Courier, monospace">reader-0</tspan> on fresh disk hits predecessor's</text>
+    <text x="94" y="279" font-size="12" fill="#5c3a3a">registration &#8594; <tspan font-weight="700" fill="#b43c3c">Code: 253 REPLICA_ALREADY_EXISTS</tspan></text>
+
+    <path d="M502 257 H550" fill="none" stroke="#1f6f50" stroke-width="2.5" marker-end="url(#arr-r)"/>
+
+    <rect x="556" y="216" width="492" height="82" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="576" y="240" font-size="15" font-weight="700" fill="#164231">Self-Scoped Stale Znode Drop + Retry</text>
+    <text x="576" y="261" font-size="12" fill="#2c4a3e">On Code 253, run <tspan font-family="Courier, monospace" font-weight="700">SYSTEM DROP REPLICA '&lt;self&gt;' FROM ZKPATH</tspan></text>
+    <text x="576" y="279" font-size="12" fill="#2c4a3e">(never a peer's name) and retry the <tspan font-family="Courier, monospace">CREATE</tspan> once</text>
+
+    <!-- ROUND 3 -->
+    <rect x="32" y="310" width="470" height="82" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <circle cx="62" cy="351" r="18" fill="#c05c5c"/>
+    <text x="62" y="356" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">R3</text>
+    <text x="94" y="334" font-size="15" font-weight="700" fill="#7c2323">Keeper Outage Dressed as Boot Success</text>
+    <text x="94" y="355" font-size="12" fill="#5c3a3a">Keeper rolled mid-boot (<tspan font-weight="700" fill="#b43c3c">Code: 999</tspan>), 1 plain table applied,</text>
+    <text x="94" y="373" font-size="12" fill="#5c3a3a">and &quot;at least 1 succeeded&quot; marked the step green</text>
+
+    <path d="M502 351 H550" fill="none" stroke="#1f6f50" stroke-width="2.5" marker-end="url(#arr-r)"/>
+
+    <rect x="556" y="310" width="492" height="82" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="576" y="334" font-size="15" font-weight="700" fill="#164231">Strict Failure Accounting &amp; Backoff</text>
+    <text x="576" y="355" font-size="12" fill="#2c4a3e">Partial success is failure: any failed statement returns</text>
+    <text x="576" y="373" font-size="12" fill="#2c4a3e">a retryable error so the pipeline retries with backoff</text>
+
+    <!-- ROUND 4 -->
+    <rect x="32" y="404" width="470" height="82" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <circle cx="62" cy="445" r="18" fill="#c05c5c"/>
+    <text x="62" y="450" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">R4</text>
+    <text x="94" y="428" font-size="15" font-weight="700" fill="#7c2323">The Recovery Command Broke on {shard}</text>
+    <text x="94" y="449" font-size="12" fill="#5c3a3a"><tspan font-family="Courier, monospace">SYSTEM DROP REPLICA</tspan> does not expand <tspan font-family="Courier, monospace">{shard}</tspan> macros &#8594;</text>
+    <text x="94" y="467" font-size="12" fill="#5c3a3a"><tspan font-weight="700" fill="#b43c3c">Code: 305</tspan> &quot;does not look like a table path&quot;</text>
+
+    <path d="M502 445 H550" fill="none" stroke="#1f6f50" stroke-width="2.5" marker-end="url(#arr-r)"/>
+
+    <rect x="556" y="404" width="492" height="82" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="576" y="428" font-size="15" font-weight="700" fill="#164231">Client-Side Macro Resolution</text>
+    <text x="576" y="449" font-size="12" fill="#2c4a3e">Read rendered <tspan font-family="Courier, monospace">&lt;shard&gt;01&lt;/shard&gt;</tspan> from local config and</text>
+    <text x="576" y="467" font-size="12" fill="#2c4a3e">substitute <tspan font-family="Courier, monospace">/clickhouse/tables/01/events</tspan> before drop</text>
+
+    <!-- ROUND 5 -->
+    <rect x="32" y="498" width="470" height="82" rx="10" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.6"/>
+    <circle cx="62" cy="539" r="18" fill="#c05c5c"/>
+    <text x="62" y="544" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">R5</text>
+    <text x="94" y="522" font-size="15" font-weight="700" fill="#7c2323">Post-Boot Outages &amp; Role Mismatches</text>
+    <text x="94" y="543" font-size="12" fill="#5c3a3a">Long Keeper outage outlasts boot; <tspan font-family="Courier, monospace">backup</tspan> node creates</text>
+    <text x="94" y="561" font-size="12" fill="#5c3a3a"><tspan font-family="Courier, monospace">S3Queue</tspan> table without IAM perms &#8594; <tspan font-weight="700" fill="#b43c3c">AccessDenied</tspan> loop</text>
+
+    <path d="M502 539 H550" fill="none" stroke="#1f6f50" stroke-width="2.5" marker-end="url(#arr-r)"/>
+
+    <rect x="556" y="498" width="492" height="82" rx="10" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="576" y="522" font-size="15" font-weight="700" fill="#164231">15-Min Convergence Timer + -- @roles: Tag</text>
+    <text x="576" y="543" font-size="12" fill="#2c4a3e"><tspan font-family="Courier, monospace">systemd</tspan> timer re-runs idempotent DDL every 15m; statements</text>
+    <text x="576" y="561" font-size="12" fill="#2c4a3e">tagged <tspan font-family="Courier, monospace" font-weight="700">-- @roles: writer</tspan> are skipped on <tspan font-family="Courier, monospace">backup</tspan> &amp; <tspan font-family="Courier, monospace">reader</tspan></text>
+
+    <!-- FOOTER -->
+    <rect x="32" y="592" width="1016" height="36" rx="8" fill="#17283c"/>
+    <text x="540" y="615" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Convergence is a loop, not a one-shot boot event: make every statement idempotent and run the loop on a timer</text>
+  </g>
+</svg>

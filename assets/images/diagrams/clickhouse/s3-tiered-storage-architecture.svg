@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">ClickHouse on S3: Tiered Storage Policy, Metadata Disk, and Async Inserts</title>
+  <desc id="desc">How ClickHouse tiered storage on AWS S3 works: async_insert batches small writes into hot local disk, the persistent metadata gp3 volume holds the address book mapping tables to S3 keys, and cold parts move to S3 behind an SLRU local cache disk with 30-day Standard-IA tiering.</desc>
+  <defs>
+    <marker id="arr-ts" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1e4e68"/>
+    </marker>
+    <marker id="arr-tsg" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">ClickHouse on S3: Tiered Storage Policies That Don't Melt</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Batch small writes with async_insert, protect the metadata address book on persistent gp3, and tier cold bytes to S3 Standard-IA</text>
+
+    <!-- TOP: WRITE & TIERING PIPELINE -->
+    <rect x="28" y="82" width="1024" height="236" rx="14" fill="#eef4fb" stroke="#28597a" stroke-width="2"/>
+    <text x="540" y="108" text-anchor="middle" font-size="16" font-weight="700" fill="#143852">The Write &amp; Tiering Flow Across Hot Local Storage, Cache, and S3</text>
+
+    <!-- Box 1: Async Insert -->
+    <rect x="46" y="124" width="218" height="174" rx="10" fill="#ffffff" stroke="#9b6b24" stroke-width="1.6"/>
+    <rect x="46" y="124" width="218" height="32" rx="10" fill="#9b6b24"/>
+    <text x="155" y="145" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">1. async_insert Buffer</text>
+    <text x="155" y="172" text-anchor="middle" font-size="11" fill="#5e3e0e">S3 writes take 10–50ms;</text>
+    <text x="155" y="190" text-anchor="middle" font-size="11" fill="#5e3e0e">tiny inserts cause</text>
+    <text x="155" y="208" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Too many parts (300)!</text>
+    <rect x="60" y="222" width="190" height="44" rx="6" fill="#fff0d1"/>
+    <text x="155" y="240" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#5e3e0e">async_insert_max_data=100MB</text>
+    <text x="155" y="256" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#5e3e0e">busy_timeout_ms = 10000</text>
+    <text x="155" y="284" text-anchor="middle" font-size="10" font-weight="700" fill="#1f6f50">Flushes 1 big clean part</text>
+
+    <path d="M264 211 H284" fill="none" stroke="#1e4e68" stroke-width="2.2" marker-end="url(#arr-ts)"/>
+
+    <!-- Box 2: Hot Volume -->
+    <rect x="288" y="124" width="228" height="174" rx="10" fill="#ffffff" stroke="#28597a" stroke-width="1.6"/>
+    <rect x="288" y="124" width="228" height="32" rx="10" fill="#28597a"/>
+    <text x="402" y="145" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">2. Hot Volume (Local Disk)</text>
+    <text x="402" y="172" text-anchor="middle" font-size="11" fill="#334a60">New parts land locally for</text>
+    <text x="402" y="190" text-anchor="middle" font-size="11" fill="#334a60">fast initial merges &amp; recent</text>
+    <text x="402" y="208" text-anchor="middle" font-size="11" fill="#334a60">queries (<tspan font-family="Courier, monospace">parts_to_throw=3000</tspan>).</text>
+    <rect x="302" y="222" width="200" height="44" rx="6" fill="#eef4fb"/>
+    <text x="402" y="240" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#143852">move_factor = 0.1 (10% free)</text>
+    <text x="402" y="256" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#143852">+ TTL TO VOLUME 'cold'</text>
+    <text x="402" y="284" text-anchor="middle" font-size="10" font-weight="700" fill="#28597a">Moves aged/merged parts to S3</text>
+
+    <path d="M516 211 H536" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-tsg)"/>
+
+    <!-- Box 3: s3_cache Wrapper -->
+    <rect x="540" y="124" width="228" height="174" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.6"/>
+    <rect x="540" y="124" width="228" height="32" rx="10" fill="#1f6f50"/>
+    <text x="654" y="145" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">3. s3_cache Wrapper (NVMe)</text>
+    <text x="654" y="172" text-anchor="middle" font-size="11" fill="#2c4a3e"><tspan font-family="Courier, monospace">type = cache</tspan> wrapping <tspan font-family="Courier, monospace">s3</tspan>.</text>
+    <text x="654" y="190" text-anchor="middle" font-size="11" fill="#2c4a3e">Keeps hot column segments</text>
+    <text x="654" y="208" text-anchor="middle" font-size="11" fill="#2c4a3e">on local NVMe / gp3.</text>
+    <rect x="554" y="222" width="200" height="44" rx="6" fill="#dff0e8"/>
+    <text x="654" y="240" text-anchor="middle" font-size="10" font-weight="700" fill="#164231">Disposable cache: if lost,</text>
+    <text x="654" y="256" text-anchor="middle" font-size="10" font-weight="700" fill="#164231">refills on demand from S3</text>
+    <text x="654" y="284" text-anchor="middle" font-size="10" font-weight="700" fill="#1f6f50">Via free VPC Gateway Endpoint</text>
+
+    <path d="M768 211 H788" fill="none" stroke="#1f6f50" stroke-width="2.2" marker-end="url(#arr-tsg)"/>
+
+    <!-- Box 4: S3 Bucket -->
+    <rect x="792" y="124" width="242" height="174" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.6"/>
+    <rect x="792" y="124" width="242" height="32" rx="10" fill="#164231"/>
+    <text x="913" y="145" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">4. S3 Bucket (Cold Warehouse)</text>
+    <text x="913" y="172" text-anchor="middle" font-size="11" fill="#2c4a3e">Holds the bulk bytes of every</text>
+    <text x="913" y="190" text-anchor="middle" font-size="11" fill="#2c4a3e">part under tenant/replica prefix.</text>
+    <rect x="806" y="204" width="214" height="58" rx="6" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.2"/>
+    <text x="913" y="224" text-anchor="middle" font-size="11" font-weight="700" fill="#164231">Day 0–30: S3 Standard ($0.023)</text>
+    <text x="913" y="242" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Day 30+: Standard-IA ($0.0125)</text>
+    <text x="913" y="256" text-anchor="middle" font-size="10" fill="#b43c3c" font-weight="700">NEVER Glacier (queries need ms!)</text>
+    <text x="913" y="284" text-anchor="middle" font-size="10" font-weight="700" fill="#164231">11 nines of durability</text>
+
+    <!-- BOTTOM: THE THREE STORAGE LOCATIONS & WHY THE METADATA DISK IS KING -->
+    <rect x="28" y="336" width="1024" height="170" rx="12" fill="#fff8eb" stroke="#9b6b24" stroke-width="2"/>
+    <text x="540" y="364" text-anchor="middle" font-size="16" font-weight="700" fill="#5e3e0e">The Critical Distinction: Bytes in S3 vs. The Address Book on the Metadata Disk</text>
+
+    <rect x="46" y="380" width="312" height="108" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="202" y="404" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">S3 Bucket (The Part Bytes)</text>
+    <text x="202" y="426" text-anchor="middle" font-size="11" fill="#2c4a3e">Stores raw compressed column objects</text>
+    <text x="202" y="444" text-anchor="middle" font-family="Courier, monospace" font-size="10" fill="#28597a">data/tenant/writer-0/szl/ab91f...</text>
+    <text x="202" y="470" text-anchor="middle" font-size="11" font-weight="700" fill="#7a541b">Anonymous object keys without the map!</text>
+
+    <rect x="384" y="380" width="312" height="108" rx="8" fill="#fdf2f2" stroke="#b43c3c" stroke-width="1.8"/>
+    <text x="540" y="404" text-anchor="middle" font-size="13" font-weight="700" fill="#7c2323">Metadata gp3 Disk (The Address Book!)</text>
+    <text x="540" y="426" text-anchor="middle" font-size="11" fill="#5c3a3a">Maps <tspan font-family="Courier, monospace" font-weight="700">table/part_name &#8594; S3 object key</tspan>.</text>
+    <text x="540" y="446" text-anchor="middle" font-size="11" fill="#5c3a3a">Must be persistent (<tspan font-family="Courier, monospace">delete_on_termination=false</tspan>)</text>
+    <text x="540" y="470" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Lose it without a snapshot/peer = unreadable S3!</text>
+
+    <rect x="722" y="380" width="312" height="108" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.4"/>
+    <text x="878" y="404" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">Cache Disk (The Shop Counter)</text>
+    <text x="878" y="426" text-anchor="middle" font-size="11" fill="#334a60">Holds recently queried byte ranges</text>
+    <text x="878" y="444" text-anchor="middle" font-size="11" fill="#334a60">plus RAM mark cache (5 GB).</text>
+    <text x="878" y="470" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">100% ephemeral &#8212; safe to wipe anytime</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="522" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="548" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Storage Law: S3 holds the bytes, but the metadata disk holds the map &#8212; back up the metadata disk daily</text>
+  </g>
+</svg>

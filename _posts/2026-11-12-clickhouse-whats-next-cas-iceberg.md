@@ -5,7 +5,7 @@ date: 2026-11-12 09:00:00 -0800
 series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 8
 description: "CAS content-addressed storage, Apache Iceberg, and the honest checklist for choosing self-managed ClickHouse over ClickHouse Cloud."
-image: /assets/images/og-default.png
+image: /assets/images/diagrams/clickhouse/whats-next-cas-iceberg-cloud.svg
 tags: [clickhouse, cas, apache-iceberg, clickhouse-cloud, architecture, storage]
 permalink: /blog/clickhouse-whats-next-cas-iceberg/
 faqs:
@@ -35,6 +35,10 @@ But the architecture has one structural cost. Structural means it is built into 
 ---
 
 ## The structural cost of ReplicatedMergeTree
+
+![Solving the N-replica photocopy cost of ReplicatedMergeTree: Antalya CAS versus Apache Iceberg versus ClickHouse Cloud](/assets/images/diagrams/clickhouse/whats-next-cas-iceberg-cloud.svg)
+
+*Three ways to eliminate the `N × S3` photocopy cost of `ReplicatedMergeTree`: Antalya CAS shares one object pool inside ClickHouse, Apache Iceberg shares open Parquet tables across engines, and ClickHouse Cloud runs managed `SharedMergeTree`.*
 
 ReplicatedMergeTree is the engine that keeps identical parts of a table on multiple servers, so queries and inserts survive a node loss. Each replica stores its own complete copy. Picture four branch offices of one company: each office photocopies the entire archive so every office can answer questions locally. The copies are identical, but the paper bill grows with every branch you open. In ClickHouse terms, this is the photocopy problem: durability is bought by paying for each branch's copy again.
 

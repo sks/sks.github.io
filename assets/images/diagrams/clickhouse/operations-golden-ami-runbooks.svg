@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 560" role="img" aria-labelledby="title desc">
+  <title id="title">Operating Self-Managed ClickHouse: Golden AMI, Two-Stage Bootstrap, and Debounced Config Refresh</title>
+  <desc id="desc">Three operational pillars for running self-managed ClickHouse on EC2: Packer golden AMI cutting boot time from 12 minutes to 2-3 minutes, two-stage bootstrap overcoming the 16 KB user-data limit, and a DynamoDB-debounced S3 config refresh rolling readers, backup, keepers, then writers.</desc>
+  <defs>
+    <marker id="arr-op2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="560" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Operating Self-Managed ClickHouse: Golden AMI, Bootstrap, &amp; Rolling Refresh</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">The operational machinery that makes plain EC2 instances behave like a managed database service</text>
+
+    <!-- PILLAR 1: GOLDEN AMI -->
+    <rect x="28" y="84" width="324" height="398" rx="12" fill="#eef4fb" stroke="#28597a" stroke-width="1.8"/>
+    <rect x="46" y="100" width="288" height="32" rx="6" fill="#28597a"/>
+    <text x="190" y="121" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">1. The Pre-Set Hotel Room (Golden AMI)</text>
+
+    <rect x="46" y="148" width="288" height="72" rx="8" fill="#fdf2f2" stroke="#c05c5c" stroke-width="1.3"/>
+    <text x="190" y="170" text-anchor="middle" font-size="12" font-weight="700" fill="#7c2323">Boot from Scratch: 8–12 Minutes</text>
+    <text x="190" y="190" text-anchor="middle" font-size="11" fill="#5c3a3a">apt-get downloads on every spot replace</text>
+    <text x="190" y="206" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">+ risk of unpinned version drift at 3 a.m.</text>
+
+    <path d="M190 220 V242" fill="none" stroke="#1f6f50" stroke-width="2.4" marker-end="url(#arr-op2)"/>
+
+    <rect x="46" y="246" width="288" height="156" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="190" y="268" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Packer Golden AMI: 2–3 Minutes</text>
+    <text x="190" y="290" text-anchor="middle" font-size="11" fill="#2c4a3e">&#8226; Ubuntu 24.04 arm64 + ClickHouse 26.8 LTS</text>
+    <text x="190" y="310" text-anchor="middle" font-size="11" fill="#2c4a3e">&#8226; <tspan font-family="Courier, monospace">clickhouse-backup</tspan> + CloudWatch agent</text>
+    <text x="190" y="330" text-anchor="middle" font-size="11" fill="#2c4a3e">&#8226; Pinned, checksum-verified <tspan font-family="Courier, monospace">chinit</tspan> binary</text>
+    <text x="190" y="350" text-anchor="middle" font-size="11" fill="#2c4a3e">&#8226; THP disabled (<tspan font-family="Courier, monospace">never</tspan>) + <tspan font-family="Courier, monospace">ulimit 262144</tspan></text>
+    <text x="190" y="380" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Zero package downloads at instance launch</text>
+
+    <text x="190" y="438" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">Saves ~9 min per spot reader replacement</text>
+
+    <!-- PILLAR 2: TWO-STAGE BOOTSTRAP -->
+    <rect x="378" y="84" width="324" height="398" rx="12" fill="#fff8eb" stroke="#9b6b24" stroke-width="1.8"/>
+    <rect x="396" y="100" width="288" height="32" rx="6" fill="#9b6b24"/>
+    <text x="540" y="121" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">2. Two-Stage Bootstrap (16 KB Cap)</text>
+
+    <rect x="396" y="148" width="288" height="96" rx="8" fill="#ffffff" stroke="#9b6b24" stroke-width="1.4"/>
+    <text x="540" y="170" text-anchor="middle" font-size="13" font-weight="700" fill="#5e3e0e">Stage 0: The Shipping Label (~1.5 KB)</text>
+    <text x="540" y="190" text-anchor="middle" font-size="11" fill="#5e3e0e">Lives inside EC2 <tspan font-family="Courier, monospace">user-data</tspan> (&lt;16 KB limit).</text>
+    <text x="540" y="208" text-anchor="middle" font-size="11" fill="#5e3e0e">Uses IAM instance role (zero static keys)</text>
+    <text x="540" y="226" text-anchor="middle" font-family="Courier, monospace" font-size="10" font-weight="700" fill="#9b6b24">aws s3 cp chinit.yaml &#8594; exec chinit boot</text>
+
+    <path d="M540 244 V266" fill="none" stroke="#1f6f50" stroke-width="2.4" marker-end="url(#arr-op2)"/>
+
+    <rect x="396" y="270" width="288" height="132" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="540" y="292" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Stage 1: The Locker (chinit + S3 Bundle)</text>
+    <text x="540" y="314" text-anchor="middle" font-size="11" fill="#2c4a3e">&#8226; Verifies bundle SHA256 against spec</text>
+    <text x="540" y="334" text-anchor="middle" font-size="11" fill="#2c4a3e">&#8226; Mounts EBS disks + claims ordinal lease</text>
+    <text x="540" y="354" text-anchor="middle" font-size="11" fill="#2c4a3e">&#8226; Resolves Secrets Manager + renders XML</text>
+    <text x="540" y="374" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">&#8226; Installs Day-2 timers (schema, GC, drain)</text>
+
+    <text x="540" y="438" text-anchor="middle" font-size="12" font-weight="700" fill="#5e3e0e">Closes the EC2 vs. K8s Operator parity gap</text>
+
+    <!-- PILLAR 3: DEBOUNCED CONFIG REFRESH -->
+    <rect x="728" y="84" width="324" height="398" rx="12" fill="#eef8f3" stroke="#1f6f50" stroke-width="1.8"/>
+    <rect x="746" y="100" width="288" height="32" rx="6" fill="#1f6f50"/>
+    <text x="890" y="121" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">3. Debounced Rolling Config Refresh</text>
+
+    <rect x="746" y="148" width="288" height="84" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.4"/>
+    <text x="890" y="170" text-anchor="middle" font-size="12" font-weight="700" fill="#143852">DynamoDB 25-Min Debounce Lock</text>
+    <text x="890" y="190" text-anchor="middle" font-size="11" fill="#334a60">One <tspan font-family="Courier, monospace">tofu apply</tspan> emits ~16 S3 object events.</text>
+    <text x="890" y="208" text-anchor="middle" font-size="11" font-weight="700" fill="#28597a">Lock collapses 16 events into 1 SSM roll.</text>
+
+    <path d="M890 232 V254" fill="none" stroke="#1f6f50" stroke-width="2.4" marker-end="url(#arr-op2)"/>
+
+    <rect x="746" y="258" width="288" height="144" rx="8" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="890" y="280" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Blast-Radius Roll Order (via SSM)</text>
+    <text x="890" y="304" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#164231">1. readers  (disposable replicas)</text>
+    <text x="890" y="324" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#164231">2. backup   (cold, off query path)</text>
+    <text x="890" y="344" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#164231">3. keepers  (quorum-gated 1 by 1)</text>
+    <text x="890" y="364" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#164231">4. writers  (ingest touched last)</text>
+    <text x="890" y="388" text-anchor="middle" font-size="10" fill="#2c4a3e">Restarts a node ONLY if its XML diffed</text>
+
+    <text x="890" y="438" text-anchor="middle" font-size="12" font-weight="700" fill="#164231">Every alarm carries its runbook in text</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="498" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="524" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Operations Rule: Write the runbooks and automate the recurring chores before the first 3 a.m. page</text>
+  </g>
+</svg>

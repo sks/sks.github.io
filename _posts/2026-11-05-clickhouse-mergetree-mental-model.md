@@ -5,7 +5,7 @@ date: 2026-11-05 09:00:00 -0700
 series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 1
 description: "Parts, merges, and the ORDER BY index: how MergeTree actually stores logs, why tiny inserts break it, and how it compares to row storage."
-image: /assets/images/og-default.png
+image: /assets/images/diagrams/clickhouse/mergetree-mental-model-parts-granules.svg
 tags: [clickhouse, mergetree, columnar-storage, logs, data-engineering, self-hosted]
 permalink: /blog/clickhouse-mergetree-mental-model/
 faqs:
@@ -25,6 +25,16 @@ ClickHouse stores logs well because of one table engine: MergeTree.
 
 Almost everything else in this series builds on how MergeTree writes data, merges it in the background, and skips data with the ORDER BY key. Reference: [MergeTree table engine](https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/mergetree). I run a log analytics platform on it. This post explains the storage model step by step, with the failure modes I have personally triggered. One running example carries the post: a warehouse that receives goods in sealed boxes. Each section notes where the picture stops matching the real mechanism.
 
+> **Coming from Postgres?** This post is the full walkthrough, but it
+> assumes some comfort with storage concepts. If you want the gentler
+> on-ramp first — the same warehouse model built from a five-year-old's
+> question, with a Postgres translator at every step (b-tree → sparse
+> index, autovacuum → merges, MVCC → eventual consistency) — read
+> [Postgres Was a Filing Cabinet. ClickHouse Is a
+> Warehouse](/blog/clickhouse-for-postgres-people-warehouse-mergetree/)
+> first, then come back here for the operator's depth: part
+> explosions, TTL mechanics, and async-insert tuning.
+
 **Key takeaways**
 
 - Each INSERT becomes a *part*, and background *merges* compact many parts into fewer, larger ones. The system stays healthy only if merges keep up with insert rate.
@@ -37,6 +47,10 @@ Almost everything else in this series builds on how MergeTree writes data, merge
 ---
 
 ## Columnar means you read what you asked for
+
+![The MergeTree mental model: columnar shelves, immutable sealed parts compacted by background merges, and the ORDER BY sparse index over 8,192-row granules](/assets/images/diagrams/clickhouse/mergetree-mental-model-parts-granules.svg)
+
+*MergeTree stores each column in its own file, writes one sealed sorted part per `INSERT` that background workers compact, and uses a sparse `ORDER BY` index to skip 8,192-row granules.*
 
 Imagine a library that shelves books by attribute. All the titles stand together on one shelf. All the authors stand together on another shelf. To count books by subject, you open only the subject shelf. A column store works the same way: each shelf is one column file.
 

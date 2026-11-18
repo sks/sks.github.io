@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 580" role="img" aria-labelledby="title desc">
+  <title id="title">Why ClickHouse Zero-Copy Replication Died and What Replaced It</title>
+  <desc id="desc">Comparison of deprecated ClickHouse zero-copy replication (where drifted per-replica reference counts caused premature S3 object deletion and NoSuchKey data loss) versus its replacements: N-copy ReplicatedMergeTree, Antalya CAS, and Cloud SharedMergeTree.</desc>
+  <defs>
+    <marker id="arr-zc" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#b43c3c"/>
+    </marker>
+    <marker id="arr-zcg" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 1 L9 5 L0 9 Z" fill="#1f6f50"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="580" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Why ClickHouse Zero-Copy Replication Died (PR #82250) &amp; What Replaced It</text>
+    <text x="540" y="60" text-anchor="middle" font-size="14" fill="#465a6e">Tracking mutable reference counts outside the S3 object caused premature deletes and NoSuchKey corruption</text>
+
+    <!-- LEFT PANEL: WHY ZERO-COPY BROKE -->
+    <rect x="28" y="82" width="496" height="426" rx="14" fill="#fdf2f2" stroke="#c05c5c" stroke-width="2"/>
+    <rect x="48" y="98" width="320" height="28" rx="6" fill="#b43c3c"/>
+    <text x="208" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">DEPRECATED: ZERO-COPY REPLICATION</text>
+
+    <text x="276" y="148" text-anchor="middle" font-size="14" font-weight="700" fill="#7c2323">The Distributed Reference-Count Drift Bug</text>
+
+    <rect x="48" y="164" width="214" height="84" rx="8" fill="#ffffff" stroke="#c05c5c" stroke-width="1.5"/>
+    <text x="155" y="186" text-anchor="middle" font-size="13" font-weight="700">Replica A</text>
+    <text x="155" y="206" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#5c3a3a">Local refcount(X) = 1</text>
+    <text x="155" y="224" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Merge finishes &#8594; DELETE X!</text>
+
+    <rect x="290" y="164" width="214" height="84" rx="8" fill="#ffffff" stroke="#c05c5c" stroke-width="1.5"/>
+    <text x="397" y="186" text-anchor="middle" font-size="13" font-weight="700">Replica B</text>
+    <text x="397" y="206" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#5c3a3a">Catalog still points to X</text>
+    <text x="397" y="224" text-anchor="middle" font-size="11" font-weight="700" fill="#b43c3c">Read X &#8594; S3 NoSuchKey!</text>
+
+    <path d="M155 248 L240 286" fill="none" stroke="#b43c3c" stroke-width="2.2" marker-end="url(#arr-zc)"/>
+    <path d="M397 248 L312 286" fill="none" stroke="#b43c3c" stroke-width="2.2" marker-end="url(#arr-zc)"/>
+
+    <rect x="146" y="290" width="260" height="54" rx="8" fill="#8f2424"/>
+    <text x="276" y="313" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Shared S3 Object X (Deleted!)</text>
+    <text x="276" y="331" text-anchor="middle" font-size="11" fill="#fde8e8">Keeper refcount &amp; S3 DELETE are not atomic</text>
+
+    <rect x="48" y="362" width="456" height="128" rx="10" fill="#ffffff" stroke="#c05c5c" stroke-width="1.4"/>
+    <text x="276" y="386" text-anchor="middle" font-size="14" font-weight="700" fill="#7c2323">Why a Patch Could Not Fix It</text>
+    <text x="276" y="408" text-anchor="middle" font-size="12" fill="#5c3a3a">&#8226; Retries, merges, and TTL moves caused per-replica counts to drift.</text>
+    <text x="276" y="428" text-anchor="middle" font-size="12" fill="#5c3a3a">&#8226; S3 has no cross-system transaction with ZooKeeper/Keeper znodes.</text>
+    <text x="276" y="448" text-anchor="middle" font-size="12" fill="#5c3a3a">&#8226; Upstream deleted zero-copy tests in PR #82250.</text>
+    <text x="276" y="472" text-anchor="middle" font-family="Courier, monospace" font-size="11" font-weight="700" fill="#b43c3c">Never enable allow_remote_fs_zero_copy_replication</text>
+
+    <!-- RIGHT PANEL: WHAT REPLACED IT -->
+    <rect x="556" y="82" width="496" height="426" rx="14" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="576" y="98" width="310" height="28" rx="6" fill="#1f6f50"/>
+    <text x="731" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">WHAT REPLACED ZERO-COPY TODAY</text>
+
+    <!-- Path 1 -->
+    <rect x="576" y="142" width="456" height="106" rx="10" fill="#ffffff" stroke="#28597a" stroke-width="1.6"/>
+    <text x="804" y="166" text-anchor="middle" font-size="14" font-weight="700" fill="#143852">Option A: Plain ReplicatedMergeTree on S3 (Isolated Prefixes)</text>
+    <text x="804" y="188" text-anchor="middle" font-size="12" fill="#334a60">Each replica owns its own S3 prefix (<tspan font-family="Courier, monospace">data/{replica}/</tspan>) and</text>
+    <text x="804" y="206" text-anchor="middle" font-size="12" fill="#334a60">physically copies bytes. Zero shared objects &#8594; zero GC races.</text>
+    <text x="804" y="230" text-anchor="middle" font-size="11" font-weight="700" fill="#28597a">Cost: N replicas &#215; S3 bytes &#183; Reliability: 100% battle-tested</text>
+
+    <!-- Path 2 -->
+    <rect x="576" y="262" width="456" height="114" rx="10" fill="#ffffff" stroke="#1f6f50" stroke-width="1.6"/>
+    <text x="804" y="286" text-anchor="middle" font-size="14" font-weight="700" fill="#164231">Option B: Altinity Antalya CAS (Content Hash Owns the Object)</text>
+    <text x="804" y="308" text-anchor="middle" font-size="12" fill="#2c4a3e">Blobs are immutable and keyed by content hash (<tspan font-family="Courier, monospace">blobs/&lt;hash&gt;</tspan>).</text>
+    <text x="804" y="326" text-anchor="middle" font-size="12" fill="#2c4a3e">No mutable counters: an 18-phase GC folds append-only ref logs</text>
+    <text x="804" y="344" text-anchor="middle" font-size="12" fill="#2c4a3e">and fails closed whenever a lease or ref is ambiguous.</text>
+    <text x="804" y="364" text-anchor="middle" font-size="11" font-weight="700" fill="#1f6f50">Cost: 1&#215; S3 bytes (Open Source Apache-2.0)</text>
+
+    <!-- Path 3 -->
+    <rect x="576" y="390" width="456" height="100" rx="10" fill="#ffffff" stroke="#9b6b24" stroke-width="1.6"/>
+    <text x="804" y="414" text-anchor="middle" font-size="14" font-weight="700" fill="#5e3e0e">Option C: ClickHouse Cloud SharedMergeTree</text>
+    <text x="804" y="436" text-anchor="middle" font-size="12" fill="#5e3e0e">Centralized cloud metadata service owns object lifecycle</text>
+    <text x="804" y="454" text-anchor="middle" font-size="12" fill="#5e3e0e">for stateless compute workers caching hot ranges on NVMe.</text>
+    <text x="804" y="476" text-anchor="middle" font-size="11" font-weight="700" fill="#9b6b24">Cost: 1&#215; S3 bytes (Managed Cloud service only)</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="522" width="1024" height="42" rx="8" fill="#17283c"/>
+    <text x="540" y="548" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Architectural Lesson: Never track shared object ownership with distributed mutable counters &#8212; make objects content-addressed</text>
+  </g>
+</svg>

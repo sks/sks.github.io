@@ -6,7 +6,7 @@ series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 16
 mermaid: true
 description: "A golden-image roll failed twice with InvalidIPAddress.InUse before I understood why: create_before_destroy flags propagate through the dependency graph, and a flag on an unused TLS certificate was flipping my static-IP database nodes to the wrong replacement order. A tour of Terraform's ForcedCBDTransformer, plan-JSON ordering, and why quorum members and exclusive resources demand destroy-then-create."
-image: /assets/images/og-default.png
+image: /assets/images/diagrams/clickhouse/destroy-then-create-static-ips.svg
 tags: [clickhouse, terraform, opentofu, aws, ec2, keeper, sre, infrastructure]
 permalink: /blog/clickhouse-destroy-then-create-static-ips/
 faqs:
@@ -68,6 +68,10 @@ destroy-then-create is a design decision rather than a default.
 {: .key-takeaways}
 
 ## The anatomy of a replaceable node
+
+![Create-before-destroy failing on exclusive static IP, EBS, and Keeper resources versus destroy-then-create ordering](/assets/images/diagrams/clickhouse/destroy-then-create-static-ips.svg)
+
+*Exclusive resources (static private IPs, persistent EBS volumes, and Keeper `myid` quorum seats) cannot belong to two instances simultaneously; Terraform's `ForcedCBDTransformer` must not flip their replacement actions from `["delete","create"]` to `["create","delete"]`.*
 
 First, why these nodes are different from the average web server.
 
