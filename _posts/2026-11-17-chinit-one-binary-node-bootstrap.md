@@ -32,7 +32,7 @@ query — the boot script — gets templated by the infrastructure-as-code
 it fails at 3 a.m.
 
 We ended up with one, like everyone does. And then we replaced it with
-[chinit](https://github.com/sks/clickhouse-operator) — a single Go
+[chinit](https://github.com/stackgenhq/chinit) — a single Go
 binary that treats node bootstrap as a typed spec, a state file, and a
 retry engine. This post is about why that boundary — bash to binary —
 was the single highest-leverage change in the whole

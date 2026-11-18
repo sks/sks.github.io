@@ -30,7 +30,7 @@ dashboards. Almost nobody reads what runs between the instance launching
 and the first successful query — which is exactly where the interesting
 failures live. This post walks the boot sequence of the
 [self-managed ClickHouse cluster](/blog/clickhouse-ec2-vs-k8s-mermaid-data-flow/)
-in this series, built as [chinit](https://github.com/sks/clickhouse-operator)
+in this series, built as [chinit](https://github.com/stackgenhq/chinit)
 — a Go bootstrapper that replaced roughly 3,600 lines of Terraform-templated
 bash — with every step's failure semantics made explicit, and the
 production findings that forced its ordering.

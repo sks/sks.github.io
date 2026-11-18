@@ -79,7 +79,7 @@ another failed node, forever. The bootstrap is the fleet's
 self-healing loop, which means it must be *deterministic, testable,
 and idempotent* — three things a shell script cannot be at 3,600
 lines, which is why it became
-[chinit](https://github.com/sks/clickhouse-operator): a single
+[chinit](https://github.com/stackgenhq/chinit): a single
 open-source Go binary.
 
 ## The cast: what exists before chinit runs anything

@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 610" role="img" aria-labelledby="title desc">
+  <title id="title">chinit on Cloud VMs vs. clickhouse-operator on Kubernetes</title>
+  <desc id="desc">Balanced architectural comparison between running ClickHouse via clickhouse-operator on Kubernetes (StatefulSets, PVCs, shared cluster bin-packing) and chinit on Cloud VMs (EC2 ASG and Azure VMSS, lease identity, local NVMe instance-store cache, zero Kubernetes control plane), showing who benefits from each model.</desc>
+
+  <rect width="1080" height="610" fill="#fffdf8"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#17283c">
+    <text x="540" y="36" text-anchor="middle" font-size="22" font-weight="700">Running ClickHouse: Kubernetes Operator vs. chinit on Plain Cloud VMs</text>
+    <text x="540" y="59" text-anchor="middle" font-size="14" fill="#465a6e">Same ClickHouse config &amp; schema brain &#8212; two different ways to run the machines underneath</text>
+
+    <!-- LEFT PANEL: KUBERNETES + CLICKHOUSE-OPERATOR -->
+    <rect x="28" y="80" width="498" height="442" rx="14" fill="#f2f6fb" stroke="#28597a" stroke-width="2"/>
+    <rect x="48" y="96" width="338" height="28" rx="6" fill="#28597a"/>
+    <text x="217" y="115" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">KUBERNETES + CLICKHOUSE-OPERATOR</text>
+
+    <rect x="48" y="138" width="458" height="72" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.5"/>
+    <text x="277" y="160" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">Central Control Plane (EKS / AKS / GKE / Bare-Metal K8s)</text>
+    <text x="277" y="179" text-anchor="middle" font-size="11" fill="#334a60">API Server + etcd + Operator Deployment + CNI + CSI + DaemonSets</text>
+    <text x="277" y="197" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#28597a">CRD: ClickHouseInstallation &#8594; StatefulSets + PVCs + Services</text>
+
+    <rect x="48" y="224" width="222" height="128" rx="8" fill="#ffffff" stroke="#28597a" stroke-width="1.4"/>
+    <text x="159" y="246" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">Where Operator Excels</text>
+    <text x="62" y="268" font-size="11" fill="#22384d">&#10003; Multi-tenant bin-packing</text>
+    <text x="62" y="287" font-size="11" fill="#22384d">&#10003; Complex multi-shard layouts</text>
+    <text x="62" y="306" font-size="11" fill="#22384d">&#10003; Event-driven CRD GitOps</text>
+    <text x="62" y="325" font-size="11" fill="#22384d">&#10003; Runs on any K8s / on-prem</text>
+    <text x="62" y="343" font-size="11" fill="#22384d">&#10003; Mature ecosystem &amp; tooling</text>
+
+    <rect x="284" y="224" width="222" height="128" rx="8" fill="#fdf6ee" stroke="#9b6b24" stroke-width="1.4"/>
+    <text x="395" y="246" text-anchor="middle" font-size="13" font-weight="700" fill="#5e3e0e">Where Friction Appears</text>
+    <text x="298" y="268" font-size="11" fill="#5e3e0e">&#8226; 10&#8211;15% node RAM/CPU K8s tax</text>
+    <text x="298" y="287" font-size="11" fill="#5e3e0e">&#8226; Local NVMe pins pods to nodes</text>
+    <text x="298" y="306" font-size="11" fill="#5e3e0e">&#8226; StatefulSet fights mixed Spot</text>
+    <text x="298" y="325" font-size="11" fill="#5e3e0e">&#8226; Heavy BYOC K8s install &amp; RBAC</text>
+    <text x="298" y="343" font-size="11" fill="#5e3e0e">&#8226; Quarterly K8s upgrade cycle</text>
+
+    <rect x="48" y="366" width="458" height="140" rx="10" fill="#e6eff7" stroke="#28597a" stroke-width="1.5"/>
+    <text x="277" y="390" text-anchor="middle" font-size="13" font-weight="700" fill="#143852">Best Fit: Shared Platform &amp; Multi-Shard Kubernetes Teams</text>
+    <text x="66" y="414" font-size="12" fill="#22384d">&#8226; Platform team already operates EKS / GKE / AKS at scale</text>
+    <text x="66" y="436" font-size="12" fill="#22384d">&#8226; Packing many small-to-medium ClickHouse clusters per node pool</text>
+    <text x="66" y="458" font-size="12" fill="#22384d">&#8226; Standardized on ArgoCD / Flux, NetworkPolicy, and K8s Secrets</text>
+    <text x="66" y="480" font-size="12" fill="#22384d">&#8226; Multi-shard clusters or non-AWS/Azure clouds (GCP, bare metal)</text>
+
+    <!-- RIGHT PANEL: CLOUD VMs + CHINIT -->
+    <rect x="554" y="80" width="498" height="442" rx="14" fill="#eef8f3" stroke="#1f6f50" stroke-width="2"/>
+    <rect x="574" y="96" width="338" height="28" rx="6" fill="#1f6f50"/>
+    <text x="743" y="115" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">CLOUD VMs + CHINIT (APACHE-2.0, ONE BINARY)</text>
+
+    <rect x="574" y="138" width="458" height="72" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="803" y="160" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Zero Control Plane (EC2 ASG / Azure VMSS + Object &amp; Lease Store)</text>
+    <text x="803" y="179" text-anchor="middle" font-size="11" fill="#2c4a3e">In-process Altinity config renderer + DynamoDB/Table leases + systemd timers</text>
+    <text x="803" y="197" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#1f6f50">chinit.yaml + chi.yaml &#8594; 2&#8211;3 min Golden AMI Boot + 5m Self-Heal</text>
+
+    <rect x="574" y="224" width="222" height="128" rx="8" fill="#ffffff" stroke="#1f6f50" stroke-width="1.4"/>
+    <text x="685" y="246" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Where chinit Excels</text>
+    <text x="588" y="268" font-size="11" fill="#164231">&#10003; 0% K8s RAM tax; no cluster</text>
+    <text x="588" y="287" font-size="11" fill="#164231">&#10003; Auto NVMe RAID-0 + 90% sizing</text>
+    <text x="588" y="306" font-size="11" fill="#164231">&#10003; Native ASG/VMSS Spot readers</text>
+    <text x="588" y="325" font-size="11" fill="#164231">&#10003; Drop-in BYOC Terraform deploy</text>
+    <text x="588" y="343" font-size="11" fill="#164231">&#10003; Built-in S3 CAS &amp; GC metrics</text>
+
+    <rect x="810" y="224" width="222" height="128" rx="8" fill="#fdf6ee" stroke="#9b6b24" stroke-width="1.4"/>
+    <text x="921" y="246" text-anchor="middle" font-size="13" font-weight="700" fill="#5e3e0e">Current Trade-Offs</text>
+    <text x="824" y="268" font-size="11" fill="#5e3e0e">&#8226; Dedicated VMs (no pod packing)</text>
+    <text x="824" y="287" font-size="11" fill="#5e3e0e">&#8226; Timer pull (2&#8211;5m) vs API watch</text>
+    <text x="824" y="306" font-size="11" fill="#5e3e0e">&#8226; AWS &amp; Azure today (no GCP yet)</text>
+    <text x="824" y="325" font-size="11" fill="#5e3e0e">&#8226; Single-shard S3/CAS focus</text>
+    <text x="824" y="343" font-size="11" fill="#5e3e0e">&#8226; Golden image Packer pipeline</text>
+
+    <rect x="574" y="366" width="458" height="140" rx="10" fill="#dff0e8" stroke="#1f6f50" stroke-width="1.5"/>
+    <text x="803" y="390" text-anchor="middle" font-size="13" font-weight="700" fill="#164231">Best Fit: BYOC Vendors, High-Volume Telemetry &amp; VM-First Teams</text>
+    <text x="592" y="414" font-size="12" fill="#164231">&#8226; BYOC SaaS deploying into customer VPCs/VNets without EKS/AKS</text>
+    <text x="592" y="436" font-size="12" fill="#164231">&#8226; 10&#8211;100+ TB/day log/trace fleets pairing EBS hot tier + NVMe cache</text>
+    <text x="592" y="458" font-size="12" fill="#164231">&#8226; Spot-backed elastic reader fleets + Altinity Antalya S3 CAS pool</text>
+    <text x="592" y="480" font-size="12" fill="#164231">&#8226; Lean SRE/Terraform teams replacing fragile cloud-init bash scripts</text>
+
+    <!-- FOOTER -->
+    <rect x="28" y="538" width="1024" height="50" rx="8" fill="#17283c"/>
+    <text x="540" y="560" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">chinit embeds Altinity's clickhouse-operator config &amp; schema libraries in-process &#8212; keeping the brain while skipping the K8s cluster</text>
+    <text x="540" y="578" text-anchor="middle" font-family="Courier, monospace" font-size="11" fill="#b8d4e8">https://github.com/stackgenhq/chinit  (Apache-2.0 &#183; v0.2.0 &#183; AWS &amp; Azure)</text>
+  </g>
+</svg>
