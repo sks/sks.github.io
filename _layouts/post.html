@@ -11,7 +11,7 @@ layout: default
         {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
         {{ page.date | date: date_format }}
       </time>
-      {%- assign words = content | number_of_words -%}
+      {%- assign words = content | strip_html | number_of_words -%}
       {%- if words < 360 -%}
         {%- assign reading_minutes = 1 -%}
       {%- else -%}

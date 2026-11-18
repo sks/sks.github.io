@@ -5,6 +5,7 @@ date: 2026-11-17 22:30:00 -0800
 series: "ClickHouse on AWS: Self-Managed from First Principles"
 series_order: 42
 mermaid: true
+math: true
 description: >-
   An S3 Gateway Endpoint makes the network wire between your VPC and S3 free
   ($0/hr, $0/GB) — once you close every missing route table and region-less CLI

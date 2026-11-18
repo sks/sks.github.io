@@ -1058,6 +1058,210 @@ hr {
   margin: 2rem 0 1rem;
 }
 
+// Standalone context callout for series posts landed on directly.
+.pn-context-callout {
+  margin: 1.25rem 0 1.5rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--pn-border);
+  border-left: 4px solid var(--pn-accent);
+  border-radius: 0.5rem;
+  background: var(--pn-bg-elevated);
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+.pn-context-callout p {
+  margin: 0;
+}
+
+// Native zero-JS mathematical equation display card.
+.pn-formula-card {
+  margin: 1.25rem 0;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--pn-border);
+  border-radius: 0.6rem;
+  background: var(--pn-bg-elevated);
+  overflow-x: auto;
+}
+
+.pn-formula-eq {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--pn-text);
+  line-height: 1.4;
+}
+
+.pn-frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  padding: 0 0.3rem;
+}
+
+.pn-frac__num {
+  padding: 0 0.25rem 0.18rem;
+  border-bottom: 1.5px solid var(--pn-text);
+  white-space: nowrap;
+}
+
+.pn-frac__den {
+  padding: 0.18rem 0.25rem 0;
+  white-space: nowrap;
+}
+
+.pn-formula-legend {
+  margin: 0.85rem 0 0;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--pn-border);
+  color: var(--pn-text-muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+// Interactive Break-Even Calculator widget.
+.pn-calc {
+  margin: 1.5rem 0 2rem;
+  padding: 1.25rem;
+  border: 1px solid var(--pn-border);
+  border-radius: 0.75rem;
+  background: var(--pn-bg-elevated);
+  box-shadow: var(--pn-shadow);
+}
+
+.pn-calc__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.pn-calc__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.pn-calc__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.pn-calc__preset {
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--pn-border);
+  border-radius: 0.4rem;
+  background: var(--pn-bg);
+  color: var(--pn-text);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pn-calc__preset:hover,
+.pn-calc__preset:focus-visible {
+  border-color: var(--pn-link);
+  color: var(--pn-link);
+}
+
+.pn-calc__controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem 1.25rem;
+  margin-bottom: 1.15rem;
+}
+
+.pn-calc__field label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.3rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.pn-calc__val {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: var(--pn-link);
+  font-weight: 700;
+}
+
+.pn-calc__field input[type="range"] {
+  width: 100%;
+  accent-color: var(--pn-accent);
+  cursor: pointer;
+}
+
+.pn-calc__results {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.pn-calc__stat {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--pn-border);
+  border-radius: 0.5rem;
+  background: var(--pn-bg);
+}
+
+.pn-calc__stat-label {
+  display: block;
+  color: var(--pn-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.25rem;
+}
+
+.pn-calc__stat-num {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 1.15rem;
+  font-weight: 750;
+  color: var(--pn-text);
+}
+
+.pn-calc__stat--savings .pn-calc__stat-num {
+  color: #1a7f37;
+}
+
+[data-theme="dark"] .pn-calc__stat--savings .pn-calc__stat-num {
+  color: #3fb950;
+}
+
+.pn-calc__verdict {
+  padding: 0.75rem 0.95rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--pn-border);
+  background: var(--pn-bg);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 700px) {
+  .pn-calc__controls {
+    grid-template-columns: 1fr;
+  }
+
+  .pn-calc__results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+
 .series-suggest {
   margin-bottom: 2rem;
   padding: 1.1rem 1.25rem 1.25rem;
