@@ -93,7 +93,8 @@ through **three distinct fleet generations**:
 This post compares the non-CAS and CAS fleets side by side without vendor spin:
 what CAS genuinely solves, what CAS **does not** touch, the seven sharp edges
 you sign up for in production, and a **single-flag, 5-layer blueprint** (plus an
-interactive break-even calculator) to decide which generation fits your cluster.
+[interactive break-even calculator](#interactive-non-cas-vs-cas-cold-storage-calculator))
+to decide which generation fits your cluster.
 
 **Key takeaways**
 
@@ -482,15 +483,18 @@ equation:
   </p>
 </div>
 
-Plug in your own cluster numbers below to compare Generation 2 vs. Generation 3:
+### Interactive Non-CAS vs. CAS Cold-Storage Calculator
+
+Plug in your own cluster numbers below (or share a direct permalink to any scenario):
 
 <div class="pn-calc" id="cas-breakeven-calc">
   <div class="pn-calc__header">
-    <p class="pn-calc__title">Interactive Non-CAS vs. CAS Cold-Storage Calculator</p>
+    <p class="pn-calc__title"><a class="pn-calc__permalink" href="#interactive-non-cas-vs-cas-cold-storage-calculator">#</a> Cold-Storage Cost Estimator</p>
     <div class="pn-calc__presets">
-      <button type="button" class="pn-calc__preset" data-tb="2" data-days="14" data-rep="3" data-comp="14">Preset: Small Fleet (2 TB/d, R=3)</button>
-      <button type="button" class="pn-calc__preset" data-tb="30" data-days="26" data-rep="9" data-comp="15.2">Preset: Our Benchmark (30 TB/d, R=9)</button>
-      <button type="button" class="pn-calc__preset" data-tb="80" data-days="30" data-rep="10" data-comp="15">Preset: Scale Fleet (80 TB/d, R=10)</button>
+      <button type="button" class="pn-calc__preset" data-tb="2" data-days="14" data-rep="3" data-comp="14">Small Fleet (2 TB/d, R=3)</button>
+      <button type="button" class="pn-calc__preset" data-tb="30" data-days="26" data-rep="9" data-comp="15.2">Our Benchmark (30 TB/d, R=9)</button>
+      <button type="button" class="pn-calc__preset" data-tb="80" data-days="30" data-rep="10" data-comp="15">Scale Fleet (80 TB/d, R=10)</button>
+      <button type="button" class="pn-calc__preset pn-calc__preset--copy" id="calc-copy-link" aria-label="Copy permalink to this calculator scenario">Copy Permalink</button>
     </div>
   </div>
   <div class="pn-calc__controls">

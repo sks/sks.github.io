@@ -1127,6 +1127,25 @@ hr {
 }
 
 // Interactive Break-Even Calculator widget.
+#interactive-non-cas-vs-cas-cold-storage-calculator,
+#cas-breakeven-calc {
+  scroll-margin-top: 4.5rem;
+}
+
+.pn-calc__permalink {
+  text-decoration: none;
+  color: var(--pn-text-subtle);
+  margin-right: 0.25rem;
+}
+
+.pn-calc__permalink:hover {
+  color: var(--pn-link);
+}
+
+.pn-calc__preset--copy {
+  border-color: var(--pn-accent);
+}
+
 .pn-calc {
   margin: 1.5rem 0 2rem;
   padding: 1.25rem;

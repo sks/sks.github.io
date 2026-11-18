@@ -316,6 +316,8 @@ Multiply by `r` across the five real cluster topologies:
 | **Sharded GA Bounded-Lag (`3 shards × 2 replicas`)** | **`2×`** | `$636/mo` | `$2,872/mo` | **`-$318/mo` (`-50%`)** | **`-$1,436/mo` (`-50%`)** |
 | **Altinity Antalya CAS (`cas_config.enabled = true`)** | **`1×`** | **`$318/mo`** | **`$1,436/mo`** | *Baseline (`1×`)* | *Baseline (`1×`)* |
 
+> **Want to model your own daily TB, retention window, and replica count?** Try the live [Interactive Non-CAS vs. CAS Cold-Storage Calculator](/blog/clickhouse-fleet-evolution-non-cas-to-cas-blueprint/#interactive-non-cas-vs-cas-cold-storage-calculator) in Part 44.
+
 ---
 
 ## 4. Three More Cost Wins CAS Unlocks Beyond Storage Bytes

@@ -2,10 +2,39 @@
   var root = document.getElementById("cas-breakeven-calc");
   if (!root) return;
 
+  var ANCHOR = "#interactive-non-cas-vs-cas-cold-storage-calculator";
   var elTb = document.getElementById("calc-tb");
   var elDays = document.getElementById("calc-days");
   var elRep = document.getElementById("calc-rep");
   var elComp = document.getElementById("calc-comp");
+  var copyBtn = document.getElementById("calc-copy-link");
+
+  function clamp(val, min, max) {
+    return Math.min(max, Math.max(min, val));
+  }
+
+  // Hydrate sliders from URL query parameters (?tb=30&days=26&rep=9&comp=15.2) when present.
+  try {
+    var params = new URLSearchParams(window.location.search);
+    if (params.has("tb")) elTb.value = clamp(parseFloat(params.get("tb")) || 30, 1, 100);
+    if (params.has("days")) elDays.value = clamp(parseFloat(params.get("days")) || 26, 5, 90);
+    if (params.has("rep")) elRep.value = clamp(parseInt(params.get("rep"), 10) || 9, 2, 12);
+    if (params.has("comp")) elComp.value = clamp(parseFloat(params.get("comp")) || 15.2, 8, 20);
+  } catch (e) {
+    /* ignore malformed query strings */
+  }
+
+  function buildPermalink() {
+    var base = window.location.origin + window.location.pathname;
+    var tb = parseFloat(elTb.value);
+    var days = parseFloat(elDays.value);
+    var rep = parseInt(elRep.value, 10);
+    var comp = parseFloat(elComp.value);
+    if (tb === 30 && days === 26 && rep === 9 && Math.abs(comp - 15.2) < 0.05) {
+      return base + ANCHOR;
+    }
+    return base + "?tb=" + tb + "&days=" + days + "&rep=" + rep + "&comp=" + comp + ANCHOR;
+  }
 
   function fmtUSD(n) {
     return "$" + Math.round(n).toLocaleString("en-US");
@@ -62,7 +91,7 @@
     el.addEventListener("input", update);
   });
 
-  Array.prototype.forEach.call(root.querySelectorAll(".pn-calc__preset"), function (btn) {
+  Array.prototype.forEach.call(root.querySelectorAll(".pn-calc__preset[data-tb]"), function (btn) {
     btn.addEventListener("click", function () {
       elTb.value = btn.getAttribute("data-tb");
       elDays.value = btn.getAttribute("data-days");
@@ -71,6 +100,23 @@
       update();
     });
   });
+
+  if (copyBtn) {
+    copyBtn.addEventListener("click", function () {
+      var url = buildPermalink();
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, "", url);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function () {
+          copyBtn.textContent = "Copied!";
+          window.setTimeout(function () {
+            copyBtn.textContent = "Copy Permalink";
+          }, 1600);
+        });
+      }
+    });
+  }
 
   update();
 })();
