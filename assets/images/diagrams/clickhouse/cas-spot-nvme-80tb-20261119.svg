@@ -1,0 +1,277 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 820" width="1200" height="820" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" role="img" aria-labelledby="svgTitle svgDesc">
+  <title id="svgTitle">ClickHouse 100% Spot + NVMe Instance-Store Cache + CAS Benchmark &amp; Churn Telemetry</title>
+  <desc id="svgDesc">Four-panel engineering benchmark report on AWS Graviton: (1) 81.86 TB/day 10-minute burst row convergence from 53,443,013 to 334,739,767 exact rows across 6 Spot replicas with 49s staging drain; (2) 100-minute AWS Spot churn swimlanes across 15 Spot EC2 launches and 6 AWS Spot interruptions; (3) role-scoped NVMe reader cache (1.8 GB/s vs 131 MB/s gp3) and mixed-instance Spot architecture; (4) measured 46% cluster cost reduction ($3.26/hr On-Demand to $1.75/hr Spot+NVMe) and production hybrid recommendations.</desc>
+
+  <defs>
+    <linearGradient id="bgCanvas" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1120"/>
+      <stop offset="55%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#090d16"/>
+    </linearGradient>
+    <linearGradient id="hdrBanner" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#172554"/>
+    </linearGradient>
+    <linearGradient id="writerArea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f97316" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#f97316" stop-opacity="0.02"/>
+    </linearGradient>
+    <linearGradient id="burstBand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.06"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Canvas -->
+  <rect width="1200" height="820" rx="14" fill="url(#bgCanvas)" stroke="#334155" stroke-width="1.5"/>
+
+  <!-- Header Banner -->
+  <rect x="24" y="18" width="1152" height="74" rx="10" fill="url(#hdrBanner)" stroke="#38bdf8" stroke-width="1.2"/>
+  <text x="44" y="47" font-size="19" font-weight="800" fill="#f8fafc">ClickHouse 100% Spot + NVMe Cache + CAS Stress Test: 81.86 TB/day Burst Under Live Churn</text>
+  <text x="44" y="71" font-size="12" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">Single-AZ AWS Graviton · Antalya 26.8 + chinit v0.2.8 · 53,443,013 + 281,296,754 = 334,739,767 exact rows (0 loss)</text>
+
+  <!-- Header Pills -->
+  <rect x="916" y="29" width="242" height="22" rx="11" fill="#064e3b" stroke="#34d399" stroke-width="1"/>
+  <text x="1037" y="44" text-anchor="middle" font-size="10.5" font-weight="700" fill="#6ee7b7">EXACT PARITY: 6/6 NODES (0 LOSS)</text>
+  <rect x="916" y="57" width="242" height="22" rx="11" fill="#3b0764" stroke="#c084fc" stroke-width="1"/>
+  <text x="1037" y="72" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e9d5ff">COST: $1.75/hr SPOT (-46% vs OD)</text>
+
+  <!-- ===================================================================== -->
+  <!-- PANEL 1 (TOP LEFT): 81.86 TB/day Burst Row Convergence & Drain        -->
+  <!-- ===================================================================== -->
+  <rect x="24" y="108" width="564" height="334" rx="10" fill="#111827" stroke="#1e293b" stroke-width="1.3"/>
+  <text x="42" y="133" font-size="14" font-weight="700" fill="#f8fafc">1. 81.86 TB/day Burst — Row Convergence &amp; Mid-Run Churn (27m Window)</text>
+  <text x="42" y="151" font-size="11" fill="#94a3b8">2,925 files · 571.3 GB NDJSON in 10m 03s (466.8k rec/s) · 744.5 GiB uncomp → 47.8 GiB hot (15.57× ZSTD)</text>
+
+  <!-- Burst Window Highlight -->
+  <rect x="117" y="172" width="177" height="200" fill="url(#burstBand)"/>
+  <text x="205" y="185" text-anchor="middle" font-size="9.5" font-weight="700" fill="#fbbf24">10m 03s BURST (81.86 TB/d)</text>
+
+  <!-- Gridlines Panel 1 (x: 84..560, y: 172..372, 0..350M) -->
+  <g stroke="#1e293b" stroke-width="1">
+    <line x1="84" y1="172" x2="560" y2="172"/>
+    <line x1="84" y1="212" x2="560" y2="212"/>
+    <line x1="84" y1="252" x2="560" y2="252"/>
+    <line x1="84" y1="292" x2="560" y2="292"/>
+    <line x1="84" y1="332" x2="560" y2="332"/>
+    <line x1="84" y1="372" x2="560" y2="372" stroke="#475569"/>
+  </g>
+  <g font-size="10" fill="#94a3b8" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+    <text x="77" y="176">350M</text>
+    <text x="77" y="216">280M</text>
+    <text x="77" y="256">210M</text>
+    <text x="77" y="296">140M</text>
+    <text x="77" y="336">70M</text>
+    <text x="77" y="376">0</text>
+  </g>
+  <g font-size="10" fill="#94a3b8" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+    <text x="84" y="388">T+0m</text>
+    <text x="153" y="388">T+4m</text>
+    <text x="232" y="388">T+8m</text>
+    <text x="308" y="388">T+13m</text>
+    <text x="385" y="388">T+17m</text>
+    <text x="472" y="388">T+22m</text>
+    <text x="556" y="388">T+27m</text>
+  </g>
+
+  <!-- Writers Area & Curve (Orange #f97316) -->
+  <polygon points="84,341.5 107,341.5 130,331.7 153,310.5 177,288.7 200,267.0 232,238.7 260,217.7 285,202.5 308,180.7 560,180.7 560,372 84,372" fill="url(#writerArea)"/>
+  <polyline fill="none" stroke="#f97316" stroke-width="2.6" points="84,341.5 107,341.5 130,331.7 153,310.5 177,288.7 200,267.0 232,238.7 260,217.7 285,202.5 308,180.7 560,180.7"/>
+
+  <!-- Readers Curve (Sky Blue #38bdf8, gap during dual Spot reclaim, then rapid catch-up) -->
+  <polyline fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-dasharray="5,3" points="84,341.5 107,341.5 130,331.8 153,310.7 177,289.2 200,267.6 232,240.0 260,223.0 285,222.0"/>
+  <polyline fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-dasharray="5,3" points="363,290.5 385,180.7 560,180.7"/>
+
+  <!-- Event Callouts on Panel 1 -->
+  <circle cx="153" cy="310.5" r="3.8" fill="#fbbf24"/>
+  <text x="159" y="321" font-size="9.5" fill="#fde68a">Idle alarm: 3W→2W (99.6% CPU, 1s lag)</text>
+
+  <circle cx="246" cy="228" r="3.8" fill="#34d399"/>
+  <text x="252" y="236" font-size="9.5" fill="#6ee7b7">CPU scale-out: 2W→4W</text>
+
+  <circle cx="308" cy="180.7" r="4.5" fill="#f97316"/>
+  <text x="314" y="196" font-size="9.5" font-weight="700" fill="#fdba74">DONE+49s: 334,739,767 rows (staging=0)</text>
+
+  <circle cx="363" cy="290.5" r="3.8" fill="#ef4444"/>
+  <text x="368" y="294" font-size="9.5" fill="#fca5a5">New NVMe Spot R0 backfill → 0s lag in 79s</text>
+
+  <!-- Legend Panel 1 -->
+  <line x1="44" y1="412" x2="64" y2="412" stroke="#f97316" stroke-width="2.6"/>
+  <text x="70" y="416" font-size="10.5" fill="#cbd5e1">Spot Writers (m7g/m6g.4xlarge, 4/4 parity)</text>
+  <line x1="318" y1="412" x2="338" y2="412" stroke="#38bdf8" stroke-width="2.2" stroke-dasharray="5,3"/>
+  <text x="344" y="416" font-size="10.5" fill="#cbd5e1">NVMe Spot Readers (m8gd.xlarge, 2/2 parity)</text>
+  <text x="44" y="432" font-size="10" fill="#94a3b8">Total S3 API spend across entire 81.86 TB/day burst + post-drain: $0.0662 (peak $0.357/hr · 0 Code 241 OOMs)</text>
+
+  <!-- ===================================================================== -->
+  <!-- PANEL 2 (TOP RIGHT): 100-Min AWS Spot Churn Swimlanes                 -->
+  <!-- ===================================================================== -->
+  <rect x="612" y="108" width="564" height="334" rx="10" fill="#111827" stroke="#1e293b" stroke-width="1.3"/>
+  <text x="630" y="133" font-size="14" font-weight="700" fill="#f8fafc">2. 100-Min AWS Spot Churn &amp; Recovery Timeline (15 Spot Launches)</text>
+  <text x="630" y="151" font-size="11" fill="#94a3b8">6 AWS Spot reclaims (1 Writer, 5 NVMe Readers in Single-AZ) + 3 idle step-downs + 3 CPU scale-outs</text>
+
+  <!-- Time Axis: 0m (x=720) to 100m (x=1150) => 4.3 px/min -->
+  <rect x="1033" y="168" width="43" height="204" fill="url(#burstBand)"/>
+  <g stroke="#1e293b" stroke-width="1">
+    <line x1="720" y1="168" x2="720" y2="372"/>
+    <line x1="806" y1="168" x2="806" y2="372"/>
+    <line x1="892" y1="168" x2="892" y2="372"/>
+    <line x1="978" y1="168" x2="978" y2="372"/>
+    <line x1="1064" y1="168" x2="1064" y2="372"/>
+    <line x1="1150" y1="168" x2="1150" y2="372"/>
+    <line x1="720" y1="372" x2="1150" y2="372" stroke="#475569"/>
+  </g>
+  <g font-size="10" fill="#94a3b8" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+    <text x="720" y="388">+0m</text>
+    <text x="806" y="388">+20m</text>
+    <text x="892" y="388">+40m</text>
+    <text x="978" y="388">+60m</text>
+    <text x="1064" y="388">+80m</text>
+    <text x="1150" y="388">+100m</text>
+  </g>
+
+  <!-- Lane Labels -->
+  <g font-size="10.5" font-weight="600" fill="#cbd5e1" text-anchor="end">
+    <text x="712" y="191">Keepers (3× OD)</text>
+    <text x="712" y="217">backup-0 (OD)</text>
+    <text x="712" y="247">Writers Slot A</text>
+    <text x="712" y="271">Writers Slot B</text>
+    <text x="712" y="295">Writers C &amp; D</text>
+    <text x="712" y="327">Readers Slot 0</text>
+    <text x="712" y="355">Readers Slot 1</text>
+  </g>
+
+  <!-- Lane 1: Keepers -->
+  <rect x="720" y="179" width="430" height="15" rx="3" fill="#065f46" stroke="#10b981" stroke-width="1"/>
+  <text x="935" y="190" text-anchor="middle" font-size="9.5" fill="#ecfdf5">3 × t4g.large Raft Quorum — 0 errors, 100% uptime</text>
+
+  <!-- Lane 2: backup-0 -->
+  <rect x="978" y="205" width="22" height="15" rx="3" fill="#0d9488" stroke="#5eead4" stroke-width="1"/>
+  <text x="1006" y="216" font-size="9.5" fill="#99f6e4">02:00Z wake → S3 tar backup OK → self-stop</text>
+
+  <!-- Lane 3: Writers Slot A -->
+  <rect x="750" y="235" width="216" height="15" rx="3" fill="#9a3412" stroke="#f97316" stroke-width="1"/>
+  <circle cx="966" cy="242.5" r="4.5" fill="#ef4444"/>
+  <rect x="970" y="235" width="180" height="15" rx="3" fill="#c2410c" stroke="#fb923c" stroke-width="1"/>
+  <text x="855" y="246" text-anchor="middle" font-size="9" fill="#ffedd5">m7g.4xl (ITN @ 51m)</text>
+  <text x="1060" y="246" text-anchor="middle" font-size="9" fill="#ffedd5">m7g.4xl (writer-1 live)</text>
+
+  <!-- Lane 4: Writers Slot B -->
+  <rect x="750" y="259" width="165" height="15" rx="3" fill="#7c2d12" stroke="#f97316" stroke-width="1"/>
+  <rect x="941" y="259" width="209" height="15" rx="3" fill="#c2410c" stroke="#fb923c" stroke-width="1"/>
+  <text x="832" y="270" text-anchor="middle" font-size="9" fill="#fed7aa">m6g (idle in)</text>
+  <text x="1045" y="270" text-anchor="middle" font-size="9" fill="#ffedd5">m7g.4xl (writer-0 live)</text>
+
+  <!-- Lane 5: Writers Slots C & D -->
+  <rect x="941" y="283" width="105" height="15" rx="3" fill="#7c2d12" stroke="#f97316" stroke-width="1"/>
+  <rect x="1061" y="283" width="89" height="15" rx="3" fill="#ea580c" stroke="#fdba74" stroke-width="1"/>
+  <text x="993" y="294" text-anchor="middle" font-size="8.8" fill="#fed7aa">m6g (idle in)</text>
+  <text x="1105" y="294" text-anchor="middle" font-size="8.8" fill="#fff7ed">+2× m7g (CPU out)</text>
+
+  <!-- Lane 6: Readers Slot 0 -->
+  <rect x="720" y="315" width="159" height="15" rx="3" fill="#0369a1" stroke="#38bdf8" stroke-width="1"/>
+  <circle cx="879" cy="322.5" r="4" fill="#ef4444"/>
+  <rect x="887" y="315" width="99" height="15" rx="3" fill="#0369a1" stroke="#38bdf8" stroke-width="1"/>
+  <circle cx="986" cy="322.5" r="4" fill="#ef4444"/>
+  <rect x="989" y="315" width="20" height="15" rx="2" fill="#450a0a" stroke="#ef4444" stroke-dasharray="2,2"/>
+  <rect x="1010" y="315" width="69" height="15" rx="3" fill="#0369a1" stroke="#38bdf8" stroke-width="1"/>
+  <circle cx="1079" cy="322.5" r="4" fill="#ef4444"/>
+  <rect x="1085" y="315" width="26" height="15" rx="3" fill="#0369a1" stroke="#38bdf8" stroke-width="1"/>
+  <circle cx="1111" cy="322.5" r="4" fill="#ef4444"/>
+  <rect x="1120" y="315" width="30" height="15" rx="3" fill="#0284c7" stroke="#7dd3fc" stroke-width="1.2"/>
+  <text x="800" y="326" text-anchor="middle" font-size="8.8" fill="#e0f2fe">m7gd (38m)</text>
+  <text x="936" y="326" text-anchor="middle" font-size="8.8" fill="#e0f2fe">m8gd (23m)</text>
+  <text x="1044" y="326" text-anchor="middle" font-size="8.5" fill="#e0f2fe">m8gd</text>
+
+  <!-- Lane 7: Readers Slot 1 -->
+  <rect x="1061" y="343" width="18" height="15" rx="3" fill="#0369a1" stroke="#38bdf8" stroke-width="1"/>
+  <circle cx="1079" cy="350.5" r="4" fill="#ef4444"/>
+  <rect x="1094" y="343" width="17" height="15" rx="3" fill="#0369a1" stroke="#38bdf8" stroke-width="1"/>
+  <circle cx="1111" cy="350.5" r="4" fill="#ef4444"/>
+  <rect x="1128" y="343" width="22" height="15" rx="3" fill="#0284c7" stroke="#7dd3fc" stroke-width="1.2"/>
+  <text x="945" y="354" text-anchor="end" font-size="9" fill="#94a3b8">Scale-out R1 (m8gd NVMe):</text>
+
+  <!-- Legend Panel 2 -->
+  <circle cx="636" cy="412" r="4.5" fill="#ef4444"/>
+  <text x="646" y="416" font-size="10.5" fill="#fca5a5">AWS Spot Reclaim (2-min ITN → chinit &lt;0.6s drain)</text>
+  <rect x="932" y="406" width="16" height="11" rx="2" fill="#450a0a" stroke="#ef4444" stroke-dasharray="2,2"/>
+  <text x="954" y="416" font-size="10.5" fill="#cbd5e1">Single-AZ *gd Spot pinch (3.5m)</text>
+  <text x="630" y="432" font-size="10" fill="#94a3b8">Finding: m8gd.xlarge in single-AZ reclaimed 5× in 60m → enable Multi-AZ + wider *gd pool in prod</text>
+
+  <!-- ===================================================================== -->
+  <!-- PANEL 3 (BOTTOM LEFT): Role-Scoped NVMe Cache + Direct-IO Benchmark   -->
+  <!-- ===================================================================== -->
+  <rect x="24" y="460" width="564" height="336" rx="10" fill="#111827" stroke="#1e293b" stroke-width="1.3"/>
+  <text x="42" y="485" font-size="14" font-weight="700" fill="#f8fafc">3. Role-Scoped NVMe Cache Architecture &amp; Direct-IO Benchmark</text>
+  <text x="42" y="503" font-size="11" fill="#94a3b8">reader_cache_on_nvme_instance_store = true · 1.8 GB/s NVMe vs 131 MB/s baseline gp3 cache (13.7×)</text>
+
+  <!-- Box A: Spot Writers -->
+  <rect x="42" y="520" width="254" height="122" rx="8" fill="#1e293b" stroke="#f97316" stroke-width="1.3"/>
+  <text x="54" y="540" font-size="12" font-weight="700" fill="#fb923c">Spot Writers ASG (min=1, max=9)</text>
+  <text x="54" y="557" font-size="10.5" fill="#e2e8f0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">m8g / m7g / m6g.4xlarge (16c/64G)</text>
+  <text x="54" y="575" font-size="10.5" fill="#cbd5e1">• 100% Spot ($0.257–$0.292/hr, -62%)</text>
+  <text x="54" y="592" font-size="10.5" fill="#cbd5e1">• /dev/sdb: 256 GiB gp3 hot (632 MB/s)</text>
+  <text x="54" y="609" font-size="10.5" fill="#cbd5e1">• /dev/sdc: 64 GiB gp3 cache (131 MB/s)</text>
+  <text x="54" y="626" font-size="10.5" fill="#fdba74">• NLB :8123/replicas_status · quorum=2</text>
+
+  <!-- Box B: NVMe Spot Readers -->
+  <rect x="314" y="520" width="256" height="122" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="1.3"/>
+  <text x="326" y="540" font-size="12" font-weight="700" fill="#7dd3fc">NVMe Spot Readers ASG (min=1..4)</text>
+  <text x="326" y="557" font-size="10.5" fill="#e2e8f0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">m8gd / m7gd.xl · c8gd.2xl (16G)</text>
+  <text x="326" y="575" font-size="10.5" fill="#cbd5e1">• /dev/sdc gp3 DROPPED ($0 cache EBS)</text>
+  <text x="326" y="592" font-size="10.5" fill="#6ee7b7">• nvme2n1: 217 GiB NVMe (1.8 GB/s read)</text>
+  <text x="326" y="609" font-size="10.5" fill="#cbd5e1">• 4 × 48.65 GiB SLRU cold-read wrappers</text>
+  <text x="326" y="626" font-size="10.5" fill="#7dd3fc">• Lazy cold cache only (0B on relink!)</text>
+
+  <!-- Box C: Coordination & Self-Healing -->
+  <rect x="42" y="656" width="254" height="122" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="1.3"/>
+  <text x="54" y="676" font-size="12" font-weight="700" fill="#34d399">Quorum, Leases &amp; Spot Drain</text>
+  <text x="54" y="694" font-size="10.5" fill="#cbd5e1">• 3 × t4g.large OD Keepers (0 errors)</text>
+  <text x="54" y="711" font-size="10.5" fill="#cbd5e1">• DDB node-claims conditional leases</text>
+  <text x="54" y="728" font-size="10.5" fill="#cbd5e1">• chinit-spot-watch: stop queues + DNS</text>
+  <text x="54" y="745" font-size="10.5" fill="#cbd5e1">  &amp; lease release in &lt;0.6s on 2m ITN</text>
+  <text x="54" y="762" font-size="10.5" fill="#6ee7b7">• backup-0: 02:00Z S3 snapshot verified</text>
+
+  <!-- Box D: Shared 1x CAS Cold Tier -->
+  <rect x="314" y="656" width="256" height="122" rx="8" fill="#1e293b" stroke="#a855f7" stroke-width="1.3"/>
+  <text x="326" y="676" font-size="12" font-weight="700" fill="#d8b4fe">Hot vs. Cold NVMe Cache Boundary</text>
+  <text x="326" y="694" font-size="10.5" fill="#cbd5e1">• Hot (&lt;TTL): local gp3 + :9010 (not NVMe)</text>
+  <text x="326" y="711" font-size="10.5" fill="#cbd5e1">• Cold (&gt;TTL): 1× S3 CAS + 0B relink</text>
+  <text x="326" y="728" font-size="10.5" fill="#cbd5e1">• NVMe cas_cache warms lazily on SELECT</text>
+  <text x="326" y="745" font-size="10.5" fill="#cbd5e1">• Set cold TTL 7d → 1–2d to activate early</text>
+  <text x="326" y="762" font-size="10.5" fill="#e9d5ff">• S3 API: $0.125/hr post-drain steady</text>
+
+  <!-- ===================================================================== -->
+  <!-- PANEL 4 (BOTTOM RIGHT): Economics (-46%) & Stability Recommendations  -->
+  <!-- ===================================================================== -->
+  <rect x="612" y="460" width="564" height="336" rx="10" fill="#111827" stroke="#1e293b" stroke-width="1.3"/>
+  <text x="630" y="485" font-size="14" font-weight="700" fill="#f8fafc">4. Measured Cluster Economics (3W + 2R + 3K) &amp; GA Roadmap</text>
+  <text x="630" y="503" font-size="11" fill="#94a3b8">us-west-2 live pricing · includes EC2, gp3 EBS (500 MB/s), 2 NLBs, Keepers &amp; S3 API</text>
+
+  <!-- Bar 1: On-Demand Baseline -->
+  <text x="630" y="531" font-size="11" font-weight="600" fill="#cbd5e1">A. All On-Demand (3× m8g.4xl + 2× m8g.xl + gp3 cache)</text>
+  <rect x="630" y="538" width="380" height="20" rx="4" fill="#475569"/>
+  <rect x="630" y="538" width="293" height="20" rx="4" fill="#ef4444"/>
+  <text x="1018" y="553" font-size="11.5" font-weight="700" fill="#fca5a5">$3.26/hr ($2,378/mo)</text>
+
+  <!-- Bar 2: 100% Spot + NVMe Cache (Measured Live) -->
+  <text x="630" y="579" font-size="11" font-weight="600" fill="#cbd5e1">B. 100% Spot Writers + NVMe Spot Readers (Measured Live)</text>
+  <rect x="630" y="586" width="204" height="20" rx="4" fill="#475569"/>
+  <rect x="630" y="586" width="118" height="20" rx="4" fill="#10b981"/>
+  <text x="842" y="601" font-size="11.5" font-weight="700" fill="#6ee7b7">$1.75/hr ($1,275/mo · -46%)</text>
+
+  <!-- Bar 3: Recommended Prod Hybrid -->
+  <text x="630" y="627" font-size="11" font-weight="600" fill="#cbd5e1">C. Prod Hybrid (1 OD Base W + 1 OD Base R + Multi-AZ Spot)</text>
+  <rect x="630" y="634" width="271" height="20" rx="4" fill="#475569"/>
+  <rect x="630" y="634" width="185" height="20" rx="4" fill="#38bdf8"/>
+  <text x="909" y="649" font-size="11.5" font-weight="700" fill="#7dd3fc">$2.33/hr ($1,697/mo · -29%)</text>
+
+  <!-- Divider & Takeaways -->
+  <line x1="630" y1="668" x2="1156" y2="668" stroke="#1e293b" stroke-width="1.2"/>
+  <text x="630" y="688" font-size="11.5" font-weight="700" fill="#f8fafc">Key Stability Findings &amp; Next Levers for 9.8/10 Production Spot:</text>
+  <text x="630" y="707" font-size="10.5" fill="#cbd5e1">1. <tspan fill="#6ee7b7" font-weight="700">Zero Data Loss Proven:</tspan> Survived 6 Spot reclaims + mid-burst 3→2→4 scaling with 0 lost rows.</text>
+  <text x="630" y="725" font-size="10.5" fill="#cbd5e1">2. <tspan fill="#7dd3fc" font-weight="700">Multi-AZ Unlocks *gd Spot:</tspan> Enable multi_az_config + add r8gd/r7gd/c7gd to stop single-AZ pinches.</text>
+  <text x="630" y="743" font-size="10.5" fill="#cbd5e1">3. <tspan fill="#fdba74" font-weight="700">Writer Hot NVMe Next:</tspan> Backfill pushed writer gp3 to 45–85% %iowait; *gd NVMe hot removes it.</text>
+  <text x="630" y="761" font-size="10.5" fill="#cbd5e1">4. <tspan fill="#e9d5ff" font-weight="700">Anchor Quorum Floor:</tspan> Keep writer_spot_on_demand_base_capacity = 1 (dev) / 2 (prod) + min_readers = 2.</text>
+  <text x="630" y="779" font-size="10" fill="#94a3b8">Colored bar segment = EC2 compute (Writers + Readers); grey tail = fixed Keepers + EBS + NLBs + S3 API.</text>
+</svg>

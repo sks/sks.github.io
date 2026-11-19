@@ -129,17 +129,17 @@
       read: {
         title: "4. Readers Fleet · 100% Spot Replicas & NVMe Instance-Store Cache (Sky Blue)",
         color: C.read,
-        body: "Query traffic enters query.clickhouse.example:8443 via an ACM-terminated NLB gated by /replicas_status. Six 4-vCPU / 16 GiB Graviton NVMe Spot readers (~$330/mo) handle reads in complete write isolation. Each reader uses its free local NVMe instance-store SSD (auto-sized for cas_cache) at ~2× gp3 throughput and $0 extra EBS cost, keeping repeated cold queries off S3.",
+        body: "Query traffic enters query.clickhouse.example:8443 via an ACM-terminated NLB gated by /replicas_status. Six 4-vCPU / 16 GiB Graviton NVMe Spot readers (~$330/mo) handle reads in complete write isolation. Cold CAS relinks copy 0 bytes onto NVMe; each reader's local NVMe SSD (measured 1.8 GB/s direct-IO vs 131 MB/s baseline gp3, 3.4× larger at $0 extra EBS) acts as a lazy SLRU cache only for cold byte-ranges scanned by SELECTs.",
         kv: [
           ["Spot NVMe Readers (6×)", "~$330/mo + $31/mo small gp3 meta"],
-          ["NVMe cas_cache", "Local instance-store SSD ($0 extra EBS)"],
+          ["NVMe cas_cache", "217 GiB NVMe (4×48.65G SLRU · $0 EBS)"],
           ["RAM Caches", "5 GiB Mark + 8 GiB Uncompressed"],
-          ["Cold Cache Throughput", "~2× gp3 SSD (~95%+ cache hit rate)"]
+          ["Measured Direct-IO", "1.8 GB/s NVMe vs 131 MB/s gp3 (13.7×)"]
         ],
         facts: [
-          {c:C.read, t:"NVMe Instance-Store Win", v:"Free local NVMe SSDs on *gd Spot nodes", s:"Zero EBS cache cost + ~2× read IOPS"},
-          {c:C.read, t:"Stateless Ephemeral Cache", v:"NVMe wipes on Spot reclaim — safe!", s:"Cold truth lives in 1× S3 CAS pool"},
-          {c:C.read, t:"Zero-Copy Cold Scale-Out", v:"New Spot readers relink in ~2–3s", s:"No multi-TB :9010 backfill storm"},
+          {c:C.read, t:"NVMe Instance-Store Win", v:"1.8 GB/s read vs 131 MB/s gp3 cache", s:"Zero EBS cache cost + 3.4× larger SLRU"},
+          {c:C.read, t:"No Eager Cold Pull", v:"Relink = 0B; NVMe warms lazily on SELECT", s:"Hot parts (<TTL) stay on hot disk, not NVMe"},
+          {c:C.read, t:"Zero-Copy Cold Scale-Out", v:"New Spot readers relink in ~2–3s", s:"Multi-AZ *gd pool stops single-AZ pinches"},
           {c:C.read, t:"Strict Read Isolation", v:"Read-only users + strict query quotas", s:"Ingest spikes never starve queries"}
         ]
       }

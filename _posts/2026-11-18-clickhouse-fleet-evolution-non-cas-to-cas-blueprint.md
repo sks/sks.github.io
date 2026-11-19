@@ -472,6 +472,17 @@ The follow-up burst (`2,987` files, `287,257,259` rows, `476,598 rec/s`, `10m 03
 - **NLB `:8123/replicas_status` + `min_absolute_delay_to_close=300` / `min_relative_delay_to_close=120`** kept lagging autoscaled readers out of rotation without a single client-visible error; `deregistration_delay` dropped `300s → 30s`.
 - **A clean `2fc6bb4` build (`chinit v0.2.7`)** is the tag that carries all of the above (`v0.2.7` cut after the burst, before production promotion).
 
+### Follow-Up Chaos Run (`chinit v0.2.8` + Antalya `26.8`): 100% Spot Writers, NVMe Readers & The Hot/Cold Cache Boundary
+
+To stress-test how far cost and elasticity can be pushed, we next moved **both** ASGs onto **100% EC2 Spot** — writers across `m8g / m7g / m6g.4xlarge` (`writer_min = 1`, `quorum = 2`) and readers onto NVMe-equipped `*gd` Graviton pools (`m8gd / m7gd.xlarge` + `c8gd.2xlarge`) with a role-scoped **`reader_cache_on_nvme_instance_store = true`** flag (so readers drop `/dev/sdc` `gp3` cache and mount their `217 GiB` local NVMe SSD as `4 × 48.65 GiB` wrappers, while EBS-only writers keep their `64 GiB` `gp3` cache) — and ran a second **`81.86 TB/day` (`466,820 rec/s`, `281.30M`-row)** 10-minute burst through live AWS Spot interruptions:
+
+- **Exact 6-node parity (`334,739,767` rows, `0` lost) across `6` real AWS Spot reclaims and `-46%` cost**: Across a 100-minute window (`15` Spot launches, `1` writer reclaim, `5` single-AZ `m8gd/m7gd` reader reclaims, plus a mid-burst `3 → 2 → 4` writer swing where **2 Spot writers solo-carried `81.86 TB/day`** at `99.6%` CPU and `1s` lag), staging drained to `0` in `49s`, `chinit-spot-watch` drained every 2-minute ITN in `<0.6s`, `/replicas_status` held backfilling readers out of NLB rotation until `lag = 0s`, and live cluster run-rate dropped **46%** (`$3.26/hr → $1.75/hr`).
+- **Why Single-AZ `*gd` Spot needs Multi-AZ + CAS**: Pinning `*gd` Spot readers to one AZ hit 5 reclaims and a `3.5m` `UnfulfillableCapacity` pinch. Because CAS cold parts relink across AZs via S3 at **`$0.00/GB`**, enabling Multi-AZ + widening `*gd` families (`r8gd/r7gd/c7gd`) expands Spot pool diversity `6×`.
+- **Answering *"Does each replica still pull the same hot parts into its own NVMe cache?"***: Direct inspection of `system.filesystem_cache` (`FilesystemCacheBytes = 0` on fresh `194.6 GiB` capacity) and `dd` direct-IO benchmarks (**`1.8 GB/s` NVMe read vs. `131–149 MB/s` baseline `gp3` cache = `~13×` faster**) confirmed an essential architectural distinction:
+  1. **Hot parts (`< cold TTL`) never touch NVMe `cas_cache`** — they live on each replica's `<hot>` `default` disk and sync over `:9010`.
+  2. **Cold parts (`> cold TTL`) live `1×` in S3 CAS and relink with `0` bytes copied** — replicas never eagerly download the shared S3 pool onto NVMe.
+  3. **NVMe `cas_cache` is strictly a lazy `SLRU` cold-read cache** populated only for cold column byte-ranges that `SELECT` queries actually scan. If your cold-move TTL is `7 DAY`, NVMe `cas_cache` sits `0 B` idle for the first week — lower cold TTL to **`1–2 DAY` `TO VOLUME 'cold'`** to cut per-replica hot `gp3` size by `~75–85%` and put days `2–33` onto `1×` S3 CAS + `1.8 GB/s` NVMe immediately.
+
 
 ---
 
