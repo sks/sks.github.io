@@ -37,23 +37,23 @@
         casCost: "$1,059/mo",
         nonCas10x: "$10,592/mo",
         nonCas3x: "$3,178/mo",
-        computeEbs: "$3,255/mo",
-        chTotal: "$4,314/mo",
-        unitCost: "$0.0014/GB (0.14¢/GB)",
+        computeEbs: "$3,645/mo",
+        chTotal: "$4,704/mo",
+        unitCost: "$0.0015/GB (0.15¢/GB)",
         savings10x: "$9,533/mo ($114k/yr)",
-        note: "1× CAS cold pool (46.1 TB in S3 Standard) + 10× *gd Spot Writers (NVMe hot) + 6× *gd Spot Readers (NVMe cache) + 3× Keepers."
+        note: "1× CAS cold pool (46.1 TB in S3 Standard) + 1× OD writer-0 (backup coord) + 9× *gd Spot writers + 6× *gd Spot readers + 3× Keepers."
       },
       "33d": {
-        label: "33-Day Retention (30d Std + 3d IA)",
+        label: "33-Day Retention (S3 Standard)",
         poolSize: "217.1 TB",
-        casCost: "$4,786/mo",
-        nonCas10x: "$47,862/mo",
-        nonCas3x: "$14,359/mo",
-        computeEbs: "$3,255/mo",
-        chTotal: "$8,041/mo",
-        unitCost: "$0.0026/GB (0.26¢/GB)",
-        savings10x: "$43,076/mo ($517k/yr)",
-        note: "1× CAS cold pool (217.1 TB: 30d S3 Standard + 3d Standard-IA) saves $43,076/mo vs. 10× non-CAS or $9,573/mo vs. 3× sharded non-CAS."
+        casCost: "$4,993/mo",
+        nonCas10x: "$49,934/mo",
+        nonCas3x: "$14,980/mo",
+        computeEbs: "$3,645/mo",
+        chTotal: "$8,638/mo",
+        unitCost: "$0.0028/GB (0.28¢/GB)",
+        savings10x: "$44,941/mo ($539k/yr)",
+        note: "1× CAS cold pool (217.1 TB kept in S3 Standard to avoid Standard-IA's 30-day minimum early-deletion fee) saves $44,941/mo vs. 10× non-CAS."
       }
     };
 
@@ -61,69 +61,69 @@
       all: {
         title: "All Live Cluster Roles — 100 TB/day Continuous Parallel Pipeline",
         color: "#e2e8f0",
-        body: "All four color-coded roles run continuously, and BOTH Writers & Readers run 100% Spot (reclaimable at any given time): Orange 100% Spot Writers ingest 100 TB/day onto free local NVMe hot disks (~3 GB/s, zero %iowait stalls) and replicate :9010; Emerald Keeper + DynamoDB coordinate Raft logs and Spot leases; Purple CAS stores each cold XXH3-128 blob ONCE (1×) and relinks peers in ~2.4s; Sky-Blue 100% Spot Readers serve queries from RAM and local NVMe instance-store cas_cache.",
+        body: "All four color-coded roles run continuously: writer-0 stays On-Demand (coordinates 02:00 UTC backup-wake, orphan/dead-replica GC, and autoscale) while writer-1..9 and reader-0..5 run 100% Spot (reclaimable at any time). Writers ingest 100 TB/day onto free local NVMe hot disks (~3 GB/s, zero %iowait stalls) and replicate :9010; Keepers + DynamoDB coordinate Raft and Spot leases; Purple CAS stores each cold XXH3-128 blob ONCE (1×) and relinks in ~2.4s; Spot Readers serve queries from RAM and local NVMe cas_cache.",
         kv: [
           ["Ingest Scale", "100 TB/day (3.04 PB/month)"],
           ["Compressed Growth", "6.58 TB/day (15.2× ZSTD)"],
-          ["Writers Fleet", "10× 16-vCPU *gd Spot (NVMe Hot)"],
+          ["Writers Fleet", "1× OD (w0) + 9× *gd Spot (NVMe)"],
           ["Readers Fleet", "6× 4-vCPU *gd Spot (NVMe Cache)"]
         ],
         facts: [
-          {c:C.hot,   t:"1. Spot Writers + NVMe Hot (Orange)", v:"10× *gd Spot ($1,900/mo) · reclaimable anytime", s:"NVMe hot/merge (~3 GB/s, $0 EBS) · :9010 sync"},
-          {c:C.coord, t:"2. Quorum & Leases (Emerald)", v:"3× On-Demand Keepers · $162/mo", s:"DynamoDB writer-N/reader-N claims · 0s lag"},
-          {c:C.cas,   t:"3. CAS Cold Pool (Purple)", v:"1× XXH3-128 S3 · $1,059–$4,786/mo", s:"Zero-byte relink · Free S3 Gateway"},
-          {c:C.read,  t:"4. NVMe Readers (Sky Blue)", v:"6× *gd Spot ($0 NVMe cache) · $330/mo", s:"$0.0014/GB @ 7d · $0.0026/GB @ 33d"}
+          {c:C.hot,   t:"1. Writers + NVMe Hot (Orange)", v:"writer-0 OD + 9× *gd Spot ($2,290/mo)", s:"writer-0 starts backup-0 · NVMe hot (~3 GB/s)"},
+          {c:C.coord, t:"2. Quorum, Leases & Backup (Emerald)", v:"3× OD Keepers · $162/mo", s:"writer-0 wakes backup-0 @ 02:00 UTC · DDB leases"},
+          {c:C.cas,   t:"3. CAS Cold Pool (Purple)", v:"1× XXH3-128 S3 · $1,059–$4,993/mo", s:"Zero-byte relink · Free S3 Gateway"},
+          {c:C.read,  t:"4. NVMe Readers (Sky Blue)", v:"6× *gd Spot ($0 NVMe cache) · $330/mo", s:"$0.0015/GB @ 7d · $0.0028/GB @ 33d"}
         ]
       },
       hot: {
-        title: "1. Writers Fleet · 100% Spot (Reclaimable Anytime) & NVMe Hot Path (Orange)",
+        title: "1. Writers Fleet · writer-0 On-Demand + writer-1..9 Spot & NVMe Hot (Orange)",
         color: C.hot,
-        body: "Ingest producers push 100 TB/day (~590k rows/sec) over TLS through Writers NLB (:8443) to ten 16-vCPU / 64 GiB *gd Graviton Spot writers (diversified across 3 instance families; any writer can be reclaimed with a 2-min notice at any time). Using bundled local NVMe SSDs (~950 GB, $0 EBS) on the hot path delivers ~2–4× gp3 sequential bandwidth—eliminating >65% %iowait stalls during 15.2× ZSTD ~1 GiB wide-part merges and serving write-through hot reads locally, while committed hot parts replicate intra-AZ over :9010 ($0/GB).",
+        body: "Ingest producers push 100 TB/day (~590k rows/sec) over TLS through Writers NLB (:8443) to ten 16-vCPU / 64 GiB *gd writers. writer-0 is pinned On-Demand (on_demand_base_capacity=1) because it triggers nightly backup-wake for backup-0 plus GC/autoscale; writer-1..9 run 100% Spot (reclaimable anytime). Bundled local NVMe SSDs (~950 GB, $0 EBS) on the hot path deliver ~2–4× gp3 sequential bandwidth—eliminating >65% %iowait stalls during 15.2× ZSTD ~1 GiB merges while :9010 syncs committed parts intra-AZ ($0/GB).",
         kv: [
-          ["Spot Writers (10× *gd)", "~$1,900/mo (reclaimable anytime)"],
+          ["Writers (1× OD + 9× Spot)", "~$2,290/mo (w0 OD · w1..9 Spot)"],
           ["NVMe Hot + Meta Disk", "$0 NVMe (~3 GB/s) + $102/mo 128G gp3"],
           ["Compression Ratio", "15.2× ZSTD (6.58 TB/day net)"],
-          ["Intra-AZ Replication", "Interserver TLS :9010 ($0/GB)"]
+          ["Backup Coordinator", "On-Demand writer-0 → backup-wake"]
         ],
         facts: [
-          {c:C.hot, t:"Why NVMe on Hot Path", v:"Eliminates gp3 %iowait merge bottlenecks", s:"Multi-GB/s sequential I/O for 1 GiB merges"},
-          {c:C.hot, t:"Spot Writer Safety", v:"NLB drains + :9010 sync + 1× CAS", s:"Zero data loss when reclaimed anytime"},
-          {c:C.hot, t:"Zero Orphan EBS", v:"NVMe vanishes cleanly with reclaimed VM", s:"Small 128G gp3 catalog delete_on_term=true"},
-          {c:C.cas, t:"Hot → Cold Handoff", v:"Merged parts age to shared CAS pool", s:"1× XXH3-128 blob PUT via S3 Gateway"}
+          {c:C.hot, t:"Why writer-0 Stays On-Demand", v:"Triggers 02:00 UTC backup-wake + GC", s:"on_demand_base_capacity = 1 in Writers ASG"},
+          {c:C.hot, t:"Why NVMe on Hot Path", v:"Eliminates gp3 %iowait merge stalls", s:"Multi-GB/s sequential I/O for 1 GiB merges"},
+          {c:C.hot, t:"Spot Writer-1..9 Safety", v:"NLB drains + :9010 sync + 1× CAS", s:"Zero data loss when writer-1..9 reclaimed"},
+          {c:C.cas, t:"Zero Orphan EBS", v:"NVMe vanishes cleanly with Spot VM", s:"Small 128G gp3 catalog delete_on_term=true"}
         ]
       },
       coord: {
         title: "2. Coordination, Spot Identity & Backup (Emerald)",
         color: C.coord,
-        body: "Three On-Demand 2-vCPU / 8 GiB Keeper nodes form a Raft quorum (:9181) tracking ReplicatedMergeTree part logs—CAS never stores blob locks in Keeper. A DynamoDB node-claims table assigns stable ordinal slots (writer-N, reader-N) and deterministic server UUIDs so Spot replacements attach cleanly without UUID collisions. An on-demand backup replica wakes at 02:00 UTC.",
+        body: "Three On-Demand 2-vCPU / 8 GiB Keeper nodes form a Raft quorum (:9181) tracking ReplicatedMergeTree part logs—CAS never stores blob locks in Keeper. A DynamoDB node-claims table assigns stable ordinal slots (writer-N, reader-N) and deterministic server UUIDs so Spot replacements attach cleanly. On-Demand writer-0 runs `chinit backup-wake` at 02:00 UTC to wake backup-0, which syncs metadata, uploads snapshots, and self-stops.",
         kv: [
           ["Keeper Quorum (3× OD)", "~$162/mo (dedicated gp3 Raft disk)"],
           ["Lease Table", "DynamoDB ch-node-claims (<$5/mo)"],
-          ["Replication Lag", "0s steady-state across all replicas"],
+          ["Backup Trigger", "OD writer-0 wakes backup-0 @ 02:00 UTC"],
           ["Nightly Backup", "On-demand snapshot → isolated bucket"]
         ],
         facts: [
+          {c:C.coord, t:"writer-0 → backup-0 Wake", v:"OD writer-0 never Spot-reclaimed", s:"Runs backup-wake, dead-replica-gc & orphan-gc"},
           {c:C.coord, t:"Why Keepers Stay On-Demand", v:"Raft quorum loss halts all writes", s:"3 nodes survive 1 rolling replacement"},
           {c:C.coord, t:"Deterministic CAS UUID", v:"1 conditional DynamoDB write per slot", s:"Prevents CAS owner-fence errors"},
-          {c:C.coord, t:"No Keeper Znode Bloat", v:"CAS uses S3 If-Match conditional PUTs", s:"Replaces deprecated zero-copy locks"},
           {c:C.coord, t:"NLB Health Gate", v:"HTTP :8123/replicas_status (200 OK)", s:"30s deregistration on Spot notice"}
         ]
       },
       cas: {
-        title: "3. CAS Cold Pool & Lifecycle (Purple) — 1× S3 + Zero-Byte Relink",
+        title: "3. CAS Cold Pool & TTL Lifecycle (Purple) — 1× S3 + Zero-Byte Relink",
         color: C.cas,
-        body: "Aged hot parts hash into XXH3-128 content-addressed blobs and upload ONCE (1×) to an unversioned S3 CAS pool through the free VPC S3 Gateway Endpoint ($0/GB, saving $18k+/mo vs. NAT). Replicas share the same prefix (no {replica} segment) and attach cold parts in ~2–3s via CA_RELINK_COOKIE metadata with 0 bytes copied. CAS GC folds ref-logs every 300s; lifecycle tiers to Standard-IA at 30d and drops at 32d.",
+        body: "Aged hot parts hash into XXH3-128 content-addressed blobs and upload ONCE (1×) to an unversioned S3 CAS pool through the free VPC S3 Gateway Endpoint ($0/GB, saving $18k+/mo vs. NAT). Replicas share the same prefix (no {replica} segment) and attach cold parts in ~2–3s via CA_RELINK_COOKIE metadata with 0 bytes copied. CAS GC folds ref-logs every 300s. For 7d–33d TTLs, objects stay in S3 Standard (avoiding Standard-IA's 30-day minimum early-deletion fee; IA only pays off at ≥60d retention).",
         kv: [
           ["7-Day Cold Pool (1×)", "46.1 TB · $1,059/mo (vs $10.6k 10×)"],
-          ["33-Day Cold Pool (1×)", "217.1 TB · $4,786/mo (vs $47.9k 10×)"],
+          ["33-Day Cold Pool (1×)", "217.1 TB · $4,993/mo (vs $49.9k 10×)"],
           ["S3 Gateway Endpoint", "$0.00/GB transfer (saves $18k+/mo)"],
           ["S3 API Spend", "~$580/mo (GC interval = 300s)"]
         ],
         facts: [
-          {c:C.cas, t:"1.00× Cold Storage", v:"1 shared S3 copy across all 16+ replicas", s:"Saves $43,076/mo @ 33d vs 10× non-CAS"},
+          {c:C.cas, t:"1.00× Cold Storage", v:"1 shared S3 copy across all 16+ replicas", s:"Saves $44,941/mo @ 33d vs 10× non-CAS"},
           {c:C.cas, t:"Zero-Byte Relink", v:"CA_RELINK_COOKIE + S3 HEAD verify", s:"~2.4s cold hydrate on Spot scale-out"},
           {c:C.cas, t:"Unversioned CAS Bucket", v:"Versioning & Object Lock MUST be OFF", s:"Required for S3 If-Match GC safety"},
-          {c:C.cas, t:"Standard-IA @ 30d", v:"Automatic S3 lifecycle before 32d drop", s:"No Glacier — queries stay readable"}
+          {c:C.cas, t:"No 30d IA Early-Delete Trap", v:"Keep <=47d TTLs in S3 Standard", s:"Standard-IA 30d min fits >=60d TTLs only"}
         ]
       },
       read: {
@@ -146,7 +146,7 @@
     };
 
     var ZONES = [
-      {id:"hot",    x:14,   y:34,  w:652, h:398, color:C.hot,    title:"1. Writers Fleet · 100% Spot (Reclaimable Anytime) & NVMe Hot Path"},
+      {id:"hot",    x:14,   y:34,  w:652, h:398, color:C.hot,    title:"1. Writers Fleet · writer-0 (On-Demand) + writer-1..9 (Spot) & NVMe Hot"},
       {id:"coord",  x:14,   y:446, w:652, h:194, color:C.coord,  title:"2. Keeper Raft Quorum, Spot Leases & Backup"},
       {id:"cas",    x:678,  y:34,  w:260, h:606, color:C.cas,    title:"3. CAS Cold Pool (1× S3 · 46–217 TB)"},
       {id:"read",   x:1004, y:34,  w:302, h:606, color:C.read,   title:"4. Readers Fleet · 100% Spot & NVMe Cache"},
@@ -159,10 +159,10 @@
       wnlb:     {zone:"hot",  x:28,  y:202, w:244, h:92,  title:"Writers NLB", sub:"ingest.clickhouse.example:8443", pill:"ACM TLS", stat:"Health: :8123/replicas_status",
                  desc:"Network Load Balancer terminating ACM TLS; drains traffic in 30s if any Spot writer receives a 2-min reclaim notice."},
 
-      wr0:      {zone:"hot",  x:332, y:58,  w:318, h:132, title:"writer-0", sub:"16-vCPU *gd NVMe Spot", pill:"SPOT · ANYTIME", stat:"NVMe hot (~3 GB/s) · :9010 sync",
-                 desc:"100% Spot writer replica (can be reclaimed anytime). Commits bursts to local NVMe SSD (~3 GB/s, zero %iowait) and syncs :9010."},
-      wr1:      {zone:"hot",  x:332, y:214, w:318, h:132, title:"writer-1..9", sub:"9× *gd NVMe Spot (ASG 3..12)", pill:"9× SPOT POOL", stat:"10× Spot $1,900/mo · $0 NVMe hot",
-                 desc:"Nine peer Spot writers across 3 *gd Graviton families. Ephemeral NVMe vanishes cleanly on reclaim; committed parts sync via :9010 & CAS."},
+      wr0:      {zone:"hot",  x:332, y:58,  w:318, h:132, title:"writer-0 (On-Demand)", sub:"16-vCPU *gd OD · Backup Coord", pill:"OD · BACKUP", stat:"On-Demand · wakes backup-0 · :9010",
+                 desc:"Pinned On-Demand (never Spot, on_demand_base_capacity=1). Starts nightly backup-0 via chinit backup-wake (02:00 UTC) and coordinates GC/autoscale."},
+      wr1:      {zone:"hot",  x:332, y:214, w:318, h:132, title:"writer-1..9", sub:"9× *gd NVMe Spot (ASG 1..9)", pill:"9× SPOT POOL", stat:"1× OD + 9× Spot $2,290/mo · $0 NVMe",
+                 desc:"Nine peer Spot writers across 3 *gd Graviton families (reclaimable anytime). Ephemeral NVMe vanishes cleanly; committed parts sync via :9010 & CAS."},
       hot_note: {zone:"hot",  x:28,  y:362, w:622, h:58,  title:"NVMe Hot Path & Spillover Policy (tiered_cas)", sub:"NVMe hot/merge (~3 GB/s, $0 EBS) → 1 GiB wide parts → CAS cold", pill:"NVME HOT", stat:"Eliminates gp3 %iowait stalls · write-through cache · no S3 wait",
                  desc:"NVMe absorbs 100 TB/day inserts, 3 rollup MVs & ~1 GiB ZSTD merges without EBS %iowait bottlenecks; write-through NVMe serves recent hot reads off S3."},
 
@@ -170,19 +170,19 @@
                  desc:"Three On-Demand 2-vCPU Keeper nodes in dedicated Raft quorum. Coordinates part logs and cluster state (never CAS blob locks)."},
       ddb:      {zone:"coord",  x:282, y:474, w:188, h:148, title:"DDB Claims", sub:"ch-node-claims", pill:"SPOT LEASE", stat:"writer-N / reader-N UUIDs",
                  desc:"Conditional DynamoDB writes grant ephemeral Spot replacements stable ordinal identities, DNS records, and CAS server UUIDs."},
-      backup:   {zone:"coord",  x:484, y:474, w:168, h:148, title:"backup-0", sub:"on-demand snapshot", pill:"02:00 UTC", stat:"Isolated versioned bucket",
-                 desc:"Wakes nightly at 02:00 UTC, syncs metadata, writes tar backups to an isolated versioned/object-locked bucket, then stops."},
+      backup:   {zone:"coord",  x:484, y:474, w:168, h:148, title:"backup-0", sub:"woken by writer-0 (OD)", pill:"02:00 UTC", stat:"Isolated versioned bucket",
+                 desc:"Woken nightly at 02:00 UTC by On-Demand writer-0 (chinit backup-wake), syncs metadata, writes tar backups to an isolated bucket, then self-stops."},
 
       gw:       {zone:"cas",    x:690, y:58,  w:236, h:64,  title:"S3 Gateway Endpoint", sub:"VPC Route · $0.00/GB", pill:"SAVES $18K", stat:"No NAT Gateway ($0.045/GB)",
                  desc:"Keeps 100% of cluster↔S3 writes, relinks, reads, and GC inside AWS at $0/GB instead of $0.045/GB through NAT."},
       cas_pool: {zone:"cas",    x:690, y:138, w:236, h:130, title:"Shared CAS Pool", sub:"s3://…-cas/cas/{default,tiered}/", pill:"1× XXH3-128", stat:"46.1 TB (7d) · 217.1 TB (33d)",
-                 desc:"Unversioned S3 pool storing each content-hashed XXH3-128 blob ONCE across all 16+ replicas ($1,059/mo @ 7d; $4,786/mo @ 33d)."},
+                 desc:"Unversioned S3 pool storing each content-hashed XXH3-128 blob ONCE across all 16+ replicas ($1,059/mo @ 7d; $4,993/mo @ 33d)."},
       relink:   {zone:"cas",    x:690, y:304, w:236, h:88,  title:"Zero-Byte Relink", sub:"CA_RELINK_COOKIE", pill:"0B COPY", stat:"HEAD verify → ~2.4s attach",
                  desc:"Spot readers and peer writers exchange a manifest pointer cookie and relink cold parts directly on S3 with zero bytes copied."},
       cas_gc:   {zone:"cas",    x:690, y:408, w:236, h:96,  title:"CAS GC Leader", sub:"cas_gc_interval_sec = 300", pill:"IF-MATCH", stat:"S3 API ~$580/mo total",
                  desc:"Elected mount folds pool ref-logs every 300s using S3 conditional writes, freeing blobs only when zero replicas reference them."},
-      s3_ia:    {zone:"cas",    x:690, y:520, w:236, h:102, title:"S3 Lifecycle & TTL", sub:"Standard → IA @ 30d", pill:"TTL 32D", stat:"Whole-part drop (no Glacier)",
-                 desc:"Aged cold objects transition to S3 Standard-IA ($0.0125/GB) at 30 days and drop completely via TTL at 32–33 days."},
+      s3_ia:    {zone:"cas",    x:690, y:520, w:236, h:102, title:"S3 Std & TTL Drop", sub:"S3 Std (IA only @ >=60d TTL)", pill:"TTL 33D", stat:"No 30d IA early-delete fee",
+                 desc:"For 7d–33d TTLs, cold objects stay in S3 Standard (avoiding Standard-IA's 30-day minimum early-deletion fee) until whole-part TTL drop."},
 
       qclient:  {zone:"read",   x:1016,y:58,  w:278, h:64,  title:"Query Clients", sub:"Dashboards / API · SELECT", pill:"READ-ONLY", stat:"query.clickhouse.example:8443",
                  desc:"Analytical dashboards and query APIs connect via TLS to Readers NLB with strict read-only ClickHouse credentials."},
@@ -206,7 +206,7 @@
       {id:"f_wr_keep",  from:"wr1",    to:"keeper", zone:"coord", color:C.coord, rate:1.05, speed:0.56, label:"part log :9181", lpos:0.65, d:"M 650 326 L 660 326 L 660 436 L 240 436 L 240 474"},
       {id:"f_ddb_wr",   from:"ddb",    to:"wr1",    zone:"coord", color:C.coord, rate:0.45, speed:0.6,  label:"lease", lpos:0.42, d:"M 376 474 L 376 444 L 656 444 L 656 336 L 650 336"},
       {id:"f_ddb_rd",   from:"ddb",    to:"rd1",    zone:"coord", color:C.coord, rate:0.4,  speed:0.42, label:"reader-N claim", lpos:0.45, d:"M 436 622 L 436 635 L 986 635 L 986 446 L 1016 446"},
-      {id:"f_wr_bk",    from:"wr1",    to:"backup", zone:"coord", color:C.coord, rate:0.35, speed:0.55, label:"02:00 UTC", lpos:0.68, d:"M 650 316 L 664 316 L 664 454 L 594 454 L 594 474"},
+      {id:"f_wr_bk",    from:"wr0",    to:"backup", zone:"coord", color:C.coord, rate:0.35, speed:0.55, label:"backup-wake", lpos:0.84, d:"M 650 174 L 664 174 L 664 454 L 594 454 L 594 474"},
       {id:"f_keep_rd",  from:"keeper", to:"rd0",    zone:"coord", color:C.coord, rate:0.8,  speed:0.4,  label:"watch :9181", lpos:0.16, d:"M 268 598 L 668 598 L 668 286 L 1016 286"},
 
       {id:"f_wr_rd0",   from:"wr0", to:"rd0", zone:"hot", color:C.hot, rate:1.15, speed:0.54, label:":9010 hot fetch", lpos:0.89, d:"M 650 158 L 668 158 L 668 286 L 1016 286"},
@@ -219,7 +219,7 @@
       {id:"f_relink_rd0", from:"relink",   to:"rd0",      zone:"cas", color:C.cas, rate:0.95,speed:0.8,  label:"relink ~2s", lpos:0.5, d:"M 926 314 L 1016 314"},
       {id:"f_relink_rd1", from:"relink",   to:"rd1",      zone:"cas", color:C.cas, rate:0.95,speed:0.78, label:"0B copy", lpos:0.5, d:"M 926 364 L 1016 364"},
       {id:"f_relink_gc",  from:"relink",   to:"cas_gc",   zone:"cas", color:C.cas, rate:0.65,speed:0.85, label:"ref-log", lpos:0.5, d:"M 808 392 L 808 408"},
-      {id:"f_gc_ia",      from:"cas_gc",   to:"s3_ia",    zone:"cas", color:C.cas, rate:0.5, speed:0.8,  label:"IA 30d / 32d", lpos:0.5, d:"M 808 504 L 808 520"},
+      {id:"f_gc_ia",      from:"cas_gc",   to:"s3_ia",    zone:"cas", color:C.cas, rate:0.5, speed:0.8,  label:"S3 Std · 33d", lpos:0.5, d:"M 808 504 L 808 520"},
 
       {id:"f_qc_rnlb",   from:"qclient",  to:"rnlb",       zone:"read", color:C.read, rate:1.5, speed:0.9,  label:"SELECT", lpos:0.5, d:"M 1155 122 L 1155 138"},
       {id:"f_rnlb_rd0",  from:"rnlb",     to:"rd0",        zone:"read", color:C.read, rate:1.35,speed:0.9,  label:":8123", lpos:0.5, d:"M 1110 200 L 1110 214"},
@@ -291,11 +291,11 @@
       '<div class="chf-shell">' +
         '<div class="chf-head">' +
           '<div>' +
-            '<div class="chf-title">Interactive Data Flow: 100 TB/day ClickHouse on AWS (Spot Writers · NVMe Spot Readers · 1× CAS Cold Pool)</div>' +
+            '<div class="chf-title">Interactive Data Flow: 100 TB/day ClickHouse on AWS (OD writer-0 · Spot Writers/Readers · NVMe · 1× CAS)</div>' +
             '<div class="chf-sub">Single-AZ Regional VPC · S3 Gateway Endpoint ($0/GB) · 15.2× ZSTD (6.58 TB/day compressed) · tiered_cas policy</div>' +
           '</div>' +
           '<div class="chf-badges">' +
-            '<span class="chf-badge">Writers: <b>10× 16-vCPU *gd Spot</b></span>' +
+            '<span class="chf-badge">Writers: <b>1× OD (w0) + 9× *gd Spot</b></span>' +
             '<span class="chf-badge">Readers: <b>6× 4-vCPU *gd Spot</b></span>' +
             '<span class="chf-badge">Keepers: <b>3× 2-vCPU OD</b></span>' +
           '</div>' +
@@ -303,7 +303,7 @@
         '<div class="chf-bar">' +
           '<div class="chf-tabs">' +
             '<button type="button" class="chf-tab active" data-focus="all"><span class="chf-dot" style="background:#e2e8f0"></span>All Live Flows</button>' +
-            '<button type="button" class="chf-tab" data-focus="hot"><span class="chf-dot" style="background:' + C.hot + '"></span>1. Spot Writers &amp; NVMe Hot</button>' +
+            '<button type="button" class="chf-tab" data-focus="hot"><span class="chf-dot" style="background:' + C.hot + '"></span>1. Writers (OD+Spot) &amp; NVMe</button>' +
             '<button type="button" class="chf-tab" data-focus="coord"><span class="chf-dot" style="background:' + C.coord + '"></span>2. Keeper &amp; Leases</button>' +
             '<button type="button" class="chf-tab" data-focus="cas"><span class="chf-dot" style="background:' + C.cas + '"></span>3. CAS Cold Pool</button>' +
             '<button type="button" class="chf-tab" data-focus="read"><span class="chf-dot" style="background:' + C.read + '"></span>4. NVMe Spot Readers</button>' +
@@ -322,12 +322,12 @@
         '<div class="chf-costbar" id="chf-costbar"></div>' +
         '<div class="chf-legend">' +
           '<div class="chf-litems">' +
-            '<span class="chf-litem"><span class="chf-sw" style="background:' + C.hot + '"></span>Spot Writers &amp; NVMe Hot Path</span>' +
-            '<span class="chf-litem"><span class="chf-sw" style="background:' + C.coord + '"></span>Keeper Raft &amp; DDB Leases</span>' +
+            '<span class="chf-litem"><span class="chf-sw" style="background:' + C.hot + '"></span>Writers (OD w0 + Spot w1..9) &amp; NVMe</span>' +
+            '<span class="chf-litem"><span class="chf-sw" style="background:' + C.coord + '"></span>Keeper Raft, DDB Leases &amp; Backup</span>' +
             '<span class="chf-litem"><span class="chf-sw" style="background:' + C.cas + '"></span>CAS Cold Pool (1× + Relink + GC)</span>' +
             '<span class="chf-litem"><span class="chf-sw" style="background:' + C.read + '"></span>NVMe Spot Readers &amp; Cache</span>' +
           '</div>' +
-          '<div class="chf-status" id="chf-status">LIVE @ 100 TB/day: 100% Spot Writers &amp; Readers streaming · click any box to inspect</div>' +
+          '<div class="chf-status" id="chf-status">LIVE @ 100 TB/day: writer-0 OD (backup coord) + Spot w1..9 &amp; r0..5 streaming</div>' +
         '</div>' +
         '<div class="chf-svgwrap"><svg class="chf-svg" id="chf-board" viewBox="0 0 1320 744" preserveAspectRatio="xMidYMid meet"></svg></div>' +
         '<div class="chf-insp">' +
@@ -390,7 +390,7 @@
         {x:310,  t:"t + 1–5 s",     d:"NVMe hot commit + MVs (0 %iowait)", c:C.hot},
         {x:580,  t:"t + 10–30 s",   d:"Keeper + :9010 sync (Spot-safe)", c:C.coord},
         {x:845,  t:"t + 1–7 d",     d:"CAS Pool (1×) + 2.4s relink", c:C.cas},
-        {x:1110, t:"t + 30 / 32 d", d:"Standard-IA → TTL drop", c:C.read}
+        {x:1110, t:"t + 33 d",      d:"S3 Std → TTL drop (no IA penalty)", c:C.read}
       ];
       gClock.append("line").attr("x1", 36).attr("y1", 704).attr("x2", 1275).attr("y2", 704)
         .attr("stroke", "#334155").attr("stroke-width", 2).attr("stroke-dasharray", "4,4");
@@ -569,9 +569,9 @@
       if (!playing || reclaimState.active) return;
       tickCount++;
       nodeEls.ingest_src.statTxt.text("rate: ~" + (585 + (tickCount % 11)) + "k rows/s · 100 TB/d");
-      nodeEls.wnlb.statTxt.text("TLS :8443 · 10/10 Spot writers 200 OK");
-      nodeEls.wr0.statTxt.text("NVMe hot: " + (38 + (tickCount % 7)) + "% · 0% iowait · 15.2× ZSTD");
-      nodeEls.wr1.statTxt.text("10× *gd Spot ($1,900/mo) · lag 0s");
+      nodeEls.wnlb.statTxt.text("TLS :8443 · 1 OD + 9 Spot writers 200 OK");
+      nodeEls.wr0.statTxt.text("OD · backup-wake · NVMe " + (38 + (tickCount % 7)) + "% · 0% iowait");
+      nodeEls.wr1.statTxt.text("9× *gd Spot + 1× OD ($2,290/mo) · lag 0s");
       nodeEls.cas_pool.statTxt.text("1× pool · " + RETENTION_MODELS[retMode].poolSize + " · " + RETENTION_MODELS[retMode].casCost);
       nodeEls.rd0.statTxt.text("NVMe hit: " + (95 + (tickCount % 4)) + "% · 0s lag");
       nodeEls.rd1.statTxt.text("6× *gd NVMe Spot · $330/mo · 200 OK");
