@@ -53,6 +53,17 @@ faqs:
       bandwidth before aging them once (1x) to the shared CAS pool. This
       eliminates EBS %iowait bottlenecks and prevents million-request S3 Tier-1
       PUT storms.
+  - question: "When replicas share one 1x cold S3 CAS pool, does each replica still pull the same hot parts into its own NVMe cache?"
+    answer: >-
+      No — hot parts and the NVMe cache are two separate layers in tiered_cas,
+      and replicas never eagerly pull the shared S3 pool into NVMe. Hot parts
+      (< cold TTL) sit on each node's local default disk and replicate over
+      intra-AZ :9010 without touching cas_cache or S3. Aged cold parts (> cold
+      TTL) live once (1x) in S3 CAS and attach on peers via a zero-byte
+      CA_RELINK_COOKIE pointer with 0 bytes downloaded. Each *gd Spot reader's
+      local NVMe SSD (measured at 1.8 GB/s direct-IO vs 131–149 MB/s on
+      baseline gp3, 3.4x larger at $0 EBS cost) acts strictly as a lazy SLRU
+      byte-range cache for cold S3 columns that NLB queries actually scan.
 ---
 
 Static architecture diagrams hide the thing engineers actually need to reason about: **continuous motion across roles**. At **100 TB/day (`3,040,000 GB/month`)**, four coupled roles run simultaneously every second—**`writer-0` On-Demand + Spot `writer-1..9`** ingesting and compacting parts on local **NVMe hot disks**, a Keeper Raft quorum ordering metadata, cold blobs deduplicating into a shared content-addressed S3 pool, and **100% Spot readers** serving queries straight off local NVMe SSDs.
@@ -101,13 +112,33 @@ Use the color-coded tabs to inspect each subsystem, toggle **7d / 33d Retention*
 
 ### 4. Readers Fleet · 100% Spot Replicas & NVMe Instance-Store Cache (Sky Blue)
 
-- **Read-only Spot fleet behind `/replicas_status`**: Query clients (`query.clickhouse.example:8443`) hit an NLB target group gated by `HTTP :8123/replicas_status`, ensuring newly booted Spot readers finish relinking before serving traffic.
-- **Why NVMe instance store is ideal here**: Readers run `6×` 4-vCPU / 16 GiB Graviton NVMe Spot instances (`*gd` pool). Each instance ships with local NVMe SSDs included at **`$0` extra EBS cost** and **`~2×` `gp3` throughput**, which `chinit` formats and mounts automatically as `cas_cache`.
-- **Hot vs. Cold query split**: Hot queries resolve in RAM (`5 GiB` mark cache + `8 GiB` uncompressed cache) or local NVMe `cas_cache` (`~95%+` hit rate). Cache misses fetch byte ranges from the CAS S3 pool via the free Gateway Endpoint and warm NVMe for subsequent queries.
+- **Read-only Spot fleet behind `/replicas_status`**: Query clients (`query.clickhouse.example:8443`) hit an NLB target group gated by `HTTP :8123/replicas_status`, ensuring newly booted Spot readers finish relinking and hot backfill before serving traffic.
+- **Why NVMe instance store is ideal here (`1.8 GB/s` vs. `131–149 MB/s` `gp3`)**: Readers run `6×` 4-vCPU / 16 GiB Graviton NVMe Spot instances (`*gd` pool). With a role-scoped Terraform flag (`reader_cache_on_nvme_instance_store = true` gated on `alltrue` `*gd` pool membership so EBS-only roles never lose their `gp3` cache), Terraform drops `/dev/sdc` completely (`$0` cache EBS) and `chinit` formats and mounts `/dev/nvme2n1` (`217 GiB` usable on `m8gd.xlarge`, `4 × 48.65 GiB` wrappers = **`3.4×` larger** than a `64 GiB` `gp3`). Direct-IO `dd` benchmarks on the live reader measured **`1.8 GB/s` sequential read** (`287 MB/s` write) vs. **`131–149 MB/s`** on the baseline `64 GiB` `gp3` cache volume (**`~13×` faster**).
+- **Answering the architectural question — *"Do replicas still pull the same hot parts into their own NVMe cache?"***: **No.** Under `tiered_cas`, hot parts and the NVMe cache are distinct layers, and replicas **never eagerly pull the shared S3 pool onto NVMe**:
+  1. **Hot parts (`< cold move TTL`)** live on each replica's `<hot>` volume (`default` disk) and replicate peer-to-peer over `:9010` — they never enter `cas_cache`.
+  2. **Cold parts (`> cold move TTL`)** live **once (`1.00×`)** in S3 CAS and attach on peers via `CA_RELINK_COOKIE` with **`0` bytes downloaded** (`FilesystemCacheBytes = 0` after relink; only the single replica that ran the TTL move warms bytes via `cache_on_write_operations = 1`).
+  3. **NVMe `cas_cache` is strictly a lazy `SLRU` byte-range cache for cold S3**: a reader only populates `4 MiB–32 MiB` segments of the exact cold columns/granules scanned by live `SELECT` queries. Consequently, **if your cold-move TTL is `7 DAY`, `cas_cache` stays `0 B` idle for the first 7 days!** Tightening the move rule to `TTL timestamp + INTERVAL 1 DAY TO VOLUME 'cold'` shrinks per-replica hot storage by `~75–85%` (cutting Spot reader hot-backfill time from `79s` to `<15s`) and puts days `2–33` directly onto `1×` S3 CAS + `1.8 GB/s` local NVMe cache.
 
 ---
 
-## 2. 100 TB/Day Cost Breakdown (`3,040,000 GB/Month`, `us-west-2`)
+## 2. Live Chaos Validation: `81.86 TB/day` Burst Across 100% Spot + NVMe Readers
+
+Before relying on modeled numbers, we parked a live dev/staging cluster on **100% Spot Writers** (`m8g/m7g/m6g.4xlarge`, `writer_min = 1`) + **100% NVMe Spot Readers** (`m8gd/m7gd.xlarge` + `c8gd.2xlarge`, `reader_cache_on_nvme_instance_store = true`) and fired an **`81.86 TB/day` (`466,820 rec/s`)** 10-minute `S3Queue` burst (`2,925` files, `571.3 GB` raw NDJSON = `625.6 GiB` uncompressed columnar) right through an active AWS Spot capacity squeeze:
+
+![ClickHouse 100% Spot + NVMe Instance-Store Cache + CAS Benchmark & Churn Telemetry](/assets/images/diagrams/clickhouse/cas-spot-nvme-80tb-20261119.svg)
+
+*Measured telemetry from our `81.86 TB/day` 100% Spot + NVMe reader stress test: `334,739,767` exact rows across all `6/6` Spot replicas (`0` data loss), `49s` S3 staging drain, `15` Spot launches / `6` real AWS Spot reclaims survived in `100` minutes, and a `46%` live run-rate cost drop (`$3.26/hr → $1.75/hr`).*
+
+Four concrete operational findings emerged from that 100-minute Spot churn window:
+
+1. **Zero data loss across `6` AWS Spot reclaims and a mid-burst `3 → 2 → 4` writer swing**: Pre-burst baseline (`53,443,013` rows) + `281,296,754` generated rows converged to **`334,739,767` exact rows** (`744.47 GiB` uncompressed → `47.81 GiB` compressed = `15.57×` ZSTD) on all `6/6` replicas, with `staging` drained to `0` objects **`49 seconds`** after the generator finished and **`$0.0662` total S3 API cost** (`0` `Code: 241` OOMs). Even when a pre-burst idle alarm stepped writers down `3 → 2` 90 seconds into the burst, **2 Spot writers solo-absorbed `81.86 TB/day`** at `99.6%` CPU (`0–1s` lag) until CPU TargetTracking scaled `2 → 4`.
+2. **Single-AZ `*gd` NVMe Spot pools are shallow — Multi-AZ + CAS fixes it**: Pinning `m8gd/m7gd.xlarge` Spot readers to a single AZ triggered **5 reader Spot reclaims in 60 minutes** (including a `3.5m` `UnfulfillableCapacity` pinch). Because **CAS cold parts relink across AZs via S3 at `$0.00/GB`**, enabling `multi_az_config` across 3 AZs and adding `r8gd.xlarge` / `r7gd.xlarge` / `c7gd.2xlarge` expands Spot pool diversity `6×` (`18` pools) while `min_readers >= 2` (or `reader_spot_ratio = 0.5`) eliminates `0-reader` windows.
+3. **`HTTP :8123/replicas_status` prevented every cold-reader query blackhole**: On every Spot replacement (`128s` `chinit` boot + `79s` `:9010` hot backfill for `334.74M` rows), `/replicas_status` held the fresh reader `unhealthy` on the NLB until `lag = 0s`, then flipped it `healthy` automatically.
+4. **Simultaneous hot backfill proved why writer hot NVMe (`*gd`) is critical at 100 TB/day**: Steady `81.86 TB/day` ingest held `500 MB/s` writer `gp3` at `0.8–18.4%` `%iowait`, *until* 2 scaled-out writers and 2 replacement Spot readers simultaneously fetched `48 GiB` of hot parts — spiking writer `gp3` `%iowait` to **`45.4%–85.6%`**. Moving writer hot storage onto `*gd` local NVMe (`1.8–3 GB/s`) removes that backfill + merge I/O ceiling completely.
+
+---
+
+## 3. 100 TB/Day Cost Breakdown (`3,040,000 GB/Month`, `us-west-2`)
 
 Using our measured **`15.2×` ZSTD** compression ratio, `100 TB/day` produces **`6.58 TB/day` (`6,579 GB/day`)** of net compressed ClickHouse data:
 - **7-day cold pool (`1×` CAS)**: `46.1 TB` (`46,053 GB`) in S3 Standard (`$0.023/GB-mo`) = **`$1,059/month`**
@@ -135,7 +166,7 @@ Using our measured **`15.2×` ZSTD** compression ratio, `100 TB/day` produces **
 
 ---
 
-## 3. Production Caveats & Operational Trade-offs
+## 4. Production Caveats & Operational Trade-offs
 
 Good FinOps engineering makes the trade-offs explicit alongside the savings:
 
